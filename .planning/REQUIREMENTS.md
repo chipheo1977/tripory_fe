@@ -17,6 +17,16 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 - [ ] **FND-06**: Dialog và form dùng được bằng bàn phím (focus trap, Esc để đóng, label đầy đủ)
 - [ ] **FND-07**: Bản walking skeleton được deploy lên Vercel ngay cuối Phase 0a (Root Directory `apps/web`, Node 24)
 
+### Design System (DS)
+
+- [ ] **DS-01**: `packages/design-tokens` chứa bộ token thiết kế mới (không port `lib/colors.ts` của FE cũ): màu dạng semantic (`primary`, `surface`, `text`, `border`, `danger`, `success`…), typography, spacing, radius, shadow, z-index, motion, breakpoint; xuất ra Tailwind 4 `@theme` và CSS variables, cấu trúc sẵn chỗ cho dark mode (chưa bật)
+- [ ] **DS-02**: Quy ước atomic design được ghi trong tài liệu kiến trúc và cưỡng chế bằng cấu trúc thư mục: atoms và molecules ở `packages/ui-web`; organisms và templates gắn nghiệp vụ ở `apps/web/src/modules/*/ui`; organisms dùng chung (AppHeader, AppShell) ở `apps/web/src/components`
+- [ ] **DS-03**: `ui-web` có các atom: Button, IconButton, Input, Textarea, Label, Checkbox, Switch, Avatar, Badge, Spinner, Skeleton, Separator, Icon (lucide)
+- [ ] **DS-04**: `ui-web` có các molecule: FormField (label + input + lỗi), SearchInput, Select, Tabs, DropdownMenu, Tooltip, Toast, Dialog, Sheet (bottom sheet nhiều mức), Card, EmptyState, ErrorState (có nút "Thử lại")
+- [ ] **DS-05**: App có các organism dùng chung: AppHeader, UserMenu (slot tĩnh, nối phiên thật ở Phase 3), AppShell cho `(public)` và `(dashboard)`
+- [ ] **DS-06**: Component chỉ dùng token (không hard-code màu/spacing/radius); component có phần con dùng được từ Server Component thì export bằng named export
+- [ ] **DS-07**: Mỗi base component có test (render, role/aria, tương tác bàn phím cho component tương tác); không dùng showcase (Storybook hay route `/dev/ui`)
+
 ### Phiên đăng nhập (AUTH)
 
 - [ ] **AUTH-01**: Người dùng có thể đăng ký bằng email, mật khẩu và họ tên, thấy lỗi validate của BE rõ ràng
@@ -119,6 +129,8 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 - **UX-06**: `BroadcastChannel` để dừng chuông ở các tab khác khi đã nghe ở một tab
 - **UX-07**: "Chuyển sang ngày…" cho waypoint (thêm mới rồi xóa cũ)
 - **UX-08**: Nút chia sẻ riêng cho Facebook/Zalo/X
+- **UX-09**: Dark mode (bật nhánh token đã chừa sẵn ở DS-01)
+- **UX-10**: Showcase component (Storybook hoặc route dev-only)
 
 ### Chờ BE
 
@@ -143,7 +155,7 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | Web Push, nhận cuộc gọi khi tab đóng | BE không có push |
 | Chat nhóm, sửa/xóa/thu hồi tin, reaction, gửi ảnh | BE không hỗ trợ |
 | Quên mật khẩu, xác thực email | BE không có |
-| Dark mode, PWA/offline, xuất PDF | Ngoài phạm vi thử nghiệm |
+| PWA/offline, xuất PDF | Ngoài phạm vi thử nghiệm (dark mode chuyển sang v2 UX-09) |
 | Autocomplete trên Nominatim public | Bị cấm theo Usage Policy |
 | `apps/admin`, mobile | Ngoài mục tiêu milestone |
 | Deploy BE | Repo `tripory_be` tự lo; FE chỉ cần URL |
@@ -151,16 +163,86 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 
 ## Traceability
 
-Điền khi tạo roadmap.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| FND-01 | Phase 1 | Pending |
+| FND-02 | Phase 1 | Pending |
+| FND-03 | Phase 1 | Pending |
+| FND-04 | Phase 1 | Pending |
+| FND-05 | Phase 2 | Pending |
+| FND-06 | Phase 1 | Pending |
+| FND-07 | Phase 1 | Pending |
+| DS-01 | Phase 1 | Pending |
+| DS-02 | Phase 1 | Pending |
+| DS-03 | Phase 1 | Pending |
+| DS-04 | Phase 1 | Pending |
+| DS-05 | Phase 1 | Pending |
+| DS-06 | Phase 1 | Pending |
+| DS-07 | Phase 1 | Pending |
+| AUTH-01 | Phase 3 | Pending |
+| AUTH-02 | Phase 3 | Pending |
+| AUTH-03 | Phase 3 | Pending |
+| AUTH-04 | Phase 3 | Pending |
+| AUTH-05 | Phase 3 | Pending |
+| AUTH-06 | Phase 3 | Pending |
+| AUTH-07 | Phase 3 | Pending |
+| AUTH-08 | Phase 3 | Pending |
+| ITIN-01 | Phase 4 | Pending |
+| ITIN-02 | Phase 4 | Pending |
+| ITIN-03 | Phase 4 | Pending |
+| ITIN-04 | Phase 4 | Pending |
+| ITIN-05 | Phase 4 | Pending |
+| ITIN-06 | Phase 4 | Pending |
+| ITIN-07 | Phase 4 | Pending |
+| ITIN-08 | Phase 4 | Pending |
+| ITIN-09 | Phase 4 | Pending |
+| ITIN-10 | Phase 4 | Pending |
+| ITIN-11 | Phase 4 | Pending |
+| ITIN-12 | Phase 4 | Pending |
+| ITIN-13 | Phase 4 | Pending |
+| ITIN-14 | Phase 4 | Pending |
+| PUB-01 | Phase 5 | Pending |
+| PUB-02 | Phase 5 | Pending |
+| PUB-03 | Phase 5 | Pending |
+| PUB-04 | Phase 5 | Pending |
+| PUB-05 | Phase 5 | Pending |
+| PUB-06 | Phase 5 | Pending |
+| PROF-01 | Phase 6 | Pending |
+| PROF-02 | Phase 6 | Pending |
+| PROF-03 | Phase 6 | Pending |
+| PROF-04 | Phase 6 | Pending |
+| CHAT-01 | Phase 7 | Pending |
+| CHAT-02 | Phase 7 | Pending |
+| CHAT-03 | Phase 7 | Pending |
+| CHAT-04 | Phase 7 | Pending |
+| CHAT-05 | Phase 7 | Pending |
+| CHAT-06 | Phase 7 | Pending |
+| CHAT-07 | Phase 7 | Pending |
+| CHAT-08 | Phase 7 | Pending |
+| CHAT-09 | Phase 7 | Pending |
+| VOICE-01 | Phase 7 | Pending |
+| VOICE-02 | Phase 7 | Pending |
+| VOICE-03 | Phase 7 | Pending |
+| VOICE-04 | Phase 7 | Pending |
+| CALL-01 | Phase 7 | Pending |
+| CALL-02 | Phase 7 | Pending |
+| CALL-03 | Phase 7 | Pending |
+| CALL-04 | Phase 7 | Pending |
+| CALL-05 | Phase 7 | Pending |
+| CALL-06 | Phase 7 | Pending |
+| CALL-07 | Phase 7 | Pending |
+| CALL-08 | Phase 7 | Pending |
+| CALL-09 | Phase 7 | Pending |
+| DEPL-01 | Phase 8 | Pending |
+| DEPL-02 | Phase 8 | Pending |
+| DEPL-03 | Phase 8 | Pending |
+| DEPL-04 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 65 total
-- Mapped to phases: 0
-- Unmapped: 65 ⚠️
+- v1 requirements: 72 total
+- Mapped to phases: 72
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-10-09*
-*Last updated: 2026-10-09 after initial definition*
+*Last updated: 2026-10-09 after roadmap creation*

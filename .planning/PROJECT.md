@@ -91,6 +91,9 @@ Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình 
 | Hạ pnpm về 10 ngay từ Phase 0a (đổi `packageManager`, điều chỉnh cấu hình workspace cho tương thích) | Vercel chỉ hỗ trợ chính thức pnpm 6–10; tránh rủi ro build hỏng khi deploy (quyết định 2026-10-09 sau research) | — Pending |
 | Nhập vị trí waypoint trong milestone này chỉ bằng ô dán tọa độ / link Google Maps | Bản đồ SVG không chọn được vị trí; geocoder OSM và nền MapLibre hoãn sang milestone sau | — Pending |
 | Chỉ sửa `boundaries.mjs` để thêm preset `uiPackage()` cho `ui-web`/`design-tokens` (kèm self-test, cập nhật tài liệu kiến trúc) | Bắt buộc để dựng 0a; không mở thêm browser global hay testing-library cho package | — Pending |
+| Design system ở Phase 1 theo atomic design: atoms/molecules trong `packages/ui-web`, organisms/templates nghiệp vụ ở `apps/web/src/modules/*/ui`, organisms chung ở `apps/web/src/components` | Mọi màn sau dựng trên cùng bộ component, tránh làm lại UI | — Pending |
+| Bộ design token thiết kế mới (không port `lib/colors.ts` của FE cũ), semantic token qua Tailwind 4 `@theme` + CSS variables, chừa chỗ dark mode | Muốn ngôn ngữ thiết kế mới cho bản viết lại | — Pending |
+| Không dùng showcase component (Storybook, `/dev/ui`); chất lượng component đảm bảo bằng test | Giữ toolchain gọn cho dự án một người | — Pending |
 | Chấp nhận giới hạn khi chạy song song FE cũ: mọi tab/thiết bị cùng đổ chuông, logout không revoke refresh token, iOS < 18.4 không gửi được voice | Đủ cho đợt dùng thử với bạn bè; ghi thành đề xuất cho BE | — Pending |
 
 ## Evolution

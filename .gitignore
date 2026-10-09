@@ -1,8 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Các pattern không neo "/" để áp dụng cho mọi app/package trong monorepo.
 
 # dependencies
-/node_modules
-/.pnp
+node_modules
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -11,14 +12,18 @@
 !.yarn/versions
 
 # testing
-/coverage
+coverage
 
 # next.js
-/.next/
-/out/
+.next/
+out/
 
 # production
-/build
+build
+dist
+
+# turborepo
+.turbo
 
 # misc
 .DS_Store

@@ -1,0 +1,25 @@
+{
+  "name": "@tripory/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./eslint": "./eslint/boundaries.mjs",
+    "./tsconfig/*": "./tsconfig/*",
+    "./vitest": "./vitest/preset.mjs"
+  },
+  "scripts": {
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "typescript-eslint": "catalog:",
+    "vitest": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:"
+  }
+}

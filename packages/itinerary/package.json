@@ -1,0 +1,27 @@
+{
+  "name": "@tripory/itinerary",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./http": "./src/infrastructure/index.ts",
+    "./react": "./src/react/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@tripory/api-client": "workspace:*",
+    "@tripory/shared-kernel": "workspace:*"
+  },
+  "devDependencies": {
+    "@tripory/config": "workspace:*",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

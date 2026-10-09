@@ -1,0 +1,17 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "test": {
+      // Self-test đọc eslint.config.mjs của mọi package/app nhưng không nằm trong đồ thị phụ thuộc,
+      // nên khai báo input để đổi config ở đó thì cache của test này bị bỏ.
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/packages/*/package.json",
+        "$TURBO_ROOT$/packages/*/eslint.config.mjs",
+        "$TURBO_ROOT$/apps/*/package.json",
+        "$TURBO_ROOT$/apps/*/eslint.config.mjs"
+      ]
+    }
+  }
+}

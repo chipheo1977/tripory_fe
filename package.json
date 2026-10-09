@@ -1,26 +1,15 @@
 {
-  "name": "tripory_fe",
-  "version": "0.1.0",
+  "name": "tripory-fe",
   "private": true,
+  "packageManager": "pnpm@11.6.0",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "next": "16.4.0",
-    "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test"
   },
   "devDependencies": {
-    "@tailwindcss/turbopack": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.4.0",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "turbo": "2.11.7"
   }
 }

@@ -26,7 +26,7 @@ Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình 
 - [ ] Người dùng có thể đăng ký, đăng nhập, duy trì phiên và đăng xuất qua BFF cùng origin; access token và refresh token nằm trong cookie httpOnly và không thể bị JavaScript phía client đọc.
 - [ ] Người dùng đã đăng nhập có thể tạo, xem, sửa và xóa lịch trình bằng API thật của backend.
 - [ ] Người dùng có thể thêm, sửa, xóa và sắp xếp waypoint theo ngày, đặt phụ đề ngày và xuất bản lịch trình.
-- [ ] Người dùng có thể thao tác waypoint mà không phụ thuộc Mapbox token, sử dụng bản đồ SVG và cơ chế nhập/chọn tọa độ sẽ được chốt khi lập kế hoạch phase tương ứng.
+- [ ] Người dùng có thể thao tác waypoint mà không phụ thuộc Mapbox token, sử dụng bản đồ SVG để hiển thị và nhập vị trí bằng cách dán tọa độ hoặc link Google Maps.
 - [ ] Khách chưa đăng nhập có thể xem trang công khai của một lịch trình đã xuất bản; lịch trình nháp hiển thị đúng trạng thái lỗi quyền truy cập.
 - [ ] Người dùng có thể xem và cập nhật hồ sơ thật, tìm người dùng khác và xem danh sách lịch trình của mình.
 - [ ] Người dùng có thể gửi/nhận tin nhắn text và voice theo thời gian thực, theo dõi trạng thái đã đọc và xem lịch sử hội thoại.
@@ -42,6 +42,7 @@ Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình 
 - Fork itinerary — backend chưa có endpoint; chờ hợp đồng API trước khi triển khai.
 - Social (like, comment, share nghiệp vụ), Discovery feed và Check-in/review — backend chưa hỗ trợ; không dựng mock trong frontend mới.
 - Mapbox GL và Mapbox Geocoding — chưa có token; milestone này giữ bản đồ SVG và hoãn package maps tích hợp Mapbox.
+- Tìm địa điểm bằng geocoder OSM (Nominatim/Photon) và nền bản đồ MapLibre + OpenFreeMap để bấm chọn vị trí — hoãn sang milestone sau (quyết định 2026-10-09).
 - `apps/admin` và ứng dụng mobile — không thuộc mục tiêu thử nghiệm frontend web đầu tiên.
 - Triển khai backend — thực hiện trong repo `tripory_be`; roadmap frontend chỉ coi URL backend công khai là phụ thuộc bên ngoài.
 - Thay thế hoặc gỡ frontend Vite cũ — frontend mới sẽ chạy song song trong milestone đầu để giảm rủi ro.
@@ -87,6 +88,10 @@ Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình 
 | Giữ bản đồ SVG, hoãn Mapbox | Chưa có Mapbox token nhưng luồng Itinerary vẫn cần tiến triển | — Pending |
 | Không dựng mock cho tính năng backend chưa hỗ trợ | Tránh tạo trải nghiệm giả và công việc phải bỏ khi contract thật xuất hiện | — Pending |
 | Viết tay schema Zod trước, cân nhắc type sinh từ OpenAPI sau | Cần kiểm tra runtime sớm trong khi contract generation chưa phải dependency của nền móng | — Pending |
+| Hạ pnpm về 10 ngay từ Phase 0a (đổi `packageManager`, điều chỉnh cấu hình workspace cho tương thích) | Vercel chỉ hỗ trợ chính thức pnpm 6–10; tránh rủi ro build hỏng khi deploy (quyết định 2026-10-09 sau research) | — Pending |
+| Nhập vị trí waypoint trong milestone này chỉ bằng ô dán tọa độ / link Google Maps | Bản đồ SVG không chọn được vị trí; geocoder OSM và nền MapLibre hoãn sang milestone sau | — Pending |
+| Chỉ sửa `boundaries.mjs` để thêm preset `uiPackage()` cho `ui-web`/`design-tokens` (kèm self-test, cập nhật tài liệu kiến trúc) | Bắt buộc để dựng 0a; không mở thêm browser global hay testing-library cho package | — Pending |
+| Chấp nhận giới hạn khi chạy song song FE cũ: mọi tab/thiết bị cùng đổ chuông, logout không revoke refresh token, iOS < 18.4 không gửi được voice | Đủ cho đợt dùng thử với bạn bè; ghi thành đề xuất cho BE | — Pending |
 
 ## Evolution
 

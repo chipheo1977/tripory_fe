@@ -1,0 +1,25 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Chỉ cho chạy install script khi thật sự cần (pnpm 11 chặn mặc định).
+# unrs-resolver: postinstall chỉ kiểm tra/tải native binding; binding đã có qua optionalDependencies.
+allowBuilds:
+  unrs-resolver: false
+
+# Một phiên bản cho cả monorepo: app/package dùng "catalog:" thay vì tự ghi version.
+# Lý do: ai-memories/tripory-fe--ddd-architecture.md (mục 4, 9).
+catalog:
+  next: 16.4.0
+  react: 19.3.0
+  react-dom: 19.3.0
+  "@types/react": 19.3.0
+  "@types/react-dom": 19.3.0
+  "@types/node": 20.19.43
+  typescript: 5.9.3
+  eslint: 9.39.5
+  eslint-config-next: 16.4.0
+  typescript-eslint: 8.71.1 # trùng bản eslint-config-next đang kéo về, pnpm dùng chung một bản
+  vitest: 4.1.11 # nhánh 4 cuối; Vitest 5.0 (09/2026) đòi @types/node >= 22, catalog đang 20
+  tailwindcss: 4.3.3
+  "@tailwindcss/turbopack": 4.3.3

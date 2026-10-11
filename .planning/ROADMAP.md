@@ -48,7 +48,17 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `ui-web` có đủ atoms và molecules của DS-03/DS-04, mỗi component có test render, role/aria và bàn phím chạy xanh; người dùng chỉ dùng bàn phím mở/đóng được Dialog và Sheet (focus bị giữ, Esc đóng), mọi ô form có label
   4. Người dùng mở URL Vercel (Root Directory `apps/web`, Node 24) trên điện thoại và desktop, thấy AppShell + AppHeader + UserMenu (slot tĩnh) cho `(public)`/`(dashboard)` không tràn màn, vùng chạm ≥ 44px, không có link tới route chưa tồn tại
   5. Người dùng gõ một route sai thì thấy trang 404; các màn khung có trạng thái loading (Skeleton), empty (EmptyState) và error (ErrorState kèm nút "Thử lại")
-**Plans**: TBD
+**Plans**: 8 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Wave 0: pnpm 10, boundaries, Vitest UI và package skeletons
+- [ ] 01-02-PLAN.md — Design tokens và compile/guard tests
+- [ ] 01-03-PLAN.md — Atoms
+- [ ] 01-04-PLAN.md — Molecules form/navigation
+- [ ] 01-05-PLAN.md — Molecules feedback/content/Dialog
+- [ ] 01-06-PLAN.md — Sheet và public exports
+- [ ] 01-07-PLAN.md — AppShell, organisms và Next route conventions
+- [ ] 01-08-PLAN.md — Vercel checkpoint, production deploy và smoke
 **UI hint**: yes
 **Note**: Phase này nặng hơn sau khi thêm Design System (13 requirement). Khi plan, chia plan theo thứ tự toolchain (pnpm 10, `uiPackage()`) → design tokens → atoms/molecules → organisms + AppShell → deploy Vercel. Bộ token thiết kế mới từ đầu, nên chạy `/gsd-ui-phase 1` để chốt design contract (màu, typography, spacing) trước khi plan. Test component trong `ui-web` cần môi trường DOM (jsdom + Testing Library) theo preset `uiPackage()`; đây khác với quyết định không mở Testing Library cho tầng `react` của context package.
 
@@ -151,7 +161,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Design System, UI Skeleton & Walking Skeleton | 0/TBD | Not started | - |
+| 1. Design System, UI Skeleton & Walking Skeleton | 0/8 | Planned | - |
 | 2. HTTP & Shared Kernel | 0/TBD | Not started | - |
 | 3. Identity & Session (BFF) | 0/TBD | Not started | - |
 | 4. Itinerary CRUD & Editor | 0/TBD | Not started | - |

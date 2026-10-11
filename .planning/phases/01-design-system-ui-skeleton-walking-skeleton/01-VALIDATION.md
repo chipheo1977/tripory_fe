@@ -39,20 +39,31 @@ created: 2026-10-11
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| TBD | TBD | 0 | FND-01 | — | N/A | smoke | `pnpm --version` (=10.34.6) + 4 lệnh gate | ❌ W0 | ⬜ pending |
-| TBD | TBD | 0 | FND-02 | — | N/A | unit (ESLint thật) | `pnpm --filter @tripory/config test` | ✅ `packages/config/test/boundaries.test.ts` (mở rộng) | ⬜ pending |
-| TBD | TBD | TBD | DS-01 | — | N/A | unit (compile) | `pnpm --filter @tripory/design-tokens test` | ❌ `packages/design-tokens/src/tokens.test.ts` | ⬜ pending |
-| TBD | TBD | TBD | DS-06 | — | N/A | unit (quét file) | `pnpm --filter @tripory/ui-web test -- token-guard` | ❌ `packages/ui-web/src/token-guard.test.ts` | ⬜ pending |
-| TBD | TBD | TBD | DS-06 | — | N/A | unit | `pnpm --filter @tripory/ui-web test -- exports` | ❌ `packages/ui-web/src/exports.test.ts` | ⬜ pending |
-| TBD | TBD | TBD | DS-03 | — | N/A | unit (RTL) | `pnpm --filter @tripory/ui-web test -- atoms` | ❌ `src/atoms/*.test.tsx` | ⬜ pending |
-| TBD | TBD | TBD | DS-04, FND-06 | — | N/A | unit (RTL + user-event) | `pnpm --filter @tripory/ui-web test -- molecules` | ❌ `src/molecules/*.test.tsx` | ⬜ pending |
-| TBD | TBD | TBD | FND-06 (D-06, D-07) | — | N/A | unit (RTL) | `pnpm --filter @tripory/ui-web test -- sheet dialog` | ❌ `src/molecules/sheet.test.tsx`, `dialog.test.tsx`, `sheet-snap.test.ts` | ⬜ pending |
-| TBD | TBD | TBD | DS-05, FND-03 | — | N/A | unit (RTL) | `pnpm --filter @tripory/web test -- components` | ❌ `apps/web/src/components/*.test.tsx` | ⬜ pending |
-| TBD | TBD | TBD | FND-04 (D-15) | — | N/A | unit (RTL) | `pnpm --filter @tripory/web test -- app` | ❌ `apps/web/src/app/**/*.test.tsx` | ⬜ pending |
-| TBD | TBD | TBD | FND-04 | — | N/A | smoke | `pnpm --filter @tripory/web build` → `next start` → `Invoke-WebRequest /khong-ton-tai` trả 404 | ❌ | ⬜ pending |
-| TBD | TBD | TBD | DS-07 | — | N/A | unit | guard: không có `apps/web/src/app/**/dev/**`, không dependency `storybook` (có thể gộp vào `token-guard.test.ts`) | ❌ | ⬜ pending |
+| 01-01-01 | 01-01 | 0 | FND-01 | T-01-01 | Pin dependency/install scripts | smoke | `pnpm --version; pnpm install --frozen-lockfile; pnpm --filter @tripory/web build` | ❌ W0 | ⬜ pending |
+| 01-01-02 | 01-01 | 0 | FND-02, DS-02 | T-01-02 | Default-deny boundary | unit (ESLint thật) | `pnpm --filter @tripory/config test` | ✅ mở rộng `packages/config/test/boundaries.test.ts` | ⬜ pending |
+| 01-01-03 | 01-01 | 0 | DS-07 | T-01-01 | Pinned UI test stack | smoke | `pnpm --filter @tripory/ui-web test; pnpm --filter @tripory/web test` | ❌ W0 configs/setup | ⬜ pending |
+| 01-02-01 | 01-02 | 1 | DS-01 | T-01-03 | Token integrity | unit (file contract) | `pnpm --filter @tripory/design-tokens test` | ❌ `packages/design-tokens/src/tokens.test.ts` | ⬜ pending |
+| 01-02-02 | 01-02 | 1 | DS-01, DS-06 | T-01-03, T-01-04 | Compile/constant consistency | unit (Tailwind compile) | `pnpm --filter @tripory/design-tokens test` | ❌ `packages/design-tokens/src/tokens.test.ts` | ⬜ pending |
+| 01-03-01 | 01-03 | 2 | DS-03, DS-07 | T-01-05 | Accessible controls | unit (RTL) | `pnpm --filter @tripory/ui-web test -- button icon-button input textarea label checkbox switch` | ❌ control atom tests | ⬜ pending |
+| 01-03-02 | 01-03 | 2 | DS-03, DS-07 | T-01-05 | Accessible display semantics | unit (RTL) | `pnpm --filter @tripory/ui-web test -- avatar badge spinner skeleton separator icon` | ❌ display atom tests | ⬜ pending |
+| 01-03-03 | 01-03 | 2 | DS-06, DS-07 | T-01-06 | Hard-code/source guard | unit (file scan) | `pnpm --filter @tripory/ui-web test -- token-guard` | ❌ `packages/ui-web/src/token-guard.test.ts` | ⬜ pending |
+| 01-04-01 | 01-04 | 3 | DS-04, FND-06 | T-01-07 | Label/error association | unit (RTL) | `pnpm --filter @tripory/ui-web test -- form-field search-input` | ❌ tests gần source | ⬜ pending |
+| 01-04-02 | 01-04 | 3 | DS-04, FND-06 | T-01-08 | Keyboard popup/roving focus | unit (RTL + user-event) | `pnpm --filter @tripory/ui-web test -- select tabs` | ❌ tests gần source | ⬜ pending |
+| 01-04-03 | 01-04 | 3 | DS-04, FND-06 | T-01-08 | Keyboard popup/focus restore | unit (RTL + user-event) | `pnpm --filter @tripory/ui-web test -- dropdown-menu tooltip` | ❌ tests gần source | ⬜ pending |
+| 01-05-01 | 01-05 | 3 | DS-04, FND-06 | T-01-10 | Focus trap/live region | unit (RTL + user-event) | `pnpm --filter @tripory/ui-web test -- toast dialog` | ❌ tests gần source | ⬜ pending |
+| 01-05-02 | 01-05 | 3 | DS-04 | T-01-09 | No fake interaction/data | unit (RTL) | `pnpm --filter @tripory/ui-web test -- card empty-state` | ❌ tests gần source | ⬜ pending |
+| 01-05-03 | 01-05 | 3 | FND-04, DS-04 | T-01-09 | Error detail redaction | unit (RTL) | `pnpm --filter @tripory/ui-web test -- error-state` | ❌ `error-state.test.tsx` | ⬜ pending |
+| 01-06-01 | 01-06 | 4 | DS-04 | T-01-12 | Snap constant integrity | unit | `pnpm --filter @tripory/ui-web test -- sheet-snap` | ❌ `sheet-snap.test.ts` | ⬜ pending |
+| 01-06-02 | 01-06 | 4 | DS-04, FND-06 | T-01-11 | Modal/non-modal focus safety | unit (RTL) | `pnpm --filter @tripory/ui-web test -- sheet` | ❌ `sheet.test.tsx` | ⬜ pending |
+| 01-06-03 | 01-06 | 4 | DS-06, DS-07 | T-01-12 | Public API contract | unit | `pnpm --filter @tripory/ui-web test -- exports` | ❌ `exports.test.ts` | ⬜ pending |
+| 01-07-01 | 01-07 | 5 | FND-03, DS-05 | T-01-14 | No fake identity/action | unit (RTL) | `pnpm --filter @tripory/web test -- components` | ❌ organism tests | ⬜ pending |
+| 01-07-02 | 01-07 | 5 | FND-03, DS-05 | T-01-15 | Route/build integrity | unit + build | `pnpm --filter @tripory/web test -- app; pnpm --filter @tripory/web build` | ❌ route tests | ⬜ pending |
+| 01-07-03 | 01-07 | 5 | FND-04 | T-01-13 | Error redaction/retry | unit + smoke | `pnpm --filter @tripory/web test -- app; pnpm build` | ❌ convention tests | ⬜ pending |
+| 01-08-01 | 01-08 | 6 | FND-07 | T-01-16 | Credentials ignored | CLI smoke | `git check-ignore .vercel/project.json; pnpm dlx vercel@63.1.2 project inspect` | external checkpoint | ⬜ pending |
+| 01-08-02 | 01-08 | 6 | FND-07 | T-01-17 | Server-side clean build | deploy smoke | `pnpm dlx vercel@63.1.2 inspect --logs <deployment-url>` | external deployment | ⬜ pending |
+| 01-08-03 | 01-08 | 6 | FND-03, FND-04, FND-07 | T-01-18 | Public alias/status check | HTTP + manual | `Invoke-WebRequest https://<project>.vercel.app/` và xác nhận unmatched = 404 | production URL | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky. `nyquist_compliant` giữ `false` cho tới khi execution xanh.*
 
 ---
 

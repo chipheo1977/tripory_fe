@@ -6,18 +6,28 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ESLint, type Linter } from 'eslint';
 import { describe, expect, it } from 'vitest';
+import { uiPackage } from '../eslint/boundaries.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+const virtualUiRoles = new Map<string, 'components' | 'tokens'>([
+  ['virtual/ui-web', 'components'],
+  ['virtual/design-tokens', 'tokens'],
+]);
 
 const engines = new Map<string, ESLint>();
 
 async function lint(dir: string, file: string, code: string): Promise<Linter.LintMessage[]> {
   let engine = engines.get(dir);
   if (!engine) {
-    engine = new ESLint({ cwd: path.join(repoRoot, dir) });
+    const role = virtualUiRoles.get(dir);
+    engine = role
+      ? new ESLint({ cwd: repoRoot, overrideConfigFile: true, overrideConfig: uiPackage({ role }) })
+      : new ESLint({ cwd: path.join(repoRoot, dir) });
     engines.set(dir, engine);
   }
-  const [result] = await engine.lintText(code, { filePath: path.join(repoRoot, dir, file) });
+  const role = virtualUiRoles.get(dir);
+  const filePath = role ? path.join(repoRoot, file) : path.join(repoRoot, dir, file);
+  const [result] = await engine.lintText(code, { filePath });
   return result?.messages ?? [];
 }
 
@@ -37,6 +47,8 @@ const imp = (includes: string): Violation => ({ rule: 'no-restricted-imports', i
 const itinerary = 'packages/itinerary';
 const kernel = 'packages/shared-kernel';
 const apiClient = 'packages/api-client';
+const uiWeb = 'virtual/ui-web';
+const tokens = 'virtual/design-tokens';
 const web = 'apps/web';
 
 const bad: Case[] = [
@@ -85,6 +97,18 @@ const bad: Case[] = [
   { name: 'api-client: package khác', dir: apiClient, file: 'src/x.ts', code: "import i from '@tripory/itinerary';\nexport const x = i;", violations: [imp("'@tripory/itinerary'")] },
   { name: 'api-client: next/*', dir: apiClient, file: 'src/x.ts', code: "import { cookies } from 'next/headers';\nexport const x = cookies;", violations: [imp("'next/headers'")] },
   { name: 'api-client: localStorage', dir: apiClient, file: 'src/x.ts', code: "export const t = localStorage.getItem('token');", violations: [{ rule: 'no-restricted-globals', includes: "'localStorage'" }] },
+  // ui-web
+  { name: 'ui atom: Radix', dir: uiWeb, file: 'src/atoms/x.tsx', code: "import { Dialog } from 'radix-ui';\nexport const x = Dialog;", violations: [imp("'radix-ui'")] },
+  { name: 'ui atom: Radix scoped', dir: uiWeb, file: 'src/atoms/x.tsx', code: "import x from '@radix-ui/react-dialog';\nexport { x };", violations: [imp("'@radix-ui/react-dialog'")] },
+  { name: 'ui atom: vaul', dir: uiWeb, file: 'src/atoms/x.tsx', code: "import { Drawer } from 'vaul';\nexport const x = Drawer;", violations: [imp("'vaul'")] },
+  { name: 'ui atom: next', dir: uiWeb, file: 'src/atoms/x.tsx', code: "import Link from 'next/link';\nexport const x = Link;", violations: [imp("'next/link'")] },
+  { name: 'ui atom: molecule', dir: uiWeb, file: 'src/atoms/x.tsx', code: "import { Dialog } from '../molecules/dialog';\nexport const x = Dialog;", violations: [imp("'../molecules/dialog'")] },
+  { name: 'ui atom: context package', dir: uiWeb, file: 'src/atoms/x.tsx', code: "import x from '@tripory/itinerary';\nexport { x };", violations: [imp("'@tripory/itinerary'")] },
+  { name: 'ui atom: design token deep import', dir: uiWeb, file: 'src/atoms/x.tsx', code: "import x from '@tripory/design-tokens/src/index';\nexport { x };", violations: [imp("'@tripory/design-tokens/src/index'")] },
+  { name: 'ui atom: import() động', dir: uiWeb, file: 'src/atoms/x.tsx', code: "export const load = () => import('react');", violations: [{ rule: 'no-restricted-syntax', includes: 'import()' }] },
+  { name: 'ui test: ngoài allowlist', dir: uiWeb, file: 'src/atoms/x.test.tsx', code: "import lodash from 'lodash';\nexport const x = lodash;", violations: [imp("'lodash'")] },
+  { name: 'ui lib: atom', dir: uiWeb, file: 'src/lib/x.ts', code: "import { Button } from '../atoms/button';\nexport const x = Button;", violations: [imp("'../atoms/button'")] },
+  { name: 'design tokens: React', dir: tokens, file: 'src/index.ts', code: "import React from 'react';\nexport const x = React;", violations: [imp("'react'")] },
   // apps/web
   { name: 'web: /http ngoài composition', dir: web, file: 'src/app/x.ts', code: "import r from '@tripory/itinerary/http';\nexport const x = r;", violations: [imp("'@tripory/itinerary/http'")] },
   { name: 'web: /http trong modules/ui', dir: web, file: 'src/modules/itinerary/ui/x.ts', code: "import r from '@tripory/itinerary/http';\nexport const x = r;", violations: [imp("'@tripory/itinerary/http'")] },
@@ -102,6 +126,11 @@ const ok: Omit<Case, 'violations'>[] = [
   { name: 'barrel: domain + application', dir: itinerary, file: 'src/index.ts', code: "export * from './domain';\nexport * from './application';" },
   { name: 'kernel: không import gì', dir: kernel, file: 'src/x.ts', code: 'export const x = 1;' },
   { name: 'api-client: kernel + fetch', dir: apiClient, file: 'src/x.ts', code: "import k from '@tripory/shared-kernel';\nexport const get = (url: string) => fetch(url);\nexport { k };" },
+  { name: 'ui molecule: approved runtime imports', dir: uiWeb, file: 'src/molecules/x.tsx', code: "import { Dialog } from '@base-ui/react/dialog';\nimport { MapPin } from 'lucide-react';\nimport { toast } from 'sonner';\nimport tokens from '@tripory/design-tokens';\nimport { Button } from '../atoms/button';\nexport const x = [Dialog, MapPin, toast, tokens, Button];" },
+  { name: 'ui atom: browser DOM global', dir: uiWeb, file: 'src/atoms/x.tsx', code: 'export const body = document.body;' },
+  { name: 'ui test: approved test imports', dir: uiWeb, file: 'src/atoms/x.test.tsx', code: "import fs from 'node:fs';\nimport userEvent from '@testing-library/user-event';\nimport { expect, it } from 'vitest';\nit('ok', () => expect([fs, userEvent]).toBeDefined());" },
+  { name: 'ui setup: approved setup imports', dir: uiWeb, file: 'src/test/setup.ts', code: "import { cleanup } from '@testing-library/react';\nimport { afterEach } from 'vitest';\nafterEach(cleanup);" },
+  { name: 'design tokens test: compiler and fs', dir: tokens, file: 'src/tokens.test.ts', code: "import { compile } from '@tailwindcss/node';\nimport fs from 'node:fs';\nimport { expect, it } from 'vitest';\nit('ok', () => expect([compile, fs]).toBeDefined());" },
   { name: 'web: composition import /http, /react và entry gốc', dir: web, file: 'src/composition/itinerary.client.ts', code: "import r from '@tripory/itinerary/http';\nimport h from '@tripory/itinerary/react';\nimport u from '@tripory/itinerary';\nexport const x = [r, h, u];" },
   { name: 'web: UI import /react và entry gốc', dir: web, file: 'src/modules/itinerary/ui/x.ts', code: "import h from '@tripory/itinerary/react';\nimport u from '@tripory/itinerary';\nexport const x = [h, u];" },
 ];

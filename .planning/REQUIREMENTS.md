@@ -12,7 +12,7 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 - [x] **FND-01**: Repo build và cài đặt được bằng pnpm 10 (đổi `packageManager`, cấu hình workspace tương thích), `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` đều xanh
 - [x] **FND-02**: `boundaries.mjs` có preset `uiPackage()` cho `packages/ui-web` và `packages/design-tokens`, có self-test và tài liệu kiến trúc được cập nhật
 - [ ] **FND-03**: Người dùng thấy giao diện responsive mobile-first (`dvh`, safe-area, vùng chạm ≥ 44px) với header, layout `(public)`/`(dashboard)` và điều hướng chỉ gồm route có thật
-- [ ] **FND-04**: Mọi màn có trạng thái loading, empty và error kèm nút "Thử lại"; route sai hiển thị trang 404
+- [x] **FND-04**: Mọi màn có trạng thái loading, empty và error kèm nút "Thử lại"; route sai hiển thị trang 404
 - [ ] **FND-05**: Người dùng nhận toast phản hồi thành công/thất bại cho mọi thao tác ghi, message lỗi lấy từ BE
 - [x] **FND-06**: Dialog và form dùng được bằng bàn phím (focus trap, Esc để đóng, label đầy đủ)
 - [ ] **FND-07**: Bản walking skeleton được deploy lên Vercel ngay cuối Phase 0a (Root Directory `apps/web`, Node 24)
@@ -168,7 +168,7 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | FND-01 | Phase 1 | Complete |
 | FND-02 | Phase 1 | Complete |
 | FND-03 | Phase 1 | Pending |
-| FND-04 | Phase 1 | Pending |
+| FND-04 | Phase 1 | Complete |
 | FND-05 | Phase 2 | Pending |
 | FND-06 | Phase 1 | Complete |
 | FND-07 | Phase 1 | Pending |

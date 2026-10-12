@@ -55,7 +55,7 @@ Plans:
 - [x] 01-02-PLAN.md — Design tokens và compile/guard tests
 - [x] 01-03-PLAN.md — Atoms
 - [x] 01-04-PLAN.md — Molecules form/navigation
-- [ ] 01-05-PLAN.md — Molecules feedback/content/Dialog
+- [x] 01-05-PLAN.md — Molecules feedback/content/Dialog
 - [ ] 01-06-PLAN.md — Sheet và public exports
 - [ ] 01-07-PLAN.md — AppShell, organisms và Next route conventions
 - [ ] 01-08-PLAN.md — Vercel checkpoint, production deploy và smoke

@@ -71,6 +71,7 @@ Plans:
   2. Test chứng minh N request 401 song song qua `withSessionRefresh` chỉ dẫn tới đúng 1 lần gọi refresh rồi phát lại các request
   3. `shared-kernel` (branded id, `Wgs84Coordinate`) và `api-client` có test, không dùng browser global trong package, lint ranh giới xanh
 **Plans**: TBD
+**Note**: Theo `02-CONTEXT.md`, tiêu chí 1 chỉ được chứng minh bằng unit test ở Phase 2 (chuẩn hóa lỗi, chọn message, chính sách toast). Phần người dùng thấy toast thật được nghiệm thu ở Phase 3 bằng thao tác ghi thật, khi đã mount `Toast` và `QueryClientProvider`.
 
 ### Phase 3: Identity & Session (BFF)
 **Goal**: Người dùng đăng ký, đăng nhập, giữ phiên và đăng xuất an toàn; token không bao giờ lọt về JavaScript phía client

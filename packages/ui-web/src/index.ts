@@ -16,3 +16,5 @@ export * from './molecules/form-field';
 export * from './molecules/search-input';
 export * from './molecules/select';
 export * from './molecules/tabs';
+export * from './molecules/dropdown-menu';
+export * from './molecules/tooltip';

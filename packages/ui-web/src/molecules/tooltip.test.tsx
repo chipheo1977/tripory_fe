@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { expect, it } from 'vitest';
+import * as publicUi from '../index';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, tooltipDelay } from './tooltip';
 
 function ExampleTooltip({ side = 'top' }: { side?: 'top' | 'right' | 'bottom' | 'left' }) {
@@ -40,4 +41,9 @@ it('mở bằng hover', async () => {
   render(<ExampleTooltip />);
   await user.hover(screen.getByRole('button', { name: 'Sao chép' }));
   expect(await screen.findByRole('tooltip', {}, { timeout: 1000 })).toBeTruthy();
+});
+
+it('công khai Menu và Tooltip bằng named exports', () => {
+  const names = ['DropdownMenu', 'DropdownMenuTrigger', 'DropdownMenuContent', 'DropdownMenuCheckboxItem', 'DropdownMenuRadioItem', 'Tooltip', 'TooltipProvider', 'TooltipTrigger', 'TooltipContent'];
+  expect(names.every((name) => name in publicUi)).toBe(true);
 });

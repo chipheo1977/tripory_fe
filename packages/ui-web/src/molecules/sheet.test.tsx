@@ -64,30 +64,27 @@ it.each(['bottom', 'left', 'right'] as const)('%s modal trap focus, Esc đóng v
   expect(document.activeElement).toBe(trigger);
 });
 
-it('modal có scrim và nút đóng built-in', async () => {
+it('modal có scrim nhận pointer và nút đóng built-in', async () => {
   const user = userEvent.setup();
   render(<ExampleSheet />);
   await user.click(screen.getByRole('button', { name: 'Mở bảng bottom' }));
-  expect(document.querySelector('[data-sheet-backdrop]')).toBeTruthy();
+  const backdrop = document.querySelector('[data-sheet-backdrop]');
+  expect(backdrop?.className).toContain('pointer-events-auto');
 
   await user.click(await screen.findByRole('button', { name: 'Đóng bảng' }));
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 });
 
-it('non-modal không có scrim, nền thao tác được và outside press không đóng', async () => {
+it('non-modal để pointer xuyên viewport, popup vẫn thao tác được và không có scrim', async () => {
   const user = userEvent.setup();
-  const backgroundAction = vi.fn();
-  render(
-    <div onClick={backgroundAction}>
-      <ExampleSheet modal={false} />
-    </div>,
-  );
+  render(<ExampleSheet modal={false} />);
   await user.click(screen.getByRole('button', { name: 'Mở bảng bottom' }));
-  expect(await screen.findByRole('dialog')).toBeTruthy();
+  const sheet = await screen.findByRole('dialog');
   expect(document.querySelector('[data-sheet-backdrop]')).toBeNull();
+  expect(sheet.parentElement?.className).toContain('pointer-events-none');
+  expect(sheet.className).toContain('pointer-events-auto');
 
-  await user.click(screen.getByRole('button', { name: 'Nội dung nền' }));
-  expect(backgroundAction).toHaveBeenCalled();
+  await user.click(screen.getByRole('button', { name: 'Hành động đầu' }));
   expect(screen.getByRole('dialog')).toBeTruthy();
 });
 

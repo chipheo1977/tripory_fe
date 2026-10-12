@@ -102,7 +102,7 @@ export function SheetBackdrop({ className, ...props }: ComponentProps<typeof Bas
       {...props}
       data-sheet-backdrop=""
       className={cn(
-        'fixed inset-0 z-(--z-overlay) min-h-dvh bg-overlay transition-opacity duration-(--semantic-motion-duration-slow) ease-standard data-starting-style:opacity-0 data-ending-style:opacity-0',
+        'pointer-events-auto fixed inset-0 z-(--z-overlay) min-h-dvh bg-overlay transition-opacity duration-(--semantic-motion-duration-slow) ease-standard data-starting-style:opacity-0 data-ending-style:opacity-0',
         className,
       )}
     />
@@ -127,13 +127,13 @@ export function SheetContent({ children, className, ...props }: ComponentProps<t
   return (
     <BaseDrawer.Portal>
       {modal ? <SheetBackdrop /> : null}
-      <BaseDrawer.Viewport className={cn('fixed inset-0 z-(--z-modal) flex', viewportClasses[position])}>
+      <BaseDrawer.Viewport className={cn('pointer-events-none fixed inset-0 z-(--z-modal) flex', viewportClasses[position])}>
         <BaseDrawer.Popup
           {...props}
           data-sheet-position={position}
           data-swipe-direction={swipeDirections[position]}
           className={cn(
-            'flex flex-col overflow-y-auto overscroll-contain border-border bg-surface-elevated p-stack-lg pb-[calc(var(--semantic-space-stack-lg)+env(safe-area-inset-bottom))] text-text shadow-overlay outline-hidden transition-transform duration-(--semantic-motion-duration-slow) ease-standard',
+            'pointer-events-auto flex flex-col overflow-y-auto overscroll-contain border-border bg-surface-elevated p-stack-lg pb-[calc(var(--semantic-space-stack-lg)+env(safe-area-inset-bottom))] text-text shadow-overlay outline-hidden transition-transform duration-(--semantic-motion-duration-slow) ease-standard',
             popupClasses[position],
             className,
           )}

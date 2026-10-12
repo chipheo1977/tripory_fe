@@ -101,16 +101,16 @@ it('bottom mở ở medium và controls bước qua ba snap point', async () => 
   expect(handle?.className).toContain('min-h-touch');
   const collapse = await screen.findByRole('button', { name: 'Thu gọn bảng' });
   const expand = screen.getByRole('button', { name: 'Mở rộng bảng' });
-  expect(collapse).not.toBeDisabled();
-  expect(expand).not.toBeDisabled();
+  expect(collapse.hasAttribute('disabled')).toBe(false);
+  expect(expand.hasAttribute('disabled')).toBe(false);
 
   await user.click(expand);
   expect(onSnapPointChange).toHaveBeenLastCalledWith(0.92);
-  expect(expand).toBeDisabled();
+  expect(expand.hasAttribute('disabled')).toBe(true);
   await user.click(collapse);
   await user.click(collapse);
   expect(onSnapPointChange.mock.calls.at(-1)?.[0]).toMatch(/px$/u);
-  expect(collapse).toBeDisabled();
+  expect(collapse.hasAttribute('disabled')).toBe(true);
 });
 
 it('side Sheet không render snap controls', async () => {

@@ -57,7 +57,7 @@ Plans:
 - [x] 01-04-PLAN.md — Molecules form/navigation
 - [x] 01-05-PLAN.md — Molecules feedback/content/Dialog
 - [x] 01-06-PLAN.md — Sheet và public exports
-- [ ] 01-07-PLAN.md — AppShell, organisms và Next route conventions
+- [x] 01-07-PLAN.md — AppShell, organisms và Next route conventions
 - [ ] 01-08-PLAN.md — Vercel checkpoint, production deploy và smoke
 **UI hint**: yes
 **Note**: Phase này nặng hơn sau khi thêm Design System (13 requirement). Khi plan, chia plan theo thứ tự toolchain (pnpm 10, `uiPackage()`) → design tokens → atoms/molecules → organisms + AppShell → deploy Vercel. Bộ token thiết kế mới từ đầu, nên chạy `/gsd-ui-phase 1` để chốt design contract (màu, typography, spacing) trước khi plan. Test component trong `ui-web` cần môi trường DOM (jsdom + Testing Library) theo preset `uiPackage()`; đây khác với quyết định không mở Testing Library cho tầng `react` của context package.

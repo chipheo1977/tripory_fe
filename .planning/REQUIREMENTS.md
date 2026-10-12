@@ -9,8 +9,8 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 
 ### Nền tảng (FND)
 
-- [ ] **FND-01**: Repo build và cài đặt được bằng pnpm 10 (đổi `packageManager`, cấu hình workspace tương thích), `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` đều xanh
-- [ ] **FND-02**: `boundaries.mjs` có preset `uiPackage()` cho `packages/ui-web` và `packages/design-tokens`, có self-test và tài liệu kiến trúc được cập nhật
+- [x] **FND-01**: Repo build và cài đặt được bằng pnpm 10 (đổi `packageManager`, cấu hình workspace tương thích), `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` đều xanh
+- [x] **FND-02**: `boundaries.mjs` có preset `uiPackage()` cho `packages/ui-web` và `packages/design-tokens`, có self-test và tài liệu kiến trúc được cập nhật
 - [ ] **FND-03**: Người dùng thấy giao diện responsive mobile-first (`dvh`, safe-area, vùng chạm ≥ 44px) với header, layout `(public)`/`(dashboard)` và điều hướng chỉ gồm route có thật
 - [ ] **FND-04**: Mọi màn có trạng thái loading, empty và error kèm nút "Thử lại"; route sai hiển thị trang 404
 - [ ] **FND-05**: Người dùng nhận toast phản hồi thành công/thất bại cho mọi thao tác ghi, message lỗi lấy từ BE
@@ -20,12 +20,12 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 ### Design System (DS)
 
 - [ ] **DS-01**: `packages/design-tokens` chứa bộ token thiết kế mới (không port `lib/colors.ts` của FE cũ): màu dạng semantic (`primary`, `surface`, `text`, `border`, `danger`, `success`…), typography, spacing, radius, shadow, z-index, motion, breakpoint; xuất ra Tailwind 4 `@theme` và CSS variables, cấu trúc sẵn chỗ cho dark mode (chưa bật)
-- [ ] **DS-02**: Quy ước atomic design được ghi trong tài liệu kiến trúc và cưỡng chế bằng cấu trúc thư mục: atoms và molecules ở `packages/ui-web`; organisms và templates gắn nghiệp vụ ở `apps/web/src/modules/*/ui`; organisms dùng chung (AppHeader, AppShell) ở `apps/web/src/components`
+- [x] **DS-02**: Quy ước atomic design được ghi trong tài liệu kiến trúc và cưỡng chế bằng cấu trúc thư mục: atoms và molecules ở `packages/ui-web`; organisms và templates gắn nghiệp vụ ở `apps/web/src/modules/*/ui`; organisms dùng chung (AppHeader, AppShell) ở `apps/web/src/components`
 - [ ] **DS-03**: `ui-web` có các atom: Button, IconButton, Input, Textarea, Label, Checkbox, Switch, Avatar, Badge, Spinner, Skeleton, Separator, Icon (lucide)
 - [ ] **DS-04**: `ui-web` có các molecule: FormField (label + input + lỗi), SearchInput, Select, Tabs, DropdownMenu, Tooltip, Toast, Dialog, Sheet (bottom sheet nhiều mức), Card, EmptyState, ErrorState (có nút "Thử lại")
 - [ ] **DS-05**: App có các organism dùng chung: AppHeader, UserMenu (slot tĩnh, nối phiên thật ở Phase 3), AppShell cho `(public)` và `(dashboard)`
 - [ ] **DS-06**: Component chỉ dùng token (không hard-code màu/spacing/radius); component có phần con dùng được từ Server Component thì export bằng named export
-- [ ] **DS-07**: Mỗi base component có test (render, role/aria, tương tác bàn phím cho component tương tác); không dùng showcase (Storybook hay route `/dev/ui`)
+- [x] **DS-07**: Mỗi base component có test (render, role/aria, tương tác bàn phím cho component tương tác); không dùng showcase (Storybook hay route `/dev/ui`)
 
 ### Phiên đăng nhập (AUTH)
 
@@ -165,20 +165,20 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FND-01 | Phase 1 | Pending |
-| FND-02 | Phase 1 | Pending |
+| FND-01 | Phase 1 | Complete |
+| FND-02 | Phase 1 | Complete |
 | FND-03 | Phase 1 | Pending |
 | FND-04 | Phase 1 | Pending |
 | FND-05 | Phase 2 | Pending |
 | FND-06 | Phase 1 | Pending |
 | FND-07 | Phase 1 | Pending |
 | DS-01 | Phase 1 | Pending |
-| DS-02 | Phase 1 | Pending |
+| DS-02 | Phase 1 | Complete |
 | DS-03 | Phase 1 | Pending |
 | DS-04 | Phase 1 | Pending |
 | DS-05 | Phase 1 | Pending |
 | DS-06 | Phase 1 | Pending |
-| DS-07 | Phase 1 | Pending |
+| DS-07 | Phase 1 | Complete |
 | AUTH-01 | Phase 3 | Pending |
 | AUTH-02 | Phase 3 | Pending |
 | AUTH-03 | Phase 3 | Pending |

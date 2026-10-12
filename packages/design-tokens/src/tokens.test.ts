@@ -1,7 +1,9 @@
+import { compile } from '@tailwindcss/node';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { sheetPeekMinPx, sheetSnapPoints } from './index';
 
 const srcDir = path.dirname(fileURLToPath(import.meta.url));
 const readSource = (file: string) => readFileSync(path.join(srcDir, file), 'utf8');
@@ -179,5 +181,55 @@ describe('design token inventory', () => {
       '--sheet-snap-medium': '60dvh',
       '--sheet-snap-expanded': 'calc(92dvh - env(safe-area-inset-top))',
     });
+  });
+});
+
+describe('Tailwind theme contract', () => {
+  it('biên dịch semantic utilities và loại palette mặc định', async () => {
+    const compiler = await compile('@import "tailwindcss"; @import "./index.css";', {
+      base: srcDir,
+      onDependency: () => undefined,
+    });
+    const css = compiler.build([
+      'bg-primary',
+      'text-zinc-600',
+      'rounded-control',
+      'shadow-overlay',
+      'p-stack-md',
+      'text-body',
+      'font-semibold',
+      'md:flex',
+    ]);
+
+    expect(css).toContain('.bg-primary');
+    expect(css).toContain('background-color: var(--semantic-color-primary)');
+    expect(css).toContain('.rounded-control');
+    expect(css).toContain('border-radius: var(--semantic-radius-control)');
+    expect(css).toContain('.p-stack-md');
+    expect(css).toContain('padding: var(--semantic-space-stack-md)');
+    expect(css).not.toContain('.text-zinc-600');
+  });
+
+  it('reset namespace mặc định và giữ breakpoint dạng literal', () => {
+    const themeCss = readSource('theme.css');
+
+    for (const namespace of ['color', 'radius', 'shadow', 'font', 'text', 'font-weight', 'breakpoint']) {
+      expect(themeCss, `thiếu reset namespace ${namespace}`).toContain(`--${namespace}-*: initial;`);
+    }
+    expect(themeCss).toContain('--breakpoint-sm: 640px;');
+    expect(themeCss).toContain('--breakpoint-md: 768px;');
+    expect(themeCss).toContain('--breakpoint-lg: 1024px;');
+    expect(themeCss).toContain('--breakpoint-xl: 1280px;');
+    expect(themeCss).not.toMatch(/--breakpoint-[a-z]+:\s*var\(/);
+  });
+
+  it('đối chiếu CSS Sheet contract với hằng TypeScript', () => {
+    const componentTokens = declarations(readSource('components.css'));
+
+    expect(sheetSnapPoints).toEqual({ peek: 0.25, medium: 0.6, expanded: 0.92 });
+    expect(sheetPeekMinPx).toBe(160);
+    expect(componentTokens['--sheet-snap-peek']).toBe(`max(${sheetPeekMinPx}px, ${sheetSnapPoints.peek * 100}dvh)`);
+    expect(componentTokens['--sheet-snap-medium']).toBe(`${sheetSnapPoints.medium * 100}dvh`);
+    expect(componentTokens['--sheet-snap-expanded']).toContain(`${sheetSnapPoints.expanded * 100}dvh`);
   });
 });

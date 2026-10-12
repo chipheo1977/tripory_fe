@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig/library.json",
-  "include": ["eslint/*.d.mts", "test", "vitest.config.ts", "vitest/preset.d.mts"]
+  "include": ["eslint/*.d.mts", "test", "vitest.config.ts", "vitest/preset.d.mts", "vitest/ui-preset.d.mts"]
 }

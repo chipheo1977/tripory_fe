@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "base-nova",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/styles.css",
+    "baseColor": "neutral",
+    "cssVariables": true
+  },
+  "iconLibrary": "lucide",
+  "aliases": {
+    "components": "@tripory/ui-web",
+    "utils": "@tripory/ui-web/lib",
+    "ui": "@tripory/ui-web",
+    "lib": "@tripory/ui-web/lib",
+    "hooks": "@tripory/ui-web/hooks"
+  },
+  "registries": {}
+}

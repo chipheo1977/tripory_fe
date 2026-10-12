@@ -6,7 +6,8 @@
   "exports": {
     "./eslint": "./eslint/boundaries.mjs",
     "./tsconfig/*": "./tsconfig/*",
-    "./vitest": "./vitest/preset.mjs"
+    "./vitest": "./vitest/preset.mjs",
+    "./vitest/ui": "./vitest/ui-preset.mjs"
   },
   "scripts": {
     "lint": "eslint",

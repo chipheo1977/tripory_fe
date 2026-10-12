@@ -1,0 +1,7 @@
+{
+  "extends": "@tripory/config/tsconfig/library.json",
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  },
+  "include": ["src", "vitest.config.ts"]
+}

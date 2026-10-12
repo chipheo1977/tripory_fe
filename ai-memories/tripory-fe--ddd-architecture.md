@@ -243,7 +243,7 @@ Quy tắc để mức `error`, không `warn` (bài học `EMPTY_DISPLAY` ở tc-
 - TS vẫn thấy `window`, `localStorage` vì `lib` có DOM (cần cho `fetch` ở `api-client`); chỉ ESLint chặn các global này.
 
 **Kiểm chứng:**
-- Self-test `packages/config/test/boundaries.test.ts`: 74 test = 53 vi phạm phải bắt + 16 import hợp lệ không được báo nhầm + 5 kiểm tra mỗi package/app đã nối preset. Nó chạy ESLint thật bằng `eslint.config.mjs` của từng package/app, nên kiểm cả phần nối dây.
+- Self-test `packages/config/test/boundaries.test.ts`: 76 test = 53 vi phạm phải bắt + 16 import hợp lệ không được báo nhầm + 7 kiểm tra mỗi package/app đã nối preset. Nó chạy ESLint thật bằng `eslint.config.mjs` của từng package/app, nên kiểm cả phần nối dây.
 - Đột biến: phá lần lượt 6 luật trong preset (bỏ `ImportExpression`, `noDeepImport`, `httpOnlyInComposition`, `vitest` cho file test, `pure` của domain, allowlist) thì đúng các test tương ứng vỡ (1, 1, 2, 1, 4, 13 test). Self-test không xanh rỗng.
 - Trên repo thật, thêm 5 file sai (domain và react của itinerary, shared-kernel, api-client, web): `pnpm turbo run lint typecheck` đỏ 7 task, xóa file thì xanh lại. Vi phạm `localStorage` ở api-client chỉ ESLint bắt.
 - Cache: sửa preset thì `lint` của cả 5 package bị bỏ cache; sửa `eslint.config.mjs` của một package thì `@tripory/config#test` bị bỏ cache nhờ `$TURBO_ROOT$` trong `packages/config/turbo.json`. Task `lint`, `typecheck`, `test` nối với nhau qua transit node.

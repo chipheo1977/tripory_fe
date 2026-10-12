@@ -2,27 +2,38 @@
   "name": "@tripory/web",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@tripory/design-tokens": "workspace:*",
+    "@tripory/ui-web": "workspace:*",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "catalog:",
+    "@testing-library/dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
     "@tripory/config": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "eslint": "catalog:",
     "eslint-config-next": "catalog:",
+    "jsdom": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

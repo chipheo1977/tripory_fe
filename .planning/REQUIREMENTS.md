@@ -19,12 +19,12 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 
 ### Design System (DS)
 
-- [ ] **DS-01**: `packages/design-tokens` chứa bộ token thiết kế mới (không port `lib/colors.ts` của FE cũ): màu dạng semantic (`primary`, `surface`, `text`, `border`, `danger`, `success`…), typography, spacing, radius, shadow, z-index, motion, breakpoint; xuất ra Tailwind 4 `@theme` và CSS variables, cấu trúc sẵn chỗ cho dark mode (chưa bật)
+- [x] **DS-01**: `packages/design-tokens` chứa bộ token thiết kế mới (không port `lib/colors.ts` của FE cũ): màu dạng semantic (`primary`, `surface`, `text`, `border`, `danger`, `success`…), typography, spacing, radius, shadow, z-index, motion, breakpoint; xuất ra Tailwind 4 `@theme` và CSS variables, cấu trúc sẵn chỗ cho dark mode (chưa bật)
 - [x] **DS-02**: Quy ước atomic design được ghi trong tài liệu kiến trúc và cưỡng chế bằng cấu trúc thư mục: atoms và molecules ở `packages/ui-web`; organisms và templates gắn nghiệp vụ ở `apps/web/src/modules/*/ui`; organisms dùng chung (AppHeader, AppShell) ở `apps/web/src/components`
 - [ ] **DS-03**: `ui-web` có các atom: Button, IconButton, Input, Textarea, Label, Checkbox, Switch, Avatar, Badge, Spinner, Skeleton, Separator, Icon (lucide)
 - [ ] **DS-04**: `ui-web` có các molecule: FormField (label + input + lỗi), SearchInput, Select, Tabs, DropdownMenu, Tooltip, Toast, Dialog, Sheet (bottom sheet nhiều mức), Card, EmptyState, ErrorState (có nút "Thử lại")
 - [ ] **DS-05**: App có các organism dùng chung: AppHeader, UserMenu (slot tĩnh, nối phiên thật ở Phase 3), AppShell cho `(public)` và `(dashboard)`
-- [ ] **DS-06**: Component chỉ dùng token (không hard-code màu/spacing/radius); component có phần con dùng được từ Server Component thì export bằng named export
+- [x] **DS-06**: Component chỉ dùng token (không hard-code màu/spacing/radius); component có phần con dùng được từ Server Component thì export bằng named export
 - [x] **DS-07**: Mỗi base component có test (render, role/aria, tương tác bàn phím cho component tương tác); không dùng showcase (Storybook hay route `/dev/ui`)
 
 ### Phiên đăng nhập (AUTH)
@@ -172,12 +172,12 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | FND-05 | Phase 2 | Pending |
 | FND-06 | Phase 1 | Pending |
 | FND-07 | Phase 1 | Pending |
-| DS-01 | Phase 1 | Pending |
+| DS-01 | Phase 1 | Complete |
 | DS-02 | Phase 1 | Complete |
 | DS-03 | Phase 1 | Pending |
 | DS-04 | Phase 1 | Pending |
 | DS-05 | Phase 1 | Pending |
-| DS-06 | Phase 1 | Pending |
+| DS-06 | Phase 1 | Complete |
 | DS-07 | Phase 1 | Complete |
 | AUTH-01 | Phase 3 | Pending |
 | AUTH-02 | Phase 3 | Pending |

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-10-12T02:46:13.680Z"
-last_activity: 2026-10-12 -- Completed Plan 01-01 Wave 0 UI toolchain
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-10-12T02:51:56.633Z"
+last_activity: 2026-10-12
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 8
-  completed_plans: 1
-  percent: 13
+  completed_plans: 2
+  percent: 25
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 1 of 8 (Design System, UI Skeleton & Walking Skeleton)
-Plan: 1 of 8 in current phase
-Status: In progress
-Last activity: 2026-10-12 -- Completed Plan 01-01 Wave 0 UI toolchain
+Plan: 2 of 8 in current phase
+Status: Ready to execute
+Last activity: 2026-10-12
 
 Progress: [█░░░░░░░░░] 13%
 
@@ -53,6 +53,7 @@ Progress: [█░░░░░░░░░] 13%
 
 *Updated after each plan completion*
 | Phase 01 P01 | 1h 14m | 3 tasks | 30 files |
+| Phase 01 P02 | 3 min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,9 @@ Recent decisions affecting current work:
 - [Roadmap]: Deploy BE là phụ thuộc ngoài (repo `tripory_be`), không có phase riêng
 - [Phase 01]: Retain allowBuilds with unrs-resolver disabled under pnpm 10.34.6.
 - [Phase 01]: Use role-aware default-deny uiPackage boundaries for components and tokens.
+- [Phase 01]: Use internal --semantic-* variables so Tailwind public namespaces never self-reference.
+- [Phase 01]: Keep dark.css complete but outside the public CSS import chain until runtime dark mode is implemented.
+- [Phase 01]: Expose Sheet viewport ratios in TypeScript because Base UI Drawer cannot consume dvh or CSS var snap points.
 
 ### Pending Todos
 
@@ -87,6 +91,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-12T02:46:13.676Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-10-12T02:51:56.629Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None

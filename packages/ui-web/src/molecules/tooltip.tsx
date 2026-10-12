@@ -1,6 +1,7 @@
 'use client';
 
 import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip';
+import { overlayOffsetPx } from '@tripory/design-tokens';
 import { createContext, useContext, useId } from 'react';
 import type { ComponentProps } from 'react';
 import { cn } from '../lib/cn';
@@ -41,7 +42,7 @@ type TooltipContentProps = Omit<ComponentProps<typeof BaseTooltip.Popup>, 'class
   sideOffset?: number;
 };
 
-export function TooltipContent({ className, side = 'top', sideOffset = 8, ...props }: TooltipContentProps) {
+export function TooltipContent({ className, side = 'top', sideOffset = overlayOffsetPx, ...props }: TooltipContentProps) {
   const descriptionId = useContext(TooltipDescriptionContext);
   return (
     <BaseTooltip.Portal>

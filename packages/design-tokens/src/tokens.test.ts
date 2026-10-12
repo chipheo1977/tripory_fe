@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { sheetPeekMinPx, sheetSnapPoints } from './index';
+import { overlayOffsetPx, sheetPeekMinPx, sheetSnapPoints } from './index';
 
 const srcDir = path.dirname(fileURLToPath(import.meta.url));
 const readSource = (file: string) => readFileSync(path.join(srcDir, file), 'utf8');
@@ -226,6 +226,7 @@ describe('Tailwind theme contract', () => {
   it('đối chiếu CSS Sheet contract với hằng TypeScript', () => {
     const componentTokens = declarations(readSource('components.css'));
 
+    expect(overlayOffsetPx).toBe(8);
     expect(sheetSnapPoints).toEqual({ peek: 0.25, medium: 0.6, expanded: 0.92 });
     expect(sheetPeekMinPx).toBe(160);
     expect(componentTokens['--sheet-snap-peek']).toBe(`max(${sheetPeekMinPx}px, ${sheetSnapPoints.peek * 100}dvh)`);

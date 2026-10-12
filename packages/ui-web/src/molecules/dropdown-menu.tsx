@@ -1,6 +1,7 @@
 'use client';
 
 import { Menu } from '@base-ui/react/menu';
+import { overlayOffsetPx } from '@tripory/design-tokens';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Check, Circle } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
@@ -37,7 +38,7 @@ export function DropdownMenuTrigger({ className, ...props }: Omit<ComponentProps
 export function DropdownMenuContent({ children, className, ...props }: Omit<ComponentProps<typeof Menu.Popup>, 'className'> & { className?: string }) {
   return (
     <Menu.Portal>
-      <Menu.Positioner align="start" className="z-(--z-dropdown) outline-hidden" sideOffset={8}>
+      <Menu.Positioner align="start" className="z-(--z-dropdown) outline-hidden" sideOffset={overlayOffsetPx}>
         <Menu.Popup
           {...props}
           className={cn(

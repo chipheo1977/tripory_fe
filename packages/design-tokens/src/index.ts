@@ -1,3 +1,5 @@
+export const overlayOffsetPx = 8 as const;
+
 export const sheetSnapPoints = {
   peek: 0.25,
   medium: 0.6,

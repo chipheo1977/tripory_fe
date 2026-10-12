@@ -1,6 +1,7 @@
 'use client';
 
 import { Select as BaseSelect } from '@base-ui/react/select';
+import { overlayOffsetPx } from '@tripory/design-tokens';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Check, ChevronDown } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
@@ -47,7 +48,7 @@ export function SelectValue(props: ComponentProps<typeof BaseSelect.Value>) {
 export function SelectContent({ children, className, ...props }: Omit<ComponentProps<typeof BaseSelect.Popup>, 'className'> & { className?: string }) {
   return (
     <BaseSelect.Portal>
-      <BaseSelect.Positioner alignItemWithTrigger={false} className="z-(--z-dropdown) outline-hidden" sideOffset={8}>
+      <BaseSelect.Positioner alignItemWithTrigger={false} className="z-(--z-dropdown) outline-hidden" sideOffset={overlayOffsetPx}>
         <BaseSelect.Popup
           {...props}
           className={cn(

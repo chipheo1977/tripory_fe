@@ -17,6 +17,7 @@ const forbidden = [
   { name: 'primitive token', pattern: /--primitive-/u },
   { name: 'Tailwind palette', pattern: /\b(?:text|bg|border|fill|stroke)-(?:zinc|slate|gray|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3}\b/u },
   { name: 'spacing hoặc size số', pattern: /\b(?:p|px|py|pt|pr|pb|pl|m|mx|my|mt|mr|mb|ml|gap|gap-x|gap-y|space-x|space-y|h|w|size|min-h|min-w)-(?!0\b)\d+\b/u },
+  { name: 'spacing prop số', pattern: /\b(?:sideOffset|alignOffset|collisionPadding|arrowPadding)\s*=\s*\{\s*\d/u },
   { name: 'z-index số', pattern: /\bz-\d+\b/u },
   { name: 'duration số', pattern: /\bduration-\d+\b/u },
   { name: 'arbitrary unit', pattern: /-\[[\d.]+(?:px|rem|ms)\]/u },
@@ -44,6 +45,10 @@ describe('semantic token guard', () => {
 
   it('bắt mutation dùng Tailwind palette', () => {
     expect(findTokenViolations('className="text-zinc-600"')).toContain('Tailwind palette');
+  });
+
+  it('bắt mutation dùng numeric spacing prop', () => {
+    expect(findTokenViolations('<Positioner sideOffset={8} />')).toContain('spacing prop số');
   });
 
   it('không có Storybook hoặc route showcase', () => {

@@ -1,0 +1,5 @@
+{
+  "linked": true,
+  "gitignored": true,
+  "notes": "Verified .vercel/project.json exists. Vercel CLI 63.1.2 project inspect read project loib12s-projects/tripory_v1 (ID prj_ujw5EATlQVwnV9PII6S4qV7BXofD), Root Directory apps/web, Node.js 24.x. User confirmed project configuration, including source files outside Root Directory. git check-ignore returned .vercel/project.json; git status did not list .vercel; git ls-files found no tracked .vercel files; tracked-file scan found no VERCEL_TOKEN or VERCEL_AUTH_TOKEN credentials."
+}

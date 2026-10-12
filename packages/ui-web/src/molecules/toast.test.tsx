@@ -12,8 +12,9 @@ afterEach(() => {
 it('cấu hình light theme, tối đa ba thông báo và duration đúng contract', () => {
   expect(toastDurations).toEqual({ default: 5_000, extended: 8_000 });
   const { container } = render(<Toast />);
-  const region = container.querySelector('[data-sonner-toaster]');
+  const region = container.querySelector('[data-toast-adapter]');
   expect(region?.getAttribute('data-theme')).toBe('light');
+  expect(region?.getAttribute('data-visible-toasts')).toBe('3');
 });
 
 it.each([
@@ -27,7 +28,7 @@ it.each([
   const item = await screen.findByRole(role);
   expect(item.getAttribute('aria-live')).toBe(live);
   expect(item.textContent).toContain(title);
-  expect(item.textContent).toContain('Nội dung thông báo');
+  expect(screen.getByText('Nội dung thông báo')).toBeTruthy();
 });
 
 it('action và dismiss vận hành bằng bàn phím', async () => {

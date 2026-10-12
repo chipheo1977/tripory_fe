@@ -18,3 +18,5 @@ export * from './molecules/select';
 export * from './molecules/tabs';
 export * from './molecules/dropdown-menu';
 export * from './molecules/tooltip';
+export * from './molecules/toast';
+export * from './molecules/dialog';

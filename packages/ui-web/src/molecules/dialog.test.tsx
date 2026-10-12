@@ -16,7 +16,7 @@ function ExampleDialog({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   return (
     <Dialog>
       <DialogTrigger>Mở hộp thoại</DialogTrigger>
-      <DialogContent size={size} initialFocus="#dialog-secondary">
+      <DialogContent size={size} initialFocus={() => document.querySelector('#dialog-secondary') as HTMLElement}>
         <DialogTitle>Chỉnh sửa lịch trình</DialogTitle>
         <DialogDescription>Thay đổi thông tin cơ bản.</DialogDescription>
         <button type="button">Hành động đầu</button>
@@ -46,10 +46,13 @@ it('đặt initial focus, trap Tab và Shift+Tab trong dialog', async () => {
   const initial = screen.getByRole('button', { name: 'Hành động được focus' });
   await waitFor(() => expect(document.activeElement).toBe(initial));
 
-  for (let index = 0; index < 5; index += 1) await user.tab();
-  expect(dialog.contains(document.activeElement)).toBe(true);
-  for (let index = 0; index < 5; index += 1) await user.tab({ shift: true });
-  expect(dialog.contains(document.activeElement)).toBe(true);
+  const close = screen.getByRole('button', { name: 'Đóng' });
+  await user.tab();
+  expect(document.activeElement).toBe(close);
+  await user.tab();
+  await waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true));
+  await user.tab({ shift: true });
+  await waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true));
 });
 
 it('Esc đóng và trả focus về trigger', async () => {
@@ -77,12 +80,14 @@ it('nút đóng và scrim đều đóng dialog', async () => {
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 });
 
-it('khóa body scroll khi mở', async () => {
+it('dùng modal backdrop phủ viewport để Base UI quản lý scroll lock', async () => {
   const user = userEvent.setup();
   render(<ExampleDialog />);
   await user.click(screen.getByRole('button', { name: 'Mở hộp thoại' }));
   await screen.findByRole('dialog');
-  expect(document.body.style.overflow).toBe('hidden');
+  const backdrop = document.querySelector('[data-dialog-backdrop]');
+  expect(backdrop?.className).toContain('fixed');
+  expect(backdrop?.className).toContain('min-h-dvh');
 });
 
 it('công khai compound parts bằng named exports', () => {

@@ -1,0 +1,105 @@
+@theme inline {
+  --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --font-weight-*: initial;
+  --breakpoint-*: initial;
+
+  --color-background: var(--semantic-color-background);
+  --color-surface: var(--semantic-color-surface);
+  --color-surface-muted: var(--semantic-color-surface-muted);
+  --color-surface-elevated: var(--semantic-color-surface-elevated);
+  --color-surface-inverse: var(--semantic-color-surface-inverse);
+  --color-text: var(--semantic-color-text);
+  --color-text-muted: var(--semantic-color-text-muted);
+  --color-text-subtle: var(--semantic-color-text-subtle);
+  --color-text-disabled: var(--semantic-color-text-disabled);
+  --color-text-inverse: var(--semantic-color-text-inverse);
+  --color-border: var(--semantic-color-border);
+  --color-border-strong: var(--semantic-color-border-strong);
+  --color-input: var(--semantic-color-input);
+  --color-placeholder: var(--semantic-color-placeholder);
+  --color-primary: var(--semantic-color-primary);
+  --color-primary-hover: var(--semantic-color-primary-hover);
+  --color-primary-subtle: var(--semantic-color-primary-subtle);
+  --color-primary-border: var(--semantic-color-primary-border);
+  --color-primary-foreground: var(--semantic-color-primary-foreground);
+  --color-accent: var(--semantic-color-accent);
+  --color-focus-ring: var(--semantic-color-focus-ring);
+  --color-danger: var(--semantic-color-danger);
+  --color-danger-hover: var(--semantic-color-danger-hover);
+  --color-danger-subtle: var(--semantic-color-danger-subtle);
+  --color-success: var(--semantic-color-success);
+  --color-success-subtle: var(--semantic-color-success-subtle);
+  --color-warning: var(--semantic-color-warning);
+  --color-warning-subtle: var(--semantic-color-warning-subtle);
+  --color-overlay: var(--semantic-color-overlay);
+
+  --spacing-inline-xs: var(--semantic-space-inline-xs);
+  --spacing-inline-sm: var(--semantic-space-inline-sm);
+  --spacing-control-gap: var(--semantic-space-control-gap);
+  --spacing-stack-sm: var(--semantic-space-stack-sm);
+  --spacing-stack-md: var(--semantic-space-stack-md);
+  --spacing-stack-lg: var(--semantic-space-stack-lg);
+  --spacing-section: var(--semantic-space-section);
+  --spacing-page-block: var(--semantic-space-page-block);
+  --spacing-page-block-wide: var(--semantic-space-page-block-wide);
+  --spacing-page-inline: var(--semantic-space-page-inline);
+  --spacing-page-inline-md: var(--semantic-space-page-inline-md);
+  --spacing-page-inline-lg: var(--semantic-space-page-inline-lg);
+  --spacing-control-sm: var(--semantic-size-control-sm);
+  --spacing-control-md: var(--semantic-size-control-md);
+  --spacing-control-lg: var(--semantic-size-control-lg);
+  --spacing-touch: var(--semantic-size-touch-min);
+  --spacing-content-sm: var(--semantic-size-content-sm);
+  --spacing-content-md: var(--semantic-size-content-md);
+  --spacing-content-lg: var(--semantic-size-content-lg);
+  --spacing-header: var(--semantic-size-header);
+
+  --radius-none: var(--semantic-radius-none);
+  --radius-subtle: var(--semantic-radius-subtle);
+  --radius-control: var(--semantic-radius-control);
+  --radius-container: var(--semantic-radius-container);
+  --radius-overlay: var(--semantic-radius-overlay);
+  --radius-pill: var(--semantic-radius-pill);
+
+  --shadow-none: var(--semantic-shadow-none);
+  --shadow-sm: var(--semantic-shadow-sm);
+  --shadow-md: var(--semantic-shadow-md);
+  --shadow-overlay: var(--semantic-shadow-overlay);
+
+  --font-sans: var(--semantic-font-family-sans);
+  --text-body: var(--semantic-font-size-body);
+  --text-body--line-height: var(--semantic-line-height-body);
+  --text-body--letter-spacing: var(--semantic-letter-spacing-normal);
+  --text-label: var(--semantic-font-size-label);
+  --text-label--line-height: var(--semantic-line-height-body);
+  --text-label--letter-spacing: var(--semantic-letter-spacing-normal);
+  --text-heading: var(--semantic-font-size-heading);
+  --text-heading--line-height: var(--semantic-line-height-heading);
+  --text-heading--letter-spacing: var(--semantic-letter-spacing-tight);
+  --text-display: var(--semantic-font-size-display);
+  --text-display--line-height: var(--semantic-line-height-heading);
+  --text-display--letter-spacing: var(--semantic-letter-spacing-tight);
+  --font-weight-regular: var(--semantic-font-weight-regular);
+  --font-weight-semibold: var(--semantic-font-weight-semibold);
+
+  --ease-standard: var(--semantic-motion-ease-standard);
+  --ease-exit: var(--semantic-motion-ease-exit);
+
+  /* Breakpoint phải là literal vì media query không đọc custom property qua var(). */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --semantic-motion-duration-fast: 0ms;
+    --semantic-motion-duration-normal: 0ms;
+    --semantic-motion-duration-slow: 0ms;
+  }
+}

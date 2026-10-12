@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-05-PLAN.md
-last_updated: "2026-10-12T03:43:18.638Z"
+stopped_at: Completed 01-06-PLAN.md
+last_updated: "2026-10-12T03:53:25.342Z"
 last_activity: 2026-10-12
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 8
-  completed_plans: 5
-  percent: 63
+  completed_plans: 6
+  percent: 75
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 1 of 8 (Design System, UI Skeleton & Walking Skeleton)
-Plan: 5 of 8 in current phase
+Plan: 6 of 8 in current phase
 Status: Ready to execute
 Last activity: 2026-10-12
 
@@ -57,6 +57,7 @@ Progress: [█░░░░░░░░░] 13%
 | Phase 01 P03 | 4 min | 3 tasks | 30 files |
 | Phase 01 P04 | 8 min | 3 tasks | 14 files |
 | Phase 01 P05 | 9 min | 3 tasks | 12 files |
+| Phase 01 P06 | 7 min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,9 @@ Recent decisions affecting current work:
 - [Phase 01]: Require native button semantics for interactive Card variants while keeping content states server-safe.
 - [Phase 01]: Keep ErrorState fixed-copy with only an optional onRetry callback and no technical error input.
 - [Phase 01]: Use Sonner unstyled mode so Toast presentation consumes approved semantic tokens only.
+- [Phase 01]: Resolve only Sheet peek to pixels; keep medium and expanded as Base UI viewport ratios.
+- [Phase 01]: Force disablePointerDismissal for persistent background-interactive non-modal Sheets.
+- [Phase 01]: Expose all ui-web compound children as named exports through a server-safe barrel.
 
 ### Pending Todos
 
@@ -104,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-12T03:43:18.633Z
-Stopped at: Completed 01-05-PLAN.md
+Last session: 2026-10-12T03:53:25.339Z
+Stopped at: Completed 01-06-PLAN.md
 Resume file: None

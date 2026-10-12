@@ -5,6 +5,26 @@ import { base } from './base.mjs';
 
 const KERNEL = '@tripory/shared-kernel';
 const API_CLIENT = '@tripory/api-client';
+const DESIGN_TOKENS = '@tripory/design-tokens';
+const UI_RUNTIME = [
+  'react',
+  'react-dom',
+  '@base-ui/react',
+  'class-variance-authority',
+  'clsx',
+  'tailwind-merge',
+  'lucide-react',
+];
+const UI_TEST = [
+  'vitest',
+  '@testing-library/react',
+  '@testing-library/dom',
+  '@testing-library/user-event',
+  'node:fs',
+  'node:path',
+  'node:url',
+];
+const TOKEN_TEST = ['vitest', '@tailwindcss/node', 'node:fs', 'node:path', 'node:url'];
 
 const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -41,18 +61,21 @@ const BROWSER_GLOBALS = ['window', 'document', 'localStorage', 'sessionStorage',
  * @param {string[]} options.allowed  module ngoài (ngoài import tương đối) được phép
  * @param {string[]} [options.layers] tầng trong cùng package bị cấm import
  * @param {boolean} [options.pure]    domain/application/kernel: cấm thêm fetch, đồng hồ, ngẫu nhiên
+ * @param {boolean} [options.browser] UI web được phép dùng browser global
  */
-const rulesFor = ({ allowed, layers = [], pure = false }) => ({
+const rulesFor = ({ allowed, layers = [], pure = false, browser = false }) => ({
   'no-restricted-imports': [
     'error',
     { patterns: [allowOnly(allowed), noDeepImport, ...(layers.length > 0 ? [layer(...layers)] : [])] },
   ],
   'no-restricted-globals': [
     'error',
-    ...BROWSER_GLOBALS.map((name) => ({
-      name,
-      message: 'Code dùng chung web + mobile: không dùng browser global; nhận qua deps.',
-    })),
+    ...(browser
+      ? []
+      : BROWSER_GLOBALS.map((name) => ({
+          name,
+          message: 'Code dùng chung web + mobile: không dùng browser global; nhận qua deps.',
+        }))),
     ...(pure
       ? [{ name: 'fetch', message: 'domain/application không gọi mạng; I/O nằm ở infrastructure hoặc api-client.' }]
       : []),
@@ -81,12 +104,12 @@ const rulesFor = ({ allowed, layers = [], pure = false }) => ({
     : {}),
 });
 
-/** Một vùng = 2 block: mã nguồn, và file test (test được thêm `vitest` vào allowlist). */
+/** Một vùng = 2 block: mã nguồn, và file test với allowlist test đã duyệt. */
 const zone = (root, options) => [
   { files: [`${root}/**/*.{ts,tsx}`], ignores: [`${root}/**/*.test.{ts,tsx}`], rules: rulesFor(options) },
   {
     files: [`${root}/**/*.test.{ts,tsx}`],
-    rules: rulesFor({ ...options, allowed: [...options.allowed, 'vitest'] }),
+    rules: rulesFor({ ...options, allowed: [...options.allowed, ...(options.testAllowed ?? ['vitest'])] }),
   },
 ];
 
@@ -106,6 +129,41 @@ export const kernelPackage = () => [...base, ...zone('src', { allowed: [], pure:
 
 /** @tripory/api-client: chỉ phụ thuộc shared-kernel; được dùng fetch. */
 export const httpPackage = () => [...base, ...zone('src', { allowed: [KERNEL] })];
+
+/** Package UI web hoặc design token với allowlist và tầng atomic default-deny. */
+export const uiPackage = ({ role = 'components' } = {}) =>
+  role === 'tokens'
+    ? [
+        ...base,
+        ...zone('src', { allowed: [], browser: true, testAllowed: TOKEN_TEST }),
+      ]
+    : [
+        ...base,
+        ...zone('src', {
+          allowed: [...UI_RUNTIME, 'sonner', DESIGN_TOKENS],
+          browser: true,
+          testAllowed: UI_TEST,
+        }),
+        ...zone('src/lib', {
+          allowed: ['clsx', 'tailwind-merge'],
+          layers: ['atoms', 'molecules'],
+          browser: true,
+          testAllowed: UI_TEST,
+        }),
+        ...zone('src/atoms', {
+          allowed: [...UI_RUNTIME, DESIGN_TOKENS],
+          layers: ['molecules'],
+          browser: true,
+          testAllowed: UI_TEST,
+        }),
+        ...zone('src/molecules', {
+          allowed: [...UI_RUNTIME, 'sonner', DESIGN_TOKENS],
+          browser: true,
+          testAllowed: UI_TEST,
+        }),
+        // setup.ts không theo glob *.test.*, nhưng chỉ được dùng dependency test đã duyệt.
+        { files: ['src/test/**/*.ts'], rules: rulesFor({ allowed: UI_TEST, browser: true }) },
+      ];
 
 /** Mỗi app thêm sau config sẵn của framework (eslint-config-next, ...). */
 export const app = () => [

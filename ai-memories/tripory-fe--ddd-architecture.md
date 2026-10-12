@@ -114,8 +114,11 @@ tripory_fe/
 │   ├── shared-kernel/                            # Wgs84Coordinate, branded Id (UserId, ItineraryId)
 │   ├── api-client/                               # port HttpClient + bản fetch, bóc ApiResponse<T>, refresh token
 │   ├── api-contract/                             # (tùy chọn) type sinh từ swagger.json của BE
-│   ├── ui-web/                                   # shadcn/Tailwind cho web + admin
-│   ├── design-tokens/                            # màu, spacing → Tailwind (web) và NativeWind/StyleSheet (mobile)
+│   ├── ui-web/                                   # shadcn/Base UI + Tailwind cho web + admin
+│   │   └── src/
+│   │       ├── atoms/                            # primitive UI; không import molecules
+│   │       └── molecules/                        # ghép atoms; compound children dùng named export
+│   ├── design-tokens/                            # token CSS/TS dùng chung web và mobile
 │   └── config/                                   # eslint/{base,boundaries}.mjs, tsconfig/library.json, vitest/preset.mjs, test/boundaries.test.ts
 ├── pnpm-workspace.yaml
 └── turbo.json                                    # task: dev, build, lint, typecheck, test
@@ -172,6 +175,8 @@ Trong package context (`packages/<context>/src`). Cột "Được import" là **
 
 Mọi tầng: cấm `import()` động và cấm import sâu `@tripory/*/src/**`.
 
+Trong package UI, `uiPackage({ role: 'components' | 'tokens' })` cũng default-deny. `ui-web/src/atoms` chỉ được import React/React DOM, Base UI, cva, clsx, tailwind-merge, Lucide và `@tripory/design-tokens`; atoms **không** import molecules. Molecules được thêm `sonner` và có thể ghép atoms. `src/test/setup.ts` chỉ được import Vitest/Testing Library đã duyệt. `design-tokens` không import React; test token chỉ được thêm Vitest, `@tailwindcss/node` và module Node cần thiết. UI web được dùng DOM global, khác hook `react/` dùng chung web + mobile. Radix, `vaul`, Next, context package, deep import và `import()` đều bị chặn nếu không nằm trong allowlist.
+
 Trong app (`apps/<app>/src`):
 
 | Nơi | Được import |
@@ -223,6 +228,7 @@ Bốn lớp, từ sớm đến muộn:
 | `contextPackage()` | `packages/<context>` | Theo bảng mục 5: allowlist import (default-deny), cấm import chéo tầng, cấm import sâu `src`, cấm browser global. Domain/application thêm: cấm `fetch`, `Date.now`, `new Date()` không tham số, `Math.random` |
 | `kernelPackage()` | `shared-kernel` | Như domain, không import package nào |
 | `httpPackage()` | `api-client` | Chỉ import `shared-kernel`; được dùng `fetch` |
+| `uiPackage({ role })` | `ui-web`, `design-tokens` | Default-deny theo vai trò; UI components cho DOM và dependency đã duyệt, atoms không import molecules; tokens không import React; setup test có allowlist riêng |
 | `app()` | `apps/*`, thêm sau config của framework | Cấm import sâu `src`; `/http` chỉ trong `src/composition/**` |
 
 4. **Vitest `environment: 'node'`** (`vitest/preset.mjs`): file test của package nào lén dùng DOM/React sẽ vỡ khi chạy. Test hook cần DOM thì đặt `// @vitest-environment jsdom` ở đầu file (khi đó cài thêm jsdom).
@@ -237,7 +243,7 @@ Quy tắc để mức `error`, không `warn` (bài học `EMPTY_DISPLAY` ở tc-
 - TS vẫn thấy `window`, `localStorage` vì `lib` có DOM (cần cho `fetch` ở `api-client`); chỉ ESLint chặn các global này.
 
 **Kiểm chứng:**
-- Self-test `packages/config/test/boundaries.test.ts`: 58 test = 42 vi phạm phải bắt + 11 import hợp lệ không được báo nhầm + 5 kiểm tra mỗi package/app đã nối preset. Nó chạy ESLint thật bằng `eslint.config.mjs` của từng package/app, nên kiểm cả phần nối dây.
+- Self-test `packages/config/test/boundaries.test.ts`: 74 test = 53 vi phạm phải bắt + 16 import hợp lệ không được báo nhầm + 5 kiểm tra mỗi package/app đã nối preset. Nó chạy ESLint thật bằng `eslint.config.mjs` của từng package/app, nên kiểm cả phần nối dây.
 - Đột biến: phá lần lượt 6 luật trong preset (bỏ `ImportExpression`, `noDeepImport`, `httpOnlyInComposition`, `vitest` cho file test, `pure` của domain, allowlist) thì đúng các test tương ứng vỡ (1, 1, 2, 1, 4, 13 test). Self-test không xanh rỗng.
 - Trên repo thật, thêm 5 file sai (domain và react của itinerary, shared-kernel, api-client, web): `pnpm turbo run lint typecheck` đỏ 7 task, xóa file thì xanh lại. Vi phạm `localStorage` ở api-client chỉ ESLint bắt.
 - Cache: sửa preset thì `lint` của cả 5 package bị bỏ cache; sửa `eslint.config.mjs` của một package thì `@tripory/config#test` bị bỏ cache nhờ `$TURBO_ROOT$` trong `packages/config/turbo.json`. Task `lint`, `typecheck`, `test` nối với nhau qua transit node.

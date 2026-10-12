@@ -1,0 +1,6 @@
+:root {
+  --sheet-side-width: min(400px, 100vw - 48px);
+  --sheet-snap-peek: max(160px, 25dvh);
+  --sheet-snap-medium: 60dvh;
+  --sheet-snap-expanded: calc(92dvh - env(safe-area-inset-top));
+}

@@ -10,9 +10,10 @@ vi.mock("next/font/google", () => ({
 it("owns the document fallback and retries exactly once without exposing the error", async () => {
   const retry = vi.fn();
   const reset = vi.fn();
-  render(<GlobalError error={new Error("private detail")} retry={retry} reset={reset} />);
+  const fallback = GlobalError({ error: new Error("private detail"), retry, reset });
 
-  expect(document.querySelector("html")?.getAttribute("lang")).toBe("vi");
+  expect(fallback.props.lang).toBe("vi");
+  render(fallback.props.children.props.children);
   expect(screen.queryByText("private detail")).toBeNull();
   await userEvent.setup().click(screen.getByRole("button", { name: "Thử lại" }));
   expect(retry).toHaveBeenCalledTimes(1);

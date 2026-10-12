@@ -37,6 +37,6 @@ it('không hiện nút xóa khi clear bị tắt hoặc giá trị rỗng', () =
   const { rerender } = render(<SearchInput label="Tìm kiếm" defaultValue="Tripory" clearable={false} />);
   expect(screen.queryByRole('button', { name: 'Xóa tìm kiếm' })).toBeNull();
 
-  rerender(<SearchInput label="Tìm kiếm" />);
+  rerender(<SearchInput key="empty" label="Tìm kiếm" />);
   expect(screen.queryByRole('button', { name: 'Xóa tìm kiếm' })).toBeNull();
 });

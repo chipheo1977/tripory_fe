@@ -12,7 +12,7 @@ const inputVariants = cva(
   },
 );
 
-export type InputProps = ComponentProps<typeof BaseInput> & VariantProps<typeof inputVariants>;
+export type InputProps = Omit<ComponentProps<typeof BaseInput>, 'size'> & VariantProps<typeof inputVariants>;
 
 export function Input({ className, size, ...props }: InputProps) {
   return <BaseInput {...props} className={inputVariants({ className, size })} />;

@@ -1,7 +1,7 @@
 {
   "name": "tripory-fe",
   "private": true,
-  "packageManager": "pnpm@11.6.0",
+  "packageManager": "pnpm@10.34.6",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",

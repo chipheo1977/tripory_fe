@@ -1,0 +1,13 @@
+@import "tw-animate-css";
+
+:root {
+  --checkbox-size: 20px;
+  --switch-height: 24px;
+  --switch-width: 40px;
+  --switch-thumb-size: 16px;
+  --switch-thumb-offset: 16px;
+  --spinner-size-sm: 16px;
+  --spinner-size-md: 20px;
+  --spinner-size-lg: 24px;
+  --textarea-min-height: 96px;
+}

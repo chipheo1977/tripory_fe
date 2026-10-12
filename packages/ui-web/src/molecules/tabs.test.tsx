@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { expect, it } from 'vitest';
+import * as publicUi from '../index';
 import { Tabs, TabsIndicator, TabsList, TabsPanel, TabsTrigger } from './tabs';
 
 function ExampleTabs({ variant = 'line' }: { variant?: 'line' | 'contained' }) {
@@ -47,4 +48,9 @@ it('dùng roving focus với Arrow, Home và End', async () => {
   await user.keyboard('{Home}');
   expect(document.activeElement).toBe(overview);
   expect(overview.getAttribute('aria-selected')).toBe('true');
+});
+
+it('công khai compound parts bằng named exports', () => {
+  const names = ['Select', 'SelectTrigger', 'SelectContent', 'SelectItem', 'Tabs', 'TabsList', 'TabsTrigger', 'TabsPanel'];
+  expect(names.every((name) => name in publicUi)).toBe(true);
 });

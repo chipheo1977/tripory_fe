@@ -13,9 +13,15 @@ import {
   SelectValue,
 } from './select';
 
+const destinationItems = [
+  { label: 'Huế', value: 'hue' },
+  { label: 'Đà Nẵng', value: 'danang' },
+  { label: 'TP Hồ Chí Minh', value: 'hcm' },
+];
+
 function ExampleSelect({ disabled = false, loading = false }: { disabled?: boolean; loading?: boolean }) {
   return (
-    <Select defaultValue="hue" disabled={disabled}>
+    <Select defaultValue="hue" disabled={disabled} items={destinationItems}>
       <SelectLabel>Điểm đến</SelectLabel>
       <SelectTrigger loading={loading}>
         <SelectValue placeholder="Chọn điểm đến" />

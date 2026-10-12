@@ -14,3 +14,5 @@ export * from './atoms/textarea';
 export * from './lib/cn';
 export * from './molecules/form-field';
 export * from './molecules/search-input';
+export * from './molecules/select';
+export * from './molecules/tabs';

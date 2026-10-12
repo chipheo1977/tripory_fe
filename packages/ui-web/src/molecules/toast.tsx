@@ -42,9 +42,12 @@ export function Toast(props: Omit<ToasterProps, 'theme' | 'visibleToasts' | 'dur
         visibleToasts={3}
         toastOptions={{
           ...props.toastOptions,
+          unstyled: true,
           closeButtonAriaLabel: 'Đóng thông báo',
           classNames: {
-            toast: 'border-border bg-surface-elevated text-text shadow-md',
+            toast: 'flex items-center gap-control-gap rounded-container border border-border bg-surface-elevated p-stack-md text-body text-text shadow-md',
+            content: 'flex min-w-0 flex-1 flex-col gap-inline-xs',
+            title: 'font-semibold text-text',
             description: 'text-muted',
             actionButton: 'min-h-touch rounded-control bg-primary px-inline-sm text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',
             closeButton: 'min-h-touch min-w-touch border-border bg-surface text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',

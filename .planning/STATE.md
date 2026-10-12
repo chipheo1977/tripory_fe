@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-10-12T03:02:31.699Z"
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-10-12T03:11:35.195Z"
 last_activity: 2026-10-12
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 8
-  completed_plans: 3
-  percent: 38
+  completed_plans: 4
+  percent: 50
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 1 of 8 (Design System, UI Skeleton & Walking Skeleton)
-Plan: 3 of 8 in current phase
+Plan: 4 of 8 in current phase
 Status: Ready to execute
 Last activity: 2026-10-12
 
@@ -55,6 +55,7 @@ Progress: [█░░░░░░░░░] 13%
 | Phase 01 P01 | 1h 14m | 3 tasks | 30 files |
 | Phase 01 P02 | 3 min | 2 tasks | 9 files |
 | Phase 01 P03 | 4 min | 3 tasks | 30 files |
+| Phase 01 P04 | 8 min | 3 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,9 @@ Recent decisions affecting current work:
 - [Phase 01]: Require labels directly in Checkbox and Switch props while Input and Textarea use native htmlFor/id association.
 - [Phase 01]: Keep display atoms static unless Base UI owns behavior and keep the public barrel server-safe.
 - [Phase 01]: Use stable component variables only for approved atom dimensions absent from shared semantic namespaces.
+- [Phase 01]: Delegate popup keyboard and focus management to Base UI 1.8 primitives.
+- [Phase 01]: Keep SearchInput synchronous and business-agnostic with explicit onValueChange.
+- [Phase 01]: Link supplementary Tooltip content explicitly while requiring an accessible trigger name.
 
 ### Pending Todos
 
@@ -95,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-12T03:02:31.695Z
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-10-12T03:11:35.191Z
+Stopped at: Completed 01-04-PLAN.md
 Resume file: None

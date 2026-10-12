@@ -1,0 +1,24 @@
+{
+  "productionAlias": "https://triporyv1.vercel.app",
+  "checks": [
+    {
+      "url": "https://triporyv1.vercel.app/",
+      "statusCode": 200,
+      "expectedStatusCode": 200,
+      "passed": true
+    },
+    {
+      "url": "https://triporyv1.vercel.app/itineraries/mine",
+      "statusCode": 200,
+      "expectedStatusCode": 200,
+      "passed": true
+    },
+    {
+      "url": "https://triporyv1.vercel.app/not-found",
+      "statusCode": 404,
+      "expectedStatusCode": 404,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

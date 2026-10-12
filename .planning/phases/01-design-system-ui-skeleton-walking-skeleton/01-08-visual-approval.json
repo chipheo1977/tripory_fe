@@ -1,0 +1,11 @@
+{
+  "approved": true,
+  "productionUrl": "https://triporyv1.vercel.app",
+  "viewportsVerified": [
+    "320x568",
+    "390x844",
+    "768x1024",
+    "1440x900"
+  ],
+  "notes": "approved"
+}

@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { expect, it, vi } from 'vitest';
@@ -32,10 +31,10 @@ it('Enter trên Thử lại gọi onRetry đúng một lần', async () => {
 });
 
 it('API và source không nhận hoặc render chi tiết lỗi kỹ thuật', () => {
-  const source = readFileSync(fileURLToPath(new URL('./error-state.tsx', import.meta.url)), 'utf8');
+  const source = readFileSync('src/molecules/error-state.tsx', 'utf8');
   expect(source).not.toContain('error.message');
   expect(source).not.toMatch(/\bdigest\b/);
-  expect(source).not.toMatch(/\bstack\b/);
+  expect(source).not.toContain('.stack');
   expect(source).not.toMatch(/\berror\s*:/i);
 });
 

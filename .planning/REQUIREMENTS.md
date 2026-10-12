@@ -15,7 +15,7 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 - [x] **FND-04**: Mọi màn có trạng thái loading, empty và error kèm nút "Thử lại"; route sai hiển thị trang 404
 - [ ] **FND-05**: Người dùng nhận toast phản hồi thành công/thất bại cho mọi thao tác ghi, message lỗi lấy từ BE
 - [x] **FND-06**: Dialog và form dùng được bằng bàn phím (focus trap, Esc để đóng, label đầy đủ)
-- [ ] **FND-07**: Bản walking skeleton được deploy lên Vercel ngay cuối Phase 0a (Root Directory `apps/web`, Node 24)
+- [x] **FND-07**: Bản walking skeleton được deploy lên Vercel ngay cuối Phase 0a (Root Directory `apps/web`, Node 24)
 
 ### Design System (DS)
 
@@ -171,7 +171,7 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | FND-04 | Phase 1 | Complete |
 | FND-05 | Phase 2 | Pending |
 | FND-06 | Phase 1 | Complete |
-| FND-07 | Phase 1 | Pending |
+| FND-07 | Phase 1 | Complete |
 | DS-01 | Phase 1 | Complete |
 | DS-02 | Phase 1 | Complete |
 | DS-03 | Phase 1 | Complete |

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import { AppHeader } from "./app-header";
 
-const usePathname = vi.fn<() => string>();
+const { usePathname } = vi.hoisted(() => ({ usePathname: vi.fn<() => string>() }));
 
 vi.mock("next/navigation", () => ({ usePathname }));
 

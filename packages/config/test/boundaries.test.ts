@@ -93,10 +93,16 @@ const bad: Case[] = [
   { name: 'kernel: package khác', dir: kernel, file: 'src/x.ts', code: "import i from '@tripory/itinerary';\nexport const x = i;", violations: [imp("'@tripory/itinerary'")] },
   { name: 'kernel: react', dir: kernel, file: 'src/x.ts', code: "import React from 'react';\nexport const x = React;", violations: [imp("'react'")] },
   { name: 'kernel: Math.random', dir: kernel, file: 'src/x.ts', code: 'export const r = Math.random();', violations: [{ rule: 'no-restricted-properties', includes: 'Math.random' }] },
+  { name: 'kernel: fetch', dir: kernel, file: 'src/x.ts', code: "export const f = () => fetch('/x');", violations: [{ rule: 'no-restricted-globals', includes: "'fetch'" }] },
+  { name: 'kernel: navigator', dir: kernel, file: 'src/x.ts', code: 'export const l = navigator.language;', violations: [{ rule: 'no-restricted-globals', includes: "'navigator'" }] },
   // api-client
   { name: 'api-client: package khác', dir: apiClient, file: 'src/x.ts', code: "import i from '@tripory/itinerary';\nexport const x = i;", violations: [imp("'@tripory/itinerary'")] },
   { name: 'api-client: next/*', dir: apiClient, file: 'src/x.ts', code: "import { cookies } from 'next/headers';\nexport const x = cookies;", violations: [imp("'next/headers'")] },
   { name: 'api-client: localStorage', dir: apiClient, file: 'src/x.ts', code: "export const t = localStorage.getItem('token');", violations: [{ rule: 'no-restricted-globals', includes: "'localStorage'" }] },
+  { name: 'api-client: navigator (Web Locks phải tiêm qua deps)', dir: apiClient, file: 'src/x.ts', code: "export const lock = (name: string) => navigator.locks.request(name, async () => undefined);", violations: [{ rule: 'no-restricted-globals', includes: "'navigator'" }] },
+  { name: 'api-client: window', dir: apiClient, file: 'src/x.ts', code: 'export const w = window.location;', violations: [{ rule: 'no-restricted-globals', includes: "'window'" }] },
+  { name: 'api-client: zod', dir: apiClient, file: 'src/x.ts', code: "import { z } from 'zod';\nexport const x = z;", violations: [imp("'zod'")] },
+  { name: 'api-client test: node:fs', dir: apiClient, file: 'src/x.test.ts', code: "import fs from 'node:fs';\nexport const x = fs;", violations: [imp("'node:fs'")] },
   // ui-web
   { name: 'ui atom: Radix', dir: uiWeb, file: 'src/atoms/x.tsx', code: "import { Dialog } from 'radix-ui';\nexport const x = Dialog;", violations: [imp("'radix-ui'")] },
   { name: 'ui atom: Radix scoped', dir: uiWeb, file: 'src/atoms/x.tsx', code: "import x from '@radix-ui/react-dialog';\nexport { x };", violations: [imp("'@radix-ui/react-dialog'")] },
@@ -114,6 +120,8 @@ const bad: Case[] = [
   { name: 'web: /http trong modules/ui', dir: web, file: 'src/modules/itinerary/ui/x.ts', code: "import r from '@tripory/itinerary/http';\nexport const x = r;", violations: [imp("'@tripory/itinerary/http'")] },
   { name: 'web: import sâu src (UI)', dir: web, file: 'src/modules/itinerary/ui/x.ts', code: "import d from '@tripory/itinerary/src/domain/itinerary';\nexport const x = d;", violations: [imp("'@tripory/itinerary/src/domain/itinerary'")] },
   { name: 'web: import sâu src (composition)', dir: web, file: 'src/composition/x.ts', code: "import d from '@tripory/itinerary/src/domain/itinerary';\nexport const x = d;", violations: [imp("'@tripory/itinerary/src/domain/itinerary'")] },
+  { name: 'web: api-client /http trong lib/feedback', dir: web, file: 'src/lib/feedback/x.ts', code: "import { createFetchHttpClient } from '@tripory/api-client/http';\nexport const x = createFetchHttpClient;", violations: [imp("'@tripory/api-client/http'")] },
+  { name: 'web: api-client /http trong app', dir: web, file: 'src/app/x.ts', code: "import { withSessionRefresh } from '@tripory/api-client/http';\nexport const x = withSessionRefresh;", violations: [imp("'@tripory/api-client/http'")] },
 ];
 
 const ok: Omit<Case, 'violations'>[] = [
@@ -126,6 +134,8 @@ const ok: Omit<Case, 'violations'>[] = [
   { name: 'barrel: domain + application', dir: itinerary, file: 'src/index.ts', code: "export * from './domain';\nexport * from './application';" },
   { name: 'kernel: không import gì', dir: kernel, file: 'src/x.ts', code: 'export const x = 1;' },
   { name: 'api-client: kernel + fetch', dir: apiClient, file: 'src/x.ts', code: "import k from '@tripory/shared-kernel';\nexport const get = (url: string) => fetch(url);\nexport { k };" },
+  { name: 'api-client: AbortController + setTimeout', dir: apiClient, file: 'src/x.ts', code: 'export const t = () => { const c = new AbortController(); const id = setTimeout(() => c.abort(), 1); clearTimeout(id); return c.signal; };' },
+  { name: 'api-client test: vitest + kernel', dir: apiClient, file: 'src/x.test.ts', code: "import { expect, it } from 'vitest';\nimport * as k from '@tripory/shared-kernel';\nit('ok', () => expect(k).toBeDefined());" },
   { name: 'ui molecule: approved runtime imports', dir: uiWeb, file: 'src/molecules/x.tsx', code: "import { Dialog } from '@base-ui/react/dialog';\nimport { MapPin } from 'lucide-react';\nimport { toast } from 'sonner';\nimport tokens from '@tripory/design-tokens';\nimport { Button } from '../atoms/button';\nexport const x = [Dialog, MapPin, toast, tokens, Button];" },
   { name: 'ui atom: browser DOM global', dir: uiWeb, file: 'src/atoms/x.tsx', code: 'export const body = document.body;' },
   { name: 'ui test: approved test imports', dir: uiWeb, file: 'src/atoms/x.test.tsx', code: "import fs from 'node:fs';\nimport userEvent from '@testing-library/user-event';\nimport { expect, it } from 'vitest';\nit('ok', () => expect([fs, userEvent]).toBeDefined());" },
@@ -133,6 +143,8 @@ const ok: Omit<Case, 'violations'>[] = [
   { name: 'design tokens test: compiler and fs', dir: tokens, file: 'src/tokens.test.ts', code: "import { compile } from '@tailwindcss/node';\nimport fs from 'node:fs';\nimport { expect, it } from 'vitest';\nit('ok', () => expect([compile, fs]).toBeDefined());" },
   { name: 'web: composition import /http, /react và entry gốc', dir: web, file: 'src/composition/itinerary.client.ts', code: "import r from '@tripory/itinerary/http';\nimport h from '@tripory/itinerary/react';\nimport u from '@tripory/itinerary';\nexport const x = [r, h, u];" },
   { name: 'web: UI import /react và entry gốc', dir: web, file: 'src/modules/itinerary/ui/x.ts', code: "import h from '@tripory/itinerary/react';\nimport u from '@tripory/itinerary';\nexport const x = [h, u];" },
+  { name: 'web: lib/feedback import entry gốc api-client', dir: web, file: 'src/lib/feedback/x.ts', code: "import { isApiError } from '@tripory/api-client';\nexport const x = isApiError;" },
+  { name: 'web: composition import api-client /http', dir: web, file: 'src/composition/http.client.ts', code: "import { createFetchHttpClient, withSessionRefresh } from '@tripory/api-client/http';\nimport { isApiError } from '@tripory/api-client';\nexport const x = [createFetchHttpClient, withSessionRefresh, isApiError];" },
 ];
 
 describe('lớp cưỡng chế bắt vi phạm', () => {

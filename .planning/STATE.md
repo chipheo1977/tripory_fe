@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Phase 1 verified complete; ready to plan Phase 2
-last_updated: "2026-10-12T06:47:07.138Z"
+status: verifying
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-10-12T15:45:50.914Z"
 last_activity: 2026-10-12
 progress:
   total_phases: 8
-  completed_phases: 1
-  total_plans: 8
-  completed_plans: 8
+  completed_phases: 2
+  total_plans: 12
+  completed_plans: 12
   percent: 100
 ---
 
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 
 ## Current Position
 
-Phase: 2 of 8 (HTTP & Shared Kernel)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
+Phase: 3
+Plan: Not started
+Status: Phase complete — ready for verification
 Last activity: 2026-10-12
 
 Phase 1 progress: [██████████] 100% — verified complete
@@ -36,7 +36,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 
 **Velocity:**
 
-- Total plans completed: 8
+- Total plans completed: 12
 - Average duration: 18m (7 plans with recorded duration; deployment checkpoint excluded)
 - Total execution time: 2h 5m (recorded execution plans)
 
@@ -45,6 +45,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 8 | 2h 5m recorded | 18m recorded |
+| 2 | 4 | - | - |
 
 **Recent Trend:**
 
@@ -60,6 +61,10 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 01 P06 | 7 min | 3 tasks | 6 files |
 | Phase 01 P07 | 20 min | 3 tasks | 36 files |
 | Phase 01 P08 | external checkpoint | 3 tasks | 5 metadata files |
+| Phase 02 P01 | 6 min | 2 tasks | 6 files |
+| Phase 02 P02 | 16 min | 3 tasks | 13 files |
+| Phase 02 P03 | 10 min | 2 tasks | 5 files |
+| Phase 02 P04 | 6 min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -94,6 +99,10 @@ Recent decisions affecting current work:
 - [Phase 01]: Keep UserMenu static and non-interactive until real identity is available.
 - [Phase 01]: Use Next.js 16.4 retry() for route error recovery without exposing Error details.
 - [Phase 01]: Centralize unmatched URL handling in root app/not-found.tsx only.
+- [Phase 02]: Kernel chỉ có UserId, ItineraryId (GUID trim + chữ thường, sai trả null) và Wgs84Coordinate khoảng đóng, frozen, không làm tròn
+- [Phase 02]: api-client: ApiError plain object frozen (type/kind/status/code/message/fieldErrors), toApiError giữ errorCode/message BE, ProblemDetails → message null; fetch client timeout 30s bao cả đọc body, không retry, factory chỉ ở ./http
+- [Phase 02]: withSessionRefresh: single-flight inFlight trong Lock + epoch; chi 'expired' goi onSessionExpired (1 lan/lo), refresh throw giu loi goc (D-14a); replay 1 lan, replay 401 -> session.expired
+- [Phase 02]: lib/feedback: ERROR_MESSAGES la Map 39 ma D-16; selectErrorMessage map -> message BE -> cau chung (aborted -> null); resolveFormError gan 'Gia tri khong hop le.', field la -> toast cau chung; decideMutationError im lang voi errorToast:false, session_expired, aborted
 
 ### Pending Todos
 
@@ -113,6 +122,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-12T04:14:36.290Z
-Stopped at: Completed 01-07-PLAN.md
+Last session: 2026-10-12T10:41:58.810Z
+Stopped at: Completed 02-04-PLAN.md
 Resume file: None

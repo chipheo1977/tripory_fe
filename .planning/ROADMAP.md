@@ -28,7 +28,7 @@ Thứ tự phase giữ đúng lộ trình đã chốt (0a → 0b → 0c → 1 �
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Design System, UI Skeleton & Walking Skeleton** - pnpm 10, preset `uiPackage()`, design token, base components theo atomic design, khung giao diện responsive và bản deploy Vercel đầu tiên
-- [ ] **Phase 2: HTTP & Shared Kernel** - `api-client` chuẩn hóa lỗi BE, single-flight refresh và `shared-kernel` dùng chung
+- [x] **Phase 2: HTTP & Shared Kernel** - `api-client` chuẩn hóa lỗi BE, single-flight refresh và `shared-kernel` dùng chung (completed 2026-10-12)
 - [ ] **Phase 3: Identity & Session (BFF)** - Đăng ký, đăng nhập, phiên cookie httpOnly, refresh im lặng và BFF có allowlist
 - [ ] **Phase 4: Itinerary CRUD & Editor** - "Lịch trình của tôi" và editor đầy đủ tới bước xuất bản
 - [ ] **Phase 5: SVG Map & Public View** - Trang công khai SSR, bản đồ SVG dùng chung, chia sẻ và Open Graph
@@ -70,7 +70,14 @@ Plans:
   1. Khi BE trả lỗi ở bất kỳ dạng nào trong 4 dạng đã biết (envelope, ProblemDetails, validation, lỗi mạng/timeout), người dùng nhận toast thất bại chứa message lấy từ BE; thao tác thành công có toast thành công
   2. Test chứng minh N request 401 song song qua `withSessionRefresh` chỉ dẫn tới đúng 1 lần gọi refresh rồi phát lại các request
   3. `shared-kernel` (branded id, `Wgs84Coordinate`) và `api-client` có test, không dùng browser global trong package, lint ranh giới xanh
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [x] 02-01-PLAN.md — shared-kernel: `UserId`, `ItineraryId`, `Wgs84Coordinate` và test
+- [x] 02-02-PLAN.md — api-client lõi: `ApiError`, `toApiError` + fixture BE, fetch client timeout 30 s, subpath `./http`
+- [x] 02-03-PLAN.md — `withSessionRefresh`: single-flight + epoch, phân loại hết phiên/lỗi tạm thời
+- [x] 02-04-PLAN.md — `apps/web/src/lib/feedback` (bảng map, chọn message, lỗi form, chính sách toast), self-test ranh giới, full suite
+**Note**: Theo `02-CONTEXT.md`, tiêu chí 1 chỉ được chứng minh bằng unit test ở Phase 2 (chuẩn hóa lỗi, chọn message, chính sách toast). Phần người dùng thấy toast thật được nghiệm thu ở Phase 3 bằng thao tác ghi thật, khi đã mount `Toast` và `QueryClientProvider`.
 
 ### Phase 3: Identity & Session (BFF)
 **Goal**: Người dùng đăng ký, đăng nhập, giữ phiên và đăng xuất an toàn; token không bao giờ lọt về JavaScript phía client
@@ -162,7 +169,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Design System, UI Skeleton & Walking Skeleton | 8/8 | Complete | 2026-10-12 |
-| 2. HTTP & Shared Kernel | 0/TBD | Not started | - |
+| 2. HTTP & Shared Kernel | 4/4 | Complete | 2026-10-12 |
 | 3. Identity & Session (BFF) | 0/TBD | Not started | - |
 | 4. Itinerary CRUD & Editor | 0/TBD | Not started | - |
 | 5. SVG Map & Public View | 0/TBD | Not started | - |

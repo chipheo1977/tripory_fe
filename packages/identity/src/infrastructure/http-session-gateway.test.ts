@@ -5,14 +5,14 @@ import { authResponseFixture, userIdFixture, userProfileFixture, viewerJsonFixtu
 import { createHttpProfileReader, createHttpSessionGateway } from './http-session-gateway';
 
 const fakeHttp = (reply: unknown = viewerJsonFixture) => {
-  const send = vi.fn(async (_request: HttpRequest): Promise<unknown> => reply);
+  const send = vi.fn<HttpClient['send']>(async () => reply);
   const http: HttpClient = { send };
 
   return { http, send };
 };
 
 const failingHttp = (error: unknown) => {
-  const send = vi.fn(async (_request: HttpRequest): Promise<unknown> => {
+  const send = vi.fn<HttpClient['send']>(async () => {
     throw error;
   });
   const http: HttpClient = { send };
@@ -141,7 +141,9 @@ describe('createHttpSessionGateway.changePassword', () => {
   it('chỉ gửi currentPassword và newPassword, bỏ ô nhập lại', async () => {
     const { http, send } = fakeHttp(null);
 
-    await createHttpSessionGateway(http).changePassword({ ...changeInput, confirmPassword: 'khong-gui' });
+    const withExtra = { ...changeInput, confirmPassword: 'khong-gui' };
+
+    await createHttpSessionGateway(http).changePassword(withExtra);
 
     expect(firstRequest(send).body).toEqual(changeInput);
   });

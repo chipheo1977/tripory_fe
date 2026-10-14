@@ -22,6 +22,8 @@ const atoms = [
 
 const molecules = [
   'FormField',
+  'InlineAlert',
+  'PasswordInput',
   'SearchInput',
   'Select',
   'Tabs',
@@ -115,6 +117,15 @@ describe('ui-web public entry', () => {
 
   it('export Sheet snap adapter và feedback helpers', () => {
     expect(hasEveryExport(['resolveSnapPoints', 'stepSnapPoint', 'notify', 'toastDurations'])).toEqual([]);
+  });
+
+  it('Button public nhận loadingLabel và PasswordInput nhận ref', () => {
+    type ButtonProps = Parameters<typeof publicUi.Button>[0];
+    type PasswordInputProps = Parameters<typeof publicUi.PasswordInput>[0];
+    const buttonProps = { loading: true, loadingLabel: 'Đang lưu…' } satisfies ButtonProps;
+    const passwordProps = { ref: { current: null } } satisfies PasswordInputProps;
+    expect('loadingLabel' in buttonProps).toBe(true);
+    expect('ref' in passwordProps).toBe(true);
   });
 
   it('ErrorState public nhận onRetry', () => {

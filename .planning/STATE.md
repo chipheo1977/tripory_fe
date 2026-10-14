@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-10-14T09:00:54.137Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-10-14T14:47:29.129Z"
 last_activity: 2026-10-14
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 27
-  completed_plans: 13
-  percent: 48
+  completed_plans: 14
+  percent: 52
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 3 (Identity & Session (BFF)) — EXECUTING
-Plan: 2 of 15
+Plan: 3 of 15
 Status: Ready to execute
 Last activity: 2026-10-14
 
@@ -66,6 +66,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 02 P03 | 10 min | 2 tasks | 5 files |
 | Phase 02 P04 | 6 min | 3 tasks | 11 files |
 | Phase 3 P01 | 9 min | 3 tasks | 22 files |
+| Phase 3 P02 | 71 min | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,10 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-01: `@tripory/identity` dựng theo `contextPackage()`; catalog pin cứng react-query 5.104.2, zod 4.6.7, react-hook-form 7.89.0, resolvers 5.9.1; `API_ORIGIN` server-only (`.env.example` + `env` của turbo build/dev) — Không nới allowlist: boundaries.mjs không đổi, self-test thêm 15 case khóa identity và web.
 - [Phase 3]: 03-01: test route/BFF/proxy dùng `// @vitest-environment node` trong app; `setup.ts` chỉ polyfill matchMedia khi có `window` — Preset app mặc định jsdom nhưng route handler cần node; setup.ts cũ vỡ ngoài DOM.
 - [Phase 3]: 03-01: helper test `setCookiesOf` giữ nguyên giá trị cookie, hạ chữ thường tên thuộc tính và SameSite; fake lock reject bằng `signal.reason`; fake BroadcastChannel chuyển tin đồng bộ qua structuredClone — Đúng đặc tả Web Locks/BroadcastChannel, tin không clone được lộ ngay trong test, test khỏi phải flush.
+- [Phase 3]: 03-02: `DropdownMenuLinkItem` mặc định `closeOnClick = true`, khác `Menu.LinkItem` gốc (`false`) — UserMenu nằm trong layout nên điều hướng client không unmount nó, menu sẽ kẹt mở; truyền `closeOnClick={false}` để giữ.
+- [Phase 3]: 03-02: Không thêm `focusableWhenDisabled` cho `DropdownMenuItem`; Base UI 1.8.0 `Menu.Item` đã focusable khi disabled — Đã đo: ArrowDown/ArrowUp tới được mục disabled (D-15). Ngoại lệ: mở menu bằng phím thì focus đầu bỏ qua mục disabled đứng đầu; UserMenu bắt đầu bằng link enabled nên không ảnh hưởng.
+- [Phase 3]: 03-02: `PasswordInput` chỉ tự reset về ẩn khi `value` controlled là rỗng — `resetField` của React Hook Form ghi thẳng vào DOM nên component không thấy; plan 03-12 phải dùng value controlled hoặc đổi `key` khi xóa mật khẩu đăng nhập sai.
+- [Phase 3]: 03-02: `Button` có `loadingLabel` thì thay hẳn children bằng Spinner decorative + nhãn — Nhãn đang gửi phải đọc được (D-30); không truyền `loadingLabel` thì giữ nhánh cũ (children `invisible` + spinner phủ).
 
 ### Pending Todos
 
@@ -126,6 +131,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-14T09:00:45.045Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-10-14T10:15:19.183Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None

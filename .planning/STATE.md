@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 3 UI-SPEC approved
-last_updated: "2026-10-14T08:28:55.171Z"
-last_activity: 2026-10-14 -- Phase 3 planning complete
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-10-14T09:00:54.137Z"
+last_activity: 2026-10-14
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 27
-  completed_plans: 12
-  percent: 44
+  completed_plans: 13
+  percent: 48
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình du lịch thật trên bản triển khai công khai, rồi trao đổi về chuyến đi với người khác.
-**Current focus:** Phase 2 — HTTP & Shared Kernel
+**Current focus:** Phase 3 — Identity & Session (BFF)
 
 ## Current Position
 
-Phase: 3
-Plan: Not started
+Phase: 3 (Identity & Session (BFF)) — EXECUTING
+Plan: 2 of 15
 Status: Ready to execute
-Last activity: 2026-10-14 -- Phase 3 planning complete
+Last activity: 2026-10-14
 
 Phase 1 progress: [██████████] 100% — verified complete
 
@@ -65,6 +65,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 02 P02 | 16 min | 3 tasks | 13 files |
 | Phase 02 P03 | 10 min | 2 tasks | 5 files |
 | Phase 02 P04 | 6 min | 3 tasks | 11 files |
+| Phase 3 P01 | 9 min | 3 tasks | 22 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,9 @@ Recent decisions affecting current work:
 - [Phase 02]: api-client: ApiError plain object frozen (type/kind/status/code/message/fieldErrors), toApiError giữ errorCode/message BE, ProblemDetails → message null; fetch client timeout 30s bao cả đọc body, không retry, factory chỉ ở ./http
 - [Phase 02]: withSessionRefresh: single-flight inFlight trong Lock + epoch; chi 'expired' goi onSessionExpired (1 lan/lo), refresh throw giu loi goc (D-14a); replay 1 lan, replay 401 -> session.expired
 - [Phase 02]: lib/feedback: ERROR_MESSAGES la Map 39 ma D-16; selectErrorMessage map -> message BE -> cau chung (aborted -> null); resolveFormError gan 'Gia tri khong hop le.', field la -> toast cau chung; decideMutationError im lang voi errorToast:false, session_expired, aborted
+- [Phase 3]: 03-01: `@tripory/identity` dựng theo `contextPackage()`; catalog pin cứng react-query 5.104.2, zod 4.6.7, react-hook-form 7.89.0, resolvers 5.9.1; `API_ORIGIN` server-only (`.env.example` + `env` của turbo build/dev) — Không nới allowlist: boundaries.mjs không đổi, self-test thêm 15 case khóa identity và web.
+- [Phase 3]: 03-01: test route/BFF/proxy dùng `// @vitest-environment node` trong app; `setup.ts` chỉ polyfill matchMedia khi có `window` — Preset app mặc định jsdom nhưng route handler cần node; setup.ts cũ vỡ ngoài DOM.
+- [Phase 3]: 03-01: helper test `setCookiesOf` giữ nguyên giá trị cookie, hạ chữ thường tên thuộc tính và SameSite; fake lock reject bằng `signal.reason`; fake BroadcastChannel chuyển tin đồng bộ qua structuredClone — Đúng đặc tả Web Locks/BroadcastChannel, tin không clone được lộ ngay trong test, test khỏi phải flush.
 
 ### Pending Todos
 
@@ -122,6 +126,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-13T09:34:43.899Z
-Stopped at: Phase 3 UI-SPEC approved
-Resume file: .planning/phases/03-identity-session-bff/03-UI-SPEC.md
+Last session: 2026-10-14T09:00:45.045Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None

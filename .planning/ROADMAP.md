@@ -94,7 +94,7 @@ Plans:
 **Research flag**: cần research sâu khi plan (tên claim JWT, thiết kế cookie `__Host-`/`__Secure-`, Web Locks trên iOS)
 
 Plans:
-- [ ] 03-01-PLAN.md — Wave 0: catalog (4 dependency, pin cứng), khung `packages/identity`, self-test ranh giới, helper test (NextRequest, fake Web Locks, fake BroadcastChannel)
+- [x] 03-01-PLAN.md — Wave 0: catalog (4 dependency, pin cứng), khung `packages/identity`, self-test ranh giới, helper test (NextRequest, fake Web Locks, fake BroadcastChannel)
 - [ ] 03-02-PLAN.md — `design-tokens` + `ui-web`: token form/user-menu, `Button.loadingLabel`, `PasswordInput`, `InlineAlert`, `DropdownMenuLinkItem`
 - [ ] 03-03-PLAN.md — `identity` domain/application: `toSafeNextPath`, ngưỡng token, rule mật khẩu (6 mục đổi mật khẩu), port
 - [ ] 03-04-PLAN.md — `identity` infrastructure/react: DTO Zod, claim JWT thật, gateway, hook factory

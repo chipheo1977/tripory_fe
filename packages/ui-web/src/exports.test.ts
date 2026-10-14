@@ -62,6 +62,7 @@ const compoundParts = [
   'DropdownMenuTrigger',
   'DropdownMenuContent',
   'DropdownMenuItem',
+  'DropdownMenuLinkItem',
   'DropdownMenuCheckboxItem',
   'DropdownMenuRadioGroup',
   'DropdownMenuRadioItem',

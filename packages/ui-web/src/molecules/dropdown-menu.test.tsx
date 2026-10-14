@@ -132,7 +132,7 @@ describe('DropdownMenuLinkItem', () => {
     await user.keyboard('{Enter}');
     await screen.findByRole('menu');
 
-    await user.keyboard('{ArrowDown}');
+    // Mở bằng bàn phím thì Base UI đã focus mục đầu tiên.
     expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Lịch trình của tôi' }));
     await user.keyboard('{Enter}');
     expect(onNavigate).toHaveBeenCalledTimes(1);
@@ -231,8 +231,10 @@ describe('DropdownMenuItem disabled (D-15)', () => {
     expect(disabled.hasAttribute('href')).toBe(false);
   });
 
-  // Kết quả xác minh Base UI 1.8.0: `Menu.Item` tự gọi useButton với `focusableWhenDisabled: true`
-  // (menu/item/useMenuItem.mjs), nên mục disabled vẫn nằm trong vòng điều hướng bằng phím mà không cần prop thêm.
+  // Kết quả xác minh Base UI 1.8.0 (D-15): `Menu.Item` tự gọi useButton với `focusableWhenDisabled: true`
+  // (menu/item/useMenuItem.mjs), nên mũi tên tới được mục disabled mà không cần prop thêm, cả ArrowDown lẫn ArrowUp.
+  // Chỉ có một khác biệt: khi mở menu bằng phím, focus ban đầu bỏ qua mục disabled đứng đầu và rơi vào mục enabled đầu tiên.
+  // UserMenu bắt đầu bằng link "Lịch trình của tôi" (enabled) nên không bị ảnh hưởng.
   it('phím mũi tên tới được mục disabled để trình đọc màn hình đọc "Hồ sơ"', async () => {
     const user = userEvent.setup();
     render(<UserMenuExample />);
@@ -240,7 +242,7 @@ describe('DropdownMenuItem disabled (D-15)', () => {
     await user.keyboard('{Enter}');
     await screen.findByRole('menu');
 
-    await user.keyboard('{ArrowDown}');
+    // Mở bằng bàn phím thì Base UI đã focus mục đầu tiên (link), mũi tên đi tiếp qua hai mục disabled.
     expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Lịch trình của tôi' }));
     await user.keyboard('{ArrowDown}');
     expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Hồ sơ' }));
@@ -250,6 +252,23 @@ describe('DropdownMenuItem disabled (D-15)', () => {
     expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Đổi mật khẩu' }));
   });
 
+  it('ArrowUp từ mục phía dưới cũng dừng ở mục disabled', async () => {
+    const user = userEvent.setup();
+    render(<UserMenuExample />);
+    screen.getByRole('button', { name: 'Tài khoản' }).focus();
+    await user.keyboard('{Enter}');
+    await screen.findByRole('menu');
+
+    await user.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}{ArrowDown}');
+    expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Đăng xuất' }));
+    await user.keyboard('{ArrowUp}');
+    expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Đổi mật khẩu' }));
+    await user.keyboard('{ArrowUp}');
+    expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Tin nhắn' }));
+    await user.keyboard('{ArrowUp}');
+    expect(document.activeElement).toBe(screen.getByRole('menuitem', { name: 'Hồ sơ' }));
+  });
+
   it('chọn mục disabled bằng Enter hoặc click không kích hoạt và không đóng menu', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
@@ -257,10 +276,10 @@ describe('DropdownMenuItem disabled (D-15)', () => {
       <DropdownMenu>
         <DropdownMenuTrigger>Mở</DropdownMenuTrigger>
         <DropdownMenuContent>
+          <DropdownMenuItem>Khác</DropdownMenuItem>
           <DropdownMenuItem disabled onClick={onClick}>
             Hồ sơ
           </DropdownMenuItem>
-          <DropdownMenuItem>Khác</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>,
     );

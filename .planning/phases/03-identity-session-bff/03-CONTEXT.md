@@ -84,6 +84,10 @@ Nằm ngoài phase:
   - Nhãn ô: "Email", "Mật khẩu", "Họ và tên", "Nhập lại mật khẩu", "Mật khẩu hiện tại", "Mật khẩu mới".
   - Toast: xem D-07, D-18, D-20. Dòng cold start: xem D-31. Header khách: "Đăng nhập".
 
+### Bổ sung sau research (2026-10-13)
+- **D-33:** Lỗi regex email của BE (`Email.cs` là `^[^@s]+@[^@s]+.[^@s]+$`, chặn mọi email có chữ "s") được **người dùng sửa ở repo `tripory_be` trước UAT Phase 3**, thành `^[^@\s]+@[^@\s]+\.[^@\s]+$`. FE **không** chép regex lỗi này. Validate email phía client theo dạng chuẩn. Plan có một bước UAT kiểm lại bằng email có chữ "s" (ví dụ `user@gmail.com`). Mục này vẫn ghi vào checklist phụ thuộc BE (DEPL-02).
+- **D-34:** Checklist đổi mật khẩu có **6 mục**, gồm thêm `MinimumLength(8)` của BE mà D-27 bỏ sót. Copy cho mục ký tự đặc biệt là **"Có một trong các ký tự ! ? * @ # $ % ^ & + ="**. Regex FE phải giống hệt tập ký tự của BE: `/[!?*@#$%^&+=]/`.
+
 ### Claude's Discretion
 - Tên cookie, prefix `__Host-`/`__Secure-`, `SameSite`, `Max-Age`, cookie `tripory_at_exp` cho refresh chủ động, tên claim JWT. Research flag của ROADMAP, researcher chốt theo PITFALLS P1 và P2.
 - Cơ chế Web Locks trên iOS Safari và fallback nếu không có `navigator.locks`.

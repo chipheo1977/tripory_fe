@@ -89,9 +89,26 @@ Plans:
   3. Người dùng mở trang cần đăng nhập khi chưa có phiên thì được đưa tới đăng nhập rồi quay lại đúng trang; `?next=` trỏ ra ngoài bị bỏ qua
   4. Người dùng đổi mật khẩu (thấy rule trước khi nhập) và đăng xuất được từ mọi trang; cookie bị xóa
   5. Request tới BFF ngoài allowlist (`users`, `itineraries`, `chat`), tới `auth/*`, hoặc sai Origin đều bị từ chối
-**Plans**: TBD
+**Plans**: 15 plans
 **UI hint**: yes
 **Research flag**: cần research sâu khi plan (tên claim JWT, thiết kế cookie `__Host-`/`__Secure-`, Web Locks trên iOS)
+
+Plans:
+- [ ] 03-01-PLAN.md — Wave 0: catalog (4 dependency, pin cứng), khung `packages/identity`, self-test ranh giới, helper test (NextRequest, fake Web Locks, fake BroadcastChannel)
+- [ ] 03-02-PLAN.md — `design-tokens` + `ui-web`: token form/user-menu, `Button.loadingLabel`, `PasswordInput`, `InlineAlert`, `DropdownMenuLinkItem`
+- [ ] 03-03-PLAN.md — `identity` domain/application: `toSafeNextPath`, ngưỡng token, rule mật khẩu (6 mục đổi mật khẩu), port
+- [ ] 03-04-PLAN.md — `identity` infrastructure/react: DTO Zod, claim JWT thật, gateway, hook factory
+- [ ] 03-05-PLAN.md — Lõi server: cookie `__Host-`, env, Origin guard, upstream 28 s, session-store
+- [ ] 03-06-PLAN.md — Composition client: Web Locks + `refreshSession`, `sessionEvents`/BroadcastChannel, `QueryClient`
+- [ ] 03-07-PLAN.md — Route `/api/auth/{login,register,logout,refresh,change-password}`
+- [ ] 03-08-PLAN.md — BFF `/api/bff/[...path]` (allowlist, chống traversal, Origin)
+- [ ] 03-09-PLAN.md — `proxy.ts`, `viewer.server.ts`, `decideDashboardGate`
+- [ ] 03-10-PLAN.md — Nền form: schema Zod, map lỗi, `PasswordChecklist`, `SubmitStatus`, `AuthFormCard`
+- [ ] 03-11-PLAN.md — Vòng đời phiên UI: `Providers`, `SessionEffects`, `SessionKeeper`, `SessionRecovery`
+- [ ] 03-12-PLAN.md — `LoginForm`, `RegisterForm`, `ChangePasswordForm` và 3 trang
+- [ ] 03-13-PLAN.md — `UserMenu`, nút khách, `AccountSlot`, `AppShell`, gate `(dashboard)`
+- [ ] 03-14-PLAN.md — Test đối chiếu gate, bất biến bảo mật, checklist phụ thuộc BE, full suite + build
+- [ ] 03-15-PLAN.md — UAT thủ công với BE thật (checkpoint; gồm `user@gmail.com` cho D-33)
 
 ### Phase 4: Itinerary CRUD & Editor
 **Goal**: Người dùng đã đăng nhập tạo, sửa, sắp xếp và xuất bản một lịch trình thật bằng API BE, trên cả desktop và mobile

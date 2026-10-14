@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-10-14T15:05:54.618Z"
+stopped_at: Completed 03-10-PLAN.md
+last_updated: "2026-10-14T15:18:30.263Z"
 last_activity: 2026-10-14
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 27
-  completed_plans: 16
-  percent: 59
+  completed_plans: 17
+  percent: 63
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 3 (Identity & Session (BFF)) — EXECUTING
-Plan: 5 of 15
+Plan: 5 of 15 (03-10 đã xong ngoài thứ tự; 03-05..03-09 còn lại)
 Status: Ready to execute
 Last activity: 2026-10-14
 
@@ -69,6 +69,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 3 P02 | 71 min | 3 tasks | 15 files |
 | Phase 3 P03 | 6 min | 2 tasks | 12 files |
 | Phase 3 P04 | 8 min | 2 tasks | 12 files |
+| Phase 3 P10 | 10 min | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,9 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-04: sessionRefresh: false đúng 3 chỗ (login, register, logout); changePassword và me() để mặc định để 401 session.expired được refresh rồi phát lại — Login/register/logout trả 401 không có nghĩa phiên hết hạn (tránh refresh lặp, T-03-13); đổi mật khẩu và users/me đi qua client có refresh.
 - [Phase 3]: 03-04: toViewer chỉ chép 5 trường và ném Error khi id sai GUID; viewerDto bỏ khóa lạ; avatar mặc định chung của BE (dicebear seed=tripory) thành null — Token hay trường thừa không đi tiếp vào Viewer (T-03-12); mọi người chưa đổi ảnh cùng một URL nên UI hiện chữ cái đầu (D-12).
 - [Phase 3]: 03-04: Hook factory dùng DefaultError của TanStack Query; viewerResponseDto là nội bộ (không export khỏi ./infrastructure) — Khi app khai báo Register defaultError ở 03-06, kiểu lỗi của form tự theo mà không xung đột; route server chỉ cần viewerDto.
+- [Phase 3]: 03-10: Mỗi ô form chỉ phát đúng một lỗi Zod (ô rỗng chỉ báo 'Vui lòng nhập…'); rule cần hai ô (độ mạnh mật khẩu mới + differentFromCurrent, nhập lại khớp) ở superRefine của object — Form hiện đúng câu theo UI-SPEC, không phụ thuộc thứ tự issue.
+- [Phase 3]: 03-10: Bảng mã lỗi BE → ô là Map riêng từng form trong form-error-mapping.ts, trả null cho session_expired/aborted; ERROR_MESSAGES toàn cục không thêm mã *Validator — Cùng mã MinimumLengthValidator nghĩa khác giữa form; onSessionExpired đã chuyển trang và toast (D-20) nên form không hiện thêm lỗi.
+- [Phase 3]: 03-10: PasswordChecklist render div + ul, nên 03-12 truyền render={<div />} cho FormFieldDescription (Base UI Field.Description là <p>) hoặc đặt checklist ngoài nó và nối aria-describedby bằng id; apps/web thêm lucide-react (catalog) để truyền Circle/CircleCheck cho Icon — Tránh HTML lồng sai; Icon nhận LucideIcon nên glyph do app import.
 
 ### Pending Todos
 
@@ -140,6 +144,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-14T15:05:54.614Z
-Stopped at: Completed 03-04-PLAN.md
+Last session: 2026-10-14T15:18:30.259Z
+Stopped at: Completed 03-10-PLAN.md
 Resume file: None

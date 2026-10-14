@@ -103,7 +103,7 @@ Plans:
 - [ ] 03-07-PLAN.md — Route `/api/auth/{login,register,logout,refresh,change-password}`
 - [ ] 03-08-PLAN.md — BFF `/api/bff/[...path]` (allowlist, chống traversal, Origin)
 - [ ] 03-09-PLAN.md — `proxy.ts`, `viewer.server.ts`, `decideDashboardGate`
-- [ ] 03-10-PLAN.md — Nền form: schema Zod, map lỗi, `PasswordChecklist`, `SubmitStatus`, `AuthFormCard`
+- [x] 03-10-PLAN.md — Nền form: schema Zod, map lỗi, `PasswordChecklist`, `SubmitStatus`, `AuthFormCard`
 - [ ] 03-11-PLAN.md — Vòng đời phiên UI: `Providers`, `SessionEffects`, `SessionKeeper`, `SessionRecovery`
 - [ ] 03-12-PLAN.md — `LoginForm`, `RegisterForm`, `ChangePasswordForm` và 3 trang
 - [ ] 03-13-PLAN.md — `UserMenu`, nút khách, `AccountSlot`, `AppShell`, gate `(dashboard)`

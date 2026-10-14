@@ -122,6 +122,9 @@ importers:
       '@tripory/ui-web':
         specifier: workspace:*
         version: link:../../packages/ui-web
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.54.0(@types/react@19.3.0)(react@19.3.0)
       next:
         specifier: 'catalog:'
         version: 16.4.0(@babel/core@7.29.7)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)

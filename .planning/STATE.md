@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-10-PLAN.md
-last_updated: "2026-10-14T15:18:30.263Z"
+stopped_at: Completed 03-05-PLAN.md
+last_updated: "2026-10-14T15:29:03.824Z"
 last_activity: 2026-10-14
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 27
-  completed_plans: 17
-  percent: 63
+  completed_plans: 18
+  percent: 67
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 3 (Identity & Session (BFF)) — EXECUTING
-Plan: 5 of 15 (03-10 đã xong ngoài thứ tự; 03-05..03-09 còn lại)
+Plan: 6 of 15 (03-10 đã xong ngoài thứ tự; 03-06..03-09 còn lại)
 Status: Ready to execute
 Last activity: 2026-10-14
 
@@ -70,6 +70,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 3 P03 | 6 min | 2 tasks | 12 files |
 | Phase 3 P04 | 8 min | 2 tasks | 12 files |
 | Phase 3 P10 | 10 min | 3 tasks | 13 files |
+| Phase 3 P05 | 9 min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -125,6 +126,10 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-10: Mỗi ô form chỉ phát đúng một lỗi Zod (ô rỗng chỉ báo 'Vui lòng nhập…'); rule cần hai ô (độ mạnh mật khẩu mới + differentFromCurrent, nhập lại khớp) ở superRefine của object — Form hiện đúng câu theo UI-SPEC, không phụ thuộc thứ tự issue.
 - [Phase 3]: 03-10: Bảng mã lỗi BE → ô là Map riêng từng form trong form-error-mapping.ts, trả null cho session_expired/aborted; ERROR_MESSAGES toàn cục không thêm mã *Validator — Cùng mã MinimumLengthValidator nghĩa khác giữa form; onSessionExpired đã chuyển trang và toast (D-20) nên form không hiện thêm lỗi.
 - [Phase 3]: 03-10: PasswordChecklist render div + ul, nên 03-12 truyền render={<div />} cho FormFieldDescription (Base UI Field.Description là <p>) hoặc đặt checklist ngoài nó và nối aria-describedby bằng id; apps/web thêm lucide-react (catalog) để truyền Circle/CircleCheck cho Icon — Tránh HTML lồng sai; Icon nhận LucideIcon nên glyph do app import.
+- [Phase 3]: 03-05: Tên cookie viết thành hai hằng đầy đủ (__Host-tripory_at|rt|at_exp và không prefix), không ghép prefix lúc chạy; clearSession ghi lại đủ thuộc tính với Max-Age=0, không dùng delete — Grep được tên cookie thật khi debug; trình duyệt từ chối lệnh xóa cookie __Host- thiếu Secure và Path=/ nên đăng xuất sẽ không có tác dụng (T-03-16).
+- [Phase 3]: 03-05: callBackend ném Error không kèm đường dẫn khi URL ra ngoài API_ORIGIN hoặc không bắt đầu /api/v1/, dùng redirect manual và timeout 28 giây tính cả đọc body — Đường dẫn có thể chứa dữ liệu do client gửi; 3xx của BE không dẫn server tới host khác (T-03-18); 28 giây để client nhận 504 có cấu trúc trước timeout 30 giây.
+- [Phase 3]: 03-05: readSession trả stale không kèm accessToken (route refresh dùng readRawTokens); writeSession trả ok false và không ghi cookie nào khi expiresAt không parse được hoặc access token thiếu claim — Không để lại phiên nửa vời, và Bearer hết hạn không lọt vào BFF.
+- [Phase 3]: 03-05: Fixture auth của app ở apps/web/src/test/be-auth-fixtures.ts (bearerPair, beAuthResponse, beTokenResponse, beErrorEnvelope, 7 envelope lỗi BE, jsonResponse) không import vitest — 03-07/08/09/13 dùng chung; không import xuyên package bằng đường tương đối nên app giữ bản riêng.
 
 ### Pending Todos
 
@@ -144,6 +149,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-14T15:18:30.259Z
-Stopped at: Completed 03-10-PLAN.md
+Last session: 2026-10-14T15:29:03.818Z
+Stopped at: Completed 03-05-PLAN.md
 Resume file: None

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-10-14T14:47:29.129Z"
+stopped_at: Completed 03-03-PLAN.md
+last_updated: "2026-10-14T14:54:50.272Z"
 last_activity: 2026-10-14
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 27
-  completed_plans: 14
-  percent: 52
+  completed_plans: 15
+  percent: 56
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 3 (Identity & Session (BFF)) — EXECUTING
-Plan: 3 of 15
+Plan: 4 of 15
 Status: Ready to execute
 Last activity: 2026-10-14
 
@@ -67,6 +67,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 02 P04 | 6 min | 3 tasks | 11 files |
 | Phase 3 P01 | 9 min | 3 tasks | 22 files |
 | Phase 3 P02 | 71 min | 3 tasks | 15 files |
+| Phase 3 P03 | 6 min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,9 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-02: Không thêm `focusableWhenDisabled` cho `DropdownMenuItem`; Base UI 1.8.0 `Menu.Item` đã focusable khi disabled — Đã đo: ArrowDown/ArrowUp tới được mục disabled (D-15). Ngoại lệ: mở menu bằng phím thì focus đầu bỏ qua mục disabled đứng đầu; UserMenu bắt đầu bằng link enabled nên không ảnh hưởng.
 - [Phase 3]: 03-02: `PasswordInput` chỉ tự reset về ẩn khi `value` controlled là rỗng — `resetField` của React Hook Form ghi thẳng vào DOM nên component không thấy; plan 03-12 phải dùng value controlled hoặc đổi `key` khi xóa mật khẩu đăng nhập sai.
 - [Phase 3]: 03-02: `Button` có `loadingLabel` thì thay hẳn children bằng Spinner decorative + nhãn — Nhãn đang gửi phải đọc được (D-30); không truyền `loadingLabel` thì giữ nhánh cũ (children `invisible` + spinner phủ).
+- [Phase 3]: 03-03: toSafeNextPath so khớp theo đoạn path, chặn /login, /register, /api, /_next cùng con của chúng; /loginfoo, /registered, /apix vẫn hợp lệ — Tránh vòng lặp chuyển trang và route nội bộ mà không chặn oan route khác có chung tiền tố.
+- [Phase 3]: 03-03: Ký tự điều khiển/khoảng trắng trong toSafeNextPath kiểm bằng vòng lặp charCodeAt (<= 0x20 hoặc 0x7f), không dùng regex — Khỏi vướng no-control-regex mà không cần eslint-disable; cùng tập ký tự bị chặn.
+- [Phase 3]: 03-03: Rule mật khẩu là dữ liệu { id, min?, test } và evaluatePasswordRules bỏ khóa min khi rule không có; ports export bằng export type * — Checklist UI và schema Zod ở app dùng chung predicate; ports chỉ có type nên không sinh runtime.
 
 ### Pending Todos
 
@@ -131,6 +135,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-14T10:15:19.183Z
-Stopped at: Completed 03-02-PLAN.md
+Last session: 2026-10-14T14:54:43.370Z
+Stopped at: Completed 03-03-PLAN.md
 Resume file: None

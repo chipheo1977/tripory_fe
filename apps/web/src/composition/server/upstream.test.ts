@@ -129,7 +129,7 @@ describe("callBackend: lời gọi fetch", () => {
 
   it("gọi fetch như hàm trần (không mất this)", async () => {
     const seen: unknown[] = [];
-    const fetch = vi.fn(function (this: unknown, _input: RequestInfo | URL, _init?: RequestInit) {
+    const fetch = vi.fn(function (this: unknown) {
       seen.push(this);
 
       return Promise.resolve(jsonResponse({}));

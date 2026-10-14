@@ -51,9 +51,9 @@ describe('toViewer', () => {
   });
 
   it('avatarUrl vắng mặt thành null', () => {
-    const { avatarUrl: _omitted, ...rest } = viewerJsonFixture.viewer;
+    const { id, email, fullName, handle } = viewerJsonFixture.viewer;
 
-    expect(toViewer(rest).avatarUrl).toBeNull();
+    expect(toViewer({ id, email, fullName, handle }).avatarUrl).toBeNull();
   });
 
   it('chuẩn hóa id về chữ thường', () => {

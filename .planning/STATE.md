@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-09-PLAN.md
-last_updated: "2026-10-15T03:14:28.661Z"
+stopped_at: Completed 03-11-PLAN.md
+last_updated: "2026-10-15T03:22:25.506Z"
 last_activity: 2026-10-15
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 27
-  completed_plans: 22
-  percent: 81
+  completed_plans: 23
+  percent: 85
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 3 (Identity & Session (BFF)) — EXECUTING
-Plan: 10 of 15 (03-06, 03-07 và 03-10 đã xong; 03-08, 03-09 còn lại)
+Plan: 11 of 15 (03-06, 03-07 và 03-10 đã xong; 03-08, 03-09 còn lại)
 Status: Ready to execute
 Last activity: 2026-10-15
 
@@ -75,6 +75,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 3 P07 | 12 min | 3 tasks | 9 files |
 | Phase 3 P08 | 15min | 2 tasks | 4 files |
 | Phase 3 P09 | 10min | 2 tasks | 5 files |
+| Phase 03 P11 | 35min | 3 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -145,6 +146,7 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-07: handleChangePassword: none/stale trả 401 session.expired không gọi BE và không xóa cookie, invalid xóa cookie; BE 2xx xóa cả 3 cookie bất kể body; BE 401 thành session.expired của FE; lỗi BE khác chuyển nguyên và giữ cookie — Stale cần giữ refresh token để client refresh rồi phát lại; BE thu hồi mọi refresh token khi đổi mật khẩu nên cookie cũ phải bị xóa ngay (D-18, T-03-34); đổi mật khẩu thất bại không được đăng xuất người dùng (D-19).
 - [Phase 3]: 03-08: BFF kiểm theo thứ tự method → allowlist/traversal → Origin → phiên → body; stale/invalid 401 không gọi BE; BE 3xx → 502 Bff.InvalidUpstream; trần body 4 MB
 - [Phase 3]: 03-09: proxy chỉ kiểm sự có mặt cookie phiên (không giải mã JWT), cho qua khi access hết hạn (D-25); next lọc _rsc/__next*
+- [Phase 03]: 03-11: useLogout onSuccess ở mức hook (mutate-level callback mất khi menu unmount); SessionRecovery chặn StrictMode bằng ref
 
 ### Pending Todos
 
@@ -164,6 +166,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-15T03:14:28.657Z
-Stopped at: Completed 03-09-PLAN.md
+Last session: 2026-10-15T03:22:25.501Z
+Stopped at: Completed 03-11-PLAN.md
 Resume file: None

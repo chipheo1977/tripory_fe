@@ -466,14 +466,15 @@ describe("forwardToBackend: response về client", () => {
     expect(res.headers.get("server")).toBeNull();
   });
 
-  it("BE 3xx không được theo và không lộ location", async () => {
+  it.each([301, 302, 304])("BE %i không được theo, không lộ location, thành 502 Bff.InvalidUpstream", async (status) => {
     const fetch = fetchReturning(
-      new Response(null, { status: 302, headers: { location: "https://evil.test/steal" } }),
+      new Response(null, { status, headers: { location: "https://evil.test/steal" } }),
     );
 
     const res = await forwardToBackend(bffRequest("/api/bff/users/me"), ["users", "me"], depsWith(fetch));
 
-    expect(res.status).toBe(302);
+    expect(res.status).toBe(502);
+    expect(await errorCodeOf(res)).toBe("Bff.InvalidUpstream");
     expect(res.headers.get("location")).toBeNull();
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(fetch.mock.calls[0]?.[1]?.redirect).toBe("manual");

@@ -55,7 +55,7 @@ export function resolveBffTarget(segments: readonly string[], rawPathname: strin
 export const BFF_MAX_BODY_BYTES = 4 * 1024 * 1024;
 
 // Trạng thái HTTP không được có body: `new Response(body, { status })` ném lỗi nếu vi phạm.
-const NULL_BODY_STATUSES = new Set([204, 205, 304]);
+const NULL_BODY_STATUSES = new Set([204, 205]);
 
 /**
  * Đọc body với trần `BFF_MAX_BODY_BYTES`. Kiểm `content-length` trước (từ chối rẻ, chưa đọc gì), rồi kiểm lại
@@ -142,6 +142,16 @@ export async function forwardToBackend(
 
   if (upstream.kind === "timeout") return errorEnvelope(504, "Bff.UpstreamTimeout", nowMs);
   if (upstream.kind === "network") return errorEnvelope(502, "Bff.UpstreamUnavailable", nowMs);
+
+  // `callBackend` dùng `redirect: "manual"` nên 3xx của BE đến tận đây. BE không có redirect hợp lệ cho REST;
+  // chuyển tiếp 3xx thiếu `location` (đã bị lọc) chỉ làm trình duyệt bối rối, nên coi là upstream hỏng, cùng
+  // quy tắc với `/api/auth/*` (plan 03-07).
+  const isSuccess = upstream.status >= 200 && upstream.status <= 299;
+  const isError = upstream.status >= 400 && upstream.status <= 599;
+
+  if (!isSuccess && !isError) {
+    return errorEnvelope(502, "Bff.InvalidUpstream", nowMs);
+  }
 
   const responseHeaders = new Headers({ "cache-control": "no-store" });
 

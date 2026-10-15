@@ -13,7 +13,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import type { ServerDeps } from "./env";
 import { checkSameOrigin, errorEnvelope, successEnvelope } from "./request-guards";
-import { clearSession, decodeJwtPayload, readRawTokens, writeSession } from "./session-store";
+import { clearSession, decodeJwtPayload, readRawTokens, readSession, writeSession } from "./session-store";
 import { callBackend, type UpstreamResult } from "./upstream";
 
 /** Header duy nhất đi tới BE cho request JSON. Cố ý không chuyển `cookie`, `authorization`, `origin` của client. */
@@ -270,4 +270,59 @@ function rotateSession(body: string, deps: ServerDeps): NextResponse {
   const response = successEnvelope({ refreshed: true }, nowMs);
 
   return writeSession(response, parsed.data, nowMs, deps.secure).ok ? response : invalidUpstream(deps);
+}
+
+/**
+ * `PUT /api/auth/change-password`: AUTH-06.
+ *
+ * Phiên (đồng hồ server) quyết định trước khi đụng tới BE:
+ * - `none` / `stale`: 401 `session.expired`, KHÔNG gọi BE và KHÔNG xóa cookie. Với `stale`, client sẽ refresh
+ *   rồi phát lại request; xóa cookie ở đây sẽ cắt mất refresh token mà bước refresh cần.
+ * - `invalid` (thiếu refresh, claim hỏng): không hồi phục được → xóa cookie, 401.
+ *
+ * Thành công thì xóa cả 3 cookie bất kể BE trả gì ở body (D-18, T-03-34): BE `ChangePassword` thu hồi mọi
+ * refresh token của người dùng, nên giữ cookie cũ làm lần refresh kế tiếp rơi vào nhánh reuse
+ * (`Token.Compromised`) với thông báo sai ngữ cảnh. Phiên chấm dứt ở server, người dùng đăng nhập lại bằng
+ * mật khẩu mới. Lỗi BE (`Auth.InvalidCurrentPassword`, `NotEqualValidator`...) chuyển nguyên để form gắn vào
+ * đúng ô (D-19) và KHÔNG xóa cookie: đổi mật khẩu thất bại không được đăng xuất người dùng.
+ *
+ * Mật khẩu chỉ đi từ body request sang body request BE, không vào log, không vào response.
+ */
+export async function handleChangePassword(request: NextRequest, deps: ServerDeps): Promise<NextResponse> {
+  if (!checkSameOrigin(request)) return crossOrigin(deps);
+
+  const session = readSession(
+    (name) => request.cookies.get(name)?.value,
+    Math.floor(deps.nowMs() / 1000),
+    deps.secure,
+  );
+
+  if (session.state === "invalid") return sessionEnded(deps);
+  if (session.state !== "fresh") return errorEnvelope(401, SESSION_EXPIRED, deps.nowMs());
+
+  const picked = pickStrings(await readJsonObject(request), ["currentPassword", "newPassword"]);
+
+  if (picked === null) return invalidBody(deps);
+
+  const result = await callBackend(deps, "/api/v1/auth/change-password", {
+    method: "PUT",
+    headers: { ...JSON_HEADERS, authorization: `Bearer ${session.accessToken}` },
+    body: JSON.stringify(picked),
+  });
+
+  if (result.kind === "response") {
+    if (isSuccessStatus(result.status)) {
+      const response = successEnvelope(null, deps.nowMs());
+
+      clearSession(response, deps.secure);
+
+      return response;
+    }
+
+    // Bearer bị BE từ chối (body rỗng, không có errorCode): cho client đi đường hết phiên thay vì chuyển một
+    // 401 trần mà form không hiểu.
+    if (result.status === 401) return errorEnvelope(401, SESSION_EXPIRED, deps.nowMs());
+  }
+
+  return forwardUpstream(result, deps.nowMs());
 }

@@ -100,7 +100,7 @@ Plans:
 - [x] 03-04-PLAN.md — `identity` infrastructure/react: DTO Zod, claim JWT thật, gateway, hook factory
 - [x] 03-05-PLAN.md — Lõi server: cookie `__Host-`, env, Origin guard, upstream 28 s, session-store
 - [x] 03-06-PLAN.md — Composition client: Web Locks + `refreshSession`, `sessionEvents`/BroadcastChannel, `QueryClient`
-- [ ] 03-07-PLAN.md — Route `/api/auth/{login,register,logout,refresh,change-password}`
+- [x] 03-07-PLAN.md — Route `/api/auth/{login,register,logout,refresh,change-password}`
 - [ ] 03-08-PLAN.md — BFF `/api/bff/[...path]` (allowlist, chống traversal, Origin)
 - [ ] 03-09-PLAN.md — `proxy.ts`, `viewer.server.ts`, `decideDashboardGate`
 - [x] 03-10-PLAN.md — Nền form: schema Zod, map lỗi, `PasswordChecklist`, `SubmitStatus`, `AuthFormCard`

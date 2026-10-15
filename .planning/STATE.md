@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-06-PLAN.md
-last_updated: "2026-10-15T02:49:50.918Z"
+stopped_at: Completed 03-07-PLAN.md
+last_updated: "2026-10-15T03:03:16.104Z"
 last_activity: 2026-10-15
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 27
-  completed_plans: 19
-  percent: 70
+  completed_plans: 20
+  percent: 74
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 3 (Identity & Session (BFF)) — EXECUTING
-Plan: 7 of 15 (03-06 và 03-10 đã xong; 03-07..03-09 còn lại)
+Plan: 8 of 15 (03-06, 03-07 và 03-10 đã xong; 03-08, 03-09 còn lại)
 Status: Ready to execute
 Last activity: 2026-10-15
 
@@ -72,6 +72,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 3 P10 | 10 min | 3 tasks | 13 files |
 | Phase 3 P05 | 9 min | 3 tasks | 11 files |
 | Phase 3 P06 | 35 min | 3 tasks | 10 files |
+| Phase 3 P07 | 12 min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -136,6 +137,10 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-06: makeBrowserHttp(deps) thuần + singleton ở cuối file; mutex dự phòng nằm trong closure từng instance — Test dựng nhiều tab độc lập (chung fake lock + cookie jar), beCalls === 1 chứng minh khóa cùng route idempotent; chuỗi đường dẫn route refresh chỉ có ở http.client.ts (Pitfall 3).
 - [Phase 3]: 03-06: sessionEvents tạo BroadcastChannel lazy, expired không đi qua channel, createChannel chỉ được hỏi một lần kể cả khi trả null, dispose giữ handler đăng xuất — Node 24 có BroadcastChannel toàn cục nên SSR không được mở channel; cookie bị xóa nên tab khác tự phát hiện ở request kế tiếp.
 - [Phase 3]: 03-06: makeQueryClient() luôn trả client mới với retry false, staleTime 60 giây, MutationCache theo chữ ký 5.104.2 (data, variables, onMutateResult, mutation, context); QueryCache không toast (D-10); SESSION_EXPIRED_TOAST là hằng riêng khác dấu câu với SESSION_EXPIRED_MESSAGE — Mutation chỉ khai báo meta.feedback; mount QueryClientProvider và Toast thuộc 03-11.
+- [Phase 3]: 03-07: Body gửi BE dựng lại từ các field chuỗi đặt tên cứng (login/register/change-password), thiếu hoặc sai kiểu thì 400 Bff.InvalidBody; chuỗi rỗng vẫn qua để BE validate, mật khẩu không trim — Chống mass-assignment (T-03-32) và giữ confirmPassword ở lại trình duyệt; lỗi validate vẫn do BE trả để form gắn vào ô (D-19).
+- [Phase 3]: 03-07: Lỗi upstream: 4xx/5xx chuyển nguyên status+body+content-type và bỏ mọi header khác của BE (set-cookie); timeout 504, mạng 502; 3xx hoặc BE 2xx sai hình dạng thành 502 Bff.InvalidUpstream không kèm cookie — BE không được đặt cookie lên origin của FE (T-03-33); redirect manual của callBackend không được trở thành response hợp lệ; không để lại phiên nửa vời.
+- [Phase 3]: 03-07: handleRefresh kiểm Origin trước cookie, no-op theo đồng hồ server khi còn hơn 150 giây, chỉ BE 400/401/403 xóa phiên còn mọi thứ khác (5xx, 404, 429, 3xx, timeout, mạng) giữ cookie và trả 503 Bff.RefreshUnavailable; BE 200 hỏng thì 502 giữ cookie — Origin lạ không được xóa cookie của người dùng; không đăng xuất oan khi BE cold start (D-14a, T-03-30); route idempotent làm mọi lần refresh lặp giữa các tab vô hại (T-03-29).
+- [Phase 3]: 03-07: handleChangePassword: none/stale trả 401 session.expired không gọi BE và không xóa cookie, invalid xóa cookie; BE 2xx xóa cả 3 cookie bất kể body; BE 401 thành session.expired của FE; lỗi BE khác chuyển nguyên và giữ cookie — Stale cần giữ refresh token để client refresh rồi phát lại; BE thu hồi mọi refresh token khi đổi mật khẩu nên cookie cũ phải bị xóa ngay (D-18, T-03-34); đổi mật khẩu thất bại không được đăng xuất người dùng (D-19).
 
 ### Pending Todos
 
@@ -155,6 +160,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-15T02:49:50.913Z
-Stopped at: Completed 03-06-PLAN.md
+Last session: 2026-10-15T03:03:16.100Z
+Stopped at: Completed 03-07-PLAN.md
 Resume file: None

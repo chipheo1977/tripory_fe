@@ -85,7 +85,9 @@ describe("forwardToBackend: chặn trước khi gọi BE", () => {
 
   it.each([
     [["users", ".."], "/api/bff/users/.."],
-    [["users", "x"], "/api/bff/users/%2e%2e/auth/login"],
+    // `new URL` gộp `/%2e%2e/` thành dấu chấm kép, nên dùng dạng dính liền để giữ nguyên trong chuỗi thô.
+    [["users", "../auth"], "/api/bff/users/%2e%2e%2fauth"],
+    [["users", "x"], "/api/bff/users/x%2e"],
     [["users", "a/b"], "/api/bff/users/a%2Fb"],
     [["users", "a\\b"], "/api/bff/users/a%5Cb"],
   ] as const)("traversal %j → 400 Bff.BadPath, BE 0 lần", async (segments, path) => {
@@ -142,7 +144,7 @@ describe("forwardToBackend: chặn trước khi gọi BE", () => {
   });
 
   it.each([
-    ["stale (còn 60 giây)", 60],
+    ["stale (còn 20 giây, ngưỡng STALE_AT_SEC = 30)", 20],
     ["đã hết hạn", -30],
   ])("cookie %s → 401 session.expired, BE 0 lần", async (_label, expiresInSec) => {
     const fetch = fetchReturning(jsonResponse(ok));
@@ -160,7 +162,9 @@ describe("forwardToBackend: chặn trước khi gọi BE", () => {
     const fetch = fetchReturning(jsonResponse(ok));
     const { pair } = sessionCookies(3600);
 
-    for (const cookies of [{ [AT]: "khong-phai-jwt", [RT]: "r" }, { [AT]: pair.accessToken }]) {
+    const invalidCookies: Record<string, string>[] = [{ [AT]: "khong-phai-jwt", [RT]: "r" }, { [AT]: pair.accessToken }];
+
+    for (const cookies of invalidCookies) {
       const res = await forwardToBackend(
         bffRequest("/api/bff/users/me", { cookies }),
         ["users", "me"],

@@ -8,7 +8,10 @@ const source = readFileSync(path.join(appDir, "layout.tsx"), "utf8");
 
 it("declares Vietnamese metadata and the Inter font contract", () => {
   expect(source).toContain('lang="vi"');
-  expect(source).toContain('title: "Tripory"');
+  expect(source).toContain('default: "Tripory"');
+  expect(source).toContain('template: "%s · Tripory"');
+  expect(source).toContain("<Providers>");
+  expect(source).not.toContain("cookies(");
   expect(source).toContain('description: "Lập và chia sẻ lịch trình du lịch"');
   expect(source).toContain("Inter({");
   expect(source).toContain('subsets: ["latin", "vietnamese"]');

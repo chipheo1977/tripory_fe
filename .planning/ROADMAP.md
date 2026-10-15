@@ -102,7 +102,7 @@ Plans:
 - [x] 03-06-PLAN.md — Composition client: Web Locks + `refreshSession`, `sessionEvents`/BroadcastChannel, `QueryClient`
 - [x] 03-07-PLAN.md — Route `/api/auth/{login,register,logout,refresh,change-password}`
 - [x] 03-08-PLAN.md — BFF `/api/bff/[...path]` (allowlist, chống traversal, Origin)
-- [ ] 03-09-PLAN.md — `proxy.ts`, `viewer.server.ts`, `decideDashboardGate`
+- [x] 03-09-PLAN.md — `proxy.ts`, `viewer.server.ts`, `decideDashboardGate`
 - [x] 03-10-PLAN.md — Nền form: schema Zod, map lỗi, `PasswordChecklist`, `SubmitStatus`, `AuthFormCard`
 - [ ] 03-11-PLAN.md — Vòng đời phiên UI: `Providers`, `SessionEffects`, `SessionKeeper`, `SessionRecovery`
 - [ ] 03-12-PLAN.md — `LoginForm`, `RegisterForm`, `ChangePasswordForm` và 3 trang

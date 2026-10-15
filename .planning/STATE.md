@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-08-PLAN.md
-last_updated: "2026-10-15T03:10:07.490Z"
+stopped_at: Completed 03-09-PLAN.md
+last_updated: "2026-10-15T03:14:28.661Z"
 last_activity: 2026-10-15
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 27
-  completed_plans: 21
-  percent: 78
+  completed_plans: 22
+  percent: 81
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 3 (Identity & Session (BFF)) — EXECUTING
-Plan: 9 of 15 (03-06, 03-07 và 03-10 đã xong; 03-08, 03-09 còn lại)
+Plan: 10 of 15 (03-06, 03-07 và 03-10 đã xong; 03-08, 03-09 còn lại)
 Status: Ready to execute
 Last activity: 2026-10-15
 
@@ -74,6 +74,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 3 P06 | 35 min | 3 tasks | 10 files |
 | Phase 3 P07 | 12 min | 3 tasks | 9 files |
 | Phase 3 P08 | 15min | 2 tasks | 4 files |
+| Phase 3 P09 | 10min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -143,6 +144,7 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-07: handleRefresh kiểm Origin trước cookie, no-op theo đồng hồ server khi còn hơn 150 giây, chỉ BE 400/401/403 xóa phiên còn mọi thứ khác (5xx, 404, 429, 3xx, timeout, mạng) giữ cookie và trả 503 Bff.RefreshUnavailable; BE 200 hỏng thì 502 giữ cookie — Origin lạ không được xóa cookie của người dùng; không đăng xuất oan khi BE cold start (D-14a, T-03-30); route idempotent làm mọi lần refresh lặp giữa các tab vô hại (T-03-29).
 - [Phase 3]: 03-07: handleChangePassword: none/stale trả 401 session.expired không gọi BE và không xóa cookie, invalid xóa cookie; BE 2xx xóa cả 3 cookie bất kể body; BE 401 thành session.expired của FE; lỗi BE khác chuyển nguyên và giữ cookie — Stale cần giữ refresh token để client refresh rồi phát lại; BE thu hồi mọi refresh token khi đổi mật khẩu nên cookie cũ phải bị xóa ngay (D-18, T-03-34); đổi mật khẩu thất bại không được đăng xuất người dùng (D-19).
 - [Phase 3]: 03-08: BFF kiểm theo thứ tự method → allowlist/traversal → Origin → phiên → body; stale/invalid 401 không gọi BE; BE 3xx → 502 Bff.InvalidUpstream; trần body 4 MB
+- [Phase 3]: 03-09: proxy chỉ kiểm sự có mặt cookie phiên (không giải mã JWT), cho qua khi access hết hạn (D-25); next lọc _rsc/__next*
 
 ### Pending Todos
 
@@ -162,6 +164,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-15T03:10:07.485Z
-Stopped at: Completed 03-08-PLAN.md
+Last session: 2026-10-15T03:14:28.657Z
+Stopped at: Completed 03-09-PLAN.md
 Resume file: None

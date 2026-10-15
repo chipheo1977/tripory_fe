@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
+import { Skeleton } from "@tripory/ui-web";
+import { AccountSlot } from "./account-slot";
 import { AppHeader } from "./app-header";
 
 export type AppShellProps = {
@@ -18,7 +20,15 @@ export function AppShell({ children, variant }: AppShellProps) {
       >
         Bỏ qua đến nội dung chính
       </a>
-      <AppHeader />
+      {/* AccountSlot đọc cookie nên nằm trong Suspense (Cache Components). Fallback là Skeleton tròn 32px, tuyệt
+          đối không phải nút "Đăng nhập": người đã đăng nhập không được thấy nút đó nháy lên (D-11). */}
+      <AppHeader
+        account={
+          <Suspense fallback={<Skeleton className="size-control-sm" variant="circle" />}>
+            <AccountSlot />
+          </Suspense>
+        }
+      />
       <main
         className="mx-auto flex w-full max-w-content-lg min-w-0 flex-1 flex-col px-page-inline py-page-block sm:px-page-inline-md lg:px-page-inline-lg lg:py-page-block-wide"
         id="main-content"

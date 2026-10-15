@@ -1,10 +1,15 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserMenu } from "./user-menu";
 
-export function AppHeader() {
+export type AppHeaderProps = Readonly<{
+  /** Ô tài khoản (menu user hoặc nút Đăng nhập) do AppShell bọc Suspense rồi truyền xuống. */
+  account: ReactNode;
+}>;
+
+export function AppHeader({ account }: AppHeaderProps) {
   const pathname = usePathname();
 
   return (
@@ -17,7 +22,7 @@ export function AppHeader() {
         >
           Tripory
         </Link>
-        <UserMenu />
+        {account}
       </div>
     </header>
   );

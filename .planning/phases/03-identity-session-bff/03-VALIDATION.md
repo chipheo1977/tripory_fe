@@ -1,9 +1,9 @@
-﻿---
+---
 phase: 3
 slug: identity-session-bff
 status: draft
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-10-13
 ---
 
@@ -40,44 +40,44 @@ Task ID có dạng `03-PP-TT` (plan PP, task TT). Wave theo frontmatter của t�
 
 | Task ID | Plan | Wave | Requirement | Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|----------|-----------|-------------------|-------------|--------|
-| 03-01-01 | 03-01 | 1 | AUTH-02..05, 08 | Catalog pin cứng, khung `packages/identity`, `API_ORIGIN` | build/lint | `pnpm --filter @tripory/identity test` | ❌ W0 | ⬜ |
-| 03-01-02 | 03-01 | 1 | AUTH-08 | Self-test ranh giới cho identity, `proxy.ts`, `modules`, `composition` | unit | `pnpm --filter @tripory/config test` | ✅ (thêm case) | ⬜ |
-| 03-01-03 | 03-01 | 1 | AUTH-03, 04 | Helper `NextRequest`, fake Web Locks, fake BroadcastChannel | unit | `pnpm --filter @tripory/web test -- test-helpers` | ❌ W0 | ⬜ |
-| 03-02-01 | 03-02 | 1 | AUTH-06, 07 | Token `--semantic-size-form`, `--user-menu-name-max-width` | unit | `pnpm --filter @tripory/design-tokens test` | ✅ (sửa) | ⬜ |
-| 03-02-02 | 03-02 | 1 | AUTH-06 | `Button.loadingLabel`, `PasswordInput`, `InlineAlert` | component | `pnpm --filter @tripory/ui-web test` | ❌ W0 | ⬜ |
-| 03-02-03 | 03-02 | 1 | AUTH-07 | `DropdownMenuLinkItem`, `align`, mục disabled tới được bằng phím | component | `pnpm --filter @tripory/ui-web test` | ✅ (sửa) | ⬜ |
-| 03-03-01 | 03-03 | 2 | AUTH-05 | Bảng ca `toSafeNextPath`, ngưỡng token, `Viewer` | unit | `pnpm --filter @tripory/identity test` | ❌ W0 | ⬜ |
-| 03-03-02 | 03-03 | 2 | AUTH-06 | `evaluatePasswordRules` (6 mục đổi mật khẩu, `special` = `!?*@#$%^&+=`) | unit | `pnpm --filter @tripory/identity test` | ❌ W0 | ⬜ |
-| 03-04-01 | 03-04 | 3 | AUTH-02, 07 | `parseAccessTokenClaims` (payload JWT thật, UTF-8), DTO, `normalizeAvatarUrl` | unit | `pnpm --filter @tripory/identity test` | ❌ W0 | ⬜ |
-| 03-04-02 | 03-04 | 3 | AUTH-01, 06 | Gateway HTTP, profile reader, hook factory, ranh giới export | unit | `pnpm --filter @tripory/identity test` | ❌ W0 | ⬜ |
-| 03-05-01 | 03-05 | 4 | AUTH-02, 08 | Tên cookie, env, `checkSameOrigin`, envelope | unit (node) | `pnpm --filter @tripory/web test -- session-cookies env request-guards` | ❌ W0 | ⬜ |
-| 03-05-02 | 03-05 | 4 | AUTH-08 | `callBackend` timeout 28 s, khóa origin upstream | unit (node) | `pnpm --filter @tripory/web test -- upstream` | ❌ W0 | ⬜ |
-| 03-05-03 | 03-05 | 4 | AUTH-02, 04 | `writeSession`/`clearSession` (Set-Cookie đủ thuộc tính), `readSession` | unit (node) | `pnpm --filter @tripory/web test -- session-store` | ❌ W0 | ⬜ |
-| 03-06-01 | 03-06 | 4 | AUTH-03 | N×401 + chủ động + hai tab chỉ 1 refresh; fallback mutex; khóa quá 40 s | unit (jsdom) | `pnpm --filter @tripory/web test -- http.client` | ❌ W0 | ⬜ |
-| 03-06-02 | 03-06 | 4 | AUTH-04 | `sessionEvents`, BroadcastChannel, `registerLogoutHandler` | unit | `pnpm --filter @tripory/web test -- session-events` | ❌ W0 | ⬜ |
-| 03-06-03 | 03-06 | 4 | FND-05 | `makeQueryClient` (retry false, toast theo meta), `SESSION_EXPIRED_TOAST` | unit | `pnpm --filter @tripory/web test -- query-client error-messages` | ❌ W0 | ⬜ |
-| 03-07-01 | 03-07 | 5 | AUTH-01, 02, 04 | Route login/register/logout: cookie, body không token, Origin | unit (node) | `pnpm --filter @tripory/web test -- auth-handlers` | ❌ W0 | ⬜ |
-| 03-07-02 | 03-07 | 5 | AUTH-03 | Route refresh idempotent, 401 xóa cookie, 5xx giữ cookie | unit (node) | `pnpm --filter @tripory/web test -- auth-handlers.refresh` | ❌ W0 | ⬜ |
-| 03-07-03 | 03-07 | 5 | AUTH-06 | Route change-password: stale 401, xóa cookie khi thành công | unit (node) | `pnpm --filter @tripory/web test -- auth-handlers.change-password` | ❌ W0 | ⬜ |
-| 03-08-01 | 03-08 | 5 | AUTH-08 | `resolveBffTarget` (allowlist, `auth/*` 404, traversal 400) | unit (node) | `pnpm --filter @tripory/web test -- bff.resolve` | ❌ W0 | ⬜ |
-| 03-08-02 | 03-08 | 5 | AUTH-08 | `forwardToBackend` (Origin 403, stale 401, header, timeout 504) | unit (node) | `pnpm --filter @tripory/web test -- bff.forward` | ❌ W0 | ⬜ |
-| 03-09-01 | 03-09 | 5 | AUTH-05 | `proxy` (gate, đẩy khỏi `/login`, `next=//evil`, D-25) | unit (node) | `pnpm --filter @tripory/web test -- proxy` | ❌ W0 | ⬜ |
-| 03-09-02 | 03-09 | 5 | AUTH-03, 07 | `decideDashboardGate`, `viewer.server` | unit | `pnpm --filter @tripory/web test -- dashboard-gate` | ❌ W0 | ⬜ |
-| 03-10-01 | 03-10 | 3 | AUTH-01, 06 | Schema Zod 3 form (D-29, D-33) | unit | `pnpm --filter @tripory/web test -- form-schemas` | ❌ W0 | ⬜ |
-| 03-10-02 | 03-10 | 3 | AUTH-01, 06 | Map errorCode → ô/alert theo form | unit | `pnpm --filter @tripory/web test -- form-error-mapping` | ❌ W0 | ⬜ |
-| 03-10-03 | 03-10 | 3 | AUTH-06 | `PasswordChecklist`, `SubmitStatus` (5 s), `AuthFormCard` | component | `pnpm --filter @tripory/web test -- password-checklist submit-status auth-form-card` | ❌ W0 | ⬜ |
-| 03-11-01 | 03-11 | 5 | AUTH-04, 05 | `useSessionActions`, `SessionEffects` (expired, remote tab) | component | `pnpm --filter @tripory/web test -- use-session-actions session-effects` | ❌ W0 | ⬜ |
-| 03-11-02 | 03-11 | 5 | AUTH-03, 05 | `SessionKeeper`, `SessionRecovery`, `LoginRedirect` | component | `pnpm --filter @tripory/web test -- session-keeper session-recovery login-redirect` | ❌ W0 | ⬜ |
-| 03-11-03 | 03-11 | 5 | FND-05 | `Providers` + root layout (Toast, QueryClient) | unit | `pnpm --filter @tripory/web test -- layout` | ✅ (sửa) | ⬜ |
-| 03-12-01 | 03-12 | 6 | AUTH-02, 05 | `LoginForm` + `/login` | component | `pnpm --filter @tripory/web test -- login` | ❌ W0 | ⬜ |
-| 03-12-02 | 03-12 | 6 | AUTH-01 | `RegisterForm` + `/register` | component | `pnpm --filter @tripory/web test -- register` | ❌ W0 | ⬜ |
-| 03-12-03 | 03-12 | 6 | AUTH-06 | `ChangePasswordForm` + `/settings/password` | component | `pnpm --filter @tripory/web test -- change-password settings` | ❌ W0 | ⬜ |
-| 03-13-01 | 03-13 | 6 | AUTH-07 | `UserMenu` ba trạng thái, mục disabled, nút khách | component | `pnpm --filter @tripory/web test -- user-menu guest-login-button` | ✅ (viết lại) | ⬜ |
-| 03-13-02 | 03-13 | 6 | AUTH-07 | `AccountSlot`, `AppHeader`, `AppShell` Skeleton lúc đọc phiên | component | `pnpm --filter @tripory/web test -- account-slot app-header app-shell` | ✅ (sửa) | ⬜ |
-| 03-13-03 | 03-13 | 6 | AUTH-03, 05 | `DashboardSessionGate` + layout `(dashboard)` | component | `pnpm --filter @tripory/web test` | ✅ (sửa) | ⬜ |
-| 03-14-01 | 03-14 | 7 | AUTH-05, 08 | `proxy-coverage` + bất biến bảo mật tĩnh | unit (node) | `pnpm --filter @tripory/web test -- proxy-coverage auth-invariants` | ❌ W0 | ⬜ |
-| 03-14-02 | 03-14 | 7 | AUTH-01 (D-33) | `03-BE-DEPENDENCIES.md` (DEPL-02 đầu vào) | doc | `Select-String 03-BE-DEPENDENCIES.md -Pattern user@gmail.com -SimpleMatch` | ❌ | ⬜ |
-| 03-14-03 | 03-14 | 7 | AUTH-01..08 | Full suite + `pnpm build` (không lỗi Suspense) | build | `pnpm lint; pnpm typecheck; pnpm test; pnpm build` | n/a | ⬜ |
+| 03-01-01 | 03-01 | 1 | AUTH-02..05, 08 | Catalog pin cứng, khung `packages/identity`, `API_ORIGIN` | build/lint | `pnpm --filter @tripory/identity test` | ✅ | ✅ |
+| 03-01-02 | 03-01 | 1 | AUTH-08 | Self-test ranh giới cho identity, `proxy.ts`, `modules`, `composition` | unit | `pnpm --filter @tripory/config test` | ✅ (thêm case) | ✅ |
+| 03-01-03 | 03-01 | 1 | AUTH-03, 04 | Helper `NextRequest`, fake Web Locks, fake BroadcastChannel | unit | `pnpm --filter @tripory/web test -- test-helpers` | ✅ | ✅ |
+| 03-02-01 | 03-02 | 1 | AUTH-06, 07 | Token `--semantic-size-form`, `--user-menu-name-max-width` | unit | `pnpm --filter @tripory/design-tokens test` | ✅ (sửa) | ✅ |
+| 03-02-02 | 03-02 | 1 | AUTH-06 | `Button.loadingLabel`, `PasswordInput`, `InlineAlert` | component | `pnpm --filter @tripory/ui-web test` | ✅ | ✅ |
+| 03-02-03 | 03-02 | 1 | AUTH-07 | `DropdownMenuLinkItem`, `align`, mục disabled tới được bằng phím | component | `pnpm --filter @tripory/ui-web test` | ✅ (sửa) | ✅ |
+| 03-03-01 | 03-03 | 2 | AUTH-05 | Bảng ca `toSafeNextPath`, ngưỡng token, `Viewer` | unit | `pnpm --filter @tripory/identity test` | ✅ | ✅ |
+| 03-03-02 | 03-03 | 2 | AUTH-06 | `evaluatePasswordRules` (6 mục đổi mật khẩu, `special` = `!?*@#$%^&+=`) | unit | `pnpm --filter @tripory/identity test` | ✅ | ✅ |
+| 03-04-01 | 03-04 | 3 | AUTH-02, 07 | `parseAccessTokenClaims` (payload JWT thật, UTF-8), DTO, `normalizeAvatarUrl` | unit | `pnpm --filter @tripory/identity test` | ✅ | ✅ |
+| 03-04-02 | 03-04 | 3 | AUTH-01, 06 | Gateway HTTP, profile reader, hook factory, ranh giới export | unit | `pnpm --filter @tripory/identity test` | ✅ | ✅ |
+| 03-05-01 | 03-05 | 4 | AUTH-02, 08 | Tên cookie, env, `checkSameOrigin`, envelope | unit (node) | `pnpm --filter @tripory/web test -- session-cookies env request-guards` | ✅ | ✅ |
+| 03-05-02 | 03-05 | 4 | AUTH-08 | `callBackend` timeout 28 s, khóa origin upstream | unit (node) | `pnpm --filter @tripory/web test -- upstream` | ✅ | ✅ |
+| 03-05-03 | 03-05 | 4 | AUTH-02, 04 | `writeSession`/`clearSession` (Set-Cookie đủ thuộc tính), `readSession` | unit (node) | `pnpm --filter @tripory/web test -- session-store` | ✅ | ✅ |
+| 03-06-01 | 03-06 | 4 | AUTH-03 | N×401 + chủ động + hai tab chỉ 1 refresh; fallback mutex; khóa quá 40 s | unit (jsdom) | `pnpm --filter @tripory/web test -- http.client` | ✅ | ✅ |
+| 03-06-02 | 03-06 | 4 | AUTH-04 | `sessionEvents`, BroadcastChannel, `registerLogoutHandler` | unit | `pnpm --filter @tripory/web test -- session-events` | ✅ | ✅ |
+| 03-06-03 | 03-06 | 4 | FND-05 | `makeQueryClient` (retry false, toast theo meta), `SESSION_EXPIRED_TOAST` | unit | `pnpm --filter @tripory/web test -- query-client error-messages` | ✅ | ✅ |
+| 03-07-01 | 03-07 | 5 | AUTH-01, 02, 04 | Route login/register/logout: cookie, body không token, Origin | unit (node) | `pnpm --filter @tripory/web test -- auth-handlers` | ✅ | ✅ |
+| 03-07-02 | 03-07 | 5 | AUTH-03 | Route refresh idempotent, 401 xóa cookie, 5xx giữ cookie | unit (node) | `pnpm --filter @tripory/web test -- auth-handlers.refresh` | ✅ | ✅ |
+| 03-07-03 | 03-07 | 5 | AUTH-06 | Route change-password: stale 401, xóa cookie khi thành công | unit (node) | `pnpm --filter @tripory/web test -- auth-handlers.change-password` | ✅ | ✅ |
+| 03-08-01 | 03-08 | 5 | AUTH-08 | `resolveBffTarget` (allowlist, `auth/*` 404, traversal 400) | unit (node) | `pnpm --filter @tripory/web test -- bff.resolve` | ✅ | ✅ |
+| 03-08-02 | 03-08 | 5 | AUTH-08 | `forwardToBackend` (Origin 403, stale 401, header, timeout 504) | unit (node) | `pnpm --filter @tripory/web test -- bff.forward` | ✅ | ✅ |
+| 03-09-01 | 03-09 | 5 | AUTH-05 | `proxy` (gate, đẩy khỏi `/login`, `next=//evil`, D-25) | unit (node) | `pnpm --filter @tripory/web test -- proxy` | ✅ | ✅ |
+| 03-09-02 | 03-09 | 5 | AUTH-03, 07 | `decideDashboardGate`, `viewer.server` | unit | `pnpm --filter @tripory/web test -- dashboard-gate` | ✅ | ✅ |
+| 03-10-01 | 03-10 | 3 | AUTH-01, 06 | Schema Zod 3 form (D-29, D-33) | unit | `pnpm --filter @tripory/web test -- form-schemas` | ✅ | ✅ |
+| 03-10-02 | 03-10 | 3 | AUTH-01, 06 | Map errorCode → ô/alert theo form | unit | `pnpm --filter @tripory/web test -- form-error-mapping` | ✅ | ✅ |
+| 03-10-03 | 03-10 | 3 | AUTH-06 | `PasswordChecklist`, `SubmitStatus` (5 s), `AuthFormCard` | component | `pnpm --filter @tripory/web test -- password-checklist submit-status auth-form-card` | ✅ | ✅ |
+| 03-11-01 | 03-11 | 5 | AUTH-04, 05 | `useSessionActions`, `SessionEffects` (expired, remote tab) | component | `pnpm --filter @tripory/web test -- use-session-actions session-effects` | ✅ | ✅ |
+| 03-11-02 | 03-11 | 5 | AUTH-03, 05 | `SessionKeeper`, `SessionRecovery`, `LoginRedirect` | component | `pnpm --filter @tripory/web test -- session-keeper session-recovery login-redirect` | ✅ | ✅ |
+| 03-11-03 | 03-11 | 5 | FND-05 | `Providers` + root layout (Toast, QueryClient) | unit | `pnpm --filter @tripory/web test -- layout` | ✅ (sửa) | ✅ |
+| 03-12-01 | 03-12 | 6 | AUTH-02, 05 | `LoginForm` + `/login` | component | `pnpm --filter @tripory/web test -- login` | ✅ | ✅ |
+| 03-12-02 | 03-12 | 6 | AUTH-01 | `RegisterForm` + `/register` | component | `pnpm --filter @tripory/web test -- register` | ✅ | ✅ |
+| 03-12-03 | 03-12 | 6 | AUTH-06 | `ChangePasswordForm` + `/settings/password` | component | `pnpm --filter @tripory/web test -- change-password settings` | ✅ | ✅ |
+| 03-13-01 | 03-13 | 6 | AUTH-07 | `UserMenu` ba trạng thái, mục disabled, nút khách | component | `pnpm --filter @tripory/web test -- user-menu guest-login-button` | ✅ (viết lại) | ✅ |
+| 03-13-02 | 03-13 | 6 | AUTH-07 | `AccountSlot`, `AppHeader`, `AppShell` Skeleton lúc đọc phiên | component | `pnpm --filter @tripory/web test -- account-slot app-header app-shell` | ✅ (sửa) | ✅ |
+| 03-13-03 | 03-13 | 6 | AUTH-03, 05 | `DashboardSessionGate` + layout `(dashboard)` | component | `pnpm --filter @tripory/web test` | ✅ (sửa) | ✅ |
+| 03-14-01 | 03-14 | 7 | AUTH-05, 08 | `proxy-coverage` + bất biến bảo mật tĩnh | unit (node) | `pnpm --filter @tripory/web test -- proxy-coverage auth-invariants` | ✅ | ✅ |
+| 03-14-02 | 03-14 | 7 | AUTH-01 (D-33) | `03-BE-DEPENDENCIES.md` (DEPL-02 đầu vào) | doc | `Select-String 03-BE-DEPENDENCIES.md -Pattern user@gmail.com -SimpleMatch` | ✅ | ✅ |
+| 03-14-03 | 03-14 | 7 | AUTH-01..08 | Full suite + `pnpm build` (không lỗi Suspense) | build | `pnpm lint; pnpm typecheck; pnpm test; pnpm build` | n/a | ✅ |
 | 03-15-02 | 03-15 | 8 | AUTH-01..08, FND-05 | UAT thủ công 19 bước (checkpoint) | manual | `03-UAT-CHECKLIST.md` | ❌ | ⬜ |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
@@ -88,11 +88,11 @@ Task ID có dạng `03-PP-TT` (plan PP, task TT). Wave theo frontmatter của t�
 
 Wave 0 = plan 03-01 (wave 1) cộng fixture ở plan 03-04 và 03-05; các wave sau chỉ dùng lại.
 
-- [ ] Khung `packages/identity/` (plan 03-01 Task 1): `package.json` (exports `.`, `./http`, `./react`), `eslint.config.mjs` (`contextPackage()`), `tsconfig.json`, `vitest.config.ts`. Case self-test ranh giới ở Task 2.
-- [ ] Catalog + `apps/web/package.json` (plan 03-01 Task 1): `@tanstack/react-query`, `zod`, `react-hook-form`, `@hookform/resolvers`, `@tripory/identity`, pin cứng.
-- [ ] Fixture: payload JWT thật và DTO ở `packages/identity/src/infrastructure/fixtures.ts` (plan 03-04); `apps/web/src/test/be-auth-fixtures.ts` (`fakeJwt`, `beAuthResponse`, envelope lỗi `Token.*`, `Auth.InvalidCurrentPassword`, `NotEqualValidator`) ở plan 03-05.
-- [ ] Helper `apps/web/src/test/next-request.ts` (`makeRequest`, `setCookiesOf`) (plan 03-01 Task 3).
-- [ ] Fake `navigator.locks` (`fake-locks.ts`) và fake `BroadcastChannel` (`fake-broadcast-channel.ts`) (plan 03-01 Task 3).
+- [x] Khung `packages/identity/` (plan 03-01 Task 1): `package.json` (exports `.`, `./http`, `./react`), `eslint.config.mjs` (`contextPackage()`), `tsconfig.json`, `vitest.config.ts`. Case self-test ranh giới ở Task 2.
+- [x] Catalog + `apps/web/package.json` (plan 03-01 Task 1): `@tanstack/react-query`, `zod`, `react-hook-form`, `@hookform/resolvers`, `@tripory/identity`, pin cứng.
+- [x] Fixture: payload JWT thật và DTO ở `packages/identity/src/infrastructure/fixtures.ts` (plan 03-04); `apps/web/src/test/be-auth-fixtures.ts` (`fakeJwt`, `beAuthResponse`, envelope lỗi `Token.*`, `Auth.InvalidCurrentPassword`, `NotEqualValidator`) ở plan 03-05.
+- [x] Helper `apps/web/src/test/next-request.ts` (`makeRequest`, `setCookiesOf`) (plan 03-01 Task 3).
+- [x] Fake `navigator.locks` (`fake-locks.ts`) và fake `BroadcastChannel` (`fake-broadcast-channel.ts`) (plan 03-01 Task 3).
 
 ---
 ## Manual-Only Verifications
@@ -110,7 +110,7 @@ Wave 0 = plan 03-01 (wave 1) cộng fixture ở plan 03-04 và 03-05; các wave 
 
 ## Validation Sign-Off
 
-- [ ] Mọi task có `<automated>` verify, hoặc phụ thuộc vào Wave 0
+- [x] Mọi task có `<automated>` verify, hoặc phụ thuộc vào Wave 0
 - [x] Không có 3 task liên tiếp thiếu automated verify
 - [x] Wave 0 phủ mọi tham chiếu đang thiếu
 - [x] Không dùng cờ watch-mode

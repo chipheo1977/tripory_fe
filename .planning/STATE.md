@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-11-PLAN.md
-last_updated: "2026-10-15T03:22:25.506Z"
+stopped_at: Completed 03-12-PLAN.md
+last_updated: "2026-10-15T03:35:01.195Z"
 last_activity: 2026-10-15
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 27
-  completed_plans: 23
-  percent: 85
+  completed_plans: 24
+  percent: 89
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 3 (Identity & Session (BFF)) — EXECUTING
-Plan: 11 of 15 (03-06, 03-07 và 03-10 đã xong; 03-08, 03-09 còn lại)
+Plan: 12 of 15 (03-06, 03-07 và 03-10 đã xong; 03-08, 03-09 còn lại)
 Status: Ready to execute
 Last activity: 2026-10-15
 
@@ -76,6 +76,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 3 P08 | 15min | 2 tasks | 4 files |
 | Phase 3 P09 | 10min | 2 tasks | 5 files |
 | Phase 03 P11 | 35min | 3 tasks | 14 files |
+| Phase 03 P12 | 25min | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -147,6 +148,7 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-08: BFF kiểm theo thứ tự method → allowlist/traversal → Origin → phiên → body; stale/invalid 401 không gọi BE; BE 3xx → 502 Bff.InvalidUpstream; trần body 4 MB
 - [Phase 3]: 03-09: proxy chỉ kiểm sự có mặt cookie phiên (không giải mã JWT), cho qua khi access hết hạn (D-25); next lọc _rsc/__next*
 - [Phase 03]: 03-11: useLogout onSuccess ở mức hook (mutate-level callback mất khi menu unmount); SessionRecovery chặn StrictMode bằng ref
+- [Phase 03]: 03-12: ô mật khẩu dùng Controller (controlled) để PasswordInput tự ẩn lại khi form xóa ô; nút Hủy là next/link + buttonVariants thay vì Button render Link (tránh role=button)
 
 ### Pending Todos
 
@@ -166,6 +168,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-15T03:22:25.501Z
-Stopped at: Completed 03-11-PLAN.md
+Last session: 2026-10-15T03:35:01.190Z
+Stopped at: Completed 03-12-PLAN.md
 Resume file: None

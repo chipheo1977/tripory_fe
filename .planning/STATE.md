@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-05-PLAN.md
-last_updated: "2026-10-14T15:29:03.824Z"
-last_activity: 2026-10-14
+stopped_at: Completed 03-06-PLAN.md
+last_updated: "2026-10-15T02:49:50.918Z"
+last_activity: 2026-10-15
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 27
-  completed_plans: 18
-  percent: 67
+  completed_plans: 19
+  percent: 70
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 3 (Identity & Session (BFF)) — EXECUTING
-Plan: 6 of 15 (03-10 đã xong ngoài thứ tự; 03-06..03-09 còn lại)
+Plan: 7 of 15 (03-06 và 03-10 đã xong; 03-07..03-09 còn lại)
 Status: Ready to execute
-Last activity: 2026-10-14
+Last activity: 2026-10-15
 
 Phase 1 progress: [██████████] 100% — verified complete
 
@@ -71,6 +71,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 3 P04 | 8 min | 2 tasks | 12 files |
 | Phase 3 P10 | 10 min | 3 tasks | 13 files |
 | Phase 3 P05 | 9 min | 3 tasks | 11 files |
+| Phase 3 P06 | 35 min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -130,6 +131,11 @@ Recent decisions affecting current work:
 - [Phase 3]: 03-05: callBackend ném Error không kèm đường dẫn khi URL ra ngoài API_ORIGIN hoặc không bắt đầu /api/v1/, dùng redirect manual và timeout 28 giây tính cả đọc body — Đường dẫn có thể chứa dữ liệu do client gửi; 3xx của BE không dẫn server tới host khác (T-03-18); 28 giây để client nhận 504 có cấu trúc trước timeout 30 giây.
 - [Phase 3]: 03-05: readSession trả stale không kèm accessToken (route refresh dùng readRawTokens); writeSession trả ok false và không ghi cookie nào khi expiresAt không parse được hoặc access token thiếu claim — Không để lại phiên nửa vời, và Bearer hết hạn không lọt vào BFF.
 - [Phase 3]: 03-05: Fixture auth của app ở apps/web/src/test/be-auth-fixtures.ts (bearerPair, beAuthResponse, beTokenResponse, beErrorEnvelope, 7 envelope lỗi BE, jsonResponse) không import vitest — 03-07/08/09/13 dùng chung; không import xuyên package bằng đường tương đối nên app giữ bản riêng.
+- [Phase 3]: 03-06: refreshSession() chỉ trả refreshed|expired hoặc ném lỗi tạm thời, không tự gọi onSessionExpired; caller (SessionKeeper, SessionRecovery ở 03-11) phát sessionEvents.emitExpired() — withSessionRefresh vẫn báo cho request 401, sessionEvents đã chống lặp nên không sinh hai toast.
+- [Phase 3]: 03-06: Hết hạn xin khóa Web Locks (40 giây) đổi AbortError thành ApiError kind timeout chỉ khi khóa chưa được cấp (cờ granted); lỗi của tác vụ refresh trong khóa lan nguyên — Lỗi tạm thời không bao giờ phát expired (D-14a) và DOMException không lọt ra ngoài; 503 vẫn là 503.
+- [Phase 3]: 03-06: makeBrowserHttp(deps) thuần + singleton ở cuối file; mutex dự phòng nằm trong closure từng instance — Test dựng nhiều tab độc lập (chung fake lock + cookie jar), beCalls === 1 chứng minh khóa cùng route idempotent; chuỗi đường dẫn route refresh chỉ có ở http.client.ts (Pitfall 3).
+- [Phase 3]: 03-06: sessionEvents tạo BroadcastChannel lazy, expired không đi qua channel, createChannel chỉ được hỏi một lần kể cả khi trả null, dispose giữ handler đăng xuất — Node 24 có BroadcastChannel toàn cục nên SSR không được mở channel; cookie bị xóa nên tab khác tự phát hiện ở request kế tiếp.
+- [Phase 3]: 03-06: makeQueryClient() luôn trả client mới với retry false, staleTime 60 giây, MutationCache theo chữ ký 5.104.2 (data, variables, onMutateResult, mutation, context); QueryCache không toast (D-10); SESSION_EXPIRED_TOAST là hằng riêng khác dấu câu với SESSION_EXPIRED_MESSAGE — Mutation chỉ khai báo meta.feedback; mount QueryClientProvider và Toast thuộc 03-11.
 
 ### Pending Todos
 
@@ -149,6 +155,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-14T15:29:03.818Z
-Stopped at: Completed 03-05-PLAN.md
+Last session: 2026-10-15T02:49:50.913Z
+Stopped at: Completed 03-06-PLAN.md
 Resume file: None

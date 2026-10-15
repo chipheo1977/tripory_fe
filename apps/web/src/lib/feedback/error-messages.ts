@@ -12,6 +12,11 @@ export const GENERIC_ERROR_MESSAGE = "Đã có lỗi xảy ra, vui lòng thử l
 /** D-05a: hiện ở ô form khi BE trả ValidationProblemDetails (message gốc là tiếng Anh). */
 export const FIELD_INVALID_MESSAGE = "Giá trị không hợp lệ.";
 export const SESSION_EXPIRED_MESSAGE = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+/**
+ * D-20: khác dấu câu với `SESSION_EXPIRED_MESSAGE` có chủ đích (một câu liền, không dấu chấm giữa câu).
+ * Dùng cho toast hết phiên; giữ hằng cũ cho bảng map lỗi.
+ */
+export const SESSION_EXPIRED_TOAST = "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại";
 
 export const ERROR_MESSAGES: ReadonlyMap<string, string> = new Map<string, string>([
   // Auth / User

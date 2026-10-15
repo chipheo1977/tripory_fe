@@ -107,7 +107,7 @@ Plans:
 - [x] 03-11-PLAN.md — Vòng đời phiên UI: `Providers`, `SessionEffects`, `SessionKeeper`, `SessionRecovery`
 - [x] 03-12-PLAN.md — `LoginForm`, `RegisterForm`, `ChangePasswordForm` và 3 trang
 - [x] 03-13-PLAN.md — `UserMenu`, nút khách, `AccountSlot`, `AppShell`, gate `(dashboard)`
-- [ ] 03-14-PLAN.md — Test đối chiếu gate, bất biến bảo mật, checklist phụ thuộc BE, full suite + build
+- [x] 03-14-PLAN.md — Test đối chiếu gate, bất biến bảo mật, checklist phụ thuộc BE, full suite + build
 - [ ] 03-15-PLAN.md — UAT thủ công với BE thật (checkpoint; gồm `user@gmail.com` cho D-33)
 
 ### Phase 4: Itinerary CRUD & Editor

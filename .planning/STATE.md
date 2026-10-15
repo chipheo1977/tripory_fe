@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-13-PLAN.md
-last_updated: "2026-10-15T04:06:52.849Z"
+stopped_at: Completed 03-14-PLAN.md
+last_updated: "2026-10-15T04:11:08.430Z"
 last_activity: 2026-10-15
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 27
-  completed_plans: 25
-  percent: 93
+  completed_plans: 26
+  percent: 96
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 3 (Identity & Session (BFF)) — EXECUTING
-Plan: 13 of 15 (03-06, 03-07 và 03-10 đã xong; 03-08, 03-09 còn lại)
+Plan: 14 of 15 (03-06, 03-07 và 03-10 đã xong; 03-08, 03-09 còn lại)
 Status: Ready to execute
 Last activity: 2026-10-15
 
@@ -78,6 +78,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 03 P11 | 35min | 3 tasks | 14 files |
 | Phase 03 P12 | 25min | 3 tasks | 13 files |
 | Phase 3 P13 | 20min | 3 tasks | 15 files |
+| Phase 3 P14 | 25min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -151,6 +152,7 @@ Recent decisions affecting current work:
 - [Phase 03]: 03-11: useLogout onSuccess ở mức hook (mutate-level callback mất khi menu unmount); SessionRecovery chặn StrictMode bằng ref
 - [Phase 03]: 03-12: ô mật khẩu dùng Controller (controlled) để PasswordInput tự ẩn lại khi form xóa ô; nút Hủy là next/link + buttonVariants thay vì Button render Link (tránh role=button)
 - [Phase 03]: 03-13: GuestLoginButton là next/link + buttonVariants (tránh role=button); AccountSlot là chỗ duy nhất đọc cookie của header, AppShell bọc trong Suspense với Skeleton tròn; DashboardSessionGate nhận loading qua prop
+- [Phase 3]: 03-14: bất biến bảo mật tĩnh khớp `import "server-only"` (không khớp comment) và literal có nháy kép "/refresh" (không đếm nhầm đường BE `refresh-token`); VALIDATION map đã ✅, còn 03-15 UAT thủ công
 
 ### Pending Todos
 
@@ -170,6 +172,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-15T04:06:52.845Z
-Stopped at: Completed 03-13-PLAN.md
+Last session: 2026-10-15T04:11:08.425Z
+Stopped at: Completed 03-14-PLAN.md
 Resume file: None

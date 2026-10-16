@@ -83,7 +83,8 @@ async function readBoundedBody(request: NextRequest): Promise<ArrayBuffer | unde
  *   lại. Không có cookie → chuyển tiếp không Bearer để endpoint công khai vẫn chạy.
  * - Header đi chỉ gồm `accept`, `content-type` (giữ boundary multipart) và `authorization` do SERVER gắn từ
  *   cookie. Không chuyển `cookie`, `host`, `origin`, `x-forwarded-*` hay `authorization` của client (T-03-38,
- *   T-03-39).
+ *   T-03-39). Cũng vì thế `x-bff-secret` / `x-forwarded-for` do trình duyệt gửi không bao giờ tới BE, và proxy
+ *   chung này không truyền `clientIp` cho `callBackend` nên không mang `X-Bff-Secret` (D-35).
  * - Response về client chỉ giữ `content-type` và `cache-control: no-store`; `set-cookie`, `location` và các
  *   header lộ công nghệ của BE bị bỏ (T-03-38, T-03-41).
  */

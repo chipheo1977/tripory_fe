@@ -11,6 +11,7 @@ import {
 } from "@tripory/identity/http";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
+import { deriveClientIp } from "./client-ip";
 import type { ServerDeps } from "./env";
 import { checkSameOrigin, errorEnvelope, successEnvelope } from "./request-guards";
 import { clearSession, decodeJwtPayload, readRawTokens, readSession, writeSession } from "./session-store";
@@ -88,6 +89,10 @@ function forwardUpstream(result: UpstreamResult, nowMs: number): NextResponse {
 
   if (result.contentType !== null) headers.set("content-type", result.contentType);
 
+  // 429 của BE (giới hạn tốc độ theo IP, D-35) chuyển nguyên status + body (errorCode `RateLimit.TooManyRequests`
+  // và câu tiếng Việt của BE) kèm `Retry-After` nếu có, KHÔNG đổi thành 5xx.
+  if (result.status === 429 && result.retryAfter !== undefined) headers.set("retry-after", result.retryAfter);
+
   return new NextResponse(result.body, { status: result.status, headers });
 }
 
@@ -145,6 +150,8 @@ async function credentialsHandler(
     method: "POST",
     headers: JSON_HEADERS,
     body: JSON.stringify(picked),
+    // BE giới hạn login/register theo IP: gửi IP thật của người dùng (D-35).
+    clientIp: deriveClientIp(request.headers),
   });
 
   if (result.kind !== "response" || !isSuccessStatus(result.status)) {
@@ -242,6 +249,8 @@ export async function handleRefresh(request: NextRequest, deps: ServerDeps): Pro
     method: "POST",
     headers: JSON_HEADERS,
     body: JSON.stringify({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken }),
+    // BE giới hạn refresh-token theo IP (20/phút): cùng lý do với login/register (D-35).
+    clientIp: deriveClientIp(request.headers),
   });
 
   if (result.kind !== "response") return refreshUnavailable(deps);

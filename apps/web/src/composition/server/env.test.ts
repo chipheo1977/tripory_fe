@@ -16,6 +16,33 @@ describe("parseServerEnv", () => {
     });
   });
 
+  it("BFF_SHARED_SECRET: thiếu hoặc rỗng = chưa đặt (không có key), có giá trị thì giữ nguyên", () => {
+    expect(parseServerEnv({ API_ORIGIN: "http://be.test" })).not.toHaveProperty("bffSharedSecret");
+    expect(parseServerEnv({ API_ORIGIN: "http://be.test", BFF_SHARED_SECRET: "" })).not.toHaveProperty(
+      "bffSharedSecret",
+    );
+    expect(parseServerEnv({ API_ORIGIN: "http://be.test", BFF_SHARED_SECRET: "gia-tri-thu-nghiem" })).toEqual({
+      apiOrigin: "http://be.test",
+      bffSharedSecret: "gia-tri-thu-nghiem",
+    });
+  });
+
+  it("BFF_SHARED_SECRET chứa ký tự điều khiển → ném Error KHÔNG kèm giá trị", () => {
+    const bad = "abc\r\nx-injected: 1";
+    const error = (() => {
+      try {
+        parseServerEnv({ API_ORIGIN: "http://be.test", BFF_SHARED_SECRET: bad });
+      } catch (caught) {
+        return caught as Error;
+      }
+
+      return undefined;
+    })();
+
+    expect(error?.message).toMatch(/BFF_SHARED_SECRET/);
+    expect(error?.message).not.toContain("abc");
+  });
+
   it.each([
     ["thiếu", {}],
     ["rỗng", { API_ORIGIN: "" }],
@@ -34,6 +61,15 @@ describe("serverDeps", () => {
 
     vi.stubEnv("API_ORIGIN", "http://be.test/");
     expect(serverDeps().env).toEqual({ apiOrigin: "http://be.test" });
+  });
+
+  it("đọc BFF_SHARED_SECRET từ process.env lúc gọi; rỗng thì không có key", () => {
+    vi.stubEnv("API_ORIGIN", "http://be.test");
+    vi.stubEnv("BFF_SHARED_SECRET", "");
+    expect(serverDeps().env).toEqual({ apiOrigin: "http://be.test" });
+
+    vi.stubEnv("BFF_SHARED_SECRET", "gia-tri-thu-nghiem");
+    expect(serverDeps().env).toEqual({ apiOrigin: "http://be.test", bffSharedSecret: "gia-tri-thu-nghiem" });
   });
 
   it("secure theo NODE_ENV, nowMs là đồng hồ hệ thống, fetch gọi được", () => {

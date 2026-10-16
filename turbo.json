@@ -4,7 +4,7 @@
     "build": {
       "dependsOn": ["^build", "transit"],
       "outputs": [".next/**", "!.next/cache/**"],
-      "env": ["API_ORIGIN"]
+      "env": ["API_ORIGIN", "BFF_SHARED_SECRET"]
     },
     "transit": {
       "dependsOn": ["^transit"]
@@ -21,7 +21,7 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "env": ["API_ORIGIN"]
+      "env": ["API_ORIGIN", "BFF_SHARED_SECRET"]
     }
   }
 }

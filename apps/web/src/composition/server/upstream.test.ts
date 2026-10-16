@@ -141,6 +141,129 @@ describe("callBackend: lời gọi fetch", () => {
   });
 });
 
+describe("callBackend: header giới hạn tốc độ (D-35)", () => {
+  // Giá trị thử nghiệm, không phải bí mật thật.
+  const SECRET = "bi-mat-thu-nghiem";
+  const withSecret = (fetch: (...args: FetchArgs) => Promise<Response>): ServerDeps => ({
+    ...depsWith(fetch),
+    env: { apiOrigin: API_ORIGIN, bffSharedSecret: SECRET },
+  });
+  const baseHeaders = { accept: "application/json", "content-type": "application/json" };
+
+  it("có secret + IP hợp lệ → gửi x-bff-secret và x-forwarded-for", async () => {
+    const fetch = fetchReturning(jsonResponse({}));
+
+    await callBackend(withSecret(fetch), "/api/v1/auth/login", {
+      method: "POST",
+      headers: baseHeaders,
+      clientIp: "203.0.113.7",
+    });
+
+    expect(initOf(fetch).headers).toEqual({
+      ...baseHeaders,
+      "x-bff-secret": SECRET,
+      "x-forwarded-for": "203.0.113.7",
+    });
+  });
+
+  it("chưa cấu hình secret → không gửi header nào dù có IP", async () => {
+    const fetch = fetchReturning(jsonResponse({}));
+
+    await callBackend(depsWith(fetch), "/api/v1/auth/login", {
+      method: "POST",
+      headers: baseHeaders,
+      clientIp: "203.0.113.7",
+    });
+
+    expect(initOf(fetch).headers).toEqual(baseHeaders);
+  });
+
+  it.each([null, undefined, "", "not-an-ip", "1.2.3.4, 5.6.7.8"])(
+    "có secret nhưng IP %j không dùng được → không gửi cả secret",
+    async (clientIp) => {
+      const fetch = fetchReturning(jsonResponse({}));
+
+      await callBackend(withSecret(fetch), "/api/v1/auth/login", {
+        method: "POST",
+        headers: baseHeaders,
+        clientIp,
+      });
+
+      expect(initOf(fetch).headers).toEqual(baseHeaders);
+      expect(JSON.stringify(initOf(fetch).headers)).not.toContain(SECRET);
+    },
+  );
+
+  it("không truyền clientIp (change-password, proxy /api/bff) → không gửi secret", async () => {
+    const fetch = fetchReturning(jsonResponse({}));
+
+    await callBackend(withSecret(fetch), "/api/v1/auth/change-password", {
+      method: "PUT",
+      headers: baseHeaders,
+    });
+
+    expect(initOf(fetch).headers).toEqual(baseHeaders);
+  });
+
+  it("loại x-bff-secret / x-forwarded-for do người gọi nhét vào headers (mọi kiểu hoa thường)", async () => {
+    const fetch = fetchReturning(jsonResponse({}));
+
+    await callBackend(withSecret(fetch), "/api/v1/users/me", {
+      method: "GET",
+      headers: { ...baseHeaders, "X-Bff-Secret": "gia-mao", "X-Forwarded-For": "6.6.6.6" },
+    });
+    await callBackend(depsWith(fetch), "/api/v1/users/me", {
+      method: "GET",
+      headers: { ...baseHeaders, "x-bff-secret": "gia-mao", "x-forwarded-for": "6.6.6.6" },
+    });
+
+    for (const call of fetch.mock.calls) expect(call[1]?.headers).toEqual(baseHeaders);
+  });
+
+  it("không có headers và không có secret → headers undefined như cũ", async () => {
+    const fetch = fetchReturning(jsonResponse({}));
+
+    await callBackend(depsWith(fetch), "/api/v1/users/me", { method: "GET" });
+
+    expect(initOf(fetch).headers).toBeUndefined();
+  });
+
+  it("thông điệp lỗi URL không chứa secret", async () => {
+    const error = await callBackend(withSecret(fetchReturning(jsonResponse({}))), "https://evil.test/x", {
+      method: "POST",
+      clientIp: "203.0.113.7",
+    }).catch((caught: unknown) => caught);
+
+    expect(String(error)).not.toContain(SECRET);
+  });
+});
+
+describe("callBackend: Retry-After", () => {
+  it.each([
+    ["60", "60"],
+    [" 3600 ", "3600"],
+  ])("429 có Retry-After %j → retryAfter %j", async (header, expected) => {
+    const fetch = fetchReturning(
+      new Response("{}", { status: 429, headers: { "content-type": "application/json", "retry-after": header } }),
+    );
+
+    const result = await callBackend(depsWith(fetch), "/api/v1/auth/login", { method: "POST" });
+
+    expect(result).toMatchObject({ kind: "response", status: 429, retryAfter: expected });
+  });
+
+  it.each(["Wed, 21 Oct 2026 07:28:00 GMT", "abc", "-1", "1e9", "123456789"])(
+    "Retry-After %j không phải số giây ngắn → bỏ",
+    async (header) => {
+      const fetch = fetchReturning(new Response("{}", { status: 429, headers: { "retry-after": header } }));
+
+      const result = await callBackend(depsWith(fetch), "/api/v1/auth/login", { method: "POST" });
+
+      expect(result).not.toHaveProperty("retryAfter");
+    },
+  );
+});
+
 describe("callBackend: URL bị khóa vào API_ORIGIN", () => {
   it.each([
     ["đường dẫn không bắt đầu /api/v1/", "/auth/login"],

@@ -1,3 +1,4 @@
+import { isIP } from "node:net";
 import type { ServerDeps } from "./env";
 
 /**
@@ -7,9 +8,49 @@ import type { ServerDeps } from "./env";
 export const UPSTREAM_TIMEOUT_MS = 28_000;
 
 export type UpstreamResult =
-  | Readonly<{ kind: "response"; status: number; body: string; contentType: string | null }>
+  | Readonly<{
+      kind: "response";
+      status: number;
+      body: string;
+      contentType: string | null;
+      /** Chỉ có key khi BE gửi `Retry-After` hợp lệ (số giây nguyên). Dùng để chuyển tiếp 429 (D-35). */
+      retryAfter?: string;
+    }>
   | Readonly<{ kind: "timeout" }>
   | Readonly<{ kind: "network" }>;
+
+/** Hai header BE dùng để tin IP do BFF khai báo (RateLimiting/ClientIpResolver.cs). So khớp không phân biệt hoa thường. */
+const RATE_LIMIT_HEADER_NAMES = new Set(["x-bff-secret", "x-forwarded-for"]);
+
+/**
+ * Gắn `X-Bff-Secret` + `X-Forwarded-For` để BE đếm giới hạn tốc độ theo IP người dùng thật thay vì IP của
+ * server FE (nếu không, cả site chung một bucket: 5 login/phút, 3 register/giờ).
+ *
+ * - Hai header này CHỈ có thể đến từ tham số `clientIp` (đã kiểm `isIP`) và env: mọi `x-bff-secret` /
+ *   `x-forwarded-for` nằm sẵn trong `headers` do người gọi đưa vào đều bị loại, nên dữ liệu từ trình duyệt
+ *   không có đường nào đặt được chúng.
+ * - Chưa cấu hình secret → không gửi gì, BE dùng IP socket (hành vi hiện tại).
+ * - Có secret nhưng KHÔNG suy ra được IP (dev local không proxy) → cũng không gửi gì. Đây là lựa chọn an toàn
+ *   hơn gửi mỗi `X-Bff-Secret`: BE vẫn rơi về IP socket khi thiếu hoặc sai XFF, nên gửi secret lúc này không
+ *   mang lại gì mà chỉ thêm một lần lộ secret trên đường truyền.
+ * - Chỉ các lời gọi được truyền `clientIp` (login, register, refresh, là ba endpoint BE giới hạn tốc độ) mới
+ *   mang secret. Change-password và proxy `/api/bff` không truyền, để secret ra khỏi server FE ít nhất có thể.
+ */
+function withRateLimitHeaders(
+  headers: Readonly<Record<string, string>> | undefined,
+  secret: string | undefined,
+  clientIp: string | null | undefined,
+): Record<string, string> | undefined {
+  if (headers === undefined && (secret === undefined || !clientIp)) return undefined;
+
+  const safe = Object.fromEntries(
+    Object.entries(headers ?? {}).filter(([name]) => !RATE_LIMIT_HEADER_NAMES.has(name.toLowerCase())),
+  );
+
+  if (secret === undefined || !clientIp || isIP(clientIp) === 0) return safe;
+
+  return { ...safe, "x-bff-secret": secret, "x-forwarded-for": clientIp };
+}
 
 /**
  * Cửa duy nhất để server gọi BE. Không ném `ApiError`: route cần status và body nguyên để chuyển tiếp cho
@@ -25,7 +66,16 @@ export type UpstreamResult =
 export async function callBackend(
   deps: ServerDeps,
   pathWithQuery: string,
-  init: Readonly<{ method: string; headers?: Readonly<Record<string, string>>; body?: BodyInit | null }>,
+  init: Readonly<{
+    method: string;
+    headers?: Readonly<Record<string, string>>;
+    body?: BodyInit | null;
+    /**
+     * IP người dùng cuối, CHỈ truyền cho các lời gọi mà BE giới hạn tốc độ theo IP (login, register, refresh).
+     * Xem `rateLimitHeaders`.
+     */
+    clientIp?: string | null;
+  }>,
 ): Promise<UpstreamResult> {
   const url = new URL(pathWithQuery, deps.env.apiOrigin);
 
@@ -33,6 +83,8 @@ export async function callBackend(
   if (url.origin !== deps.env.apiOrigin || !url.pathname.startsWith("/api/v1/")) {
     throw new Error("Upstream URL không hợp lệ");
   }
+
+  const headers = withRateLimitHeaders(init.headers, deps.env.bffSharedSecret, init.clientIp);
 
   // Gọi như hàm trần: `deps.fetch(...)` làm `this` thành object deps và ném "Illegal invocation".
   const doFetch = deps.fetch;
@@ -48,7 +100,7 @@ export async function callBackend(
   try {
     const response = await doFetch(url.href, {
       method: init.method,
-      headers: init.headers,
+      headers,
       body: init.body,
       cache: "no-store",
       redirect: "manual",
@@ -56,12 +108,15 @@ export async function callBackend(
     });
     // Đọc body vẫn nằm trong cửa sổ timeout: BE có thể gửi header rồi treo body.
     const body = await response.text();
+    const retryAfter = response.headers.get("retry-after")?.trim();
 
     return {
       kind: "response",
       status: response.status,
       body,
       contentType: response.headers.get("content-type"),
+      // Chỉ nhận số giây nguyên ngắn: không chuyển tiếp chuỗi tùy ý của BE về trình duyệt.
+      ...(retryAfter !== undefined && /^\d{1,7}$/.test(retryAfter) ? { retryAfter } : {}),
     };
   } catch {
     return timedOut ? { kind: "timeout" } : { kind: "network" };

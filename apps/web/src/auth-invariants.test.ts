@@ -84,6 +84,42 @@ describe("auth security invariants (static)", () => {
     expect(proxy?.text).not.toContain("@tripory/identity/http");
   });
 
+  // D-35: bí mật dùng chung với BE chỉ server đọc. Nằm ngoài composition/server/** là có đường lọt vào bundle
+  // client hoặc vào code dùng chung; tiền tố NEXT_PUBLIC_ nhúng thẳng giá trị vào JS gửi trình duyệt.
+  it("references BFF_SHARED_SECRET only inside composition/server/**", () => {
+    const offenders = allSources
+      .filter((file) => /BFF_SHARED_SECRET|bffSharedSecret/.test(file.text))
+      .filter((file) => !file.rel.startsWith("composition/server/"))
+      .map((file) => file.rel);
+    expect(offenders).toEqual([]);
+  });
+
+  it("never gives BFF_SHARED_SECRET a NEXT_PUBLIC_ prefix (source, turbo.json, .env.example, next.config)", () => {
+    const repoRoot = path.resolve(srcDir, "..", "..", "..");
+    const webRoot = path.resolve(srcDir, "..");
+    const configTexts = [
+      path.join(repoRoot, "turbo.json"),
+      path.join(webRoot, ".env.example"),
+      ...["next.config.ts", "next.config.mjs", "next.config.js"].map((name) => path.join(webRoot, name)),
+    ]
+      .filter((file) => existsSync(file))
+      .map((file) => ({ rel: path.relative(repoRoot, file), text: readFileSync(file, "utf8") }));
+    const offenders = [...allSources, ...configTexts]
+      .filter((file) => /NEXT_PUBLIC_\w*(BFF|SHARED_SECRET)/i.test(file.text))
+      .map((file) => file.rel);
+    expect(offenders).toEqual([]);
+    // Cấu hình tồn tại để khẳng định ở trên có ý nghĩa.
+    expect(configTexts.map((file) => file.rel)).toContain("turbo.json");
+  });
+
+  it("does not inline BFF_SHARED_SECRET through next.config env/publicRuntimeConfig", () => {
+    const webRoot = path.resolve(srcDir, "..");
+    const offenders = ["next.config.ts", "next.config.mjs", "next.config.js"]
+      .map((name) => path.join(webRoot, name))
+      .filter((file) => existsSync(file) && /BFF_SHARED_SECRET/.test(readFileSync(file, "utf8")));
+    expect(offenders).toEqual([]);
+  });
+
   // Xóa cookie bằng `maxAge: 0` để thuộc tính (path, secure, sameSite) luôn khớp lúc đặt.
   it("clears cookies via maxAge 0 instead of .delete() in composition/server", () => {
     const offenders = inDir("composition/server/")

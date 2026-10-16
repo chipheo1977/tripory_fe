@@ -434,6 +434,115 @@ describe("login/register: lỗi upstream", () => {
   });
 });
 
+describe("login/register: giới hạn tốc độ của BE (D-35)", () => {
+  // Giá trị thử nghiệm, không phải bí mật thật.
+  const SECRET = "bi-mat-thu-nghiem";
+  const secretDeps = (fetch: (...args: FetchArgs) => Promise<Response>): ServerDeps => ({
+    ...depsWith(fetch),
+    env: { apiOrigin: "http://be.test", bffSharedSecret: SECRET },
+  });
+  const RATE_LIMITED = beErrorEnvelope("RateLimit.TooManyRequests", "Bạn thao tác quá nhanh. Vui lòng thử lại sau.");
+  const fromIp = { "x-forwarded-for": "203.0.113.7" };
+
+  it.each([
+    ["login", "/api/auth/login", LOGIN_BODY, handleLogin],
+    ["register", "/api/auth/register", REGISTER_BODY, handleRegister],
+  ] as const)("%s: có secret + IP của nền tảng → gửi x-bff-secret và x-forwarded-for", async (_n, path, body, handler) => {
+    const fetch = fetchReturning(jsonResponse(beAuthResponse(pair)));
+    const request = makeRequest(path, { method: "POST", origin: TEST_ORIGIN, body, headers: fromIp });
+
+    await handler(request, secretDeps(fetch));
+
+    expect(firstCall(fetch).init.headers).toEqual({
+      accept: "application/json",
+      "content-type": "application/json",
+      "x-bff-secret": SECRET,
+      "x-forwarded-for": "203.0.113.7",
+    });
+  });
+
+  it("chuỗi x-forwarded-for do client nhét (nhiều IP) bị bỏ: không gửi secret, không gửi XFF", async () => {
+    const fetch = fetchReturning(jsonResponse(beAuthResponse(pair)));
+    const request = makeRequest("/api/auth/login", {
+      method: "POST",
+      origin: TEST_ORIGIN,
+      body: LOGIN_BODY,
+      headers: { "x-forwarded-for": "6.6.6.6, 203.0.113.7", "x-bff-secret": "gia-mao" },
+    });
+
+    await handleLogin(request, secretDeps(fetch));
+
+    expect(firstCall(fetch).init.headers).toEqual({
+      accept: "application/json",
+      "content-type": "application/json",
+    });
+  });
+
+  it("chưa cấu hình secret → không gửi header nào dù có IP (hành vi cũ)", async () => {
+    const fetch = fetchReturning(jsonResponse(beAuthResponse(pair)));
+    const request = makeRequest("/api/auth/login", {
+      method: "POST",
+      origin: TEST_ORIGIN,
+      body: LOGIN_BODY,
+      headers: fromIp,
+    });
+
+    await handleLogin(request, depsWith(fetch));
+
+    expect(firstCall(fetch).init.headers).toEqual({
+      accept: "application/json",
+      "content-type": "application/json",
+    });
+  });
+
+  it.each(["login", "register"] as const)("%s: BE 429 → client nhận 429 nguyên errorCode + message + Retry-After, không Set-Cookie", async (name) => {
+    const upstream = new Response(JSON.stringify(RATE_LIMITED), {
+      status: 429,
+      headers: { "content-type": "application/json", "retry-after": "42", "set-cookie": "be=1" },
+    });
+    const request =
+      name === "login"
+        ? post("/api/auth/login", LOGIN_BODY)
+        : post("/api/auth/register", REGISTER_BODY);
+    const handler = name === "login" ? handleLogin : handleRegister;
+
+    const res = await handler(request, secretDeps(fetchReturning(upstream)));
+
+    expect(res.status).toBe(429);
+    expect(res.headers.get("retry-after")).toBe("42");
+    expect(res.headers.get("content-type")).toBe("application/json");
+    expect(res.headers.get("cache-control")).toBe("no-store");
+    expect(res.headers.getSetCookie()).toEqual([]);
+    expect(await res.json()).toMatchObject({
+      status: "error",
+      errorCode: "RateLimit.TooManyRequests",
+      message: "Bạn thao tác quá nhanh. Vui lòng thử lại sau.",
+    });
+  });
+
+  it("BE 429 không có Retry-After → không bịa header", async () => {
+    const res = await handleLogin(
+      post("/api/auth/login", LOGIN_BODY),
+      depsWith(fetchReturning(jsonResponse(RATE_LIMITED, 429))),
+    );
+
+    expect(res.status).toBe(429);
+    expect(res.headers.get("retry-after")).toBeNull();
+  });
+
+  it("secret không xuất hiện trong response (kể cả khi BE lỗi)", async () => {
+    for (const upstream of [jsonResponse(beAuthResponse(pair)), jsonResponse(RATE_LIMITED, 429), jsonResponse({}, 500)]) {
+      const res = await handleLogin(
+        makeRequest("/api/auth/login", { method: "POST", origin: TEST_ORIGIN, body: LOGIN_BODY, headers: fromIp }),
+        secretDeps(fetchReturning(upstream)),
+      );
+
+      expect(await res.text()).not.toContain(SECRET);
+      expect(JSON.stringify([...res.headers.entries()])).not.toContain(SECRET);
+    }
+  });
+});
+
 describe("handleLogout", () => {
   it("Origin hợp lệ → 200 data null và 3 Set-Cookie xóa đủ thuộc tính; không gọi BE", async () => {
     const fetch = fetchReturning(jsonResponse({}));

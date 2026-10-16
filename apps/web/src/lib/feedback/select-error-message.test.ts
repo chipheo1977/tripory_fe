@@ -60,6 +60,7 @@ const UNMAPPED = [
   "ChatMessage.ContentTooLong",
   "ChatMessage.InvalidVoiceDuration",
   "File.TooLarge",
+  "RateLimit.TooManyRequests",
   "Validation.Error",
   "NotEmptyValidator",
   "MaximumLengthValidator",
@@ -93,6 +94,16 @@ describe("selectErrorMessage", () => {
     ["Auth.UserBanned", "Tài khoản bị khóa vì vi phạm."],
   ] as const)("mã %s không map → message BE", (code, message) => {
     expect(selectErrorMessage(httpError(code, message))).toBe(message);
+  });
+
+  // D-35: BE giới hạn tốc độ login/register theo IP. Không map riêng (không chép luật của BE); hiện nguyên
+  // câu tiếng Việt của BE.
+  it("RateLimit.TooManyRequests 429 → message tiếng Việt của BE", () => {
+    expect(
+      selectErrorMessage(
+        httpError("RateLimit.TooManyRequests", "Bạn thao tác quá nhanh. Vui lòng thử lại sau.", 429),
+      ),
+    ).toBe("Bạn thao tác quá nhanh. Vui lòng thử lại sau.");
   });
 
   it("mã nội bộ Server.Error kèm message BE → câu chung", () => {

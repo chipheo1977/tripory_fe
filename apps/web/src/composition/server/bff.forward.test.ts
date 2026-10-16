@@ -134,6 +134,44 @@ describe("forwardToBackend: chặn trước khi gọi BE", () => {
     expect(fetch).toHaveBeenCalledTimes(0);
   });
 
+  it.each(["GET", "POST"])(
+    "%s: trình duyệt không nhét được x-bff-secret / x-forwarded-for / x-real-ip tới BE qua /api/bff (D-35)",
+    async (method) => {
+      const fetch = fetchReturning(jsonResponse(ok));
+      const { cookies } = sessionCookies(3600);
+      // Cả khi BFF đã cấu hình secret, proxy chung cũng không gửi secret (không truyền clientIp).
+      const deps: ServerDeps = { ...depsWith(fetch), env: { apiOrigin: "http://be.test", bffSharedSecret: "bi-mat-thu-nghiem" } };
+
+      await forwardToBackend(
+        bffRequest("/api/bff/users/me", {
+          method,
+          cookies,
+          headers: {
+            "x-bff-secret": "gia-mao",
+            "X-Forwarded-For": "6.6.6.6",
+            "x-real-ip": "6.6.6.6",
+            "x-vercel-forwarded-for": "6.6.6.6",
+          },
+          ...(method === "POST" ? { body: {} } : {}),
+        }),
+        ["users", "me"],
+        deps,
+      );
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+
+      const sent = Object.keys((fetch.mock.calls[0]?.[1]?.headers ?? {}) as Record<string, string>).map((name) =>
+        name.toLowerCase(),
+      );
+
+      expect(sent).not.toContain("x-bff-secret");
+      expect(sent).not.toContain("x-forwarded-for");
+      expect(sent).not.toContain("x-real-ip");
+      expect(sent).not.toContain("x-vercel-forwarded-for");
+      expect(JSON.stringify(fetch.mock.calls[0]?.[1]?.headers)).not.toMatch(/gia-mao|bi-mat-thu-nghiem/);
+    },
+  );
+
   it("GET không Origin → qua", async () => {
     const fetch = fetchReturning(jsonResponse(ok));
 

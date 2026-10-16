@@ -395,3 +395,46 @@ describe("handleRefresh: Origin", () => {
     expect(res.headers.getSetCookie()).toEqual([]);
   });
 });
+
+describe("handleRefresh: giới hạn tốc độ theo IP (D-35)", () => {
+  // Giá trị thử nghiệm, không phải bí mật thật.
+  const SECRET = "bi-mat-thu-nghiem";
+  const secretDeps = (fetch: (...args: FetchArgs) => Promise<Response>): ServerDeps => ({
+    ...depsWith(fetch),
+    env: { apiOrigin: "http://be.test", bffSharedSecret: SECRET },
+  });
+
+  it("có secret + IP của nền tảng → gửi x-bff-secret và x-forwarded-for tới refresh-token", async () => {
+    const { cookies } = sessionCookies(10);
+    const fetch = fetchReturning(jsonResponse(beTokenResponse(bearerPair(NOW_SEC, 3600, "2"))));
+
+    await handleRefresh(refreshRequest(cookies, { headers: { "x-real-ip": "203.0.113.7" } }), secretDeps(fetch));
+
+    expect(fetch.mock.calls[0]?.[1]?.headers).toEqual({
+      accept: "application/json",
+      "content-type": "application/json",
+      "x-bff-secret": SECRET,
+      "x-forwarded-for": "203.0.113.7",
+    });
+  });
+
+  it("BE 429 vẫn giữ ngữ nghĩa cũ: 503 Bff.RefreshUnavailable, giữ cookie, không lộ Retry-After/secret", async () => {
+    const { cookies } = sessionCookies(10);
+    const upstream = new Response(
+      JSON.stringify(beErrorEnvelope("RateLimit.TooManyRequests", "Bạn thao tác quá nhanh. Vui lòng thử lại sau.")),
+      { status: 429, headers: { "content-type": "application/json", "retry-after": "30" } },
+    );
+
+    const res = await handleRefresh(
+      refreshRequest(cookies, { headers: { "x-real-ip": "203.0.113.7" } }),
+      secretDeps(fetchReturning(upstream)),
+    );
+    const text = await res.text();
+
+    expect(res.status).toBe(503);
+    expect(JSON.parse(text)).toMatchObject({ status: "error", errorCode: "Bff.RefreshUnavailable" });
+    expect(res.headers.getSetCookie()).toEqual([]);
+    expect(res.headers.get("retry-after")).toBeNull();
+    expect(text).not.toContain(SECRET);
+  });
+});

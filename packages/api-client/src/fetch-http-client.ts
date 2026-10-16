@@ -1,4 +1,4 @@
-import { isApiError, makeApiError, type ApiErrorKind } from './api-error';
+ import { isApiError, makeApiError, type ApiErrorKind } from './api-error';
 import type { HttpClient, HttpRequest } from './http-client';
 import { isApiEnvelope, readBody } from './response-shapes';
 import { toApiError } from './to-api-error';

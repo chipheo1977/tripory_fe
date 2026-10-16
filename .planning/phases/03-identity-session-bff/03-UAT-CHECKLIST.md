@@ -19,7 +19,10 @@ Quy ước: không ghi mật khẩu hay token thật vào tệp này. Dùng mậ
 - [ ] **FE: `API_ORIGIN` trỏ tới BE**, đặt trong `apps/web/.env.local` (không commit). Giá trị là URL gốc BE, không kèm `/api/v1` (`03-BE-DEPENDENCIES.md` mục 14). Mẫu ở `apps/web/.env.example`:
   ```
   API_ORIGIN=http://localhost:5000
+  BFF_SHARED_SECRET=dev-bff-secret-change-me
   ```
+  `BFF_SHARED_SECRET` phải trùng `AuthRateLimitOptions:BffSharedSecret` của BE (giá trị dev trong `appsettings.Development.json`, nên chạy BE với `ASPNETCORE_ENVIRONMENT=Development`). Thiếu nó thì mọi người dùng chung một bucket theo IP của server FE (`03-BE-DEPENDENCIES.md` mục 2, 15). Sửa `.env.local` xong phải khởi động lại `next dev`.
+- [ ] **Biết giới hạn tốc độ của BE** (theo IP): login 5 lần/phút, register 3 lần/giờ. Bước 3 và 4 (đăng ký hai lần) dùng 2 trong 3 lần của giờ đó, nên đừng đăng ký thử thêm tùy tiện. Bộ đếm nằm trong bộ nhớ BE: **khởi động lại BE sẽ reset**. Gặp 429 thì UI phải hiện "Bạn thao tác quá nhanh. Vui lòng thử lại sau." (câu của BE).
 - [ ] **FE chạy HTTPS local** để thử cookie `__Host-` và `navigator.locks`:
   ```powershell
   pnpm --filter @tripory/web exec next dev --experimental-https

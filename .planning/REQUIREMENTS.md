@@ -50,7 +50,7 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 - [ ] **ITIN-08**: Người dùng có thể kéo thả sắp xếp waypoint trong ngày bằng chuột, cảm ứng và bàn phím; cập nhật optimistic và rollback khi lỗi
 - [ ] **ITIN-09**: Người dùng thấy quãng đường theo ngày và tổng do BE tính
 - [ ] **ITIN-10**: Người dùng thấy trạng thái lưu (Đang lưu / Đã lưu / Lỗi – thử lại) và được cảnh báo khi rời trang lúc còn request đang chạy
-- [ ] **ITIN-11**: Người dùng có thể xuất bản khi có ít nhất 1 waypoint, sau khi xác nhận rằng không thể hủy xuất bản; xong thì mở sẵn hộp chia sẻ
+- [ ] **ITIN-11**: Người dùng có thể xuất bản khi có ít nhất 1 waypoint, sau khi xác nhận rằng không thể hủy xuất bản; xong thì mở sẵn hộp chia sẻ (phần "mở sẵn hộp chia sẻ" giao ở Phase 5 cùng PUB-04, vì trang công khai chưa có ở Phase 4; xem `04-CONTEXT.md` D-40)
 - [ ] **ITIN-12**: Người dùng có thể xóa lịch trình sau khi xác nhận
 - [ ] **ITIN-13**: Người không phải chủ không thấy thao tác sửa (`canEdit` suy ra ở domain)
 - [ ] **ITIN-14**: Editor dùng được trên mobile với bottom sheet nhiều mức cho timeline

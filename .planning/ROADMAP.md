@@ -119,7 +119,7 @@ Plans:
   1. Người dùng thấy "Lịch trình của tôi" có phân trang và lọc Tất cả/Nháp/Đã xuất bản, tạo nhanh bằng tiêu đề rồi vào thẳng editor, và xóa được lịch trình sau khi xác nhận
   2. Trong editor, người dùng sửa metadata (tiêu đề, mô tả, ngày khởi hành, ảnh bìa URL có preview), chuyển/thêm ngày, sửa phụ đề ngày inline, thêm/sửa waypoint bằng cách dán tọa độ "lat, lng" hoặc link Google Maps, và thấy quãng đường theo ngày cùng tổng do BE tính
   3. Người dùng xóa waypoint và hoàn tác được trong 5 giây; kéo thả sắp xếp waypoint trong ngày bằng chuột, cảm ứng hoặc bàn phím, thấy rollback khi BE lỗi
-  4. Người dùng luôn thấy trạng thái Đang lưu / Đã lưu / Lỗi – thử lại, được cảnh báo khi rời trang lúc còn request; xuất bản được khi có ≥ 1 waypoint sau khi xác nhận không thể hủy, rồi thấy hộp chia sẻ
+  4. Người dùng luôn thấy trạng thái Đang lưu / Đã lưu / Lỗi – thử lại, được cảnh báo khi rời trang lúc còn request; xuất bản được khi có ≥ 1 waypoint sau khi xác nhận không thể hủy, rồi thấy lịch trình chuyển sang "Đã xuất bản" (hộp chia sẻ sau khi xuất bản chuyển sang Phase 5 theo `04-CONTEXT.md` D-40)
   5. Người không phải chủ không thấy thao tác sửa; trên mobile, timeline nằm trong bottom sheet nhiều mức và vẫn thao tác đủ các bước trên
 **Plans**: TBD
 **UI hint**: yes
@@ -132,7 +132,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Khách chưa đăng nhập mở link lịch trình đã xuất bản và thấy trang SSR bố cục bài viết theo ngày; chuyển sang Bản đồ SVG thấy pin theo ngày, polyline, zoom/pan, chọn điểm đồng bộ với danh sách
   2. Khách mở lịch trình nháp thấy trang 403, id sai thấy 404; chủ mở nháp thấy banner "Bản nháp – chỉ bạn thấy" và nút Sửa
-  3. Người xem chia sẻ được bằng copy link, Web Share trên mobile và mã QR; dán link vào Zalo/Messenger hiện preview với tiêu đề, mô tả, ảnh bìa; trang nháp có `noindex`
+  3. Người xem chia sẻ được bằng copy link, Web Share trên mobile và mã QR; chủ xuất bản xong trong editor thì hộp chia sẻ mở sẵn và editor có nút "Chia sẻ" (phần ITIN-11 chuyển từ Phase 4); dán link vào Zalo/Messenger hiện preview với tiêu đề, mô tả, ảnh bìa; trang nháp có `noindex`
   4. Editor hiển thị cùng component bản đồ SVG với trang công khai
 **Plans**: TBD
 **UI hint**: yes

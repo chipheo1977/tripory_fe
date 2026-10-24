@@ -3,6 +3,8 @@ import { expect, it, vi } from "vitest";
 import NotFound from "./not-found";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/khong-ton-tai" }));
+// AccountSlot đọc cookie qua viewer.server (server-only), không import được dưới Vitest.
+vi.mock("@/components/account-slot", () => ({ AccountSlot: () => null }));
 
 it("renders the root 404 in the public shell with only the real home action", () => {
   render(<NotFound />);

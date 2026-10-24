@@ -8,6 +8,10 @@ vi.mock("@/components/app-shell", () => ({
     <div data-testid="shell" data-variant={variant}>{children}</div>
   ),
 }));
+// Gate đọc cookie (viewer.server có `server-only`); ở đây chỉ cần nó cho nội dung đi qua.
+vi.mock("@/modules/identity/ui/dashboard-session-gate", () => ({
+  DashboardSessionGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 
 it.each([
   ["public", PublicLayout],

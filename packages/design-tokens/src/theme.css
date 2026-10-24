@@ -56,6 +56,7 @@
   --spacing-content-sm: var(--semantic-size-content-sm);
   --spacing-content-md: var(--semantic-size-content-md);
   --spacing-content-lg: var(--semantic-size-content-lg);
+  --spacing-form: var(--semantic-size-form);
   --spacing-header: var(--semantic-size-header);
 
   --radius-none: var(--semantic-radius-none);

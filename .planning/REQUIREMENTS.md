@@ -29,14 +29,14 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 
 ### Phiên đăng nhập (AUTH)
 
-- [ ] **AUTH-01**: Người dùng có thể đăng ký bằng email, mật khẩu và họ tên, thấy lỗi validate của BE rõ ràng
-- [ ] **AUTH-02**: Người dùng có thể đăng nhập; access và refresh token chỉ nằm trong cookie httpOnly, JavaScript phía client không đọc được
-- [ ] **AUTH-03**: Phiên được giữ qua reload và tự refresh im lặng; N request 401 song song chỉ dẫn tới đúng 1 lần refresh, kể cả khi mở nhiều tab (không kích hoạt reuse detection của BE)
-- [ ] **AUTH-04**: Người dùng có thể đăng xuất ở mọi trang; cookie bị xóa, kết nối realtime bị ngắt
-- [ ] **AUTH-05**: Truy cập trang cần đăng nhập khi chưa có phiên sẽ chuyển sang đăng nhập rồi quay lại đúng trang (`?next=` chỉ nhận path nội bộ)
-- [ ] **AUTH-06**: Người dùng có thể đổi mật khẩu, thấy rule mật khẩu của BE trước khi nhập
-- [ ] **AUTH-07**: Header hiển thị menu user (avatar, tên, Hồ sơ, Tin nhắn, Đăng xuất) theo phiên thật
-- [ ] **AUTH-08**: Client chỉ gọi BE qua BFF cùng origin có allowlist (`users`, `itineraries`, `chat`), chặn `auth/*` và kiểm Origin; BFF không thành open proxy
+- [x] **AUTH-01**: Người dùng có thể đăng ký bằng email, mật khẩu và họ tên, thấy lỗi validate của BE rõ ràng
+- [x] **AUTH-02**: Người dùng có thể đăng nhập; access và refresh token chỉ nằm trong cookie httpOnly, JavaScript phía client không đọc được
+- [x] **AUTH-03**: Phiên được giữ qua reload và tự refresh im lặng; N request 401 song song chỉ dẫn tới đúng 1 lần refresh, kể cả khi mở nhiều tab (không kích hoạt reuse detection của BE)
+- [x] **AUTH-04**: Người dùng có thể đăng xuất ở mọi trang; cookie bị xóa, kết nối realtime bị ngắt
+- [x] **AUTH-05**: Truy cập trang cần đăng nhập khi chưa có phiên sẽ chuyển sang đăng nhập rồi quay lại đúng trang (`?next=` chỉ nhận path nội bộ)
+- [x] **AUTH-06**: Người dùng có thể đổi mật khẩu, thấy rule mật khẩu của BE trước khi nhập
+- [x] **AUTH-07**: Header hiển thị menu user (avatar, tên, Hồ sơ, Tin nhắn, Đăng xuất) theo phiên thật
+- [x] **AUTH-08**: Client chỉ gọi BE qua BFF cùng origin có allowlist (`users`, `itineraries`, `chat`), chặn `auth/*` và kiểm Origin; BFF không thành open proxy
 
 ### Lịch trình — danh sách và editor (ITIN)
 
@@ -179,14 +179,14 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | DS-05 | Phase 1 | Complete |
 | DS-06 | Phase 1 | Complete |
 | DS-07 | Phase 1 | Complete |
-| AUTH-01 | Phase 3 | Pending |
-| AUTH-02 | Phase 3 | Pending |
-| AUTH-03 | Phase 3 | Pending |
-| AUTH-04 | Phase 3 | Pending |
-| AUTH-05 | Phase 3 | Pending |
-| AUTH-06 | Phase 3 | Pending |
-| AUTH-07 | Phase 3 | Pending |
-| AUTH-08 | Phase 3 | Pending |
+| AUTH-01 | Phase 3 | Complete |
+| AUTH-02 | Phase 3 | Complete |
+| AUTH-03 | Phase 3 | Complete |
+| AUTH-04 | Phase 3 | Complete |
+| AUTH-05 | Phase 3 | Complete |
+| AUTH-06 | Phase 3 | Complete |
+| AUTH-07 | Phase 3 | Complete |
+| AUTH-08 | Phase 3 | Complete |
 | ITIN-01 | Phase 4 | Pending |
 | ITIN-02 | Phase 4 | Pending |
 | ITIN-03 | Phase 4 | Pending |

@@ -2,7 +2,8 @@
 
 import { Button as BaseButton } from '@base-ui/react/button';
 import { cva, type VariantProps } from 'class-variance-authority';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
+import { Spinner } from './spinner';
 
 const buttonVariants = cva(
   'relative inline-flex min-h-touch items-center justify-center gap-control-gap whitespace-nowrap rounded-control border text-label font-semibold transition-colors duration-(--semantic-motion-duration-fast) ease-standard focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring data-disabled:cursor-not-allowed data-disabled:border-border data-disabled:bg-surface-muted data-disabled:text-disabled',
@@ -25,9 +26,17 @@ const buttonVariants = cva(
 );
 
 type BaseButtonProps = ComponentProps<typeof BaseButton>;
-export type ButtonProps = BaseButtonProps & VariantProps<typeof buttonVariants> & { loading?: boolean };
+export type ButtonProps = BaseButtonProps &
+  VariantProps<typeof buttonVariants> & {
+    loading?: boolean;
+    /** Nhãn thấy được khi `loading` (D-30). Không truyền thì giữ cách cũ: children ẩn, spinner phủ lên. */
+    loadingLabel?: ReactNode;
+  };
 
-export function Button({ children, className, disabled, loading = false, size, variant, ...props }: ButtonProps) {
+export function Button({ children, className, disabled, loading = false, loadingLabel, size, variant, ...props }: ButtonProps) {
+  // Có loadingLabel thì thay hẳn children bằng spinner + nhãn để người dùng đọc được tiến trình; nút không đổi bề rộng đột ngột vì chỉ khác nội dung.
+  const showLoadingLabel = loading && loadingLabel != null;
+
   return (
     <BaseButton
       {...props}
@@ -36,8 +45,17 @@ export function Button({ children, className, disabled, loading = false, size, v
       disabled={disabled || loading}
       focusableWhenDisabled={loading}
     >
-      <span className={loading ? 'invisible' : undefined}>{children}</span>
-      {loading ? <span aria-hidden className="absolute size-(--spinner-size-sm) animate-spin rounded-pill border border-current border-t-transparent" /> : null}
+      {showLoadingLabel ? (
+        <>
+          <Spinner decorative size="sm" />
+          <span>{loadingLabel}</span>
+        </>
+      ) : (
+        <>
+          <span className={loading ? 'invisible' : undefined}>{children}</span>
+          {loading ? <span aria-hidden className="absolute size-(--spinner-size-sm) animate-spin rounded-pill border border-current border-t-transparent" /> : null}
+        </>
+      )}
     </BaseButton>
   );
 }

@@ -45,6 +45,7 @@ type Case = {
 const imp = (includes: string): Violation => ({ rule: 'no-restricted-imports', includes });
 
 const itinerary = 'packages/itinerary';
+const identity = 'packages/identity';
 const kernel = 'packages/shared-kernel';
 const apiClient = 'packages/api-client';
 const uiWeb = 'virtual/ui-web';
@@ -89,6 +90,13 @@ const bad: Case[] = [
   // barrel gốc
   { name: 'barrel: lộ infrastructure qua entry gốc', dir: itinerary, file: 'src/index.ts', code: "export * from './infrastructure';", violations: [imp("'./infrastructure'")] },
   { name: 'barrel: lộ react qua entry gốc', dir: itinerary, file: 'src/index.ts', code: "export * from './react';", violations: [imp("'./react'")] },
+  // identity (context package: zod chỉ ở infrastructure, Next chỉ ở app)
+  { name: 'identity domain: zod', dir: identity, file: 'src/domain/x.ts', code: "import { z } from 'zod';\nexport const x = z;", violations: [imp("'zod'")] },
+  { name: 'identity application: zod', dir: identity, file: 'src/application/x.ts', code: "import { z } from 'zod';\nexport const x = z;", violations: [imp("'zod'")] },
+  { name: 'identity react: next/navigation', dir: identity, file: 'src/react/x.ts', code: "import { useRouter } from 'next/navigation';\nexport const x = useRouter;", violations: [imp("'next/navigation'")] },
+  { name: 'identity infrastructure: next/headers', dir: identity, file: 'src/infrastructure/x.ts', code: "import { cookies } from 'next/headers';\nexport const x = cookies;", violations: [imp("'next/headers'")] },
+  { name: 'identity domain: Date.now', dir: identity, file: 'src/domain/x.ts', code: 'export const t = Date.now();', violations: [{ rule: 'no-restricted-properties', includes: 'Date.now' }] },
+  { name: 'identity infrastructure: navigator', dir: identity, file: 'src/infrastructure/x.ts', code: "export const lock = (name: string) => navigator.locks.request(name, async () => undefined);", violations: [{ rule: 'no-restricted-globals', includes: "'navigator'" }] },
   // shared-kernel
   { name: 'kernel: package khác', dir: kernel, file: 'src/x.ts', code: "import i from '@tripory/itinerary';\nexport const x = i;", violations: [imp("'@tripory/itinerary'")] },
   { name: 'kernel: react', dir: kernel, file: 'src/x.ts', code: "import React from 'react';\nexport const x = React;", violations: [imp("'react'")] },
@@ -122,6 +130,9 @@ const bad: Case[] = [
   { name: 'web: import sâu src (composition)', dir: web, file: 'src/composition/x.ts', code: "import d from '@tripory/itinerary/src/domain/itinerary';\nexport const x = d;", violations: [imp("'@tripory/itinerary/src/domain/itinerary'")] },
   { name: 'web: api-client /http trong lib/feedback', dir: web, file: 'src/lib/feedback/x.ts', code: "import { createFetchHttpClient } from '@tripory/api-client/http';\nexport const x = createFetchHttpClient;", violations: [imp("'@tripory/api-client/http'")] },
   { name: 'web: api-client /http trong app', dir: web, file: 'src/app/x.ts', code: "import { withSessionRefresh } from '@tripory/api-client/http';\nexport const x = withSessionRefresh;", violations: [imp("'@tripory/api-client/http'")] },
+  { name: 'web: /http của identity trong modules', dir: web, file: 'src/modules/identity/ui/x.ts', code: "import r from '@tripory/identity/http';\nexport const x = r;", violations: [imp("'@tripory/identity/http'")] },
+  { name: 'web: /http của api-client trong proxy.ts', dir: web, file: 'src/proxy.ts', code: "import { createFetchHttpClient } from '@tripory/api-client/http';\nexport const x = createFetchHttpClient;", violations: [imp("'@tripory/api-client/http'")] },
+  { name: 'web: /http của identity trong app/api route', dir: web, file: 'src/app/api/auth/login/route.ts', code: "import r from '@tripory/identity/http';\nexport const x = r;", violations: [imp("'@tripory/identity/http'")] },
 ];
 
 const ok: Omit<Case, 'violations'>[] = [
@@ -132,6 +143,8 @@ const ok: Omit<Case, 'violations'>[] = [
   { name: 'infrastructure: application + domain + api-client + kernel + zod', dir: itinerary, file: 'src/infrastructure/x.ts', code: "import http from '@tripory/api-client';\nimport k from '@tripory/shared-kernel';\nimport { z } from 'zod';\nimport p from '../application/ports';\nimport d from '../domain/itinerary';\nexport const x = [http, k, z, p, d];" },
   { name: 'react: react + react-query + application + domain', dir: itinerary, file: 'src/react/x.ts', code: "import { useQuery } from '@tanstack/react-query';\nimport { useMemo } from 'react';\nimport u from '../application';\nimport d from '../domain';\nexport const x = [useQuery, useMemo, u, d];" },
   { name: 'barrel: domain + application', dir: itinerary, file: 'src/index.ts', code: "export * from './domain';\nexport * from './application';" },
+  { name: 'identity infrastructure: zod + api-client', dir: identity, file: 'src/infrastructure/x.ts', code: "import http from '@tripory/api-client';\nimport { z } from 'zod';\nexport const x = [http, z];" },
+  { name: 'identity react: react-query + ../domain', dir: identity, file: 'src/react/x.ts', code: "import { useQuery } from '@tanstack/react-query';\nimport d from '../domain';\nexport const x = [useQuery, d];" },
   { name: 'kernel: không import gì', dir: kernel, file: 'src/x.ts', code: 'export const x = 1;' },
   { name: 'api-client: kernel + fetch', dir: apiClient, file: 'src/x.ts', code: "import k from '@tripory/shared-kernel';\nexport const get = (url: string) => fetch(url);\nexport { k };" },
   { name: 'api-client: AbortController + setTimeout', dir: apiClient, file: 'src/x.ts', code: 'export const t = () => { const c = new AbortController(); const id = setTimeout(() => c.abort(), 1); clearTimeout(id); return c.signal; };' },
@@ -145,6 +158,10 @@ const ok: Omit<Case, 'violations'>[] = [
   { name: 'web: UI import /react và entry gốc', dir: web, file: 'src/modules/itinerary/ui/x.ts', code: "import h from '@tripory/itinerary/react';\nimport u from '@tripory/itinerary';\nexport const x = [h, u];" },
   { name: 'web: lib/feedback import entry gốc api-client', dir: web, file: 'src/lib/feedback/x.ts', code: "import { isApiError } from '@tripory/api-client';\nexport const x = isApiError;" },
   { name: 'web: composition import api-client /http', dir: web, file: 'src/composition/http.client.ts', code: "import { createFetchHttpClient, withSessionRefresh } from '@tripory/api-client/http';\nimport { isApiError } from '@tripory/api-client';\nexport const x = [createFetchHttpClient, withSessionRefresh, isApiError];" },
+  { name: 'web: composition import @tripory/identity/http', dir: web, file: 'src/composition/server/session-store.ts', code: "import r from '@tripory/identity/http';\nexport const x = r;" },
+  { name: 'web: composition import @tripory/identity/react', dir: web, file: 'src/composition/identity.client.ts', code: "import h from '@tripory/identity/react';\nexport const x = h;" },
+  { name: 'web: proxy.ts import @tripory/identity (entry gốc)', dir: web, file: 'src/proxy.ts', code: "import u from '@tripory/identity';\nexport const x = u;" },
+  { name: 'web: modules import @tripory/identity (entry gốc)', dir: web, file: 'src/modules/identity/ui/x.ts', code: "import u from '@tripory/identity';\nexport const x = u;" },
 ];
 
 describe('lớp cưỡng chế bắt vi phạm', () => {

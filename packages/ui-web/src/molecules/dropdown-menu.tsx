@@ -35,10 +35,16 @@ export function DropdownMenuTrigger({ className, ...props }: Omit<ComponentProps
   );
 }
 
-export function DropdownMenuContent({ children, className, ...props }: Omit<ComponentProps<typeof Menu.Popup>, 'className'> & { className?: string }) {
+export type DropdownMenuContentProps = Omit<ComponentProps<typeof Menu.Popup>, 'className'> & {
+  /** Căn popup theo trigger. UserMenu ở mép phải header dùng `end` để popup không tràn khỏi màn hình. */
+  align?: 'start' | 'center' | 'end';
+  className?: string;
+};
+
+export function DropdownMenuContent({ align = 'start', children, className, ...props }: DropdownMenuContentProps) {
   return (
     <Menu.Portal>
-      <Menu.Positioner align="start" className="z-(--z-dropdown) outline-hidden" sideOffset={overlayOffsetPx}>
+      <Menu.Positioner align={align} className="z-(--z-dropdown) outline-hidden" sideOffset={overlayOffsetPx}>
         <Menu.Popup
           {...props}
           className={cn(
@@ -58,6 +64,18 @@ export type DropdownMenuItemProps = Omit<ComponentProps<typeof Menu.Item>, 'clas
 
 export function DropdownMenuItem({ className, variant, ...props }: DropdownMenuItemProps) {
   return <Menu.Item {...props} className={menuItemVariants({ className, variant })} data-variant={variant ?? 'default'} />;
+}
+
+export type DropdownMenuLinkItemProps = Omit<ComponentProps<typeof Menu.LinkItem>, 'className'> &
+  VariantProps<typeof menuItemVariants> & { className?: string };
+
+/**
+ * Mục menu điều hướng, render `<a>`. Package không biết router của app: app truyền `render={<Link href="..." />}`
+ * với Link của framework (package này không được import framework). Mặc định đóng menu khi chọn, khác `Menu.LinkItem`
+ * gốc, vì UserMenu nằm trong layout nên điều hướng phía client không unmount nó; truyền `closeOnClick={false}` nếu cần giữ menu mở.
+ */
+export function DropdownMenuLinkItem({ className, closeOnClick = true, variant, ...props }: DropdownMenuLinkItemProps) {
+  return <Menu.LinkItem {...props} className={menuItemVariants({ className, variant })} closeOnClick={closeOnClick} data-variant={variant ?? 'default'} />;
 }
 
 export function DropdownMenuCheckboxItem({ children, className, ...props }: Omit<ComponentProps<typeof Menu.CheckboxItem>, 'className'> & { children?: ReactNode; className?: string }) {

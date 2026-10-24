@@ -111,6 +111,7 @@ const semanticTokens = {
   '--semantic-size-content-sm': '640px',
   '--semantic-size-content-md': '768px',
   '--semantic-size-content-lg': '1200px',
+  '--semantic-size-form': '400px',
   '--semantic-size-header': '64px',
   '--semantic-radius-none': '0px',
   '--semantic-radius-subtle': '4px',
@@ -174,13 +175,27 @@ describe('design token inventory', () => {
     expect(readSource('index.css')).not.toContain('dark.css');
   });
 
-  it('khai báo đúng component contract của Sheet', () => {
+  it('khai báo đúng component contract của Sheet và UserMenu', () => {
     expect(declarations(readSource('components.css'))).toEqual({
       '--sheet-side-width': 'min(400px, 100vw - 48px)',
       '--sheet-snap-peek': 'max(160px, 25dvh)',
       '--sheet-snap-medium': '60dvh',
       '--sheet-snap-expanded': 'calc(92dvh - env(safe-area-inset-top))',
+      '--user-menu-name-max-width': '160px',
     });
+  });
+
+  it('nối --semantic-size-form sang utility max-w-form', async () => {
+    expect(readSource('theme.css')).toContain('--spacing-form: var(--semantic-size-form);');
+
+    const compiler = await compile('@import "tailwindcss"; @import "./index.css";', {
+      base: srcDir,
+      onDependency: () => undefined,
+    });
+    const css = compiler.build(['max-w-form']);
+
+    expect(css).toContain('.max-w-form');
+    expect(css).toContain('max-width: var(--semantic-size-form)');
   });
 });
 

@@ -3,7 +3,8 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build", "transit"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": ["API_ORIGIN", "APP_ORIGIN", "BFF_SHARED_SECRET"]
     },
     "transit": {
       "dependsOn": ["^transit"]
@@ -19,7 +20,8 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["API_ORIGIN", "APP_ORIGIN", "BFF_SHARED_SECRET"]
     }
   }
 }

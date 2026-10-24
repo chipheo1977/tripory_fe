@@ -19,13 +19,6 @@ export function decideMutationError(error: unknown, feedback?: MutationFeedback)
   return message === null ? null : { variant: "error", message };
 }
 
-// Cách Phase 3 nối (không cài @tanstack/react-query và không mount provider ở Phase 2, D-01):
-//   declare module "@tanstack/react-query" {
-//     interface Register { mutationMeta: { feedback?: MutationFeedback } }
-//   }
-//   new MutationCache({
-//     onSuccess: (_d, _v, _c, m) => { const d = decideMutationSuccess(m.meta?.feedback); if (d) notify[d.variant](d.message); },
-//     onError: (e, _v, _c, m) => { const d = decideMutationError(e, m.meta?.feedback); if (d) notify[d.variant](d.message); },
-//   });
+// Nối vào `MutationCache` (cùng `meta.feedback` và `retry: false`) ở `composition/query-client.ts`.
 // D-10: query đọc lỗi chỉ hiện `ErrorState` + "Thử lại", không có hàm toast cho query.
 // D-12: Phase 3 đặt `retry: false` cho QueryClient.

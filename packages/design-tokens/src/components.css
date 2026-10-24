@@ -3,4 +3,5 @@
   --sheet-snap-peek: max(160px, 25dvh);
   --sheet-snap-medium: 60dvh;
   --sheet-snap-expanded: calc(92dvh - env(safe-area-inset-top));
+  --user-menu-name-max-width: 160px;
 }

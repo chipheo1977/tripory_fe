@@ -22,7 +22,7 @@ Chế độ text mode, câu hỏi gom theo từng mục; ★ là lựa chọn đ
 | Vị trí xóa | ★ menu ⋯ trên thẻ + editor · chỉ editor | ★ |
 | Bấm thẻ | ★ luôn vào editor · nháp vào editor, đã xuất bản tạm vào editor | ★ |
 
-**Notes:** Người dùng chọn infinite scroll thay "Tải thêm". Bản CONTEXT đầu tiên Claude tự thêm nút "Tải thêm" dự phòng; người dùng xác nhận lại là **không có nút tải thêm**, đã gỡ khỏi D-02. Chỉ giữ lỗi inline có "Thử lại" khi tải trang kế thất bại, theo FND-04.
+**Notes:** Người dùng chọn infinite scroll thay "Tải thêm". Bản CONTEXT đầu tiên Claude tự thêm nút "Tải thêm" dự phòng; người dùng xác nhận lại là **không có nút tải thêm**, đã gỡ khỏi D-02. Sau đó người dùng bỏ luôn lỗi inline có "Thử lại" ở cuối lưới. Lỗi trang kế giờ im lặng, sentinel tự thử lại khi cuộn chạm cuối lần nữa (ngoại lệ FND-04, chỉ cho trang kế; trang đầu vẫn có ErrorState).
 
 ## Tạo nhanh
 

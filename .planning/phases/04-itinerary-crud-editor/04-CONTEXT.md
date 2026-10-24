@@ -29,7 +29,7 @@ Nằm ngoài phase:
 
 ### Danh sách "Lịch trình của tôi" (ITIN-01, 12)
 - **D-01:** Lưới thẻ có ảnh bìa: 1 cột trên mobile, 2 cột từ `sm`, 3 cột từ `lg`. Dùng `Card` của `ui-web`.
-- **D-02:** **Infinite scroll**: tự tải trang kế khi cuộn gần cuối (IntersectionObserver), 12 mục mỗi trang (`pageSize=12`), dùng `useInfiniteQuery` theo `hasNextPage` của `PagedResult`. Có nút **"Tải thêm" dự phòng**, hiện khi lần tải tự động lỗi và dùng được bằng bàn phím/trình đọc màn hình, để không bị kẹt ở cuối trang. Lỗi tải trang kế không làm mất các trang đã có.
+- **D-02:** **Chỉ infinite scroll, không có nút "Tải thêm"** (người dùng chốt). Tự tải trang kế khi cuộn gần cuối (IntersectionObserver trên phần tử sentinel), 12 mục mỗi trang (`pageSize=12`), dùng `useInfiniteQuery` theo `hasNextPage` của `PagedResult`. Đang tải trang kế thì hiện Skeleton thẻ ở cuối lưới. Hết trang thì không hiện gì thêm. Lỗi tải trang kế không làm mất các trang đã có; cuối lưới hiện lỗi inline có nút "Thử lại" theo FND-04 (đây là trạng thái lỗi, không phải nút tải thêm).
 - **D-03:** Lọc bằng `Tabs` (Tất cả/Nháp/Đã xuất bản), **lưu trên URL** (`?status=all|draft|published`, map sang `isPublic` của BE). Reload và nút back giữ đúng tab. Giá trị lạ trên URL thì coi như "Tất cả".
 - **D-04:** Mỗi thẻ: ảnh bìa (không có hoặc lỗi tải thì dùng nền dự phòng theo token), tiêu đề, badge "Nháp"/"Đã xuất bản", ngày khởi hành nếu có, tổng km (ẩn khi bằng 0). **Không hiện số ngày/số điểm** vì BE `/mine` trả `DaysCount`/`WaypointsCount` luôn bằng 0 (PITFALLS, thiếu `Include`). Ghi vào checklist phụ thuộc BE.
 - **D-05:** Thứ tự theo BE (`UpdatedAt` giảm dần). FE không tự sắp lại.

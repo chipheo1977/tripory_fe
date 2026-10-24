@@ -22,7 +22,7 @@ Chế độ text mode, câu hỏi gom theo từng mục; ★ là lựa chọn đ
 | Vị trí xóa | ★ menu ⋯ trên thẻ + editor · chỉ editor | ★ |
 | Bấm thẻ | ★ luôn vào editor · nháp vào editor, đã xuất bản tạm vào editor | ★ |
 
-**Notes:** Người dùng chọn infinite scroll thay "Tải thêm". Claude bổ sung nút "Tải thêm" dự phòng khi tải lỗi và cho bàn phím/trình đọc màn hình.
+**Notes:** Người dùng chọn infinite scroll thay "Tải thêm". Bản CONTEXT đầu tiên Claude tự thêm nút "Tải thêm" dự phòng; người dùng xác nhận lại là **không có nút tải thêm**, đã gỡ khỏi D-02. Chỉ giữ lỗi inline có "Thử lại" khi tải trang kế thất bại, theo FND-04.
 
 ## Tạo nhanh
 

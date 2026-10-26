@@ -98,6 +98,12 @@ Nằm ngoài phase:
 - **D-46:** Bản nháp của người khác (BE 403 `Itinerary.Forbidden`) thì hiện cùng trang 403. Id không đúng dạng GUID (`ItineraryId` của `shared-kernel` trả null) hoặc BE 404 thì dùng `not-found` sẵn có. Lỗi mạng hoặc 5xx thì dùng `ErrorState` có "Thử lại". **Bẫy (PITFALLS):** `GET /{id}` là AllowAnonymous, nên Bearer hết hạn khiến chủ nhận 403 với chính bản nháp của mình. Đường server (RSC) và đường BFF không được gửi Bearer stale; stale thì phải đi qua cơ chế hồi phục phiên của Phase 3 (D-24) trước khi kết luận 403.
 - **D-47:** Nút back của editor: vào từ danh sách thì quay lại đúng trang danh sách cũ (giữ tab lọc trên URL và vị trí cuộn nhờ cache infinite query). Mở thẳng từ URL thì về `/itineraries/mine`.
 
+### Bổ sung sau research (2026-10-24)
+- **D-48:** Link rút gọn của địa điểm (POI) resolve ra `/maps/place/<tên>/data=…` không có tọa độ (`04-RESEARCH.md` Pitfall 1, đã gọi thật). Giữ D-20 (chỉ theo redirect, không geocoding). Kết quả `no-coordinate` thì vẫn tự điền Tên/Địa chỉ theo D-49 và hiện lỗi dưới ô Vị trí: **"Link này chỉ có tên địa điểm, không có tọa độ. Trong Google Maps, nhấn giữ vào địa điểm để lấy tọa độ rồi dán vào đây."** UAT phải có ca link chia sẻ từ app điện thoại thật và ghi rủi ro UX này.
+- **D-49:** Tách `/place/<…>/`: phần **trước dấu phẩy đầu tiên** là Tên, phần **sau** (trim) là Địa chỉ. Chỉ điền ô đang trống; không có dấu phẩy thì chỉ điền Tên. Mở rộng D-21 (trước chỉ điền Tên).
+- **D-50:** Lệnh xóa đang chờ được gửi ngay cả khi tab bị ẩn (`visibilitychange` → `hidden`), không chỉ khi `pagehide`. Lý do: trình duyệt mobile có thể kill tab ở nền. Mở rộng D-32.
+- **D-51:** Route resolve link rút gọn **không có rate limit** ở Phase 4 (chỉ cần phiên + Origin + allowlist host + giới hạn hop/timeout). Rủi ro chấp nhận ghi vào threat model: người đã đăng nhập có thể dùng server gọi `maps.app.goo.gl`.
+
 ### Claude's Discretion
 - Hình dạng 4 tầng của `packages/itinerary`: tên type, use case, port, Zod DTO (`z.iso.datetime({ offset: true })`, `z.iso.date()`), mapper ACL, query key, `createItineraryHooks`.
 - Dữ liệu editor lấy bằng RSC prefetch kèm hydrate React Query hay chỉ fetch ở client có skeleton. Chọn theo `cacheComponents` và bẫy Bearer stale ở D-46.

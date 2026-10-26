@@ -121,9 +121,34 @@ Plans:
   3. Người dùng xóa waypoint và hoàn tác được trong 5 giây; kéo thả sắp xếp waypoint trong ngày bằng chuột, cảm ứng hoặc bàn phím, thấy rollback khi BE lỗi
   4. Người dùng luôn thấy trạng thái Đang lưu / Đã lưu / Lỗi – thử lại, được cảnh báo khi rời trang lúc còn request; xuất bản được khi có ≥ 1 waypoint sau khi xác nhận không thể hủy, rồi thấy lịch trình chuyển sang "Đã xuất bản" (hộp chia sẻ sau khi xuất bản chuyển sang Phase 5 theo `04-CONTEXT.md` D-40)
   5. Người không phải chủ không thấy thao tác sửa; trên mobile, timeline nằm trong bottom sheet nhiều mức và vẫn thao tác đủ các bước trên
-**Plans**: TBD
+**Plans**: 23 plans
 **UI hint**: yes
 **Research flag**: cần research sâu khi plan (parse link Google Maps, dnd-kit với React 19 StrictMode, `CalendarDate`, mapper ngày thưa)
+
+Plans:
+- [ ] 04-01-PLAN.md — Wave 0: alias token `text-muted|subtle|disabled`, `z-*`, 2 token sizing, guard `var()` mồ côi, đổi `z-(--z-*)`
+- [ ] 04-02-PLAN.md — Wave 0: catalog dnd-kit (pin cứng), dependency `packages/itinerary`, self-test ranh giới, `HttpRequest.keepalive`
+- [ ] 04-03-PLAN.md — Route group `(shell)`/`(editor)` (layout toàn màn có gate), proxy `isProtectedPath` cho `/itineraries/{id}/edit`, `EditorSkeleton`
+- [ ] 04-10-PLAN.md — Route `/api/maps/resolve` (phiên + Origin + allowlist host, ≤ 3 hop, 5 s), mã lỗi itinerary theo UI-SPEC
+- [ ] 04-04-PLAN.md — `ui-web`: `notify.undoable`, `InlineAlert variant="info"`, `Sheet` `dismissible`/`defaultSnap`/`insetTop`
+- [ ] 04-05-PLAN.md — Wave 0 app: fake IntersectionObserver/ResizeObserver, fixture JSON BE, chuyển `SubmitStatus`, `mapFormError` dùng chung, spike dnd-kit StrictMode
+- [ ] 04-06-PLAN.md — Domain (TDD): type aggregate, `StatusFilter`, `CalendarDate`, dải ngày thưa, `canEdit`/`canPublish`, biến đổi optimistic
+- [ ] 04-07-PLAN.md — Domain (TDD): `parseLocationInput` (tọa độ, link Google Maps, link rút gọn, `no-coordinate` + tách Tên/Địa chỉ D-48/D-49)
+- [ ] 04-08-PLAN.md — Application + infrastructure: port, use case reorder, Zod DTO, mapper ACL, repository HTTP, short-link resolver
+- [ ] 04-09-PLAN.md — `createItineraryHooks` (infinite, optimistic, `scope`), composition `itinerary.client.ts`, `appHttp`/`bffUnloadHttp`, test hook
+- [ ] 04-11-PLAN.md — Nền form itinerary (schema, map lỗi, format) + `CreateItineraryDialog` + `DeleteItineraryDialog`
+- [ ] 04-13-PLAN.md — `SaveIndicator` + store, chặn rời trang (`beforeunload`, `Link onNavigate`, `LeaveEditorDialog`), `UserMenu compact`
+- [ ] 04-12-PLAN.md — "Lịch trình của tôi": `CoverImage`, `ItineraryCard`, `MyItinerariesView` (Tabs theo URL, infinite scroll im lặng khi lỗi trang kế), page
+- [ ] 04-14-PLAN.md — Bản nháp form `sessionStorage` (D-36), bề mặt Dialog/Sheet responsive, `TripInfoDialog` (metadata, preview ảnh bìa)
+- [ ] 04-16-PLAN.md — `DayTabs` (ngày thưa, km, thêm ngày optimistic) + `DaySubtitle` inline
+- [ ] 04-18-PLAN.md — Xóa waypoint hoãn 5 giây có hoàn tác, flush khi rời route/`pagehide`/`visibilitychange` (keepalive)
+- [ ] 04-15-PLAN.md — `TripSummary`, `PublishButton` (`aria-disabled`), `PublishDialog` (không có hộp chia sẻ, D-40)
+- [ ] 04-17-PLAN.md — `LocationField` (parse + resolve link rút gọn) + `WaypointFormDialog` thêm/sửa
+- [ ] 04-19-PLAN.md — `WaypointList` kéo thả dnd-kit (chuột, cảm ứng 180ms, bàn phím + announcements tiếng Việt), rollback, `InvalidReorderList`
+- [ ] 04-20-PLAN.md — `EditorLayout` 4 slot (canvas cho Phase 5), `EditorHeader`, `EditorForbidden` (403), `NotFoundView` dùng chung
+- [ ] 04-21-PLAN.md — `TimelinePanel`, container `ItineraryEditor` (tải/403/404/lỗi, dialog, khôi phục bản nháp, back D-47), page RSC `/itineraries/[id]/edit`
+- [ ] 04-22-PLAN.md — Bất biến tĩnh Phase 4, `04-BE-DEPENDENCIES.md`, full suite + build, VALIDATION xanh
+- [ ] 04-23-PLAN.md — UAT thủ công với BE thật và điện thoại thật (checkpoint)
 
 ### Phase 5: SVG Map & Public View
 **Goal**: Khách chưa đăng nhập mở link chia sẻ và đọc được lịch trình đã xuất bản dưới dạng bài viết hoặc bản đồ SVG; link hiển thị preview đẹp khi dán vào ứng dụng nhắn tin

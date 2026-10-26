@@ -527,7 +527,7 @@ Dòng trạng thái nằm ngay dưới ô (sau mô tả), `aria-live="polite"`, 
 | Vị trí | rỗng | "Vui lòng dán tọa độ hoặc link Google Maps." |
 | Vị trí | không parse được | "Không đọc được vị trí. Dán tọa độ dạng 10.7769, 106.7009 hoặc link Google Maps." |
 | Vị trí | ngoài khoảng `Wgs84Coordinate` | "Tọa độ nằm ngoài phạm vi. Vĩ độ từ -90 đến 90, kinh độ từ -180 đến 180." |
-| Vị trí | link Google Maps không chứa tọa độ | "Link này không có vị trí. Chọn một địa điểm trong Google Maps rồi chia sẻ lại." |
+| Vị trí | link Google Maps không chứa tọa độ (gồm link POI rút gọn, D-48) | "Link này chỉ có tên địa điểm, không có tọa độ. Trong Google Maps, nhấn giữ vào địa điểm để lấy tọa độ rồi dán vào đây." (vẫn tự điền Tên/Địa chỉ theo D-49) |
 | Vị trí | resolve link rút gọn thất bại (timeout, quá số bước, host lạ, lỗi mạng) | "Không mở được link rút gọn này. Thử dán link đầy đủ hoặc tọa độ." |
 | Địa chỉ | > 500 ký tự | "Địa chỉ tối đa 500 ký tự." |
 | Ghi chú | > 2000 ký tự | "Ghi chú tối đa 2000 ký tự." |

@@ -126,7 +126,7 @@ Plans:
 **Research flag**: cần research sâu khi plan (parse link Google Maps, dnd-kit với React 19 StrictMode, `CalendarDate`, mapper ngày thưa)
 
 Plans:
-- [ ] 04-01-PLAN.md — Wave 0: alias token `text-muted|subtle|disabled`, `z-*`, 2 token sizing, guard `var()` mồ côi, đổi `z-(--z-*)`
+- [x] 04-01-PLAN.md — Wave 0: alias token `text-muted|subtle|disabled`, `z-*`, 2 token sizing, guard `var()` mồ côi, đổi `z-(--z-*)`
 - [ ] 04-02-PLAN.md — Wave 0: catalog dnd-kit (pin cứng), dependency `packages/itinerary`, self-test ranh giới, `HttpRequest.keepalive`
 - [ ] 04-03-PLAN.md — Route group `(shell)`/`(editor)` (layout toàn màn có gate), proxy `isProtectedPath` cho `/itineraries/{id}/edit`, `EditorSkeleton`
 - [ ] 04-10-PLAN.md — Route `/api/maps/resolve` (phiên + Origin + allowlist host, ≤ 3 hop, 5 s), mã lỗi itinerary theo UI-SPEC

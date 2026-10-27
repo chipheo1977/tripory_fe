@@ -28,11 +28,16 @@ export function findTokenViolations(source: string) {
   return forbidden.filter(({ pattern }) => pattern.test(source)).map(({ name }) => name);
 }
 
+// Thư mục sinh ra/phụ thuộc, không phải mã nguồn; bỏ qua để không duyệt ~54k mục trong apps/web/node_modules.
+const IGNORED_DIRS = new Set(['node_modules', '.next', '.turbo']);
+
 function productionFiles(root: string): string[] {
   if (!existsSync(root)) return [];
-  return readdirSync(root, { recursive: true, withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.tsx') && !entry.name.endsWith('.test.tsx'))
-    .map((entry) => path.join(entry.parentPath, entry.name));
+  return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
+    const fullPath = path.join(root, entry.name);
+    if (entry.isDirectory()) return IGNORED_DIRS.has(entry.name) ? [] : productionFiles(fullPath);
+    return entry.isFile() && entry.name.endsWith('.tsx') && !entry.name.endsWith('.test.tsx') ? [fullPath] : [];
+  });
 }
 
 describe('semantic token guard', () => {

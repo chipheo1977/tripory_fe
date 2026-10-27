@@ -102,7 +102,7 @@ export function SheetBackdrop({ className, ...props }: ComponentProps<typeof Bas
       {...props}
       data-sheet-backdrop=""
       className={cn(
-        'pointer-events-auto fixed inset-0 z-(--z-overlay) min-h-dvh bg-overlay transition-opacity duration-(--semantic-motion-duration-slow) ease-standard data-starting-style:opacity-0 data-ending-style:opacity-0',
+        'pointer-events-auto fixed inset-0 z-overlay min-h-dvh bg-overlay transition-opacity duration-(--semantic-motion-duration-slow) ease-standard data-starting-style:opacity-0 data-ending-style:opacity-0',
         className,
       )}
     />
@@ -127,7 +127,7 @@ export function SheetContent({ children, className, ...props }: ComponentProps<t
   return (
     <BaseDrawer.Portal>
       {modal ? <SheetBackdrop /> : null}
-      <BaseDrawer.Viewport className={cn('pointer-events-none fixed inset-0 z-(--z-modal) flex', viewportClasses[position])}>
+      <BaseDrawer.Viewport className={cn('pointer-events-none fixed inset-0 z-modal flex', viewportClasses[position])}>
         <BaseDrawer.Popup
           {...props}
           data-sheet-position={position}
@@ -140,7 +140,7 @@ export function SheetContent({ children, className, ...props }: ComponentProps<t
         >
           {position === 'bottom' ? <SheetHandle /> : null}
           <SheetControls />
-          <BaseDrawer.Content className="mx-auto flex w-full max-w-(--size-content-sm) flex-col gap-stack-md">
+          <BaseDrawer.Content className="mx-auto flex w-full max-w-content-sm flex-col gap-stack-md">
             {children}
           </BaseDrawer.Content>
         </BaseDrawer.Popup>

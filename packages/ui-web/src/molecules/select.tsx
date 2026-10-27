@@ -48,7 +48,7 @@ export function SelectValue(props: ComponentProps<typeof BaseSelect.Value>) {
 export function SelectContent({ children, className, ...props }: Omit<ComponentProps<typeof BaseSelect.Popup>, 'className'> & { className?: string }) {
   return (
     <BaseSelect.Portal>
-      <BaseSelect.Positioner alignItemWithTrigger={false} className="z-(--z-dropdown) outline-hidden" sideOffset={overlayOffsetPx}>
+      <BaseSelect.Positioner alignItemWithTrigger={false} className="z-dropdown outline-hidden" sideOffset={overlayOffsetPx}>
         <BaseSelect.Popup
           {...props}
           className={cn(

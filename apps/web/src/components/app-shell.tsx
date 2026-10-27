@@ -15,7 +15,7 @@ export function AppShell({ children, variant }: AppShellProps) {
       data-variant={variant}
     >
       <a
-        className="sr-only z-(--z-modal) rounded-control bg-surface px-page-inline py-inline-sm text-label font-semibold text-text focus:not-sr-only focus:fixed focus:left-0 focus:top-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+        className="sr-only z-modal rounded-control bg-surface px-page-inline py-inline-sm text-label font-semibold text-text focus:not-sr-only focus:fixed focus:left-0 focus:top-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
         href="#main-content"
       >
         Bỏ qua đến nội dung chính

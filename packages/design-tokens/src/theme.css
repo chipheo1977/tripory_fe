@@ -6,6 +6,7 @@
   --text-*: initial;
   --font-weight-*: initial;
   --breakpoint-*: initial;
+  --z-index-*: initial;
 
   --color-background: var(--semantic-color-background);
   --color-surface: var(--semantic-color-surface);
@@ -17,6 +18,9 @@
   --color-text-subtle: var(--semantic-color-text-subtle);
   --color-text-disabled: var(--semantic-color-text-disabled);
   --color-text-inverse: var(--semantic-color-text-inverse);
+  --text-color-muted: var(--semantic-color-text-muted);
+  --text-color-subtle: var(--semantic-color-text-subtle);
+  --text-color-disabled: var(--semantic-color-text-disabled);
   --color-border: var(--semantic-color-border);
   --color-border-strong: var(--semantic-color-border-strong);
   --color-input: var(--semantic-color-input);
@@ -95,6 +99,13 @@
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
+
+  --z-index-base: var(--semantic-z-base);
+  --z-index-sticky: var(--semantic-z-sticky);
+  --z-index-dropdown: var(--semantic-z-dropdown);
+  --z-index-overlay: var(--semantic-z-overlay);
+  --z-index-modal: var(--semantic-z-modal);
+  --z-index-toast: var(--semantic-z-toast);
 }
 
 @media (prefers-reduced-motion: reduce) {

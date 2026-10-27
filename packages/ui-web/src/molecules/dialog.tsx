@@ -6,7 +6,7 @@ import type { ComponentProps } from 'react';
 import { cn } from '../lib/cn';
 
 const dialogContentVariants = cva(
-  'fixed left-1/2 top-1/2 z-(--z-modal) flex max-h-[calc(100dvh-var(--semantic-space-section))] max-w-[calc(100vw-var(--semantic-space-section))] -translate-x-1/2 -translate-y-1/2 flex-col gap-stack-md overflow-y-auto rounded-overlay border border-border bg-surface-elevated p-stack-lg text-text shadow-overlay outline-hidden transition-[transform,opacity] duration-(--semantic-motion-duration-normal) ease-standard data-starting-style:scale-95 data-starting-style:opacity-0 data-ending-style:scale-95 data-ending-style:opacity-0',
+  'fixed left-1/2 top-1/2 z-modal flex max-h-[calc(100dvh-var(--semantic-space-section))] max-w-[calc(100vw-var(--semantic-space-section))] -translate-x-1/2 -translate-y-1/2 flex-col gap-stack-md overflow-y-auto rounded-overlay border border-border bg-surface-elevated p-stack-lg text-text shadow-overlay outline-hidden transition-[transform,opacity] duration-(--semantic-motion-duration-normal) ease-standard data-starting-style:scale-95 data-starting-style:opacity-0 data-ending-style:scale-95 data-ending-style:opacity-0',
   {
     variants: {
       size: {
@@ -39,7 +39,7 @@ export function DialogBackdrop({ className, ...props }: ComponentProps<typeof Ba
       {...props}
       data-dialog-backdrop=""
       className={cn(
-        'fixed inset-0 z-(--z-overlay) min-h-dvh bg-overlay transition-opacity duration-(--semantic-motion-duration-normal) ease-standard data-starting-style:opacity-0 data-ending-style:opacity-0',
+        'fixed inset-0 z-overlay min-h-dvh bg-overlay transition-opacity duration-(--semantic-motion-duration-normal) ease-standard data-starting-style:opacity-0 data-ending-style:opacity-0',
         className,
       )}
     />
@@ -52,7 +52,7 @@ export function DialogContent({ children, className, size, ...props }: DialogCon
   return (
     <BaseDialog.Portal>
       <DialogBackdrop />
-      <BaseDialog.Viewport className="fixed inset-0 z-(--z-modal)">
+      <BaseDialog.Viewport className="fixed inset-0 z-modal">
         <BaseDialog.Popup {...props} className={dialogContentVariants({ className, size })}>
           {children}
         </BaseDialog.Popup>

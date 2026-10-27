@@ -4,4 +4,6 @@
   --sheet-snap-medium: 60dvh;
   --sheet-snap-expanded: calc(92dvh - env(safe-area-inset-top));
   --user-menu-name-max-width: 160px;
+  --editor-timeline-width: 400px;
+  --itinerary-cover-ratio: 16 / 9;
 }

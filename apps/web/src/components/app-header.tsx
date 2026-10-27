@@ -13,7 +13,7 @@ export function AppHeader({ account }: AppHeaderProps) {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-(--z-sticky) border-b border-border bg-surface pt-[env(safe-area-inset-top)]">
+    <header className="sticky top-0 z-sticky border-b border-border bg-surface pt-[env(safe-area-inset-top)]">
       <div className="mx-auto flex min-h-header w-full max-w-content-lg items-center justify-between gap-stack-md px-page-inline sm:px-page-inline-md lg:px-page-inline-lg">
         <Link
           aria-current={pathname === "/" ? "page" : undefined}

@@ -46,7 +46,7 @@ export function TooltipContent({ className, side = 'top', sideOffset = overlayOf
   const descriptionId = useContext(TooltipDescriptionContext);
   return (
     <BaseTooltip.Portal>
-      <BaseTooltip.Positioner className="z-(--z-dropdown)" side={side} sideOffset={sideOffset}>
+      <BaseTooltip.Positioner className="z-dropdown" side={side} sideOffset={sideOffset}>
         <BaseTooltip.Popup
           {...props}
           id={descriptionId}

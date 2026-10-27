@@ -1,5 +1,5 @@
 import { compile } from '@tailwindcss/node';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -182,6 +182,8 @@ describe('design token inventory', () => {
       '--sheet-snap-medium': '60dvh',
       '--sheet-snap-expanded': 'calc(92dvh - env(safe-area-inset-top))',
       '--user-menu-name-max-width': '160px',
+      '--editor-timeline-width': '400px',
+      '--itinerary-cover-ratio': '16 / 9',
     });
   });
 
@@ -228,7 +230,7 @@ describe('Tailwind theme contract', () => {
   it('reset namespace mặc định và giữ breakpoint dạng literal', () => {
     const themeCss = readSource('theme.css');
 
-    for (const namespace of ['color', 'radius', 'shadow', 'font', 'text', 'font-weight', 'breakpoint']) {
+    for (const namespace of ['color', 'radius', 'shadow', 'font', 'text', 'font-weight', 'breakpoint', 'z-index']) {
       expect(themeCss, `thiếu reset namespace ${namespace}`).toContain(`--${namespace}-*: initial;`);
     }
     expect(themeCss).toContain('--breakpoint-sm: 640px;');
@@ -247,5 +249,166 @@ describe('Tailwind theme contract', () => {
     expect(componentTokens['--sheet-snap-peek']).toBe(`max(${sheetPeekMinPx}px, ${sheetSnapPoints.peek * 100}dvh)`);
     expect(componentTokens['--sheet-snap-medium']).toBe(`${sheetSnapPoints.medium * 100}dvh`);
     expect(componentTokens['--sheet-snap-expanded']).toContain(`${sheetSnapPoints.expanded * 100}dvh`);
+  });
+});
+
+describe('utility Phase 4 có CSS thật', () => {
+  const buildUtilities = async (candidates: string[]) => {
+    const compiler = await compile('@import "tailwindcss"; @import "./index.css";', {
+      base: srcDir,
+      onDependency: () => undefined,
+    });
+    return compiler.build(candidates);
+  };
+
+  it('sinh text-muted, text-subtle, text-disabled từ semantic text color', async () => {
+    const css = await buildUtilities(['text-muted', 'text-subtle', 'text-disabled']);
+
+    expect(css).toContain('color: var(--semantic-color-text-muted)');
+    expect(css).toContain('color: var(--semantic-color-text-subtle)');
+    expect(css).toContain('color: var(--semantic-color-text-disabled)');
+  });
+
+  it('không sinh bg-muted vì alias text-color chỉ thuộc namespace text', async () => {
+    const css = await buildUtilities(['bg-muted']);
+
+    expect(css).not.toContain('.bg-muted');
+  });
+
+  it('sinh z-index utility từ semantic z token', async () => {
+    const css = await buildUtilities(['z-base', 'z-sticky', 'z-dropdown', 'z-overlay', 'z-modal', 'z-toast']);
+
+    for (const layer of ['base', 'sticky', 'dropdown', 'overlay', 'modal', 'toast']) {
+      expect(css, `thiếu z-${layer}`).toContain(`z-index: var(--semantic-z-${layer})`);
+    }
+  });
+
+  it('nối --semantic-size-content-sm sang utility max-w-content-sm', async () => {
+    const css = await buildUtilities(['max-w-content-sm']);
+
+    expect(css).toContain('max-width: var(--semantic-size-content-sm)');
+  });
+
+  it('sinh aspect ratio từ component token --itinerary-cover-ratio', async () => {
+    const css = await buildUtilities(['aspect-(--itinerary-cover-ratio)']);
+
+    expect(css).toContain('aspect-ratio: var(--itinerary-cover-ratio)');
+  });
+});
+
+describe('guard: utility trong component có CSS và không trỏ biến mồ côi', () => {
+  const repoRoot = fileURLToPath(new URL('../../..', import.meta.url));
+  const sourceRoots = [
+    'packages/ui-web/src/atoms',
+    'packages/ui-web/src/molecules',
+    'apps/web/src/components',
+    'apps/web/src/modules',
+    'apps/web/src/app',
+  ].map((dir) => path.join(repoRoot, dir));
+
+  const productionFiles = (root: string): string[] => {
+    if (!existsSync(root)) return [];
+    return readdirSync(root, { recursive: true, withFileTypes: true })
+      .filter((entry) => entry.isFile() && /\.tsx?$/u.test(entry.name) && !/\.test\.tsx?$/u.test(entry.name))
+      .map((entry) => path.join(entry.parentPath, entry.name));
+  };
+
+  const files = sourceRoots.flatMap(productionFiles);
+  const relative = (file: string) => path.relative(repoRoot, file).split(path.sep).join('/');
+
+  const candidateTokens = () => {
+    const tokens = new Set<string>();
+    for (const file of files) {
+      for (const [token] of readFileSync(file, 'utf8').matchAll(/[A-Za-z0-9_:\-[\]()/.%#!@]+/g)) {
+        if (token.includes('-')) tokens.add(token);
+      }
+    }
+    return [...tokens];
+  };
+
+  const compileCss = async (css: string, candidates: string[]) => {
+    const compiler = await compile(css, { base: srcDir, onDependency: () => undefined });
+    return compiler.build(candidates);
+  };
+
+  // ui-web/styles.css được globals.css của app import nên biến khai báo ở đó cũng hợp lệ.
+  const declarationSources = [
+    ...readdirSync(srcDir)
+      .filter((file) => file.endsWith('.css'))
+      .map((file) => path.join(srcDir, file)),
+    path.join(repoRoot, 'packages/ui-web/src/styles.css'),
+  ];
+  const declaredIn = (css: string) => [...css.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map(([, name]) => name);
+
+  // --tw-: biến nội bộ Tailwind; --default-: preflight Tailwind, luôn kèm fallback;
+  // --drawer-: Base UI Drawer gán lúc runtime.
+  const ignoredPrefixes = ['--tw-', '--default-', '--drawer-'];
+  // Gán lúc runtime: Base UI Popup (--anchor-width, --transform-origin), Base UI Tabs (--active-tab-*), next/font (--font-inter).
+  const runtimeVariables = new Set(['--anchor-width', '--transform-origin', '--active-tab-width', '--active-tab-left', '--font-inter']);
+
+  // Dựng lại index.css nội tuyến để có thể đột biến theme.css trong bộ nhớ.
+  const inlineStylesheet = (theme: string) =>
+    ['@import "tailwindcss";', ...['primitives.css', 'semantic.css', 'components.css'].map(readSource), theme].join('\n');
+
+  it('quét được file production', () => {
+    expect(files.length).toBeGreaterThan(0);
+  });
+
+  it('mọi var() trong CSS sinh ra đều có khai báo', async () => {
+    const css = await compileCss('@import "tailwindcss"; @import "./index.css";', candidateTokens());
+    const declared = new Set([
+      ...declarationSources.flatMap((file) => declaredIn(readFileSync(file, 'utf8'))),
+      ...declaredIn(css),
+    ]);
+    const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/gi)].map(([, name]) => name));
+
+    const missing = [...used]
+      .filter(
+        (name) =>
+          !declared.has(name) &&
+          !runtimeVariables.has(name) &&
+          !ignoredPrefixes.some((prefix) => name.startsWith(prefix)),
+      )
+      .sort();
+
+    expect(missing).toEqual([]);
+  });
+
+  it('ca đột biến: bỏ --text-color-muted thì text-muted không còn CSS', async () => {
+    const theme = readSource('theme.css');
+    const mutatedTheme = theme
+      .split('\n')
+      .filter((line) => !line.includes('--text-color-muted'))
+      .join('\n');
+
+    expect(mutatedTheme).not.toBe(theme);
+    expect(await compileCss(inlineStylesheet(theme), ['text-muted'])).toContain('.text-muted');
+    expect(await compileCss(inlineStylesheet(mutatedTheme), ['text-muted'])).not.toContain('.text-muted');
+  });
+
+  // Tailwind 4 luôn nhận số nguyên trần cho z-*, nên chặn tĩnh: chỉ cho phép z token và z-auto.
+  const rawZIndex = /(?<![\w-])-?z-(?:\d+|\[[^\]]*\]|\([^)]*\))(?![\w-])/gu;
+  const findRawZIndex = (source: string) => [...source.matchAll(rawZIndex)].map(([token]) => token);
+
+  it('matcher z-index bắt đúng mẫu', () => {
+    expect(findRawZIndex('z-10 md:z-50 -z-1 z-[999] z-(--z-modal) hover:!z-20')).toEqual([
+      'z-10',
+      'z-50',
+      '-z-1',
+      'z-[999]',
+      'z-(--z-modal)',
+      'z-20',
+    ]);
+    expect(findRawZIndex('fuzz-1 size-10 quiz-2 z-modal z-auto z-base md:z-toast')).toEqual([]);
+  });
+
+  it('không dùng z-index số hoặc arbitrary ngoài z token', () => {
+    const offenders = files.flatMap((file) =>
+      readFileSync(file, 'utf8')
+        .split('\n')
+        .flatMap((line, index) => findRawZIndex(line).map((token) => `${relative(file)}:${index + 1}: ${token}`)),
+    );
+
+    expect(offenders).toEqual([]);
   });
 });

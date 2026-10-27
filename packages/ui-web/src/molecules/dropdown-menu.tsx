@@ -44,7 +44,7 @@ export type DropdownMenuContentProps = Omit<ComponentProps<typeof Menu.Popup>, '
 export function DropdownMenuContent({ align = 'start', children, className, ...props }: DropdownMenuContentProps) {
   return (
     <Menu.Portal>
-      <Menu.Positioner align={align} className="z-(--z-dropdown) outline-hidden" sideOffset={overlayOffsetPx}>
+      <Menu.Positioner align={align} className="z-dropdown outline-hidden" sideOffset={overlayOffsetPx}>
         <Menu.Popup
           {...props}
           className={cn(

@@ -1,6 +1,6 @@
 "use client";
 
-// Lưu giá trị form vào `sessionStorage` khi phiên HẾT HẠN thật (D-36). Chỉ sự kiện `expired` (route refresh trả 401),
+// Lưu giá trị form vào `draftStorage` khi phiên HẾT HẠN thật (D-36). Chỉ sự kiện `expired` (route refresh trả 401),
 // không phải đăng xuất chủ động: đăng xuất là ý định của người dùng, không cần cứu nội dung.
 // Khóa có `viewerId` nên tài khoản khác cùng tab không đọc được bản nháp này (Pitfall 4).
 import { useEffect, useRef } from "react";

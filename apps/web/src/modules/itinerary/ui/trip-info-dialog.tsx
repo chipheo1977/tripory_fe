@@ -30,7 +30,7 @@ export type TripInfoDialogProps = Readonly<{
   viewerId: string;
   open: boolean;
   onOpenChange(open: boolean): void;
-  /** Bản nháp đọc từ `sessionStorage` (D-36): điền vào form và hiện InlineAlert khôi phục. */
+  /** Bản nháp đọc từ `draftStorage` (D-36): điền vào form và hiện InlineAlert khôi phục. */
   restored?: MetadataValues | null;
   /** Báo form có thay đổi chưa lưu, để editor bật cảnh báo rời trang (`useEditorLeaveGuard.formDirty`). */
   onDirtyChange?: (dirty: boolean) => void;

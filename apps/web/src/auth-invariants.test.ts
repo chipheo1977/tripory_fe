@@ -67,13 +67,24 @@ describe("auth security invariants (static)", () => {
   });
 
   // T-03-72: token không ở storage, không ở biến NEXT_PUBLIC_ (lộ vào bundle client).
+  // Ngoại lệ duy nhất, có chủ đích (Phase 4 D-36, T-04-41): adapter bản nháp form của editor dùng `sessionStorage`
+  // (khóa theo viewer, TTL 24 giờ, chỉ giá trị form, không bao giờ token). `localStorage` vẫn cấm ở mọi nơi.
+  const DRAFT_STORAGE_ADAPTER = "modules/itinerary/ui/draft-storage.ts";
   it("never stores tokens in web storage or NEXT_PUBLIC_ variables", () => {
     const offenders = allSources
-      .filter((file) =>
-        /NEXT_PUBLIC_API|NEXT_PUBLIC_\w*TOKEN|\blocalStorage\b|\bsessionStorage\b/.test(file.text),
+      .filter(
+        (file) =>
+          /NEXT_PUBLIC_API|NEXT_PUBLIC_\w*TOKEN|\blocalStorage\b/.test(file.text) ||
+          (file.rel !== DRAFT_STORAGE_ADAPTER && /\bsessionStorage\b/.test(file.text)),
       )
       .map((file) => file.rel);
     expect(offenders).toEqual([]);
+  });
+
+  it("keeps the draft storage adapter free of tokens and cookies", () => {
+    const adapter = allSources.find((file) => file.rel === DRAFT_STORAGE_ADAPTER);
+    expect(adapter).toBeDefined();
+    expect(adapter?.text).not.toMatch(/token|document\.cookie|localStorage/i);
   });
 
   // T-03-73: proxy chỉ nhìn cookie, không gọi BE và không giải mã token.

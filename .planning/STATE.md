@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-14-PLAN.md
-last_updated: "2026-10-28T15:39:58.805Z"
+stopped_at: Completed 04-16-PLAN.md
+last_updated: "2026-10-28T15:45:05.978Z"
 last_activity: 2026-10-28
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 50
-  completed_plans: 41
-  percent: 82
+  completed_plans: 42
+  percent: 84
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 4
-Plan: 15 of 23
+Plan: 16 of 23
 Status: Ready to execute
 Last activity: 2026-10-28
 
@@ -95,6 +95,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 4 P13 | 30min | 3 tasks | 9 files |
 | Phase 4 P12 | 15min | 3 tasks | 8 files |
 | Phase 04 P14 | 35min | 3 tasks | 12 files |
+| Phase 4 P16 | 25min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -182,6 +183,7 @@ Recent decisions affecting current work:
 - [Phase 4]: 04-12: sentinel cuon vo han tu nap tiep khi con trong viewport (IO khong bao lai); the vua xoa an ngay bang removedIds; the dung article thay Card (Card render div)
 - [Phase 04]: 04-14: findFirst bo qua va don ban nhap qua han/kind la; mo dialog reset ve du lieu BE roi ap ban nhap voi keepDefaultValues de noi dung khoi phuc tinh la ban
 - [Phase 04]: 04-14: Sheet nhan disablePointerDismissal (ui-web); auth-invariants thu hep: sessionStorage chi cho phep o draft-storage.ts (D-36), localStorage va NEXT_PUBLIC van cam
+- [Phase 4]: 04-16: loi them ngay chi lui ve ngay truoc khi nguoi dung van dang chon tab bi go (ref ngay dang chon); DaySubtitle dung finishedRef chong gui hai lan Enter+blur
 
 ### Pending Todos
 
@@ -201,6 +203,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-28T15:39:58.800Z
-Stopped at: Completed 04-14-PLAN.md
+Last session: 2026-10-28T15:45:05.973Z
+Stopped at: Completed 04-16-PLAN.md
 Resume file: None

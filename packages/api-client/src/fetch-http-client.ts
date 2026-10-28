@@ -92,6 +92,7 @@ export function createFetchHttpClient(deps: FetchHttpClientDeps): HttpClient {
           headers: buildHeaders(request, injected),
           body: buildBody(request.body),
           signal: controller.signal,
+          ...(request.keepalive ? { keepalive: true } : {}),
         });
         // Đọc body vẫn nằm trong cửa sổ timeout: BE/proxy có thể gửi header rồi treo body.
         const text = await response.text();

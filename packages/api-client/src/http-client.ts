@@ -18,6 +18,8 @@ export type HttpRequest = Readonly<{
   timeoutMs?: number;
   /** false: login/register/refresh không vào nhánh refresh phiên. */
   sessionRefresh?: boolean;
+  /** true: gửi kèm fetch `keepalive` để lệnh còn tới server khi trang đang đóng (Phase 4 D-32). */
+  keepalive?: boolean;
 }>;
 
 export type HttpClient = Readonly<{ send(request: HttpRequest): Promise<unknown> }>;

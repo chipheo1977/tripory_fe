@@ -29,6 +29,13 @@ export type BrowserHttp = Readonly<{
   authHttp: ReturnType<typeof withSessionRefresh>;
   /** Dữ liệu nghiệp vụ qua BFF. Base `/api/bff`, bọc refresh. */
   bffHttp: ReturnType<typeof withSessionRefresh>;
+  /** Route của chính app ngoài BFF (`/api/maps/resolve`). Base `/api`, bọc refresh. */
+  appHttp: ReturnType<typeof withSessionRefresh>;
+  /**
+   * Client trần base `/api/bff` cho DELETE keepalive lúc rời trang: không bọc refresh vì lúc unload không
+   * refresh được (D-32).
+   */
+  bffUnloadHttp: ReturnType<typeof createFetchHttpClient>;
   /**
    * Lối vào duy nhất cho refresh chủ động (SessionKeeper) và hồi phục (SessionRecovery). Resolve
    * `'expired'` khi route trả 401; ném lỗi tạm thời (mạng, 5xx, hết hạn xin khóa). Không tự báo
@@ -103,19 +110,22 @@ export function makeBrowserHttp(deps: BrowserHttpDeps): BrowserHttp {
   const authHttp = withSessionRefresh(createFetchHttpClient({ baseUrl: "/api/auth", fetch: deps.fetch }), refreshDeps);
   const bffHttp = withSessionRefresh(createFetchHttpClient({ baseUrl: "/api/bff", fetch: deps.fetch }), refreshDeps);
 
+  const appHttp = withSessionRefresh(createFetchHttpClient({ baseUrl: "/api", fetch: deps.fetch }), refreshDeps);
+  const bffUnloadHttp = createFetchHttpClient({ baseUrl: "/api/bff", fetch: deps.fetch });
+
   let inFlight: Promise<RefreshOutcome> | null = null;
   const refreshSession = (): Promise<RefreshOutcome> =>
     (inFlight ??= lock(DEFAULT_SESSION_LOCK_NAME, callRefreshRoute).finally(() => {
       inFlight = null;
     }));
 
-  return { authHttp, bffHttp, refreshSession, lock };
+  return { authHttp, bffHttp, appHttp, bffUnloadHttp, refreshSession, lock };
 }
 
 // Singleton có chủ đích: một khóa và một `inFlight` cho cả tab. Hai bản `makeBrowserHttp` trong cùng tab
 // sẽ có `inFlight` riêng và chỉ còn dựa vào `lock` + route idempotent. `fetch` bọc bằng arrow để không đọc
 // `globalThis.fetch` lúc import (SSR, test) và để gọi như hàm trần, tránh "Illegal invocation".
-export const { authHttp, bffHttp, refreshSession } = makeBrowserHttp({
+export const { authHttp, bffHttp, appHttp, bffUnloadHttp, refreshSession } = makeBrowserHttp({
   fetch: (...args) => globalThis.fetch(...args),
   locks: typeof navigator === "undefined" ? undefined : navigator.locks,
   onSessionExpired: () => sessionEvents.emitExpired(),

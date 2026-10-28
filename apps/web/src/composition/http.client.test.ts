@@ -71,6 +71,16 @@ function makeWorld() {
       return stale ? jsonResponse(failure("session.expired"), 401) : jsonResponse(success({ id: "u1" }));
     }
 
+    if (url === "/api/maps/resolve" && method === "POST") {
+      return world.fresh
+        ? jsonResponse(success({ url: "https://www.google.com/maps/@10.77,106.70,15z" }))
+        : jsonResponse(failure("session.expired"), 401);
+    }
+
+    if (url === "/api/bff/itineraries/i1/waypoints/w1" && method === "DELETE") {
+      return jsonResponse(failure("session.expired"), 401);
+    }
+
     if (url === "/api/auth/login" && method === "POST") {
       return jsonResponse(failure("Auth.InvalidCredentials"), 401);
     }
@@ -387,5 +397,38 @@ describe("makeBrowserHttp: authHttp và bffHttp", () => {
     expect(changed).toBeNull();
     expect(me).toEqual({ id: "u1" });
     expect(world.beCalls).toBe(1);
+  });
+});
+
+describe("makeBrowserHttp: appHttp và bffUnloadHttp (04-09)", () => {
+  it("appHttp dùng base /api và refresh rồi phát lại khi gặp 401 session.expired", async () => {
+    const { world, fetch } = makeWorld();
+    const http = makeBrowserHttp({ fetch, locks: makeFakeLockManager(), onSessionExpired: vi.fn() });
+
+    await expect(
+      http.appHttp.send({ method: "POST", path: "/maps/resolve", body: { url: "https://maps.app.goo.gl/x" } }),
+    ).resolves.toEqual({ url: "https://www.google.com/maps/@10.77,106.70,15z" });
+
+    expect(world.requests).toEqual(["POST /api/maps/resolve", "POST /api/auth/refresh", "POST /api/maps/resolve"]);
+    expect(world.beCalls).toBe(1);
+  });
+
+  it("bffUnloadHttp dùng base /api/bff và gặp 401 thì KHÔNG gọi route refresh (D-32)", async () => {
+    const { world, fetch } = makeWorld();
+    const onSessionExpired = vi.fn();
+    const http = makeBrowserHttp({ fetch, locks: makeFakeLockManager(), onSessionExpired });
+
+    const error = await http.bffUnloadHttp
+      .send({ method: "DELETE", path: "/itineraries/i1/waypoints/w1", keepalive: true })
+      .then(
+        () => null,
+        (rejected: unknown) => rejected,
+      );
+
+    expect(isApiError(error)).toBe(true);
+    expect(error).toMatchObject({ status: 401 });
+    expect(world.requests).toEqual(["DELETE /api/bff/itineraries/i1/waypoints/w1"]);
+    expect(world.refreshCalls).toBe(0);
+    expect(onSessionExpired).not.toHaveBeenCalled();
   });
 });

@@ -146,6 +146,9 @@ importers:
       '@tripory/itinerary':
         specifier: workspace:*
         version: link:../../packages/itinerary
+      '@tripory/shared-kernel':
+        specifier: workspace:*
+        version: link:../../packages/shared-kernel
       '@tripory/ui-web':
         specifier: workspace:*
         version: link:../../packages/ui-web

@@ -24,6 +24,7 @@
     "@tripory/design-tokens": "workspace:*",
     "@tripory/identity": "workspace:*",
     "@tripory/itinerary": "workspace:*",
+    "@tripory/shared-kernel": "workspace:*",
     "@tripory/ui-web": "workspace:*",
     "lucide-react": "catalog:",
     "next": "catalog:",

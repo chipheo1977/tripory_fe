@@ -17,6 +17,7 @@ function ExampleSheet({ modal = true, position = 'bottom', onSnapPointChange, ..
   position?: Position;
   onSnapPointChange?: (snapPoint: number | string | null) => void;
   dismissible?: boolean;
+  disablePointerDismissal?: boolean;
   defaultSnap?: 'peek' | 'medium' | 'expanded';
   insetTop?: number;
   open?: boolean;
@@ -186,6 +187,32 @@ describe('Sheet mở rộng cho editor', () => {
 
     expect(screen.getByRole('dialog')).toBeTruthy();
     expect(onOpenChange).not.toHaveBeenCalledWith(false);
+  });
+
+  it('disablePointerDismissal: bấm scrim không đóng, nút "Đóng bảng" vẫn đóng', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    // onOpenChange nhận thêm tham số details nên `toHaveBeenCalledWith(false)` không khớp; tự lọc theo đối số đầu.
+    const closed = () => onOpenChange.mock.calls.some(([next]) => next === false);
+    render(<ExampleSheet disablePointerDismissal open onOpenChange={onOpenChange} />);
+    await screen.findByRole('dialog');
+
+    const backdrop = document.querySelector('[data-sheet-backdrop]') as HTMLElement;
+    await user.click(backdrop);
+    expect(closed()).toBe(false);
+
+    await user.click(screen.getByRole('button', { name: 'Đóng bảng' }));
+    expect(closed()).toBe(true);
+  });
+
+  it('không có disablePointerDismissal: bấm scrim đóng Sheet modal', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    render(<ExampleSheet open onOpenChange={onOpenChange} />);
+    await screen.findByRole('dialog');
+
+    await user.click(document.querySelector('[data-sheet-backdrop]') as HTMLElement);
+    expect(onOpenChange.mock.calls.some(([next]) => next === false)).toBe(true);
   });
 
   it.each([

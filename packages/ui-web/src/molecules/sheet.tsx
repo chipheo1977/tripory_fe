@@ -37,6 +37,8 @@ export type SheetProps = Omit<
   children?: ReactNode;
   /** `false`: không có nút `Đóng bảng`, Esc/vuốt/bấm ngoài không đóng (timeline không modal của editor). */
   dismissible?: boolean;
+  /** `true`: bấm scrim không đóng, nhưng Esc và nút "Đóng bảng" vẫn đóng được (form modal như TripInfoDialog). */
+  disablePointerDismissal?: boolean;
   /** Mức mở đầu và mức quay về sau khi đóng. */
   defaultSnap?: SheetDefaultSnap;
   /** Chiều cao (px) phía trên không được che; mức expanded không vượt `viewportHeight - insetTop`. */
@@ -56,6 +58,7 @@ export function Sheet({
   children,
   defaultSnap = 'medium',
   dismissible = true,
+  disablePointerDismissal = false,
   insetTop = 0,
   modal = true,
   onOpenChange,
@@ -97,7 +100,7 @@ export function Sheet({
     <SheetContext.Provider value={context}>
       <BaseDrawer.Root
         {...props}
-        disablePointerDismissal={!modal || !dismissible}
+        disablePointerDismissal={!modal || !dismissible || disablePointerDismissal}
         modal={modal}
         swipeDirection={swipeDirections[position]}
         snapPoints={position === 'bottom' ? [...snapPoints] : undefined}

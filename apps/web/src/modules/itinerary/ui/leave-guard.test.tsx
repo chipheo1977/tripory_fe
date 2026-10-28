@@ -24,8 +24,8 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const beforeUnloadCalls = (spy: ReturnType<typeof vi.spyOn>) =>
-  spy.mock.calls.filter(([type]) => type === "beforeunload");
+const beforeUnloadCalls = (spy: { mock: { calls: unknown[][] } }) =>
+  spy.mock.calls.filter((call) => call[0] === "beforeunload");
 
 it("attaches beforeunload only while dirty and detaches on clean or unmount", () => {
   const add = vi.spyOn(window, "addEventListener");
@@ -50,6 +50,8 @@ it("attaches beforeunload only while dirty and detaches on clean or unmount", ()
 it("cancels the unload with an empty returnValue while dirty", () => {
   renderHook(() => useBeforeUnloadWarning(true));
   const event = new Event("beforeunload", { cancelable: true }) as BeforeUnloadEvent;
+  // jsdom có `Event.returnValue` kiểu boolean; BeforeUnloadEvent thật là chuỗi. Ghi đè để kiểm đúng giá trị.
+  Object.defineProperty(event, "returnValue", { value: undefined, writable: true });
 
   window.dispatchEvent(event);
 

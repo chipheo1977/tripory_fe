@@ -2,14 +2,18 @@
 
 import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import type { ComponentProps, ReactNode } from 'react';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '../lib/cn';
 import { resolveSnapPoints, stepSnapPoint } from './sheet-snap';
 
 export type SheetPosition = 'bottom' | 'left' | 'right';
 type SheetSnapPoint = number | string;
 
+export type SheetDefaultSnap = 'peek' | 'medium' | 'expanded';
+const snapIndexes: Record<SheetDefaultSnap, number> = { peek: 0, medium: 1, expanded: 2 };
+
 type SheetContextValue = {
+  dismissible: boolean;
   modal: boolean;
   position: SheetPosition;
   snapPoint: SheetSnapPoint | null;
@@ -31,6 +35,12 @@ export type SheetProps = Omit<
   'children' | 'defaultSnapPoint' | 'disablePointerDismissal' | 'modal' | 'onSnapPointChange' | 'snapPoint' | 'snapPoints' | 'swipeDirection'
 > & {
   children?: ReactNode;
+  /** `false`: không có nút `Đóng bảng`, Esc/vuốt/bấm ngoài không đóng (timeline không modal của editor). */
+  dismissible?: boolean;
+  /** Mức mở đầu và mức quay về sau khi đóng. */
+  defaultSnap?: SheetDefaultSnap;
+  /** Chiều cao (px) phía trên không được che; mức expanded không vượt `viewportHeight - insetTop`. */
+  insetTop?: number;
   modal?: boolean;
   position?: SheetPosition;
   onSnapPointChange?: (snapPoint: SheetSnapPoint | null) => void;
@@ -42,40 +52,73 @@ const swipeDirections = {
   right: 'right',
 } as const;
 
-export function Sheet({ children, modal = true, onOpenChange, onSnapPointChange, position = 'bottom', ...props }: SheetProps) {
+export function Sheet({
+  children,
+  defaultSnap = 'medium',
+  dismissible = true,
+  insetTop = 0,
+  modal = true,
+  onOpenChange,
+  onOpenChangeComplete,
+  onSnapPointChange,
+  position = 'bottom',
+  ...props
+}: SheetProps) {
   const [viewportHeight, setViewportHeight] = useState(640);
-  const snapPoints = useMemo(() => position === 'bottom' ? resolveSnapPoints(viewportHeight) : [], [position, viewportHeight]);
-  const [snapPoint, setSnapPoint] = useState<SheetSnapPoint | null>(0.6);
+  const snapPoints = useMemo<readonly SheetSnapPoint[]>(
+    () => position === 'bottom' ? resolveSnapPoints(viewportHeight, insetTop) : [],
+    [insetTop, position, viewportHeight],
+  );
+  // Lưu mức theo chỉ số để mức đang mở vẫn đúng sau khi `resize` tính lại giá trị px.
+  const [snapIndex, setSnapIndex] = useState(snapIndexes[defaultSnap]);
+  const snapPoint: SheetSnapPoint | null = snapPoints[snapIndex] ?? null;
+  const closingRef = useRef(false);
 
   useEffect(() => {
-    if (position === 'bottom') setViewportHeight(window.innerHeight);
+    if (position !== 'bottom') return undefined;
+    const syncViewportHeight = () => setViewportHeight(window.innerHeight);
+    syncViewportHeight();
+    window.addEventListener('resize', syncViewportHeight);
+    return () => window.removeEventListener('resize', syncViewportHeight);
   }, [position]);
 
   const setActiveSnapPoint = useCallback((nextSnapPoint: SheetSnapPoint) => {
-    setSnapPoint(nextSnapPoint);
+    const nextIndex = snapPoints.indexOf(nextSnapPoint);
+    if (nextIndex >= 0) setSnapIndex(nextIndex);
     onSnapPointChange?.(nextSnapPoint);
-  }, [onSnapPointChange]);
+  }, [onSnapPointChange, snapPoints]);
 
   const context = useMemo<SheetContextValue>(
-    () => ({ modal, position, snapPoint, snapPoints, setSnapPoint: setActiveSnapPoint }),
-    [modal, position, setActiveSnapPoint, snapPoint, snapPoints],
+    () => ({ dismissible, modal, position, snapPoint, snapPoints, setSnapPoint: setActiveSnapPoint }),
+    [dismissible, modal, position, setActiveSnapPoint, snapPoint, snapPoints],
   );
 
   return (
     <SheetContext.Provider value={context}>
       <BaseDrawer.Root
         {...props}
-        disablePointerDismissal={!modal}
+        disablePointerDismissal={!modal || !dismissible}
         modal={modal}
         swipeDirection={swipeDirections[position]}
         snapPoints={position === 'bottom' ? [...snapPoints] : undefined}
         snapPoint={position === 'bottom' ? snapPoint : undefined}
         onSnapPointChange={(next) => {
-          if (next !== null) setActiveSnapPoint(next);
+          // Base UI báo thêm một lần về mức peek ngay sau khi đóng; bỏ qua để lần mở sau vào đúng `defaultSnap`.
+          if (next !== null && !closingRef.current) setActiveSnapPoint(next);
         }}
         onOpenChange={(open, details) => {
-          if (!open && position === 'bottom') setSnapPoint(snapPoints[1] ?? null);
+          if (!open && !dismissible) {
+            details.cancel();
+            return;
+          }
+          closingRef.current = !open;
+          if (!open && position === 'bottom') setSnapIndex(snapIndexes[defaultSnap]);
           onOpenChange?.(open, details);
+        }}
+        onOpenChangeComplete={(open) => {
+          // Mở lại bằng prop `open` (không qua onOpenChange) vẫn phải nhận lại sự kiện snap.
+          closingRef.current = false;
+          onOpenChangeComplete?.(open);
         }}
       >
         {children}
@@ -177,7 +220,7 @@ function SnapButton({ children, direction }: { children: ReactNode; direction: '
 }
 
 export function SheetControls() {
-  const { position } = useSheetContext();
+  const { dismissible, position } = useSheetContext();
 
   return (
     <div className="flex shrink-0 items-center justify-end gap-control-gap">
@@ -187,9 +230,11 @@ export function SheetControls() {
           <SnapButton direction="expand">Mở rộng bảng</SnapButton>
         </>
       ) : null}
-      <BaseDrawer.Close className="inline-flex min-h-touch items-center justify-center rounded-control px-stack-sm text-label font-semibold text-text transition-colors duration-(--semantic-motion-duration-fast) hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring">
-        Đóng bảng
-      </BaseDrawer.Close>
+      {dismissible ? (
+        <BaseDrawer.Close className="inline-flex min-h-touch items-center justify-center rounded-control px-stack-sm text-label font-semibold text-text transition-colors duration-(--semantic-motion-duration-fast) hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring">
+          Đóng bảng
+        </BaseDrawer.Close>
+      ) : null}
     </div>
   );
 }

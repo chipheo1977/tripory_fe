@@ -1,8 +1,16 @@
 // @vitest-environment node
 import { NextResponse } from "next/server";
 import { describe, expect, it, vi } from "vitest";
+import {
+  itineraryDetailJson,
+  itineraryEnvelope,
+  summaryJson,
+  summaryPageJson,
+} from "./be-itinerary-fixtures";
 import { makeFakeBroadcastChannelHub } from "./fake-broadcast-channel";
+import { installFakeIntersectionObserver } from "./fake-intersection-observer";
 import { makeFakeLockManager } from "./fake-locks";
+import { installFakeResizeObserver } from "./fake-resize-observer";
 import { makeRequest, setCookiesOf } from "./next-request";
 
 /** Nhường event loop để các microtask/macrotask đang chờ chạy hết. */
@@ -312,5 +320,100 @@ describe("makeFakeBroadcastChannelHub", () => {
 
     expect(received).toEqual([payload]);
     expect(received[0]).not.toBe(payload);
+  });
+});
+
+describe("installFakeIntersectionObserver", () => {
+  const target = { id: "sentinel" } as unknown as Element;
+
+  it("trigger gọi callback của observer đang theo dõi với isIntersecting và target", () => {
+    const io = installFakeIntersectionObserver();
+    try {
+      const callback = vi.fn();
+      const observer = new IntersectionObserver(callback, { rootMargin: "200px" });
+      observer.observe(target);
+
+      io.trigger(true);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback.mock.calls[0]?.[0]).toEqual([{ isIntersecting: true, target }]);
+      expect(io.instances[0]?.options).toEqual({ rootMargin: "200px" });
+    } finally {
+      io.restore();
+    }
+  });
+
+  it("disconnect rồi thì trigger không gọi callback nữa", () => {
+    const io = installFakeIntersectionObserver();
+    try {
+      const callback = vi.fn();
+      const observer = new IntersectionObserver(callback);
+      observer.observe(target);
+      observer.disconnect();
+
+      io.trigger(true);
+
+      expect(callback).not.toHaveBeenCalled();
+    } finally {
+      io.restore();
+    }
+  });
+
+  it("restore trả lại IntersectionObserver gốc", () => {
+    const before = (globalThis as { IntersectionObserver?: unknown }).IntersectionObserver;
+    const io = installFakeIntersectionObserver();
+
+    expect((globalThis as { IntersectionObserver?: unknown }).IntersectionObserver).not.toBe(before);
+    io.restore();
+    expect((globalThis as { IntersectionObserver?: unknown }).IntersectionObserver).toBe(before);
+  });
+});
+
+describe("installFakeResizeObserver", () => {
+  it("resize báo chiều cao cho observer đang theo dõi đúng target", () => {
+    const ro = installFakeResizeObserver();
+    try {
+      const target = { id: "a" } as unknown as Element;
+      const other = { id: "b" } as unknown as Element;
+      const callback = vi.fn();
+      new ResizeObserver(callback).observe(target);
+
+      ro.resize(other, 10);
+      expect(callback).not.toHaveBeenCalled();
+
+      ro.resize(target, 120);
+      const entries = callback.mock.calls[0]?.[0] as { contentRect: { height: number }; borderBoxSize: { blockSize: number }[] }[];
+      expect(entries[0]?.contentRect.height).toBe(120);
+      expect(entries[0]?.borderBoxSize[0]?.blockSize).toBe(120);
+    } finally {
+      ro.restore();
+    }
+  });
+});
+
+describe("be-itinerary-fixtures", () => {
+  it("chi tiết có ngày thưa và orderIndex lộn như BE thật", () => {
+    const detail = itineraryDetailJson();
+
+    expect(detail.days[0]?.dayNumber).toBe(3);
+    expect(detail.days.map((d) => d.dayNumber)).toEqual([3, 1]);
+    expect(detail.days[1]?.subtitle).toBe("");
+    expect(detail.waypoints.filter((w) => w.dayNumber === 1).map((w) => w.orderIndex)).toEqual([1, 0]);
+    expect(detail.updatedAt).toMatch(/\.\d{7}\+00:00$/);
+  });
+
+  it("overrides ghi đè trường và trang /mine suy đúng cờ trang", () => {
+    expect(itineraryDetailJson({ title: "Khác" }).title).toBe("Khác");
+
+    const last = summaryPageJson();
+    expect(last).toMatchObject({ pageIndex: 1, hasNextPage: false, hasPreviousPage: false, totalPages: 1 });
+
+    const first = summaryPageJson({ items: [summaryJson(), summaryJson()], hasNextPage: true });
+    expect(first).toMatchObject({ hasNextPage: true, totalPages: 2, totalCount: 3 });
+    expect(first.items).toHaveLength(2);
+  });
+
+  it("envelope thành công cùng hình với fixture auth", () => {
+    expect(itineraryEnvelope({ a: 1 })).toMatchObject({ status: "success", data: { a: 1 }, errorCode: null });
   });
 });

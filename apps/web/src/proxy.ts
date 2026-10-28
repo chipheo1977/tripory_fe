@@ -19,11 +19,18 @@ import { hasSessionCookie, isSecureCookieEnv } from "@/composition/session-cooki
  */
 export const PROTECTED_PREFIXES = ["/itineraries/mine", "/settings"] as const;
 
+/**
+ * Route cần phiên nhưng không khớp được bằng tiền tố. Không thêm tiền tố `/itineraries`: Phase 5 có trang
+ * công khai `/itineraries/[id]` (Pitfall 3), chỉ `/itineraries/{id}/edit` mới cần phiên.
+ */
+export const PROTECTED_PATTERNS = [/^\/itineraries\/[^/]+\/edit(?:\/|$)/] as const;
+
 const AUTH_PAGES = new Set(["/login", "/register"]);
 const DEFAULT_AFTER_LOGIN = "/itineraries/mine";
 
-const isProtected = (pathname: string): boolean =>
-  PROTECTED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+export const isProtectedPath = (pathname: string): boolean =>
+  PROTECTED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)) ||
+  PROTECTED_PATTERNS.some((pattern) => pattern.test(pathname));
 
 /** Tham số nội bộ của Next (RSC/prefetch) không được lọt vào `?next=` (Pitfall 8). */
 const isInternalParam = (name: string): boolean => name === "_rsc" || name.startsWith("__next");
@@ -53,7 +60,7 @@ export function proxy(request: NextRequest): NextResponse {
     return NextResponse.redirect(new URL(target, request.url));
   }
 
-  if (!signedIn && isProtected(pathname)) {
+  if (!signedIn && isProtectedPath(pathname)) {
     const login = new URL("/login", request.url);
 
     login.searchParams.set("next", pathWithPublicSearch(pathname, searchParams));

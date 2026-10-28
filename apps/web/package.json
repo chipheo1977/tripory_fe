@@ -14,11 +14,16 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@dnd-kit/core": "catalog:",
+    "@dnd-kit/modifiers": "catalog:",
+    "@dnd-kit/sortable": "catalog:",
+    "@dnd-kit/utilities": "catalog:",
     "@hookform/resolvers": "catalog:",
     "@tanstack/react-query": "catalog:",
     "@tripory/api-client": "workspace:*",
     "@tripory/design-tokens": "workspace:*",
     "@tripory/identity": "workspace:*",
+    "@tripory/itinerary": "workspace:*",
     "@tripory/ui-web": "workspace:*",
     "lucide-react": "catalog:",
     "next": "catalog:",

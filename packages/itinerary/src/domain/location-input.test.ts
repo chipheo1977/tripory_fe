@@ -46,8 +46,8 @@ describe('parseLocationInput: tọa độ trần', () => {
     ['hello', 'chuỗi tự do'],
     ['javascript:alert(1)', 'scheme lạ'],
     ['ftp://www.google.com/maps/@10,10,15z', 'scheme không hỗ trợ'],
-  ] as const)('không hợp lệ: %j (%s)', (raw) => {
-    expect(parseLocationInput(raw)).toEqual({ kind: 'invalid' });
+  ] as const)('không hợp lệ: %j (%s)', (raw, reason) => {
+    expect(parseLocationInput(raw), reason).toEqual({ kind: 'invalid' });
   });
 });
 
@@ -72,9 +72,9 @@ describe('parseLocationInput: link rút gọn', () => {
     ['https://maps.app.goo.gl.evil.com/abc', 'host giả'],
     ['https://evilmaps.app.goo.gl/abc', 'host con lạ'],
     ['https://bit.ly/abc', 'dịch vụ rút gọn khác'],
-  ] as const)('không phải short-link: %j (%s)', (raw) => {
-    expect(parseLocationInput(raw)).toEqual({ kind: 'invalid' });
-    expect(isShortMapsLink(raw)).toBe(false);
+  ] as const)('không phải short-link: %j (%s)', (raw, reason) => {
+    expect(parseLocationInput(raw), reason).toEqual({ kind: 'invalid' });
+    expect(isShortMapsLink(raw), reason).toBe(false);
   });
 
   it('isShortMapsLink false với tọa độ và link đầy đủ', () => {
@@ -180,8 +180,8 @@ describe('parseLocationInput: link Google Maps đầy đủ', () => {
     ['https://www.google.com/mapsfoo/@10,10,15z', 'path /mapsfoo không phải /maps'],
     ['https://www.google.com:8080/maps/@10,10,15z', 'có cổng'],
     ['https://evil.com/?q=https://www.google.com/maps/@10,10,15z', 'Google chỉ nằm trong query'],
-  ] as const)('từ chối: %j (%s)', (raw) => {
-    expect(parseLocationInput(raw)).toEqual({ kind: 'invalid' });
+  ] as const)('từ chối: %j (%s)', (raw, reason) => {
+    expect(parseLocationInput(raw), reason).toEqual({ kind: 'invalid' });
   });
 
   it('nhận host maps.* kể cả path không bắt đầu /maps', () => {

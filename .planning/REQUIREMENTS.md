@@ -42,7 +42,7 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 
 - [x] **ITIN-01**: Người dùng thấy "Lịch trình của tôi" có phân trang và lọc Tất cả/Nháp/Đã xuất bản
 - [ ] **ITIN-02**: Người dùng có thể tạo lịch trình nhanh bằng tiêu đề và vào thẳng editor
-- [ ] **ITIN-03**: Người dùng có thể sửa metadata: tiêu đề, mô tả, ngày khởi hành, ảnh bìa dạng URL (có preview và nền dự phòng)
+- [x] **ITIN-03**: Người dùng có thể sửa metadata: tiêu đề, mô tả, ngày khởi hành, ảnh bìa dạng URL (có preview và nền dự phòng)
 - [ ] **ITIN-04**: Người dùng có thể chuyển tab ngày, thêm ngày và sửa phụ đề ngày inline
 - [x] **ITIN-05**: Người dùng có thể thêm waypoint (tên, địa chỉ, ghi chú) và nhập vị trí bằng cách dán tọa độ "lat, lng" hoặc link Google Maps
 - [ ] **ITIN-06**: Người dùng có thể sửa waypoint
@@ -53,7 +53,7 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 - [x] **ITIN-11**: Người dùng có thể xuất bản khi có ít nhất 1 waypoint, sau khi xác nhận rằng không thể hủy xuất bản; xong thì mở sẵn hộp chia sẻ (phần "mở sẵn hộp chia sẻ" giao ở Phase 5 cùng PUB-04, vì trang công khai chưa có ở Phase 4; xem `04-CONTEXT.md` D-40)
 - [x] **ITIN-12**: Người dùng có thể xóa lịch trình sau khi xác nhận
 - [x] **ITIN-13**: Người không phải chủ không thấy thao tác sửa (`canEdit` suy ra ở domain)
-- [ ] **ITIN-14**: Editor dùng được trên mobile với bottom sheet nhiều mức cho timeline
+- [x] **ITIN-14**: Editor dùng được trên mobile với bottom sheet nhiều mức cho timeline
 
 ### Trang công khai và chia sẻ (PUB)
 
@@ -189,7 +189,7 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | AUTH-08 | Phase 3 | Complete |
 | ITIN-01 | Phase 4 | Complete |
 | ITIN-02 | Phase 4 | Pending |
-| ITIN-03 | Phase 4 | Pending |
+| ITIN-03 | Phase 4 | Complete |
 | ITIN-04 | Phase 4 | Pending |
 | ITIN-05 | Phase 4 | Complete |
 | ITIN-06 | Phase 4 | Pending |
@@ -200,7 +200,7 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | ITIN-11 | Phase 4 | Complete |
 | ITIN-12 | Phase 4 | Complete |
 | ITIN-13 | Phase 4 | Complete |
-| ITIN-14 | Phase 4 | Pending |
+| ITIN-14 | Phase 4 | Complete |
 | PUB-01 | Phase 5 | Pending |
 | PUB-02 | Phase 5 | Pending |
 | PUB-03 | Phase 5 | Pending |

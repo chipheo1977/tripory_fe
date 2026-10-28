@@ -21,8 +21,8 @@ describe('parseCalendarDate', () => {
     ['2026-10-12T00:00', 'có phần giờ'],
     [' 2026-10-12', 'khoảng trắng đầu'],
     ['12/10/2026', 'định dạng vi'],
-  ] as const)('từ chối %j (%s)', (value) => {
-    expect(parseCalendarDate(value)).toBeNull();
+  ] as const)('từ chối %j (%s)', (value, lyDo) => {
+    expect(parseCalendarDate(value), lyDo).toBeNull();
   });
 });
 

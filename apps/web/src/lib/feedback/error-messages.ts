@@ -39,14 +39,17 @@ export const ERROR_MESSAGES: ReadonlyMap<string, string> = new Map<string, strin
   ["Token.UserUnavailable", "Tài khoản không tồn tại hoặc đã bị khóa."],
   // Itinerary / Waypoint
   ["Itinerary.NotFound", "Không tìm thấy lịch trình."],
-  ["Itinerary.Forbidden", "Bạn không có quyền chỉnh sửa lịch trình này."],
-  ["Itinerary.CannotPublishEmpty", "Cần ít nhất một điểm dừng để xuất bản lịch trình."],
-  ["Itinerary.InvalidReorderList", "Danh sách điểm dừng đã thay đổi. Vui lòng tải lại rồi thử lại."],
+  ["Itinerary.Forbidden", "Bạn không có quyền sửa lịch trình này."],
+  ["Itinerary.CannotPublishEmpty", "Thêm ít nhất 1 điểm đến để xuất bản."],
+  // D-37: reorder tự xử lý bằng toast info, câu này chỉ là dự phòng.
+  ["Itinerary.InvalidReorderList", "Danh sách đã thay đổi, đã tải lại"],
   ["Itinerary.InvalidDayNumber", "Ngày không hợp lệ."],
   ["Itinerary.InvalidUserId", GENERIC_ERROR_MESSAGE],
-  ["ItineraryTitle.Empty", "Tiêu đề không được để trống."],
-  ["WaypointName.Empty", "Tên điểm dừng không được để trống."],
-  ["Waypoint.NotFound", "Không tìm thấy điểm dừng."],
+  ["ItineraryTitle.Empty", "Vui lòng nhập tiêu đề."],
+  ["WaypointName.Empty", "Vui lòng nhập tên điểm đến."],
+  ["Waypoint.NotFound", "Điểm đến không còn tồn tại."],
+  // Do FE sinh (route resolve link rút gọn), không phải mã của BE.
+  ["Maps.UnresolvableLink", "Không mở được link rút gọn này. Thử dán link đầy đủ hoặc tọa độ."],
   ["Coordinate.InvalidLatitude", "Vĩ độ phải nằm trong khoảng -90 đến 90."],
   ["Coordinate.InvalidLongitude", "Kinh độ phải nằm trong khoảng -180 đến 180."],
   // Chat

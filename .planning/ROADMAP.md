@@ -137,7 +137,7 @@ Plans:
 - [x] 04-08-PLAN.md — Application + infrastructure: port, use case reorder, Zod DTO, mapper ACL, repository HTTP, short-link resolver
 - [x] 04-09-PLAN.md — `createItineraryHooks` (infinite, optimistic, `scope`), composition `itinerary.client.ts`, `appHttp`/`bffUnloadHttp`, test hook
 - [x] 04-11-PLAN.md — Nền form itinerary (schema, map lỗi, format) + `CreateItineraryDialog` + `DeleteItineraryDialog`
-- [ ] 04-13-PLAN.md — `SaveIndicator` + store, chặn rời trang (`beforeunload`, `Link onNavigate`, `LeaveEditorDialog`), `UserMenu compact`
+- [x] 04-13-PLAN.md — `SaveIndicator` + store, chặn rời trang (`beforeunload`, `Link onNavigate`, `LeaveEditorDialog`), `UserMenu compact`
 - [ ] 04-12-PLAN.md — "Lịch trình của tôi": `CoverImage`, `ItineraryCard`, `MyItinerariesView` (Tabs theo URL, infinite scroll im lặng khi lỗi trang kế), page
 - [ ] 04-14-PLAN.md — Bản nháp form `sessionStorage` (D-36), bề mặt Dialog/Sheet responsive, `TripInfoDialog` (metadata, preview ảnh bìa)
 - [ ] 04-16-PLAN.md — `DayTabs` (ngày thưa, km, thêm ngày optimistic) + `DaySubtitle` inline

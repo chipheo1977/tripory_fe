@@ -4,7 +4,7 @@
 // Lưu xong đóng và không toast (D-24); lỗi BE gắn vào ô hoặc InlineAlert (`errorToast: false`).
 //
 // Ảnh bìa là link ngoài do người dùng nhập (D-25, T-04-39/40): chỉ `https://`, preview chỉ render khi qua `isHttpsUrl`
-// (đã qua Zod), `referrerPolicy="no-referrer"`, KHÔNG dùng `next/image` nên không đi qua proxy của app. Ảnh lỗi
+// (đã qua Zod), `referrerPolicy="no-referrer"`, dùng thẻ img thường (không qua image optimizer) nên không đi qua proxy của app. Ảnh lỗi
 // tải vẫn lưu được vì host ảnh có thể chặn hotlink mà link vẫn đúng với người xem khác.
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Itinerary } from "@tripory/itinerary";

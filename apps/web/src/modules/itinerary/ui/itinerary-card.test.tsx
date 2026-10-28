@@ -88,7 +88,7 @@ it("omits the meta row when both parts are missing", () => {
 });
 
 it("never shows day or waypoint counters", () => {
-  const { container } = render(<ItineraryCard onDelete={vi.fn()} summary={summary()} />);
+  const { container } = render(<ItineraryCard onDelete={vi.fn()} summary={summary({ title: "Đà Lạt cuối tuần" })} />);
   expect(container.textContent).not.toMatch(/\d+\s*(ngày|điểm)/i);
 });
 

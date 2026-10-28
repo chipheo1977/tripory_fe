@@ -90,6 +90,11 @@ const bad: Case[] = [
   // barrel gốc
   { name: 'barrel: lộ infrastructure qua entry gốc', dir: itinerary, file: 'src/index.ts', code: "export * from './infrastructure';", violations: [imp("'./infrastructure'")] },
   { name: 'barrel: lộ react qua entry gốc', dir: itinerary, file: 'src/index.ts', code: "export * from './react';", violations: [imp("'./react'")] },
+  // itinerary (Phase 4: zod chỉ ở infrastructure, dnd-kit/react-dom chỉ ở app web)
+  { name: 'itinerary domain: zod', dir: itinerary, file: 'src/domain/x.ts', code: "import { z } from 'zod';\nexport const x = z;", violations: [imp("'zod'")] },
+  { name: 'itinerary react: @dnd-kit/core', dir: itinerary, file: 'src/react/x.ts', code: "import { DndContext } from '@dnd-kit/core';\nexport const x = DndContext;", violations: [imp("'@dnd-kit/core'")] },
+  { name: 'itinerary infrastructure: react', dir: itinerary, file: 'src/infrastructure/x.ts', code: "import { useState } from 'react';\nexport const x = useState;", violations: [imp("'react'")] },
+  { name: 'itinerary test: @testing-library/react', dir: itinerary, file: 'src/domain/x.test.ts', code: "import { render } from '@testing-library/react';\nexport const x = render;", violations: [imp("'@testing-library/react'")] },
   // identity (context package: zod chỉ ở infrastructure, Next chỉ ở app)
   { name: 'identity domain: zod', dir: identity, file: 'src/domain/x.ts', code: "import { z } from 'zod';\nexport const x = z;", violations: [imp("'zod'")] },
   { name: 'identity application: zod', dir: identity, file: 'src/application/x.ts', code: "import { z } from 'zod';\nexport const x = z;", violations: [imp("'zod'")] },
@@ -143,6 +148,9 @@ const ok: Omit<Case, 'violations'>[] = [
   { name: 'infrastructure: application + domain + api-client + kernel + zod', dir: itinerary, file: 'src/infrastructure/x.ts', code: "import http from '@tripory/api-client';\nimport k from '@tripory/shared-kernel';\nimport { z } from 'zod';\nimport p from '../application/ports';\nimport d from '../domain/itinerary';\nexport const x = [http, k, z, p, d];" },
   { name: 'react: react + react-query + application + domain', dir: itinerary, file: 'src/react/x.ts', code: "import { useQuery } from '@tanstack/react-query';\nimport { useMemo } from 'react';\nimport u from '../application';\nimport d from '../domain';\nexport const x = [useQuery, useMemo, u, d];" },
   { name: 'barrel: domain + application', dir: itinerary, file: 'src/index.ts', code: "export * from './domain';\nexport * from './application';" },
+  { name: 'itinerary infrastructure: zod + api-client', dir: itinerary, file: 'src/infrastructure/x.ts', code: "import type { HttpClient } from '@tripory/api-client';\nimport { z } from 'zod';\nexport type X = HttpClient;\nexport const x = z;" },
+  { name: 'itinerary react: @tanstack/react-query + react', dir: itinerary, file: 'src/react/x.ts', code: "import { useQueryClient } from '@tanstack/react-query';\nimport { useCallback } from 'react';\nexport const x = [useQueryClient, useCallback];" },
+  { name: 'itinerary domain: shared-kernel', dir: itinerary, file: 'src/domain/x.ts', code: "import k from '@tripory/shared-kernel';\nexport const x = k;" },
   { name: 'identity infrastructure: zod + api-client', dir: identity, file: 'src/infrastructure/x.ts', code: "import http from '@tripory/api-client';\nimport { z } from 'zod';\nexport const x = [http, z];" },
   { name: 'identity react: react-query + ../domain', dir: identity, file: 'src/react/x.ts', code: "import { useQuery } from '@tanstack/react-query';\nimport d from '../domain';\nexport const x = [useQuery, d];" },
   { name: 'kernel: không import gì', dir: kernel, file: 'src/x.ts', code: 'export const x = 1;' },
@@ -156,6 +164,9 @@ const ok: Omit<Case, 'violations'>[] = [
   { name: 'design tokens test: compiler and fs', dir: tokens, file: 'src/tokens.test.ts', code: "import { compile } from '@tailwindcss/node';\nimport fs from 'node:fs';\nimport { expect, it } from 'vitest';\nit('ok', () => expect([compile, fs]).toBeDefined());" },
   { name: 'web: composition import /http, /react và entry gốc', dir: web, file: 'src/composition/itinerary.client.ts', code: "import r from '@tripory/itinerary/http';\nimport h from '@tripory/itinerary/react';\nimport u from '@tripory/itinerary';\nexport const x = [r, h, u];" },
   { name: 'web: UI import /react và entry gốc', dir: web, file: 'src/modules/itinerary/ui/x.ts', code: "import h from '@tripory/itinerary/react';\nimport u from '@tripory/itinerary';\nexport const x = [h, u];" },
+  { name: 'web: modules/itinerary/ui import @dnd-kit/core + @dnd-kit/sortable', dir: web, file: 'src/modules/itinerary/ui/x.tsx', code: "import { DndContext } from '@dnd-kit/core';\nimport { SortableContext } from '@dnd-kit/sortable';\nexport const x = [DndContext, SortableContext];" },
+  { name: 'web: modules/itinerary/ui import @tripory/itinerary/react', dir: web, file: 'src/modules/itinerary/ui/x.tsx', code: "import h from '@tripory/itinerary/react';\nexport const x = h;" },
+  { name: 'web: composition/itinerary.client.ts import @tripory/itinerary/http', dir: web, file: 'src/composition/itinerary.client.ts', code: "import r from '@tripory/itinerary/http';\nexport const x = r;" },
   { name: 'web: lib/feedback import entry gốc api-client', dir: web, file: 'src/lib/feedback/x.ts', code: "import { isApiError } from '@tripory/api-client';\nexport const x = isApiError;" },
   { name: 'web: composition import api-client /http', dir: web, file: 'src/composition/http.client.ts', code: "import { createFetchHttpClient, withSessionRefresh } from '@tripory/api-client/http';\nimport { isApiError } from '@tripory/api-client';\nexport const x = [createFetchHttpClient, withSessionRefresh, isApiError];" },
   { name: 'web: composition import @tripory/identity/http', dir: web, file: 'src/composition/server/session-store.ts', code: "import r from '@tripory/identity/http';\nexport const x = r;" },

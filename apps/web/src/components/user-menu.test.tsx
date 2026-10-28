@@ -2,6 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Viewer } from "@tripory/identity";
 import { beforeEach, expect, it, vi } from "vitest";
+import { NavigationGuardProvider } from "./navigation-guard";
 import { UserMenu } from "./user-menu";
 
 const h = vi.hoisted(() => ({
@@ -143,6 +144,41 @@ it("does not mark any link current elsewhere", async () => {
 
   expect(screen.getByRole("menuitem", { name: "Lịch trình của tôi" }).getAttribute("aria-current")).toBeNull();
   expect(screen.getByRole("menuitem", { name: "Đổi mật khẩu" }).getAttribute("aria-current")).toBeNull();
+});
+
+it("compact shows only the avatar and keeps the trigger label", () => {
+  render(<UserMenu compact viewer={viewer()} />);
+
+  const trigger = screen.getByRole("button", { name: "Menu tài khoản: Nguyễn Văn Ánh" });
+  expect(within(trigger).getByRole("img")).toBeTruthy();
+  expect(within(trigger).queryByText("Nguyễn Văn Ánh")).toBeNull();
+  expect(trigger.querySelector("svg")).toBeNull();
+});
+
+it("navigates as before without a guard provider", async () => {
+  render(<UserMenu viewer={viewer()} />);
+  await open();
+
+  const link = screen.getByRole("menuitem", { name: "Lịch trình của tôi" });
+  expect(link.getAttribute("href")).toBe("/itineraries/mine");
+});
+
+it.each([
+  ["Lịch trình của tôi", "/itineraries/mine"],
+  ["Đổi mật khẩu", "/settings/password"],
+])("routes the %s link through the navigation guard", async (label, href) => {
+  const onNavigate = vi.fn((event: { preventDefault(): void }) => event.preventDefault());
+  render(
+    <NavigationGuardProvider value={{ onNavigate }}>
+      <UserMenu viewer={viewer()} />
+    </NavigationGuardProvider>,
+  );
+  const user = await open();
+
+  await user.click(screen.getByRole("menuitem", { name: label }));
+
+  expect(onNavigate).toHaveBeenCalledTimes(1);
+  expect(onNavigate.mock.calls[0]?.[1]).toBe(href);
 });
 
 it("signs out once from the menu without a confirmation dialog", async () => {

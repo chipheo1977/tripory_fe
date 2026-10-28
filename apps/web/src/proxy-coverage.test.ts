@@ -3,7 +3,7 @@ import { readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { PROTECTED_PREFIXES } from "./proxy";
+import { isProtectedPath } from "./proxy";
 
 // D-10: "route mới trong `(dashboard)` tự được bảo vệ". Proxy không thấy tên route group nên danh sách
 // `PROTECTED_PREFIXES` khai báo tay; test này đối chiếu với thư mục thật để quên khai báo thì CI đỏ
@@ -31,9 +31,6 @@ function toUrl(pagePath: string): string {
   return `/${segments.join("/")}`;
 }
 
-const isProtected = (url: string): boolean =>
-  PROTECTED_PREFIXES.some((prefix) => url === prefix || url.startsWith(`${prefix}/`));
-
 const dashboardUrls = listPages("(dashboard)").map(toUrl);
 const publicUrls = listPages("(public)").map(toUrl);
 
@@ -44,12 +41,16 @@ describe("proxy coverage of the (dashboard) route group", () => {
     expect(dashboardUrls).toContain("/settings/password");
   });
 
-  it.each(dashboardUrls)("%s is covered by PROTECTED_PREFIXES", (url) => {
-    expect(isProtected(url)).toBe(true);
+  it.each(dashboardUrls)("%s is covered by isProtectedPath", (url) => {
+    expect(isProtectedPath(url)).toBe(true);
   });
 
   it("does not gate any public page by mistake", () => {
     expect(publicUrls.length).toBeGreaterThan(0);
-    expect(publicUrls.filter(isProtected)).toEqual([]);
+    expect(publicUrls.filter(isProtectedPath)).toEqual([]);
+  });
+
+  it("does not gate the public itinerary detail page of Phase 5", () => {
+    expect(isProtectedPath("/itineraries/x")).toBe(false);
   });
 });

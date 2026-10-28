@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { makeRequest } from "@/test/next-request";
-import { config, PROTECTED_PREFIXES, proxy } from "./proxy";
+import { config, isProtectedPath, PROTECTED_PREFIXES, proxy } from "./proxy";
 
 const SESSION_COOKIE = { tripory_at: "opaque-not-decoded" };
 
@@ -41,6 +41,17 @@ describe("proxy: khách chưa có cookie phiên", () => {
     const response = proxy(makeRequest("/itineraries/mine/draft"));
 
     expect(locationOf(response)).toBe("https://app.test/login?next=%2Fitineraries%2Fmine%2Fdraft");
+  });
+
+  it("redirect /itineraries/abc/edit sang /login?next= (editor cần phiên, ITIN-13)", () => {
+    const response = proxy(makeRequest("/itineraries/abc/edit"));
+
+    expect(response.status).toBe(307);
+    expect(locationOf(response)).toBe("https://app.test/login?next=%2Fitineraries%2Fabc%2Fedit");
+  });
+
+  it("cho qua /itineraries/abc: trang công khai Phase 5 không bị gate", () => {
+    expect(passesThrough(proxy(makeRequest("/itineraries/abc")))).toBe(true);
   });
 
   it("bỏ tham số nội bộ _rsc và __next* khỏi next (Pitfall 8)", () => {
@@ -98,6 +109,20 @@ describe("proxy: đã có cookie phiên", () => {
 
     expect(passesThrough(withPlain)).toBe(true);
     expect(locationOf(withHost)).toBe("https://app.test/itineraries/mine");
+  });
+});
+
+describe("isProtectedPath", () => {
+  it.each([
+    ["/itineraries/abc/edit", true],
+    ["/itineraries/abc/edit/", true],
+    ["/itineraries/abc", false],
+    ["/itineraries/abc/editx", false],
+    ["/itineraries/mine", true],
+    ["/settings/password", true],
+    ["/itineraries", false],
+  ])("%s → %s", (pathname, expected) => {
+    expect(isProtectedPath(pathname)).toBe(expected);
   });
 });
 

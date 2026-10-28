@@ -54,6 +54,6 @@ describe("barrel lib/feedback", () => {
     expect(feedback.resolveFormError).toBeTypeOf("function");
     expect(feedback.decideMutationSuccess).toBeTypeOf("function");
     expect(feedback.decideMutationError).toBeTypeOf("function");
-    expect(feedback.ERROR_MESSAGES.size).toBe(39);
+    expect(feedback.ERROR_MESSAGES.size).toBe(40);
   });
 });

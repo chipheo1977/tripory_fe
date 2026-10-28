@@ -14,7 +14,7 @@ import { AuthFormCard } from "./auth-form-card";
 import { mapChangePasswordError } from "./form-error-mapping";
 import { changePasswordSchema, type ChangePasswordValues } from "./form-schemas";
 import { buildChecklistItems } from "./password-rule-copy";
-import { SubmitStatus } from "./submit-status";
+import { SubmitStatus } from "@/components/submit-status";
 import { useSessionActions } from "./use-session-actions";
 
 export function ChangePasswordForm() {

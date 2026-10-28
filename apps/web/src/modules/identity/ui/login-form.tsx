@@ -14,7 +14,7 @@ import { AuthField, ControlledPasswordInput } from "./auth-fields";
 import { AuthFormCard } from "./auth-form-card";
 import { mapLoginError } from "./form-error-mapping";
 import { loginSchema, type LoginValues } from "./form-schemas";
-import { SubmitStatus } from "./submit-status";
+import { SubmitStatus } from "@/components/submit-status";
 import { useSessionActions } from "./use-session-actions";
 
 export function LoginForm() {

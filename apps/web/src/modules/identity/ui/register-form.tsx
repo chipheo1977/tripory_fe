@@ -19,7 +19,7 @@ import { AuthFormCard } from "./auth-form-card";
 import { mapRegisterError } from "./form-error-mapping";
 import { registerSchema, type RegisterValues } from "./form-schemas";
 import { buildChecklistItems } from "./password-rule-copy";
-import { SubmitStatus } from "./submit-status";
+import { SubmitStatus } from "@/components/submit-status";
 import { useSessionActions } from "./use-session-actions";
 
 export function RegisterForm() {

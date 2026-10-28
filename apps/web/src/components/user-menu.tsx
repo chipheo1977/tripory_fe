@@ -17,10 +17,15 @@ import {
   DropdownMenuTrigger,
   Icon,
 } from "@tripory/ui-web";
+import { useNavigationGuard } from "@/components/navigation-guard";
 import { identity } from "@/composition/identity.client";
 import { useSessionActions } from "@/modules/identity/ui/use-session-actions";
 
-export type UserMenuProps = Readonly<{ viewer: Viewer }>;
+export type UserMenuProps = Readonly<{
+  viewer: Viewer;
+  /** Chỉ hiện avatar ở mọi breakpoint (header editor, D-16). `aria-label` của trigger giữ nguyên. */
+  compact?: boolean;
+}>;
 
 /**
  * Menu tài khoản của header khi có phiên (AUTH-07, D-12..D-16, D-21).
@@ -28,8 +33,10 @@ export type UserMenuProps = Readonly<{ viewer: Viewer }>;
  * D-15 là ngoại lệ có chủ đích do người dùng chọn: "Hồ sơ" và "Tin nhắn" hiện là mục disabled (aria-disabled, không
  * href) kèm Badge "Sắp có". Phase 6 bật "Hồ sơ", Phase 7 bật "Tin nhắn" bằng cách đổi sang `DropdownMenuLinkItem`.
  */
-export function UserMenu({ viewer }: UserMenuProps) {
+export function UserMenu({ viewer, compact = false }: UserMenuProps) {
   const pathname = usePathname();
+  // Hai link đi qua guard chặn rời trang của editor (D-35, Pitfall 12); ngoài editor guard là no-op.
+  const guard = useNavigationGuard();
   const { signOut } = useSessionActions();
   // Lỗi query chỉ làm avatar rơi về chữ cái đầu: không toast, không ErrorState.
   const profile = identity.useMyProfile(true);
@@ -44,10 +51,14 @@ export function UserMenu({ viewer }: UserMenuProps) {
         className="min-h-touch min-w-touch gap-control-gap border-transparent bg-transparent"
       >
         <Avatar name={displayName} size="sm" src={avatarSrc} />
-        <span className="hidden max-w-(--user-menu-name-max-width) truncate text-label font-semibold text-text sm:inline">
-          {displayName}
-        </span>
-        <Icon className="hidden sm:block" icon={ChevronDown} size="sm" />
+        {compact ? null : (
+          <>
+            <span className="hidden max-w-(--user-menu-name-max-width) truncate text-label font-semibold text-text sm:inline">
+              {displayName}
+            </span>
+            <Icon className="hidden sm:block" icon={ChevronDown} size="sm" />
+          </>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuGroup>
@@ -57,7 +68,15 @@ export function UserMenu({ viewer }: UserMenuProps) {
           </DropdownMenuGroupLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuLinkItem render={<Link aria-current={current("/itineraries/mine")} href="/itineraries/mine" />}>
+        <DropdownMenuLinkItem
+          render={
+            <Link
+              aria-current={current("/itineraries/mine")}
+              href="/itineraries/mine"
+              onNavigate={(event) => guard.onNavigate(event, "/itineraries/mine")}
+            />
+          }
+        >
           <Icon icon={Map} size="sm" />
           Lịch trình của tôi
         </DropdownMenuLinkItem>
@@ -71,7 +90,15 @@ export function UserMenu({ viewer }: UserMenuProps) {
           Tin nhắn
           <Badge className="ml-auto" variant="neutral">Sắp có</Badge>
         </DropdownMenuItem>
-        <DropdownMenuLinkItem render={<Link aria-current={current("/settings/password")} href="/settings/password" />}>
+        <DropdownMenuLinkItem
+          render={
+            <Link
+              aria-current={current("/settings/password")}
+              href="/settings/password"
+              onNavigate={(event) => guard.onNavigate(event, "/settings/password")}
+            />
+          }
+        >
           <Icon icon={KeyRound} size="sm" />
           Đổi mật khẩu
         </DropdownMenuLinkItem>

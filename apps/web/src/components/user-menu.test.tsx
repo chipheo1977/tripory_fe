@@ -1,8 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Viewer } from "@tripory/identity";
+import type { MouseEvent, ReactNode } from "react";
 import { beforeEach, expect, it, vi } from "vitest";
-import { NavigationGuardProvider } from "./navigation-guard";
+import { NavigationGuardProvider, type NavigationGuard } from "./navigation-guard";
 import { UserMenu } from "./user-menu";
 
 const h = vi.hoisted(() => ({
@@ -12,6 +13,28 @@ const h = vi.hoisted(() => ({
   useMyProfile: vi.fn(),
 }));
 
+// Link thật chỉ phát `onNavigate` khi có router của App Router trong context; bản giả giữ đúng hợp đồng cần kiểm:
+// `onNavigate` được truyền xuống và gọi với một event có `preventDefault`.
+vi.mock("next/link", () => ({
+  default: ({ href, onNavigate, onClick, children, ...rest }: {
+    href: string;
+    children?: ReactNode;
+    onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
+    onNavigate?: (event: { preventDefault(): void }) => void;
+  } & Record<string, unknown>) => (
+    <a
+      {...rest}
+      href={href}
+      onClick={(event) => {
+        onClick?.(event);
+        event.preventDefault();
+        onNavigate?.({ preventDefault: () => undefined });
+      }}
+    >
+      {children}
+    </a>
+  ),
+}));
 vi.mock("next/navigation", () => ({ usePathname: () => h.pathname }));
 vi.mock("@/composition/identity.client", () => ({ identity: { useMyProfile: h.useMyProfile } }));
 vi.mock("@/modules/identity/ui/use-session-actions", () => ({
@@ -167,7 +190,7 @@ it.each([
   ["Lịch trình của tôi", "/itineraries/mine"],
   ["Đổi mật khẩu", "/settings/password"],
 ])("routes the %s link through the navigation guard", async (label, href) => {
-  const onNavigate = vi.fn((event: { preventDefault(): void }) => event.preventDefault());
+  const onNavigate = vi.fn<NavigationGuard["onNavigate"]>((event) => event.preventDefault());
   render(
     <NavigationGuardProvider value={{ onNavigate }}>
       <UserMenu viewer={viewer()} />

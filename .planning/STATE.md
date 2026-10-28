@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-03-PLAN.md
-last_updated: "2026-10-28T08:20:47.479Z"
+stopped_at: Completed 04-10-PLAN.md
+last_updated: "2026-10-28T08:39:01.781Z"
 last_activity: 2026-10-28
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 50
-  completed_plans: 30
-  percent: 60
+  completed_plans: 31
+  percent: 62
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 4
-Plan: 4 of 23
+Plan: 5 of 23
 Status: Ready to execute
 Last activity: 2026-10-28
 
@@ -84,6 +84,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 4 P01 | n/a (hand-implemented) | 2 tasks | 11 files |
 | Phase 4 P02 | n/a (dev + agent) | 3 tasks | 9 files |
 | Phase 4 P03 | 6 min | 2 tasks | 24 files |
+| Phase 04 P10 | 8min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -161,6 +162,7 @@ Recent decisions affecting current work:
 - [Phase 03]: UAT thủ công 19/19 PASS trên BE thật; Phase 3 nghiệm thu, sẵn sàng verify-work
 - [Phase 4]: Chặn z-index thô bằng guard tĩnh vì Tailwind 4 luôn chấp nhận z-<số> (reset --z-index-*: initial không chặn được) — Tiền đề RESEARCH Pattern 17 sai
 - [Phase 4]: 04-03: PROTECTED_PATTERNS regex `/itineraries/{id}/edit` thay vì tiền tố /itineraries; (dashboard) tách (shell) có AppShell và (editor) toàn màn có DashboardSessionGate — Trang công khai Phase 5 không bị gate; editor không kế thừa AppShell (D-16).
+- [Phase 04]: 04-10: handleMapsResolve dùng deps.fetch; phiên stale/invalid trả 401 session.expired không xóa cookie
 
 ### Pending Todos
 
@@ -180,6 +182,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-28T08:20:47.474Z
-Stopped at: Completed 04-03-PLAN.md
+Last session: 2026-10-28T08:39:01.776Z
+Stopped at: Completed 04-10-PLAN.md
 Resume file: None

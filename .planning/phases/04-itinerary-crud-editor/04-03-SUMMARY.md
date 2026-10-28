@@ -70,7 +70,7 @@ completed: 2026-10-28
 
 ## Deviations from Plan
 
-**Requirements chưa đánh dấu hoàn thành:** frontmatter plan liệt kê ITIN-13 và ITIN-14, nhưng plan này chỉ dựng gate và khung route; trang editor (04-21) và bottom sheet mobile chưa có nên không chạy equirements mark-complete (như 04-02). Hai yêu cầu sẽ đóng ở plan giao trang editor.
+**Requirements chưa đánh dấu hoàn thành:** frontmatter plan liệt kê ITIN-13 và ITIN-14, nhưng plan này chỉ dựng gate và khung route; trang editor (04-21) và bottom sheet mobile chưa có nên không chạy `requirements mark-complete` (như 04-02). Hai yêu cầu sẽ đóng ở plan giao trang editor.
 
 Ghi chú nhỏ: `(editor)` chưa có `page.tsx` (plan 04-21) nên `proxy-coverage` chưa kiểm được page editor; ca `isProtectedPath("/itineraries/abc/edit")` ở `proxy.test.ts` khóa hành vi này tới lúc đó. Plan không yêu cầu test riêng cho `EditorSkeleton`/`error.tsx` của editor nên không thêm.
 

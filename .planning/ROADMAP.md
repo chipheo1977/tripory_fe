@@ -131,7 +131,7 @@ Plans:
 - [x] 04-03-PLAN.md — Route group `(shell)`/`(editor)` (layout toàn màn có gate), proxy `isProtectedPath` cho `/itineraries/{id}/edit`, `EditorSkeleton`
 - [x] 04-10-PLAN.md — Route `/api/maps/resolve` (phiên + Origin + allowlist host, ≤ 3 hop, 5 s), mã lỗi itinerary theo UI-SPEC
 - [x] 04-04-PLAN.md — `ui-web`: `notify.undoable`, `InlineAlert variant="info"`, `Sheet` `dismissible`/`defaultSnap`/`insetTop`
-- [ ] 04-05-PLAN.md — Wave 0 app: fake IntersectionObserver/ResizeObserver, fixture JSON BE, chuyển `SubmitStatus`, `mapFormError` dùng chung, spike dnd-kit StrictMode
+- [x] 04-05-PLAN.md — Wave 0 app: fake IntersectionObserver/ResizeObserver, fixture JSON BE, chuyển `SubmitStatus`, `mapFormError` dùng chung, spike dnd-kit StrictMode
 - [ ] 04-06-PLAN.md — Domain (TDD): type aggregate, `StatusFilter`, `CalendarDate`, dải ngày thưa, `canEdit`/`canPublish`, biến đổi optimistic
 - [ ] 04-07-PLAN.md — Domain (TDD): `parseLocationInput` (tọa độ, link Google Maps, link rút gọn, `no-coordinate` + tách Tên/Địa chỉ D-48/D-49)
 - [ ] 04-08-PLAN.md — Application + infrastructure: port, use case reorder, Zod DTO, mapper ACL, repository HTTP, short-link resolver

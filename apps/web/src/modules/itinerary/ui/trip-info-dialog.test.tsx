@@ -5,6 +5,7 @@ import { notify } from "@tripory/ui-web";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { makeQueryClient } from "@/composition/query-client";
 import { draftKey, draftStorage } from "./draft-storage";
@@ -49,6 +50,7 @@ const OWNER = parseUserId("3f2504e0-4f89-11d3-9a0c-0305e82c3301");
 const START = parseCalendarDate("2026-10-12");
 if (ID === null || OWNER === null || START === null) throw new Error("dữ liệu mẫu phải hợp lệ");
 
+const VIEWER: string = OWNER;
 const COVER = "https://img.test/da-lat.jpg";
 
 const base: Itinerary = {
@@ -70,7 +72,7 @@ const http = (status: number, code: string | null, message: string | null) =>
 
 const DRAFT_KEY = draftKey({ viewerId: OWNER, itineraryId: ID, kind: "metadata" });
 
-const title = () => screen.getByLabelText("Tiêu đề") as HTMLInputElement;
+const title = () => screen.getByLabelText(/^Tiêu đề/) as HTMLInputElement;
 const description = () => screen.getByLabelText("Mô tả") as HTMLTextAreaElement;
 const startDate = () => screen.getByLabelText("Ngày khởi hành") as HTMLInputElement;
 const cover = () => screen.getByLabelText("Ảnh bìa") as HTMLInputElement;
@@ -101,17 +103,27 @@ function setup(
   const user = userEvent.setup();
   const onOpenChange = props.onOpenChange ?? vi.fn();
   const store = props.store ?? createSaveStatusStore();
+  // Cha giữ `open` như editor thật: đóng thì dialog đóng, nên báo "hết bẩn" kiểm được.
+  function Harness() {
+    const [open, setOpen] = useState(true);
+    return (
+      <TripInfoDialog
+        itinerary={props.itinerary ?? base}
+        onDirtyChange={props.onDirtyChange}
+        onOpenChange={(next) => {
+          setOpen(next);
+          onOpenChange(next);
+        }}
+        open={open}
+        restored={props.restored}
+        viewerId={VIEWER}
+      />
+    );
+  }
   render(
     <QueryClientProvider client={makeQueryClient()}>
       <SaveStatusProvider store={store}>
-        <TripInfoDialog
-          itinerary={props.itinerary ?? base}
-          onDirtyChange={props.onDirtyChange}
-          onOpenChange={onOpenChange}
-          open
-          restored={props.restored}
-          viewerId={OWNER}
-        />
+        <Harness />
       </SaveStatusProvider>
     </QueryClientProvider>,
   );

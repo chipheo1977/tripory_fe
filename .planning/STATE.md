@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-13-PLAN.md
-last_updated: "2026-10-28T14:55:57.904Z"
+stopped_at: Completed 04-12-PLAN.md
+last_updated: "2026-10-28T15:08:32.920Z"
 last_activity: 2026-10-28
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 50
-  completed_plans: 39
-  percent: 78
+  completed_plans: 40
+  percent: 80
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 4
-Plan: 12 of 23
+Plan: 14 of 23
 Status: Ready to execute
 Last activity: 2026-10-28
 
@@ -93,6 +93,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 04 P09 | 35min | 3 tasks | 9 files |
 | Phase 4 P11 | 20min | 3 tasks | 12 files |
 | Phase 4 P13 | 30min | 3 tasks | 9 files |
+| Phase 4 P12 | 15min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -177,6 +178,7 @@ Recent decisions affecting current work:
 - [Phase 04]: 04-09: apps/web them @tripory/shared-kernel workspace dependency; bffUnloadHttp tran khong refresh cho DELETE keepalive (D-32)
 - [Phase 4]: 04-11: dialog tao giu khoa sau khi tao xong cho toi khi trang doi; don form o onOpenChangeComplete; normalizeFieldKeys chuan hoa key ASP.NET truoc mapFormError
 - [Phase 4]: 04-13: SaveIndicator suy ra Dang luu tu useIsMutating, store chi giu hasSaved/failure.retry; leave guard doc isMutating luc bam va tu dong di tiep qua MutationCache.subscribe
+- [Phase 4]: 04-12: sentinel cuon vo han tu nap tiep khi con trong viewport (IO khong bao lai); the vua xoa an ngay bang removedIds; the dung article thay Card (Card render div)
 
 ### Pending Todos
 
@@ -196,6 +198,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-28T14:55:57.899Z
-Stopped at: Completed 04-13-PLAN.md
+Last session: 2026-10-28T15:08:32.915Z
+Stopped at: Completed 04-12-PLAN.md
 Resume file: None

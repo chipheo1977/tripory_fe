@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { toast as sonnerToast } from 'sonner';
 import * as publicUi from '../index';
 import { Toast, notify, toastDurations } from './toast';
@@ -49,6 +49,12 @@ it('action và dismiss vận hành bằng bàn phím', async () => {
 });
 
 describe('notify.undoable', () => {
+  // jsdom không có Pointer Capture; Sonner gọi nó ở pointerdown của toast khi bấm bằng chuột.
+  beforeAll(() => {
+    Element.prototype.setPointerCapture ??= () => undefined;
+    Element.prototype.releasePointerCapture ??= () => undefined;
+  });
+
   afterEach(() => {
     vi.useRealTimers();
   });

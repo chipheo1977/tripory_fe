@@ -28,6 +28,16 @@ export const notify = {
   error: (title: ReactNode, options?: NotifyOptions) => showToast('error', title, options),
   info: (title: ReactNode, options?: NotifyOptions) => showToast('info', title, options),
   warning: (title: ReactNode, options?: NotifyOptions) => showToast('warning', title, options),
+  /** Toast có nút hoàn tác, KHÔNG tự hết hạn: app sở hữu đồng hồ và gọi `dismiss(id)` khi commit/hoàn tác. */
+  undoable: (
+    title: ReactNode,
+    options: Readonly<{ actionLabel: string; onAction: () => void; onDismiss?: () => void }>,
+  ) =>
+    sonnerToast.info(<ToastAnnouncement variant="info">{title}</ToastAnnouncement>, {
+      duration: Infinity,
+      action: { label: options.actionLabel, onClick: () => options.onAction() },
+      onDismiss: () => options.onDismiss?.(),
+    }),
   dismiss: sonnerToast.dismiss,
 } as const;
 

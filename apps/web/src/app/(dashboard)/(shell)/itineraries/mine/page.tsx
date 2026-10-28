@@ -1,5 +1,15 @@
-import { EmptyState } from "@tripory/ui-web";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { MyItinerariesSkeleton, MyItinerariesView } from "@/modules/itinerary/ui/my-itineraries-view";
 
-export default function MinePage() {
-  return <EmptyState className="flex-1" variant="page" />;
+// Root layout có template `%s · Tripory`, nên tab hiện "Lịch trình của tôi · Tripory".
+export const metadata: Metadata = { title: "Lịch trình của tôi" };
+
+export default function MyItinerariesPage() {
+  // View đọc `?status=` bằng useSearchParams nên phải nằm trong Suspense (docs use-search-params).
+  return (
+    <Suspense fallback={<MyItinerariesSkeleton />}>
+      <MyItinerariesView />
+    </Suspense>
+  );
 }

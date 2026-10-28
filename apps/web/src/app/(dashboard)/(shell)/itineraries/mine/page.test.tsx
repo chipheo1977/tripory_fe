@@ -1,12 +1,17 @@
 import { render, screen } from "@testing-library/react";
-import { expect, it } from "vitest";
-import MinePage from "./page";
+import { expect, it, vi } from "vitest";
+import MyItinerariesPage, { metadata } from "./page";
 
-it("renders the locked neutral empty state without a fake action", () => {
-  render(<MinePage />);
+vi.mock("@/modules/itinerary/ui/my-itineraries-view", () => ({
+  MyItinerariesView: () => <div data-testid="my-itineraries-view" />,
+  MyItinerariesSkeleton: () => <div data-testid="my-itineraries-skeleton" />,
+}));
 
-  expect(screen.getByRole("heading", { level: 2, name: "Chưa có nội dung" })).toBeTruthy();
-  expect(screen.getByText("Nội dung sẽ xuất hiện tại đây khi sẵn sàng.")).toBeTruthy();
-  expect(screen.queryByRole("link")).toBeNull();
-  expect(screen.queryByRole("button")).toBeNull();
+it("sets the document title to the page name (root template appends · Tripory)", () => {
+  expect(metadata.title).toBe("Lịch trình của tôi");
+});
+
+it("renders the list view inside the page", () => {
+  render(<MyItinerariesPage />);
+  expect(screen.getByTestId("my-itineraries-view")).toBeTruthy();
 });

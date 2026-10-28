@@ -9,6 +9,7 @@ import {
   type BeFixture,
 } from './fixtures/be-responses';
 import type { HttpRequest } from './http-client';
+import { withSessionRefresh } from './with-session-refresh';
 
 type FetchArgs = [input: RequestInfo | URL, init?: RequestInit];
 
@@ -308,5 +309,30 @@ describe('createFetchHttpClient: caller abort', () => {
     caller.abort();
     await expect(settled).resolves.toMatchObject({ kind: 'aborted' });
     expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+describe('createFetchHttpClient: keepalive', () => {
+  it('keepalive: true → init.keepalive === true', async () => {
+    const fetch = fixtureFetch(envelopeSuccess);
+    await clientWith(fetch).send({ method: 'DELETE', path: '/x', keepalive: true });
+    expect(initOf(fetch).keepalive).toBe(true);
+  });
+
+  it('không keepalive → init không có khóa keepalive', async () => {
+    const fetch = fixtureFetch(envelopeSuccess);
+    await clientWith(fetch).send({ method: 'DELETE', path: '/x' });
+    expect('keepalive' in initOf(fetch)).toBe(false);
+  });
+
+  it('keepalive đi qua withSessionRefresh tới client bên trong', async () => {
+    const fetch = fixtureFetch(envelopeSuccess);
+    const client = withSessionRefresh(clientWith(fetch), {
+      refresh: async () => 'refreshed',
+      lock: (_name, task) => task(),
+      onSessionExpired: () => undefined,
+    });
+    await client.send({ method: 'DELETE', path: '/x', keepalive: true });
+    expect(initOf(fetch).keepalive).toBe(true);
   });
 });

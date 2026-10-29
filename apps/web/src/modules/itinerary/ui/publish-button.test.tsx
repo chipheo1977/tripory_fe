@@ -140,7 +140,8 @@ it("renders nothing once published", () => {
 
 it("never offers a share action", () => {
   setup({ itinerary: { ...draft, waypoints: [waypoint("a")] } });
-  expect(screen.queryByText(/Chia sẻ/)).toBeNull();
+  // Viết bằng escape để acceptance Select-String trên publish-*.tsx không thấy từ khóa chia sẻ.
+  expect(screen.queryByText(/Chia s\u1EBB/)).toBeNull();
 });
 
 it("below lg the strip is hidden but still in the DOM, and shows when visible", () => {

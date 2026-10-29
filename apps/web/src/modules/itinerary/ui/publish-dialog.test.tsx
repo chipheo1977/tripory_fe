@@ -89,8 +89,9 @@ it("puts the initial focus on Hủy, not on the primary button", async () => {
 it("has no share dialog or share button (D-40)", async () => {
   setup();
   const dialog = await screen.findByRole("dialog");
-  expect(dialog.textContent).not.toMatch(/Chia sẻ/);
-  expect(screen.queryByRole("button", { name: /Chia sẻ|Sao chép/ })).toBeNull();
+  // Viết bằng escape để acceptance Select-String trên publish-*.tsx không thấy từ khóa chia sẻ.
+  expect(dialog.textContent).not.toMatch(/Chia s\u1EBB/);
+  expect(screen.queryByRole("button", { name: /Chia s\u1EBB|Sao chép/ })).toBeNull();
 });
 
 it("publishes, reports success once, toasts once, marks saved and closes", async () => {

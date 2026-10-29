@@ -1,7 +1,7 @@
 import { makeApiError } from "@tripory/api-client";
-import { buildDayRange, type Itinerary, type Waypoint } from "@tripory/itinerary";
+import { applyDayOrder, buildDayRange, type Itinerary, type Waypoint } from "@tripory/itinerary";
 import { itineraryKeys } from "@tripory/itinerary/react";
-import { parseItineraryId, parseUserId, parseWgs84Coordinate } from "@tripory/shared-kernel";
+import { createWgs84Coordinate, parseItineraryId, parseUserId } from "@tripory/shared-kernel";
 import { notify } from "@tripory/ui-web";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { render, screen, waitFor, within } from "@testing-library/react";
@@ -44,7 +44,7 @@ vi.mock("@/composition/session-events.client", async (importOriginal) => {
 
 const ID = parseItineraryId("3f2a6c1e-8b7d-4e21-9c55-0a1b2c3d4e5f");
 const OWNER = parseUserId("3f2504e0-4f89-11d3-9a0c-0305e82c3301");
-const COORD = parseWgs84Coordinate(10.7769, 106.7009);
+const COORD = createWgs84Coordinate({ latitude: 10.7769, longitude: 106.7009 });
 if (ID === null || OWNER === null || COORD === null) throw new Error("dữ liệu mẫu phải hợp lệ");
 
 const waypoint = (id: string, name: string, orderIndex: number, address: string | null = null): Waypoint => ({
@@ -79,6 +79,9 @@ const ITEM_HEIGHT = 40;
 const ITEM_STRIDE = 50;
 const originalRect = Element.prototype.getBoundingClientRect;
 
+// "BE" giữ trạng thái: reorder thành công thì lần tải lại sau đó (settle) trả thứ tự mới, như BE thật.
+let server = makeItinerary([]);
+
 type SetupOptions = {
   waypoints?: readonly Waypoint[];
   pendingIds?: ReadonlySet<string>;
@@ -95,7 +98,8 @@ function setup(options: SetupOptions = {}) {
   const queryClient = makeQueryClient();
   const base = makeItinerary(options.waypoints ?? [W0, W1, W2]);
   queryClient.setQueryData(itineraryKeys.detail(ID!), base);
-  h.getById.mockResolvedValue(base);
+  // "BE" giữ trạng thái: reorder thành công thì lần tải lại sau đó (settle) trả thứ tự mới, như BE thật.
+  server = base;
   const onRemove = vi.fn();
   const onEdit = vi.fn();
   const onFlushPending = vi.fn();
@@ -159,7 +163,13 @@ async function liftFirstDown(user: ReturnType<typeof userEvent.setup>, name = W0
 }
 
 beforeEach(() => {
-  h.reorderWaypoints.mockReset().mockResolvedValue(undefined);
+  h.getById.mockReset().mockImplementation(() => Promise.resolve(server));
+  h.reorderWaypoints
+    .mockReset()
+    .mockImplementation((_id: string, input: { dayNumber: number; orderedIds: readonly string[] }) => {
+      server = applyDayOrder(server, input.dayNumber, input.orderedIds);
+      return Promise.resolve();
+    });
   vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
     if (this.tagName !== "LI") return originalRect.call(this);
     const index = this.parentElement ? Array.from(this.parentElement.children).indexOf(this) : 0;
@@ -273,7 +283,9 @@ it("announces the drag in Vietnamese", async () => {
   handleOf(W0.name).focus();
   await user.keyboard(" ");
 
-  await waitFor(() => expect(screen.getByText("Đã nhấc Chợ Bến Thành, đang ở vị trí 1 trên 3.")).toBeTruthy());
+  // dnd-kit bắn `onDragOver` ngay sau `onDragStart` nên live region đọc câu "đang ở vị trí" (câu "Đã nhấc" được
+  // kiểm riêng ở dnd-announcements.test.ts).
+  await waitFor(() => expect(screen.getByText("Chợ Bến Thành đang ở vị trí 1 trên 3.")).toBeTruthy());
   await user.keyboard("{Escape}");
   await waitFor(() => expect(screen.getByText("Đã hủy. Chợ Bến Thành trở lại vị trí 1 trên 3.")).toBeTruthy());
 });

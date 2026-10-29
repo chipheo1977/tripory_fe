@@ -142,7 +142,7 @@ Plans:
 - [x] 04-14-PLAN.md — Bản nháp form `sessionStorage` (D-36), bề mặt Dialog/Sheet responsive, `TripInfoDialog` (metadata, preview ảnh bìa)
 - [x] 04-16-PLAN.md — `DayTabs` (ngày thưa, km, thêm ngày optimistic) + `DaySubtitle` inline
 - [x] 04-18-PLAN.md — Xóa waypoint hoãn 5 giây có hoàn tác, flush khi rời route/`pagehide`/`visibilitychange` (keepalive)
-- [ ] 04-15-PLAN.md — `TripSummary`, `PublishButton` (`aria-disabled`), `PublishDialog` (không có hộp chia sẻ, D-40)
+- [x] 04-15-PLAN.md — `TripSummary`, `PublishButton` (`aria-disabled`), `PublishDialog` (không có hộp chia sẻ, D-40)
 - [ ] 04-17-PLAN.md — `LocationField` (parse + resolve link rút gọn) + `WaypointFormDialog` thêm/sửa
 - [ ] 04-19-PLAN.md — `WaypointList` kéo thả dnd-kit (chuột, cảm ứng 180ms, bàn phím + announcements tiếng Việt), rollback, `InvalidReorderList`
 - [ ] 04-20-PLAN.md — `EditorLayout` 4 slot (canvas cho Phase 5), `EditorHeader`, `EditorForbidden` (403), `NotFoundView` dùng chung

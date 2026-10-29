@@ -1,0 +1,56 @@
+{
+  "verdict": "APPROVED",
+  "counts": { "blocker": 0, "high": 0, "medium": 1, "low": 6 },
+  "findings": [
+    {
+      "id": "MD-01",
+      "severity": "medium",
+      "file": "apps/web/src/modules/itinerary/ui/use-pending-delete.ts",
+      "line": 70,
+      "summary": "visibilitychange->hidden commits the pending waypoint delete via the unload path (no session refresh, errors swallowed, no cache/save-status update), so a plain tab switch with a stale token silently loses the delete and the waypoint reappears."
+    },
+    {
+      "id": "LW-01",
+      "severity": "low",
+      "file": "apps/web/src/modules/itinerary/ui/itinerary-editor.tsx",
+      "line": 307,
+      "summary": "Opening the delete-itinerary dialog flushes the pending waypoint delete (irreversible even if the dialog is cancelled) and that DELETE is not sequenced before the itinerary DELETE, so it can 404 and raise a spurious error."
+    },
+    {
+      "id": "LW-02",
+      "severity": "low",
+      "file": "apps/web/src/modules/itinerary/ui/trip-info-dialog.tsx",
+      "line": 160,
+      "summary": "useUpdateMetadata writes nothing to the cache; after save the dialog closes and the old title/cover show until the refetch completes."
+    },
+    {
+      "id": "LW-03",
+      "severity": "low",
+      "file": "apps/web/src/modules/itinerary/ui/entry-flag.ts",
+      "line": 5,
+      "summary": "enteredFromList flag stays true for the whole editor lifetime, so after in-editor navigation (e.g. to settings) and browser Back, the editor back button uses router.back() and misses the list."
+    },
+    {
+      "id": "LW-04",
+      "severity": "low",
+      "file": "apps/web/src/composition/server/maps-handlers.ts",
+      "line": 38,
+      "summary": "Resolve route buffers and parses the whole JSON body before the 2 KB URL length check; check content-length first."
+    },
+    {
+      "id": "LW-05",
+      "severity": "low",
+      "file": "apps/web/src/composition/server/maps-resolve.ts",
+      "line": 15,
+      "summary": "GOOGLE_HOST regex duplicated in server resolver and domain location-input (drift risk) and its [a-z]{2} branch accepts any two-letter suffix."
+    },
+    {
+      "id": "LW-06",
+      "severity": "low",
+      "file": "apps/web/src/modules/itinerary/ui/location-field.tsx",
+      "line": 132,
+      "summary": "flush() can return 'resolving' with no job, which the form reports as LOCATION_REQUIRED; also minor: wrong decision id in permissions.ts comment (D-45 vs D-38) and unused reorderWaypoints use case export."
+    }
+  ],
+  "reviewDoc": "C:\\Users\\OS\\Documents\\personal\\tripory_fe\\.planning\\phases\\04-itinerary-crud-editor\\04-REVIEW.md"
+}

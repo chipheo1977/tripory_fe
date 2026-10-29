@@ -45,7 +45,7 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 - [x] **ITIN-03**: Người dùng có thể sửa metadata: tiêu đề, mô tả, ngày khởi hành, ảnh bìa dạng URL (có preview và nền dự phòng)
 - [x] **ITIN-04**: Người dùng có thể chuyển tab ngày, thêm ngày và sửa phụ đề ngày inline
 - [x] **ITIN-05**: Người dùng có thể thêm waypoint (tên, địa chỉ, ghi chú) và nhập vị trí bằng cách dán tọa độ "lat, lng" hoặc link Google Maps
-- [ ] **ITIN-06**: Người dùng có thể sửa waypoint
+- [x] **ITIN-06**: Người dùng có thể sửa waypoint
 - [x] **ITIN-07**: Người dùng có thể xóa waypoint và hoàn tác trong 5 giây (hoãn gửi DELETE)
 - [ ] **ITIN-08**: Người dùng có thể kéo thả sắp xếp waypoint trong ngày bằng chuột, cảm ứng và bàn phím; cập nhật optimistic và rollback khi lỗi
 - [x] **ITIN-09**: Người dùng thấy quãng đường theo ngày và tổng do BE tính
@@ -192,7 +192,7 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | ITIN-03 | Phase 4 | Complete |
 | ITIN-04 | Phase 4 | Complete |
 | ITIN-05 | Phase 4 | Complete |
-| ITIN-06 | Phase 4 | Pending |
+| ITIN-06 | Phase 4 | Complete |
 | ITIN-07 | Phase 4 | Complete |
 | ITIN-08 | Phase 4 | Pending |
 | ITIN-09 | Phase 4 | Complete |

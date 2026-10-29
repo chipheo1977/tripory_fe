@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-15-PLAN.md
-last_updated: "2026-10-29T01:42:10.048Z"
+stopped_at: Completed 04-17-PLAN.md
+last_updated: "2026-10-29T01:53:27.469Z"
 last_activity: 2026-10-29
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 50
-  completed_plans: 44
-  percent: 88
+  completed_plans: 45
+  percent: 90
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 4
-Plan: 18 of 23
+Plan: 19 of 23
 Status: Ready to execute
 Last activity: 2026-10-29
 
@@ -98,6 +98,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 4 P16 | 25min | 2 tasks | 4 files |
 | Phase 4 P18 | 30min | 2 tasks | 4 files |
 | Phase 4 P15 | 25min | 2 tasks | 6 files |
+| Phase 4 P17 | 25min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -188,6 +189,7 @@ Recent decisions affecting current work:
 - [Phase 4]: 04-16: loi them ngay chi lui ve ngay truoc khi nguoi dung van dang chon tab bi go (ref ngay dang chon); DaySubtitle dung finishedRef chong gui hai lan Enter+blur
 - [Phase 4]: 04-18: handler toast so voi lenh cho cua chinh no (toast cu dong muon khong commit nham lenh moi); A4 xac nhan mutate sau unmount van gui DELETE; latest holder bang useState + sync() vi lint react-hooks/refs
 - [Phase 4]: 04-15: PublishHintStrip giữ duy nhất id giải thích; tooltip bọc nút bằng span trigger để nút luôn aria-describedby=hintId; thêm onHintFocusChange cho dải dưới lg
+- [Phase 4]: 04-17: form sua giu toa do day du da luu khi o Vi tri khong doi (o chi hien 4 chu so thap phan); resolve link rut gon luu theo URL nguon + job ref nen ket qua cu bi bo, flush dung lai job
 
 ### Pending Todos
 
@@ -207,6 +209,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-29T01:42:10.043Z
-Stopped at: Completed 04-15-PLAN.md
+Last session: 2026-10-29T01:53:27.464Z
+Stopped at: Completed 04-17-PLAN.md
 Resume file: None

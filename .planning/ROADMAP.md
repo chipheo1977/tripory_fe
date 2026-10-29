@@ -141,7 +141,7 @@ Plans:
 - [x] 04-12-PLAN.md — "Lịch trình của tôi": `CoverImage`, `ItineraryCard`, `MyItinerariesView` (Tabs theo URL, infinite scroll im lặng khi lỗi trang kế), page
 - [x] 04-14-PLAN.md — Bản nháp form `sessionStorage` (D-36), bề mặt Dialog/Sheet responsive, `TripInfoDialog` (metadata, preview ảnh bìa)
 - [x] 04-16-PLAN.md — `DayTabs` (ngày thưa, km, thêm ngày optimistic) + `DaySubtitle` inline
-- [ ] 04-18-PLAN.md — Xóa waypoint hoãn 5 giây có hoàn tác, flush khi rời route/`pagehide`/`visibilitychange` (keepalive)
+- [x] 04-18-PLAN.md — Xóa waypoint hoãn 5 giây có hoàn tác, flush khi rời route/`pagehide`/`visibilitychange` (keepalive)
 - [ ] 04-15-PLAN.md — `TripSummary`, `PublishButton` (`aria-disabled`), `PublishDialog` (không có hộp chia sẻ, D-40)
 - [ ] 04-17-PLAN.md — `LocationField` (parse + resolve link rút gọn) + `WaypointFormDialog` thêm/sửa
 - [ ] 04-19-PLAN.md — `WaypointList` kéo thả dnd-kit (chuột, cảm ứng 180ms, bàn phím + announcements tiếng Việt), rollback, `InvalidReorderList`

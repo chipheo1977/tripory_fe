@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-21-PLAN.md
-last_updated: "2026-10-29T03:49:26.345Z"
+stopped_at: Completed 04-22-PLAN.md
+last_updated: "2026-10-29T04:24:08.295Z"
 last_activity: 2026-10-29
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 50
-  completed_plans: 48
-  percent: 96
+  completed_plans: 49
+  percent: 98
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 4
-Plan: 22 of 23
+Plan: 23 of 23
 Status: Ready to execute
 Last activity: 2026-10-29
 
@@ -102,6 +102,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 4 P19 | 75 min | 2 tasks | 5 files |
 | Phase 4 P20 | 10min | 3 tasks | 9 files |
 | Phase 4 P21 | 25min | 3 tasks | 6 files |
+| Phase 04 P22 | 20min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -197,6 +198,7 @@ Recent decisions affecting current work:
 - [Phase 4]: 04-19: DragOverlay portal ra body với style.zIndex = var(--z-index-toast) (ghi đè zIndex 999 mặc định), target lấy bằng useSyncExternalStore
 - [Phase 4]: 04-20: EditorHeader/Minimal nhan viewer qua prop (UserMenu can); SaveIndicator+PublishButton render mot ban theo useMediaQuery sm; EditorLayout boc header trong wrapper sticky de ResizeObserver do insetTop cho Sheet
 - [Phase 4]: 04-21: ItineraryEditor nhan viewer (Viewer) thay viewerId; co data thi luon hien editor; co entry-flag xoa khi back dung no (khong o cleanup effect vi StrictMode); leaving giu khung cho sau khi xoa lich trinh
+- [Phase 04]: 04-22: invariant <img regex ends at '/>' (=> in handlers breaks '>' match); BE dependencies for Phase 4 recorded in 04-BE-DEPENDENCIES.md
 
 ### Pending Todos
 
@@ -216,6 +218,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-29T03:49:26.340Z
-Stopped at: Completed 04-21-PLAN.md
+Last session: 2026-10-29T04:24:08.291Z
+Stopped at: Completed 04-22-PLAN.md
 Resume file: None

@@ -147,7 +147,7 @@ Plans:
 - [x] 04-19-PLAN.md — `WaypointList` kéo thả dnd-kit (chuột, cảm ứng 180ms, bàn phím + announcements tiếng Việt), rollback, `InvalidReorderList`
 - [x] 04-20-PLAN.md — `EditorLayout` 4 slot (canvas cho Phase 5), `EditorHeader`, `EditorForbidden` (403), `NotFoundView` dùng chung
 - [x] 04-21-PLAN.md — `TimelinePanel`, container `ItineraryEditor` (tải/403/404/lỗi, dialog, khôi phục bản nháp, back D-47), page RSC `/itineraries/[id]/edit`
-- [ ] 04-22-PLAN.md — Bất biến tĩnh Phase 4, `04-BE-DEPENDENCIES.md`, full suite + build, VALIDATION xanh
+- [x] 04-22-PLAN.md — Bất biến tĩnh Phase 4, `04-BE-DEPENDENCIES.md`, full suite + build, VALIDATION xanh
 - [ ] 04-23-PLAN.md — UAT thủ công với BE thật và điện thoại thật (checkpoint)
 
 ### Phase 5: SVG Map & Public View

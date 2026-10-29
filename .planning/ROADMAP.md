@@ -214,7 +214,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 1. Design System, UI Skeleton & Walking Skeleton | 8/8 | Complete | 2026-10-12 |
 | 2. HTTP & Shared Kernel | 4/4 | CompleComplete
 | 3. Identity & Session (BFF) | 15/15 | Executed (UAT 19/19 PASS, chờ verify-work) | 2026-10-23 |
-| 4. Itinerary CRUD & Editor | 0/TBD | Not started | - |
+| 4. Itinerary CRUD & Editor | 22/23 | Executed (04-01..04-22 xong; UAT 04-23 chờ người thật, chờ verify-work) | - |
 | 5. SVG Map & Public View | 0/TBD | Not started | - |
 | 6. Profile & Users | 0/TBD | Not started | - |
 | 7. Chat, Voice & Calls | 0/TBD | Not started | - |

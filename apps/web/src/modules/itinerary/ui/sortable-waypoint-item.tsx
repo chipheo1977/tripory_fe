@@ -104,14 +104,12 @@ export function SortableWaypointItem({
           <Icon icon={MoreHorizontal} size="md" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => onEdit(waypoint)}>
+          <DropdownMenuItem aria-label="Sửa" onClick={() => onEdit(waypoint)}>
             <Icon icon={Pencil} size="sm" />
-            Sửa
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => onRemove(waypoint)} variant="danger">
+          <DropdownMenuItem aria-label="Xóa" onClick={() => onRemove(waypoint)} variant="danger">
             <Icon icon={Trash2} size="sm" />
-            Xóa
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

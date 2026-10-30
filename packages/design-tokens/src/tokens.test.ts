@@ -125,7 +125,7 @@ const semanticTokens = {
   '--semantic-shadow-overlay': '0 20px 48px rgb(12 10 9 / 16%)',
   '--semantic-z-base': '0',
   '--semantic-z-sticky': '20',
-  '--semantic-z-dropdown': '40',
+  '--semantic-z-dropdown': '80',
   '--semantic-z-overlay': '60',
   '--semantic-z-modal': '70',
   '--semantic-z-toast': '90',
@@ -281,6 +281,16 @@ describe('utility Phase 4 có CSS thật', () => {
     for (const layer of ['base', 'sticky', 'dropdown', 'overlay', 'modal', 'toast']) {
       expect(css, `thiếu z-${layer}`).toContain(`z-index: var(--semantic-z-${layer})`);
     }
+  });
+
+  it('dropdown nằm trên modal để menu mở từ trong Sheet/Dialog không bị popup che', () => {
+    const read = (name: string) => {
+      const match = new RegExp(`--semantic-z-${name}:\\s*(\\d+);`, 'u').exec(readSource('semantic.css'));
+      if (match === null) return Number.NaN;
+      return Number(match[1]);
+    };
+    expect(read('dropdown')).toBeGreaterThan(read('modal'));
+    expect(read('dropdown')).toBeLessThan(read('toast'));
   });
 
   it('nối --semantic-size-content-sm sang utility max-w-content-sm', async () => {

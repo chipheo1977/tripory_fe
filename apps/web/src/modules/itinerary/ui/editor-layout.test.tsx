@@ -1,4 +1,5 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { installFakeResizeObserver, type FakeResizeObserverHandle } from "@/test/fake-resize-observer";
 import { EditorLayout } from "./editor-layout";
@@ -125,7 +126,28 @@ it("below lg shows the summary behind a non-modal, non-dismissible timeline shee
   expect(document.querySelector("[data-sheet-backdrop]")).toBeNull();
 
   const props = h.sheetProps.mock.calls.at(-1)?.[0] as Record<string, unknown>;
-  expect(props).toMatchObject({ open: true, modal: false, dismissible: false, defaultSnap: "medium" });
+  expect(props).toMatchObject({ open: true, modal: false, defaultSnap: "medium" });
+  // Đóng được (vuốt xuống hết từ peek), nên không được khóa `dismissible`.
+  expect(props.dismissible).not.toBe(false);
+  // Chiều cao cố định bằng mức expanded: nếu mất thì nội dung ngắn làm Base UI gộp mất mức giữa.
+  expect(sheet.style.height).toMatch(/px$/);
+  expect(screen.queryByRole("button", { name: "Lịch trình" })).toBeNull();
+});
+
+it("closing the timeline sheet shows a chip that reopens it", async () => {
+  installMatchMedia(false);
+  setup();
+  await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
+
+  // Vuốt xuống hết gọi onOpenChange(false) giống Esc; jsdom không có cử chỉ thật.
+  await userEvent.keyboard("{Escape}");
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  const chip = screen.getByRole("button", { name: "Lịch trình" });
+
+  await userEvent.click(chip);
+  expect(await screen.findByRole("dialog", { name: "Lịch trình theo ngày" })).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Lịch trình" })).toBeNull();
+  expect((h.sheetProps.mock.calls.at(-1)?.[0] as { defaultSnap: string }).defaultSnap).toBe("medium");
 });
 
 it("passes the measured header height to the sheet as insetTop", () => {

@@ -17,6 +17,8 @@ type SheetContextValue = {
   modal: boolean;
   position: SheetPosition;
   atTopSnap: boolean;
+  /** Chiều cao px của mức cao nhất (chỉ sheet bottom); popup `fillSnap` dùng làm chiều cao cố định. */
+  topSnapHeight: string | null;
 };
 
 const SheetContext = createContext<SheetContextValue | null>(null);
@@ -86,9 +88,11 @@ export function Sheet({
   }, [onSnapPointChange, snapPoints]);
 
   const atTopSnap = isTopSnap(position, snapIndex, snapPoints.length);
+  const topSnap = snapPoints.at(-1);
+  const topSnapHeight = topSnap === undefined ? null : typeof topSnap === 'number' ? `${topSnap * viewportHeight}px` : topSnap;
   const context = useMemo<SheetContextValue>(
-    () => ({ dismissible, modal, position, atTopSnap }),
-    [dismissible, modal, position, atTopSnap],
+    () => ({ dismissible, modal, position, atTopSnap, topSnapHeight }),
+    [dismissible, modal, position, atTopSnap, topSnapHeight],
   );
 
   return (
@@ -162,8 +166,17 @@ const popupClasses: Record<SheetPosition, string> = {
   right: 'h-full w-(--sheet-side-width) rounded-l-overlay border-l [transform:translateX(var(--drawer-swipe-movement-x))] data-starting-style:[transform:translateX(100%)] data-ending-style:[transform:translateX(100%)]',
 };
 
-export function SheetContent({ children, className, ...props }: ComponentProps<typeof BaseDrawer.Popup>) {
-  const { modal, position, atTopSnap } = useSheetContext();
+export type SheetContentProps = ComponentProps<typeof BaseDrawer.Popup> & {
+  /**
+   * Bottom: popup luôn cao bằng mức expanded. Base UI giới hạn mỗi mức snap theo chiều cao popup và gộp các mức
+   * trùng nhau, nên nội dung ngắn hơn mức vừa/mở rộng làm mất mức giữa. Dùng cho sheet có nội dung thấp (timeline).
+   */
+  fillSnap?: boolean;
+};
+
+export function SheetContent({ children, className, fillSnap = false, style, ...props }: SheetContentProps) {
+  const { modal, position, atTopSnap, topSnapHeight } = useSheetContext();
+  const fixedHeight = fillSnap && position === 'bottom' && topSnapHeight !== null ? { height: topSnapHeight } : undefined;
 
   return (
     <BaseDrawer.Portal>
@@ -171,6 +184,7 @@ export function SheetContent({ children, className, ...props }: ComponentProps<t
       <BaseDrawer.Viewport className={cn('pointer-events-none fixed inset-0 z-modal flex', viewportClasses[position])}>
         <BaseDrawer.Popup
           {...props}
+          style={typeof style === 'function' ? (state) => ({ ...style(state), ...fixedHeight }) : { ...style, ...fixedHeight }}
           data-sheet-position={position}
           data-swipe-direction={swipeDirections[position]}
           className={cn(

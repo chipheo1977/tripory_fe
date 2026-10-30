@@ -61,7 +61,7 @@
   --semantic-shadow-overlay: 0 20px 48px rgb(12 10 9 / 16%);
   --semantic-z-base: 0;
   --semantic-z-sticky: 20;
-  --semantic-z-dropdown: 40;
+  --semantic-z-dropdown: 80;
   --semantic-z-overlay: 60;
   --semantic-z-modal: 70;
   --semantic-z-toast: 90;

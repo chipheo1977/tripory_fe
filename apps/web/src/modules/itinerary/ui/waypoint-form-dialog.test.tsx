@@ -157,7 +157,7 @@ it("opens an add form for the day with fields in order and the name focused", as
   await waitFor(() => expect(document.activeElement).toBe(nameInput()));
   const form = screen.getByRole("dialog").querySelector("form") as HTMLFormElement;
   const labels = [...form.querySelectorAll("label")].map((label) => label.textContent ?? "");
-  expect(labels).toEqual(["Tên(bắt buộc)", "Vị trí(bắt buộc)", "Địa chỉ", "Ghi chú"]);
+  expect(labels).toEqual(["Tên*(bắt buộc)", "Vị trí*(bắt buộc)", "Địa chỉ", "Ghi chú"]);
   expect(screen.getByText("Dán tọa độ (ví dụ 10.7769, 106.7009) hoặc link Google Maps.")).toBeTruthy();
   expect(screen.getByRole("button", { name: "Thêm điểm đến" })).toBeTruthy();
   expect(screen.queryByRole("button", { name: "Xóa điểm đến" })).toBeNull();

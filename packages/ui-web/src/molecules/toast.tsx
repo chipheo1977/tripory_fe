@@ -59,7 +59,7 @@ export function Toast(props: Omit<ToasterProps, 'theme' | 'visibleToasts' | 'dur
             content: 'flex min-w-0 flex-1 flex-col gap-inline-xs',
             title: 'font-semibold text-text',
             description: 'text-muted',
-            actionButton: 'min-h-touch rounded-control bg-primary px-inline-sm text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',
+            actionButton: 'min-h-touch rounded-control border border-border bg-surface px-inline-sm text-text hover:border-border-strong hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',
             closeButton: 'min-h-touch min-w-touch border-border bg-surface text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',
             success: 'border-success bg-success-subtle text-success',
             error: 'border-danger bg-danger-subtle text-danger',

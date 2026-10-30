@@ -214,7 +214,30 @@ describe('Sheet m·ªü r·ªông cho editor', () => {
   });
 });
 
-describe('V˘ng cu?n c?a Sheet theo m?c snap', () => {
+describe('fillSnap', () => {
+  function Filled({ fillSnap }: { fillSnap: boolean }) {
+    return (
+      <Sheet modal={false} open>
+        <SheetContent fillSnap={fillSnap}>
+          <SheetTitle>L·ªãch tr√¨nh</SheetTitle>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  it('fillSnap ƒë·∫∑t chi·ªÅu cao popup b·∫±ng m·ª©c expanded (px), m·∫∑c ƒë·ªãnh th√¨ kh√¥ng', async () => {
+    const { unmount } = render(<Filled fillSnap />);
+    const sheet = await screen.findByRole('dialog');
+    const expanded = Math.min(0.92 * window.innerHeight, window.innerHeight);
+    expect(sheet.style.height).toBe(`${expanded}px`);
+    unmount();
+
+    render(<Filled fillSnap={false} />);
+    expect((await screen.findByRole('dialog')).style.height).toBe('');
+  });
+});
+
+describe('VÔøΩng cu?n c?a Sheet theo m?c snap', () => {
   it.each([
     ['expanded', true],
     ['medium', false],
@@ -227,7 +250,7 @@ describe('V˘ng cu?n c?a Sheet theo m?c snap', () => {
     expect(classes.includes('overflow-y-hidden')).toBe(!scrolls);
   });
 
-  it.each(['left', 'right'] as const)('%s luÙn overflow-y-auto v‡ khÙng cÛ tay c?m', async (position) => {
+  it.each(['left', 'right'] as const)('%s luÔøΩn overflow-y-auto vÔøΩ khÔøΩng cÔøΩ tay c?m', async (position) => {
     render(<ExampleSheet position={position} defaultSnap="peek" open />);
     const sheet = await screen.findByRole('dialog');
     const classes = sheet.className.split(/\s+/);
@@ -236,7 +259,7 @@ describe('V˘ng cu?n c?a Sheet theo m?c snap', () => {
     expect(document.querySelector('[data-sheet-handle]')).toBeNull();
   });
 
-  it('tay c?m bottom aria-hidden v‡ touch-none', async () => {
+  it('tay c?m bottom aria-hidden vÔøΩ touch-none', async () => {
     render(<ExampleSheet open />);
     await screen.findByRole('dialog');
     const handle = document.querySelector('[data-sheet-handle]');

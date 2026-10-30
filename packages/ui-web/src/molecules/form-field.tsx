@@ -19,11 +19,21 @@ export function FormField({ className, ...props }: FormFieldProps) {
   return <Field.Root {...props} className={cn('flex w-full flex-col items-start gap-stack-sm', className)} />;
 }
 
+/** Dấu * chỉ để nhìn; chữ "bắt buộc" ẩn khỏi mắt nhưng trình đọc màn hình vẫn đọc. */
+function RequiredMark() {
+  return (
+    <>
+      <span aria-hidden="true" className="text-danger">*</span>
+      <span className="sr-only">(bắt buộc)</span>
+    </>
+  );
+}
+
 export function FormFieldLabel({ children, className, required = false, ...props }: FormFieldLabelProps) {
   return (
     <Field.Label {...props} className={cn('inline-flex min-h-touch items-center gap-inline-xs text-label font-semibold text-text', className)}>
       <span>{children}</span>
-      {required ? <span className="text-danger">(bắt buộc)</span> : null}
+      {required ? <RequiredMark /> : null}
     </Field.Label>
   );
 }

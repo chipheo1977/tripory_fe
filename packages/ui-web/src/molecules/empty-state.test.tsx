@@ -28,3 +28,19 @@ it('render heading/body tùy chỉnh và action thật khi được truyền', (
 it('công khai EmptyState qua package entry', () => {
   expect('EmptyState' in publicUi).toBe(true);
 });
+
+function RendersNothing() {
+  return null;
+}
+
+it('action render null thi wrapper co empty:hidden va khong co noi dung', () => {
+  render(<EmptyState action={<RendersNothing />} />);
+  const wrapper = document.querySelector('section > div:last-child');
+  expect(wrapper?.childNodes.length).toBe(0);
+  expect(wrapper?.className).toContain('empty:hidden');
+});
+
+it('action that van render khi co noi dung', () => {
+  render(<EmptyState action={<button type="button">Tao</button>} />);
+  expect(screen.getByRole('button', { name: 'Tao' })).toBeTruthy();
+});

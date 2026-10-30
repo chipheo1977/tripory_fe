@@ -1,6 +1,6 @@
 import { sheetPeekMinPx, sheetSnapPoints } from '@tripory/design-tokens';
 import { describe, expect, it } from 'vitest';
-import { resolveSnapPoints, stepSnapPoint } from './sheet-snap';
+import { isTopSnap, resolveSnapPoints } from './sheet-snap';
 
 describe('Sheet snap adapter', () => {
   it('giữ các hằng snap đã khóa trong design tokens', () => {
@@ -26,20 +26,17 @@ describe('Sheet snap adapter', () => {
   ] as const)('resolveSnapPoints(%i, %s) kẹp expanded theo header', (viewportHeight, insetTop, peek, medium, expanded) => {
     expect(resolveSnapPoints(viewportHeight, insetTop)).toEqual([peek, medium, expanded]);
   });
+});
 
-  it('mở rộng và thu gọn đúng một mức', () => {
-    const points = resolveSnapPoints(1000);
-
-    expect(stepSnapPoint(points, points[0], 'expand')).toBe(points[1]);
-    expect(stepSnapPoint(points, points[1], 'expand')).toBe(points[2]);
-    expect(stepSnapPoint(points, points[2], 'collapse')).toBe(points[1]);
-    expect(stepSnapPoint(points, points[1], 'collapse')).toBe(points[0]);
-  });
-
-  it('giữ nguyên khi đã ở boundary', () => {
-    const points = resolveSnapPoints(1000);
-
-    expect(stepSnapPoint(points, points[2], 'expand')).toBe(points[2]);
-    expect(stepSnapPoint(points, points[0], 'collapse')).toBe(points[0]);
+describe('isTopSnap', () => {
+  it.each([
+    ['bottom', 0, 3, false],
+    ['bottom', 1, 3, false],
+    ['bottom', 2, 3, true],
+    ['left', 0, 0, true],
+    ['right', 0, 0, true],
+    ['left', 0, 3, true],
+  ] as const)('isTopSnap(%s, %i, %i) = %s', (position, snapIndex, length, expected) => {
+    expect(isTopSnap(position, snapIndex, length)).toBe(expected);
   });
 });

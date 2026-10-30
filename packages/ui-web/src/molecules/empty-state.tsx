@@ -36,7 +36,7 @@ export function EmptyState({
         <h2 className="text-heading font-semibold text-text">{heading}</h2>
         <p className="text-body text-muted">{body}</p>
       </div>
-      {action ? <div className="flex items-center justify-center gap-control-gap">{action}</div> : null}
+      {action ? <div className="flex items-center justify-center gap-control-gap empty:hidden">{action}</div> : null}
     </section>
   );
 }

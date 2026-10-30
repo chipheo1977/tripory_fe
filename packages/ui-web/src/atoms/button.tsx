@@ -2,7 +2,9 @@
 
 import { Button as BaseButton } from '@base-ui/react/button';
 import { cva, type VariantProps } from 'class-variance-authority';
+import type { LucideIcon } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
+import { Icon } from './icon';
 import { Spinner } from './spinner';
 
 const buttonVariants = cva(
@@ -29,12 +31,28 @@ type BaseButtonProps = ComponentProps<typeof BaseButton>;
 export type ButtonProps = BaseButtonProps &
   VariantProps<typeof buttonVariants> & {
     loading?: boolean;
-    /** Nhãn thấy được khi `loading` (D-30). Không truyền thì giữ cách cũ: children ẩn, spinner phủ lên. */
     loadingLabel?: ReactNode;
+    icon?: LucideIcon;
+    iconPosition?: 'start' | 'end';
+    visible?: boolean;
   };
 
-export function Button({ children, className, disabled, loading = false, loadingLabel, size, variant, ...props }: ButtonProps) {
-  // Có loadingLabel thì thay hẳn children bằng spinner + nhãn để người dùng đọc được tiến trình; nút không đổi bề rộng đột ngột vì chỉ khác nội dung.
+export function Button({
+  children,
+  className,
+  disabled,
+  icon,
+  iconPosition = 'start',
+  loading = false,
+  loadingLabel,
+  size,
+  variant,
+  visible = true,
+  ...props
+}: ButtonProps) {
+  if (!visible) return null;
+
+  const glyph = icon ? <Icon icon={icon} size="sm" /> : null;
   const showLoadingLabel = loading && loadingLabel != null;
 
   return (
@@ -52,7 +70,11 @@ export function Button({ children, className, disabled, loading = false, loading
         </>
       ) : (
         <>
-          <span className={loading ? 'invisible' : undefined}>{children}</span>
+          <span className={loading ? 'inline-flex items-center gap-control-gap invisible' : 'inline-flex items-center gap-control-gap'}>
+            {iconPosition === 'start' ? glyph : null}
+            {children}
+            {iconPosition === 'end' ? glyph : null}
+          </span>
           {loading ? <span aria-hidden className="absolute size-(--spinner-size-sm) animate-spin rounded-pill border border-current border-t-transparent" /> : null}
         </>
       )}

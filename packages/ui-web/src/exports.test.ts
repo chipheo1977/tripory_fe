@@ -93,7 +93,6 @@ const compoundParts = [
   'SheetBackdrop',
   'SheetContent',
   'SheetHandle',
-  'SheetControls',
   'SheetTitle',
   'SheetDescription',
   'SheetClose',
@@ -117,7 +116,7 @@ describe('ui-web public entry', () => {
   });
 
   it('export Sheet snap adapter và feedback helpers', () => {
-    expect(hasEveryExport(['resolveSnapPoints', 'stepSnapPoint', 'notify', 'toastDurations'])).toEqual([]);
+    expect(hasEveryExport(['resolveSnapPoints', 'notify', 'toastDurations'])).toEqual([]);
   });
 
   it('Button public nhận loadingLabel và PasswordInput nhận ref', () => {

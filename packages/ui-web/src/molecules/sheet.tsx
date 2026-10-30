@@ -4,7 +4,7 @@ import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import type { ComponentProps, ReactNode } from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '../lib/cn';
-import { resolveSnapPoints, stepSnapPoint } from './sheet-snap';
+import { isTopSnap, resolveSnapPoints } from './sheet-snap';
 
 export type SheetPosition = 'bottom' | 'left' | 'right';
 type SheetSnapPoint = number | string;
@@ -16,9 +16,7 @@ type SheetContextValue = {
   dismissible: boolean;
   modal: boolean;
   position: SheetPosition;
-  snapPoint: SheetSnapPoint | null;
-  snapPoints: readonly SheetSnapPoint[];
-  setSnapPoint: (snapPoint: SheetSnapPoint) => void;
+  atTopSnap: boolean;
 };
 
 const SheetContext = createContext<SheetContextValue | null>(null);
@@ -35,13 +33,9 @@ export type SheetProps = Omit<
   'children' | 'defaultSnapPoint' | 'disablePointerDismissal' | 'modal' | 'onSnapPointChange' | 'snapPoint' | 'snapPoints' | 'swipeDirection'
 > & {
   children?: ReactNode;
-  /** `false`: không có nút `Đóng bảng`, Esc/vuốt/bấm ngoài không đóng (timeline không modal của editor). */
   dismissible?: boolean;
-  /** `true`: bấm scrim không đóng, nhưng Esc và nút "Đóng bảng" vẫn đóng được (form modal như TripInfoDialog). */
   disablePointerDismissal?: boolean;
-  /** Mức mở đầu và mức quay về sau khi đóng. */
   defaultSnap?: SheetDefaultSnap;
-  /** Chiều cao (px) phía trên không được che; mức expanded không vượt `viewportHeight - insetTop`. */
   insetTop?: number;
   modal?: boolean;
   position?: SheetPosition;
@@ -91,9 +85,10 @@ export function Sheet({
     onSnapPointChange?.(nextSnapPoint);
   }, [onSnapPointChange, snapPoints]);
 
+  const atTopSnap = isTopSnap(position, snapIndex, snapPoints.length);
   const context = useMemo<SheetContextValue>(
-    () => ({ dismissible, modal, position, snapPoint, snapPoints, setSnapPoint: setActiveSnapPoint }),
-    [dismissible, modal, position, setActiveSnapPoint, snapPoint, snapPoints],
+    () => ({ dismissible, modal, position, atTopSnap }),
+    [dismissible, modal, position, atTopSnap],
   );
 
   return (
@@ -168,7 +163,7 @@ const popupClasses: Record<SheetPosition, string> = {
 };
 
 export function SheetContent({ children, className, ...props }: ComponentProps<typeof BaseDrawer.Popup>) {
-  const { modal, position } = useSheetContext();
+  const { modal, position, atTopSnap } = useSheetContext();
 
   return (
     <BaseDrawer.Portal>
@@ -179,13 +174,13 @@ export function SheetContent({ children, className, ...props }: ComponentProps<t
           data-sheet-position={position}
           data-swipe-direction={swipeDirections[position]}
           className={cn(
-            'pointer-events-auto flex flex-col overflow-y-auto overscroll-contain border-border bg-surface-elevated p-stack-lg pb-[calc(var(--semantic-space-stack-lg)+env(safe-area-inset-bottom))] text-text shadow-overlay outline-hidden transition-transform duration-(--semantic-motion-duration-slow) ease-standard',
+            'pointer-events-auto flex flex-col overscroll-contain border-border bg-surface-elevated p-stack-lg pb-[calc(var(--semantic-space-stack-lg)+env(safe-area-inset-bottom))] text-text shadow-overlay outline-hidden transition-transform duration-(--semantic-motion-duration-slow) ease-standard',
+            atTopSnap ? 'overflow-y-auto' : 'overflow-y-hidden',
             popupClasses[position],
             className,
           )}
         >
           {position === 'bottom' ? <SheetHandle /> : null}
-          <SheetControls />
           <BaseDrawer.Content className="mx-auto flex w-full max-w-content-sm flex-col gap-stack-md">
             {children}
           </BaseDrawer.Content>
@@ -197,47 +192,8 @@ export function SheetContent({ children, className, ...props }: ComponentProps<t
 
 export function SheetHandle() {
   return (
-    <div data-sheet-handle="" aria-hidden="true" className="flex min-h-touch shrink-0 items-center justify-center">
+    <div data-sheet-handle="" aria-hidden="true" className="flex min-h-touch shrink-0 touch-none items-center justify-center">
       <span className="h-(--semantic-space-inline-xs) w-(--semantic-space-page-block) rounded-pill bg-border-strong" />
-    </div>
-  );
-}
-
-function SnapButton({ children, direction }: { children: ReactNode; direction: 'expand' | 'collapse' }) {
-  const { snapPoint, snapPoints, setSnapPoint } = useSheetContext();
-  const boundary = direction === 'expand' ? snapPoints.at(-1) : snapPoints[0];
-  const disabled = snapPoint === boundary;
-
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={() => {
-        if (snapPoint !== null) setSnapPoint(stepSnapPoint(snapPoints, snapPoint, direction));
-      }}
-      className="inline-flex min-h-touch items-center justify-center rounded-control px-stack-sm text-label font-semibold text-text transition-colors duration-(--semantic-motion-duration-fast) hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:text-disabled"
-    >
-      {children}
-    </button>
-  );
-}
-
-export function SheetControls() {
-  const { dismissible, position } = useSheetContext();
-
-  return (
-    <div className="flex shrink-0 items-center justify-end gap-control-gap">
-      {position === 'bottom' ? (
-        <>
-          <SnapButton direction="collapse">Thu gọn bảng</SnapButton>
-          <SnapButton direction="expand">Mở rộng bảng</SnapButton>
-        </>
-      ) : null}
-      {dismissible ? (
-        <BaseDrawer.Close className="inline-flex min-h-touch items-center justify-center rounded-control px-stack-sm text-label font-semibold text-text transition-colors duration-(--semantic-motion-duration-fast) hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring">
-          Đóng bảng
-        </BaseDrawer.Close>
-      ) : null}
     </div>
   );
 }

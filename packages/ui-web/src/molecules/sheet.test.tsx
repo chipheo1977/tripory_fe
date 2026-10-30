@@ -70,14 +70,15 @@ it.each(['bottom', 'left', 'right'] as const)('%s modal trap focus, Esc đóng v
   expect(document.activeElement).toBe(trigger);
 });
 
-it('modal có scrim nhận pointer và nút đóng built-in', async () => {
+it('modal có scrim nhận pointer và đóng được bằng Esc', async () => {
   const user = userEvent.setup();
   render(<ExampleSheet />);
   await user.click(screen.getByRole('button', { name: 'Mở bảng bottom' }));
   const backdrop = document.querySelector('[data-sheet-backdrop]');
   expect(backdrop?.className).toContain('pointer-events-auto');
 
-  await user.click(await screen.findByRole('button', { name: 'Đóng bảng' }));
+  await screen.findByRole('dialog');
+  await user.keyboard('{Escape}');
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 });
 
@@ -94,35 +95,19 @@ it('non-modal để pointer xuyên viewport, popup vẫn thao tác được và 
   expect(screen.getByRole('dialog')).toBeTruthy();
 });
 
-it('bottom mở ở medium và controls bước qua ba snap point', async () => {
+it.each(['bottom', 'left', 'right'] as const)('%s Sheet không render nút thu gọn, mở rộng hay đóng bảng', async (position) => {
   const user = userEvent.setup();
-  const onSnapPointChange = vi.fn();
-  render(<ExampleSheet onSnapPointChange={onSnapPointChange} />);
-  await user.click(screen.getByRole('button', { name: 'Mở bảng bottom' }));
-
-  const handle = document.querySelector('[data-sheet-handle]');
-  expect(handle?.className).toContain('min-h-touch');
-  const collapse = await screen.findByRole('button', { name: 'Thu gọn bảng' });
-  const expand = screen.getByRole('button', { name: 'Mở rộng bảng' });
-  expect(collapse.hasAttribute('disabled')).toBe(false);
-  expect(expand.hasAttribute('disabled')).toBe(false);
-
-  await user.click(expand);
-  expect(onSnapPointChange).toHaveBeenLastCalledWith(`${0.92 * window.innerHeight}px`);
-  expect(expand.hasAttribute('disabled')).toBe(true);
-  await user.click(collapse);
-  await user.click(collapse);
-  expect(onSnapPointChange.mock.calls.at(-1)?.[0]).toMatch(/px$/u);
-  expect(collapse.hasAttribute('disabled')).toBe(true);
-});
-
-it('side Sheet không render snap controls', async () => {
-  const user = userEvent.setup();
-  render(<ExampleSheet position="right" />);
-  await user.click(screen.getByRole('button', { name: 'Mở bảng right' }));
+  render(<ExampleSheet position={position} />);
+  await user.click(screen.getByRole('button', { name: `Mở bảng ${position}` }));
   expect(await screen.findByRole('dialog')).toBeTruthy();
-  expect(screen.queryByRole('button', { name: 'Mở rộng bảng' })).toBeNull();
-  expect(screen.queryByRole('button', { name: 'Thu gọn bảng' })).toBeNull();
+
+  if (position === 'bottom') {
+    const handle = document.querySelector('[data-sheet-handle]');
+    expect(handle?.className).toContain('min-h-touch');
+  }
+  for (const name of ['Thu gọn bảng', 'Mở rộng bảng', 'Đóng bảng']) {
+    expect(screen.queryByRole('button', { name })).toBeNull();
+  }
 });
 
 it('nút close tùy chỉnh đóng Sheet', async () => {
@@ -143,23 +128,17 @@ describe('Sheet mở rộng cho editor', () => {
     setViewportHeight(originalInnerHeight);
   });
 
-  it('dismissible mặc định true: vẫn có nút "Đóng bảng"', async () => {
+  it('dismissible mặc định true: Esc đóng Sheet', async () => {
     const user = userEvent.setup();
-    render(<ExampleSheet />);
+    const onOpenChange = vi.fn();
+    render(<ExampleSheet onOpenChange={onOpenChange} />);
     await user.click(screen.getByRole('button', { name: 'Mở bảng bottom' }));
-
-    expect(await screen.findByRole('button', { name: 'Đóng bảng' })).toBeTruthy();
-  });
-
-  it('dismissible={false} bỏ nút "Đóng bảng" nhưng giữ các nút snap', async () => {
-    const user = userEvent.setup();
-    render(<ExampleSheet dismissible={false} modal={false} />);
-    await user.click(screen.getByRole('button', { name: 'Mở bảng bottom' }));
-
     await screen.findByRole('dialog');
-    expect(screen.queryByRole('button', { name: 'Đóng bảng' })).toBeNull();
-    expect(screen.getByRole('button', { name: 'Thu gọn bảng' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Mở rộng bảng' })).toBeTruthy();
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(onOpenChange.mock.calls.some(([next]) => next === false)).toBe(true);
   });
 
   it.each([true, false] as const)('dismissible={false} modal={%s}: Esc không đóng Sheet', async (modal) => {
@@ -189,7 +168,7 @@ describe('Sheet mở rộng cho editor', () => {
     expect(onOpenChange).not.toHaveBeenCalledWith(false);
   });
 
-  it('disablePointerDismissal: bấm scrim không đóng, nút "Đóng bảng" vẫn đóng', async () => {
+  it('disablePointerDismissal: bấm scrim không đóng, Esc vẫn đóng', async () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();
     // onOpenChange nhận thêm tham số details nên `toHaveBeenCalledWith(false)` không khớp; tự lọc theo đối số đầu.
@@ -201,7 +180,7 @@ describe('Sheet mở rộng cho editor', () => {
     await user.click(backdrop);
     expect(closed()).toBe(false);
 
-    await user.click(screen.getByRole('button', { name: 'Đóng bảng' }));
+    await user.keyboard('{Escape}');
     expect(closed()).toBe(true);
   });
 
@@ -215,66 +194,53 @@ describe('Sheet mở rộng cho editor', () => {
     expect(onOpenChange.mock.calls.some(([next]) => next === false)).toBe(true);
   });
 
-  it.each([
-    ['peek', 'Thu gọn bảng'],
-    ['expanded', 'Mở rộng bảng'],
-  ] as const)('defaultSnap=%s mở ở mức đó (nút "%s" bị khóa)', async (defaultSnap, boundaryButton) => {
-    const user = userEvent.setup();
-    render(<ExampleSheet defaultSnap={defaultSnap} />);
-    await user.click(screen.getByRole('button', { name: 'Mở bảng bottom' }));
-
-    const boundary = await screen.findByRole('button', { name: boundaryButton });
-    expect(boundary.hasAttribute('disabled')).toBe(true);
-    const other = screen.getByRole('button', { name: boundaryButton === 'Thu gọn bảng' ? 'Mở rộng bảng' : 'Thu gọn bảng' });
-    expect(other.hasAttribute('disabled')).toBe(false);
-  });
-
-  it('đóng rồi mở lại thì trở về mức defaultSnap', async () => {
-    const user = userEvent.setup();
-    render(<ExampleSheet defaultSnap="expanded" />);
-    await user.click(screen.getByRole('button', { name: 'Mở bảng bottom' }));
-    await user.click(await screen.findByRole('button', { name: 'Thu gọn bảng' }));
-    expect(screen.getByRole('button', { name: 'Mở rộng bảng' }).hasAttribute('disabled')).toBe(false);
-
-    await user.click(screen.getByRole('button', { name: 'Đóng bảng' }));
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    await user.click(screen.getByRole('button', { name: 'Mở bảng bottom' }));
-
-    expect((await screen.findByRole('button', { name: 'Mở rộng bảng' })).hasAttribute('disabled')).toBe(true);
-  });
-
-  it('insetTop kẹp mức expanded ở vh − insetTop', async () => {
-    setViewportHeight(568);
-    const user = userEvent.setup();
-    const onSnapPointChange = vi.fn();
-    render(<ExampleSheet insetTop={108} onSnapPointChange={onSnapPointChange} />);
-    await user.click(screen.getByRole('button', { name: 'Mở bảng bottom' }));
-
-    await user.click(await screen.findByRole('button', { name: 'Mở rộng bảng' }));
-
-    expect(onSnapPointChange).toHaveBeenLastCalledWith('460px');
-  });
-
   it('resize window tính lại snap points và gỡ listener khi unmount', async () => {
     setViewportHeight(1000);
     const user = userEvent.setup();
-    const onSnapPointChange = vi.fn();
     const removeListener = vi.spyOn(window, 'removeEventListener');
-    const { unmount } = render(<ExampleSheet onSnapPointChange={onSnapPointChange} />);
+    const { unmount } = render(<ExampleSheet />);
     await user.click(screen.getByRole('button', { name: 'Mở bảng bottom' }));
-    await user.click(await screen.findByRole('button', { name: 'Mở rộng bảng' }));
-    expect(onSnapPointChange).toHaveBeenLastCalledWith('920px');
+    await screen.findByRole('dialog');
 
     act(() => {
       setViewportHeight(500);
       window.dispatchEvent(new Event('resize'));
     });
-    await user.click(screen.getByRole('button', { name: 'Thu gọn bảng' }));
-    await user.click(screen.getByRole('button', { name: 'Mở rộng bảng' }));
-    expect(onSnapPointChange).toHaveBeenLastCalledWith('460px');
+    expect(screen.getByRole('dialog')).toBeTruthy();
 
     unmount();
     expect(removeListener.mock.calls.some(([type]) => type === 'resize')).toBe(true);
     removeListener.mockRestore();
+  });
+});
+
+describe('V�ng cu?n c?a Sheet theo m?c snap', () => {
+  it.each([
+    ['expanded', true],
+    ['medium', false],
+    ['peek', false],
+  ] as const)('bottom defaultSnap=%s: cu?n n?i dung = %s', async (defaultSnap, scrolls) => {
+    render(<ExampleSheet defaultSnap={defaultSnap} open />);
+    const sheet = await screen.findByRole('dialog');
+    const classes = sheet.className.split(/\s+/);
+    expect(classes.includes('overflow-y-auto')).toBe(scrolls);
+    expect(classes.includes('overflow-y-hidden')).toBe(!scrolls);
+  });
+
+  it.each(['left', 'right'] as const)('%s lu�n overflow-y-auto v� kh�ng c� tay c?m', async (position) => {
+    render(<ExampleSheet position={position} defaultSnap="peek" open />);
+    const sheet = await screen.findByRole('dialog');
+    const classes = sheet.className.split(/\s+/);
+    expect(classes.includes('overflow-y-auto')).toBe(true);
+    expect(classes.includes('overflow-y-hidden')).toBe(false);
+    expect(document.querySelector('[data-sheet-handle]')).toBeNull();
+  });
+
+  it('tay c?m bottom aria-hidden v� touch-none', async () => {
+    render(<ExampleSheet open />);
+    await screen.findByRole('dialog');
+    const handle = document.querySelector('[data-sheet-handle]');
+    expect(handle?.getAttribute('aria-hidden')).toBe('true');
+    expect(handle?.className.split(/\s+/)).toContain('touch-none');
   });
 });

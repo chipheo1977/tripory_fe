@@ -1,11 +1,13 @@
 ---
 phase: 04-itinerary-crud-editor
 verified: 2026-10-29T04:41:54Z
-status: human_needed
-score: "2/5 roadmap truths fully verified; 3/5 automated-pass with manual-only residue; 0 failed"
+status: passed
+score: "5/5 roadmap truths verified (2 by automation, 3 by automation plus manual UAT); 0 failed"
 overrides_applied: 0
 verified_by_automation_itin_ids: [ITIN-01, ITIN-02, ITIN-03, ITIN-04, ITIN-06, ITIN-09, ITIN-10, ITIN-11, ITIN-12]
-human_needed_itin_ids: [ITIN-05, ITIN-07, ITIN-08, ITIN-13, ITIN-14]
+human_needed_itin_ids: []
+verified_by_uat_itin_ids: [ITIN-05, ITIN-07, ITIN-08, ITIN-13, ITIN-14]
+uat_confirmed: "2026-10-30, 23/23 PASS, người chạy xác nhận thủ công, không đính kèm ảnh chụp"
 gap_count: 0
 warning_count: 7
 gaps: []
@@ -42,8 +44,10 @@ human_verification:
 **Phase Goal:** Người dùng đã đăng nhập tạo, sửa, sắp xếp và xuất bản một lịch trình thật bằng API BE, trên cả desktop và mobile.
 **Verified:** 2026-10-29T04:41:54Z
 **Branch:** `phase_4` (HEAD `6523ba2`, working tree clean before this file)
-**Status:** human_needed
-**Re-verification:** No, initial verification.
+**Status:** passed (cập nhật 2026-10-30: `human_needed` → `passed`)
+**Re-verification:** Cập nhật trạng thái sau UAT thủ công. Phần kiểm tự động ở dưới giữ nguyên, không chạy lại.
+
+> **Cập nhật 2026-10-30:** Người chạy UAT xác nhận PASS 23/23 bước trong `04-UAT-CHECKLIST.md` (bước 2 từng lỗi, đã sửa). Các tiêu chí ITIN-05, ITIN-07, ITIN-08, ITIN-13, ITIN-14 trước đây `human_needed` nay được UAT xác nhận (bước 7–8, 10, 11–12 và 17, 19–20, 12 và 23). Bằng chứng là xác nhận thủ công, không đính kèm ảnh chụp; model máy và công cụ đọc màn hình do người chạy tự điền. Các cảnh báo MD-01, LW-01 … LW-06 ở dưới vẫn mở, không chặn. Các đoạn "pending" / "chưa chạy" trong phần còn lại của tệp phản ánh thời điểm kiểm ban đầu 2026-10-29.
 
 ## Summary
 

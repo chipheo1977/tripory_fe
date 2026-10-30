@@ -206,7 +206,7 @@ it("shows the forbidden body without edit actions when the owner is somebody els
   expect(screen.queryByText("Chuyến của người khác")).toBeNull();
   expect(screen.queryByRole("button", { name: "Xuất bản" })).toBeNull();
   expect(screen.queryByRole("button", { name: "Thông tin chuyến đi" })).toBeNull();
-  expect(screen.queryByRole("button", { name: "Thao tác lịch trình" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Xóa lịch trình" })).toBeNull();
 });
 
 it("opens the owner's editor on Day 1 with the itinerary title in the document title", async () => {
@@ -239,11 +239,10 @@ it("adds a waypoint at the end of the day, highlights it for 1500 ms and announc
   await waitFor(() => expect(card.className).not.toContain("bg-primary-subtle"), { timeout: 2500 });
 });
 
-it("opens 'Thông tin chuyến đi' from the header menu and from the summary area", async () => {
+it("opens 'Thông tin chuyến đi' from the header 'i' button and from the summary area", async () => {
   const { user } = setup();
   await loaded();
-  await user.click(screen.getByRole("button", { name: "Thao tác lịch trình" }));
-  await user.click(await screen.findByRole("menuitem", { name: "Thông tin chuyến đi" }));
+  await user.click(screen.getByRole("button", { name: "Thông tin chuyến đi" }));
   const first = await screen.findByRole("dialog");
   expect(within(first).getByLabelText(/^Tiêu đề/)).toBeTruthy();
   await user.click(within(first).getByRole("button", { name: "Hủy" }));
@@ -270,11 +269,10 @@ it("deletes a waypoint with an undo toast, moves focus to the next card and rest
   expect(h.deleteWaypoint).not.toHaveBeenCalled();
 });
 
-it("deletes the itinerary from the header menu and replaces the route with the list", async () => {
+it("deletes the itinerary from the header delete button and replaces the route with the list", async () => {
   const { user } = setup();
   await loaded();
-  await user.click(screen.getByRole("button", { name: "Thao tác lịch trình" }));
-  await user.click(await screen.findByRole("menuitem", { name: "Xóa lịch trình" }));
+  await user.click(screen.getByRole("button", { name: "Xóa lịch trình" }));
   const dialog = await screen.findByRole("dialog");
   await user.click(within(dialog).getByRole("button", { name: "Xóa" }));
 
@@ -283,7 +281,7 @@ it("deletes the itinerary from the header menu and replaces the route with the l
   expect(notify.success).toHaveBeenCalledWith("Đã xóa lịch trình");
 });
 
-it("publishes after confirmation, then hides the button, shows the live note and focuses the ⋯ button", async () => {
+it("publishes after confirmation, then hides the button, shows the live note and focuses the 'i' button", async () => {
   const { user } = setup();
   await loaded();
   await user.click(screen.getByRole("button", { name: "Xuất bản" }));
@@ -291,8 +289,8 @@ it("publishes after confirmation, then hides the button, shows the live note and
   await user.click(within(dialog).getByRole("button", { name: "Xuất bản" }));
 
   await waitFor(() => expect(screen.queryByRole("button", { name: "Xuất bản" })).toBeNull());
-  expect(screen.getByText("Thay đổi hiển thị ngay với người xem")).toBeTruthy();
-  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "Thao tác lịch trình" })));
+  expect(screen.queryByText("Thay đổi hiển thị ngay với người xem")).toBeNull();
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "Thông tin chuyến đi" })));
 });
 
 it("goes back one step when the editor was entered from the list", async () => {
@@ -357,4 +355,41 @@ it("ignores another viewer's draft", async () => {
   setup();
   await loaded();
   expect(screen.queryByRole("dialog")).toBeNull();
+});
+
+const allDialogs = () => Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]'));
+
+async function openTripInfoFromHeader(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Thông tin chuyến đi" }));
+  return screen.findByRole("dialog", { name: "Thông tin chuyến đi" });
+}
+
+it("returns focus to the 'i' button when the trip info dialog closes", async () => {
+  const { user } = setup();
+  await loaded();
+  const tripInfo = await openTripInfoFromHeader(user);
+
+  await user.click(within(tripInfo).getByRole("button", { name: "Hủy" }));
+
+  await waitFor(() => expect(allDialogs()).toHaveLength(0));
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "Thông tin chuyến đi" })));
+});
+
+it("returns focus to the delete button when the delete confirmation is cancelled", async () => {
+  const { user } = setup();
+  await loaded();
+  await user.click(screen.getByRole("button", { name: "Xóa lịch trình" }));
+  const confirm = await screen.findByRole("dialog");
+
+  await user.click(within(confirm).getByRole("button", { name: "Hủy" }));
+
+  await waitFor(() => expect(allDialogs()).toHaveLength(0));
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "Xóa lịch trình" })));
+});
+
+it("has no ⋯ menu and no user menu in the loaded editor header", async () => {
+  setup();
+  await loaded();
+  expect(screen.queryByRole("button", { name: "Thao tác lịch trình" })).toBeNull();
+  expect(screen.queryByTestId("user-menu")).toBeNull();
 });

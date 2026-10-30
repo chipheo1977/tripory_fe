@@ -1,16 +1,8 @@
 "use client";
 
-// Nút "Xuất bản" của header editor và dải giải thích dưới header (UI-SPEC §PublishButton; D-38, D-40).
-//
-// Chưa có điểm đến nào (không tính waypoint đang chờ xóa, `canPublish` của domain) thì nút dùng `aria-disabled`,
-// KHÔNG dùng `disabled`: nút vẫn focus được và bấm vào vẫn giải thích được lý do. Lý do nằm ở phần tử `hintId`
-// do `PublishHintStrip` giữ (luôn có trong DOM, ẩn bằng `hidden` nhưng vẫn là mô tả của nút qua `aria-describedby`):
-//   - từ `lg`: cùng câu đó hiện thành tooltip khi hover/focus/bấm;
-//   - dưới `lg`: chủ header cho `PublishHintStrip visible` khi nút đang focus (`onHintFocusChange`) hoặc trong
-//     4 giây sau khi chạm (`onBlockedPress`).
-// Đã xuất bản thì không render gì, và không có nút chia sẻ (D-40, thuộc Phase 5).
 import { canPublish, type Itinerary } from "@tripory/itinerary";
-import { Button, cn, Tooltip, TooltipContent, TooltipTrigger } from "@tripory/ui-web";
+import { Button, cn, Icon, Tooltip, TooltipContent, TooltipTrigger } from "@tripory/ui-web";
+import { Globe } from "lucide-react";
 import { useState, type MouseEvent } from "react";
 import { useMediaQuery } from "./use-media-query";
 
@@ -19,8 +11,46 @@ export const PUBLISH_BLOCKED_HINT = "Thêm ít nhất 1 điểm đến để xu�
 /** Trùng breakpoint `lg` của Tailwind (1024px). */
 const LG_QUERY = "(min-width: 1024px)";
 
-const BLOCKED_CLASSES =
-  "aria-disabled:cursor-not-allowed aria-disabled:border-border aria-disabled:bg-surface-muted aria-disabled:text-disabled aria-disabled:hover:not-data-disabled:bg-surface-muted";
+/** Trùng breakpoint `md` của Tailwind (768px). */
+const MD_QUERY = "(min-width: 768px)";
+
+/** `min-w-touch`: dưới `md` nút chỉ còn icon nên cần vùng chạm 44px theo cả chiều ngang. */
+const BASE_CLASSES = "min-w-touch";
+
+/**
+ * Dưới `md`: variant `ghost`, không khung/nền, trạng thái chỉ hiện qua màu icon. Lớp màu dùng tiền tố variant
+ * (`not-aria-disabled:`, `aria-disabled:`) để thắng `text-text` của ghost mà không phụ thuộc thứ tự CSS thường.
+ */
+const NARROW_ALLOWED_CLASSES = cn(BASE_CLASSES, "not-aria-disabled:text-primary");
+const NARROW_BLOCKED_CLASSES = cn(
+  BASE_CLASSES,
+  "aria-disabled:cursor-not-allowed aria-disabled:text-disabled aria-disabled:hover:not-data-disabled:bg-transparent",
+);
+
+/** Từ `md`: nút `primary` có chữ; bị chặn thì trông như disabled. */
+const WIDE_ALLOWED_CLASSES = BASE_CLASSES;
+const WIDE_BLOCKED_CLASSES = cn(
+  BASE_CLASSES,
+  "aria-disabled:cursor-not-allowed aria-disabled:border-border aria-disabled:bg-surface-muted aria-disabled:text-disabled aria-disabled:hover:not-data-disabled:bg-surface-muted",
+);
+
+type Presentation = "narrow" | "wide";
+
+const PRESENTATION_BY_FROM_MD = { true: "wide", false: "narrow" } as const;
+
+const VARIANT_BY_PRESENTATION = { narrow: "ghost", wide: "primary" } as const;
+
+const CLASSES_BY_PRESENTATION = {
+  narrow: { allowed: NARROW_ALLOWED_CLASSES, blocked: NARROW_BLOCKED_CLASSES },
+  wide: { allowed: WIDE_ALLOWED_CLASSES, blocked: WIDE_BLOCKED_CLASSES },
+} as const;
+
+/** Thuộc tính của nút theo `canPublish`: chặn thì `aria-disabled` + trỏ tới lời giải thích. */
+function stateAttributes(allowed: boolean, hintId: string, presentation: Presentation) {
+  const classes = CLASSES_BY_PRESENTATION[presentation];
+  if (allowed) return { className: classes.allowed };
+  return { "aria-describedby": hintId, "aria-disabled": true as const, className: classes.blocked };
+}
 
 export type PublishButtonProps = Readonly<{
   itinerary: Itinerary;
@@ -44,9 +74,12 @@ export function PublishButton({
   onHintFocusChange,
 }: PublishButtonProps) {
   const wide = useMediaQuery(LG_QUERY);
+  const fromMd = useMediaQuery(MD_QUERY);
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
   if (itinerary.isPublic) return null;
+
+  const presentation = PRESENTATION_BY_FROM_MD[String(fromMd) as "true" | "false"];
 
   const allowed = canPublish(itinerary, pendingIds);
   const tooltipEnabled = wide && !allowed;
@@ -71,16 +104,15 @@ export function PublishButton({
     >
       <TooltipTrigger closeOnClick={false} render={<span />}>
         <Button
-          aria-describedby={allowed ? undefined : hintId}
-          aria-disabled={allowed ? undefined : true}
-          className={cn(!allowed && BLOCKED_CLASSES)}
+          {...stateAttributes(allowed, hintId, presentation)}
           onBlur={() => onHintFocusChange?.(false)}
           onClick={handleClick}
           onFocus={() => onHintFocusChange?.(true)}
           size="sm"
-          variant="primary"
+          variant={VARIANT_BY_PRESENTATION[presentation]}
         >
-          Xuất bản
+          <Icon className="md:hidden" icon={Globe} size="sm" />
+          <span className="sr-only md:not-sr-only">Xuất bản</span>
         </Button>
       </TooltipTrigger>
       <TooltipContent>{PUBLISH_BLOCKED_HINT}</TooltipContent>

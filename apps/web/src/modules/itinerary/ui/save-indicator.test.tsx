@@ -82,6 +82,52 @@ it("shows a retry button on failure and calls the exact retry function", async (
   expect(retry).toHaveBeenCalledTimes(1);
 });
 
+it("below md the 'Đã lưu' text is screen-reader-only inside the live region and an icon stays visible", () => {
+  const { store } = setup();
+
+  act(() => store.markSaved());
+
+  const label = screen.getByText("Đã lưu");
+  expect(label.className).toContain("sr-only");
+  expect(label.className).toContain("md:not-sr-only");
+  expect(region().contains(label)).toBe(true);
+  expect(region().querySelector("svg[aria-hidden='true']")).not.toBeNull();
+});
+
+it("below md the 'Đang lưu…' text is screen-reader-only inside the live region", async () => {
+  const user = userEvent.setup();
+  const { release } = setup(true);
+
+  await user.click(screen.getByRole("button", { name: "ghi" }));
+
+  const label = await screen.findByText("Đang lưu…");
+  expect(label.className).toContain("sr-only");
+  expect(label.className).toContain("md:not-sr-only");
+  expect(region().contains(label)).toBe(true);
+
+  await act(async () => {
+    release();
+  });
+});
+
+it("the retry button keeps its name, a 44px touch area and a screen-reader-only label below md", async () => {
+  const user = userEvent.setup();
+  const { store } = setup();
+  const retry = vi.fn();
+
+  act(() => store.markFailed(retry));
+
+  const button = screen.getByRole("button", { name: "Lỗi – Thử lại" });
+  expect(region().contains(button)).toBe(true);
+  expect(button.className).toContain("min-h-touch");
+  expect(button.className).toContain("min-w-touch");
+  const label = screen.getByText("Lỗi – Thử lại");
+  expect(label.className).toContain("sr-only");
+  expect(label.className).toContain("md:not-sr-only");
+  await user.click(button);
+  expect(retry).toHaveBeenCalledTimes(1);
+});
+
 it("prefers 'Đang lưu…' over a failure", async () => {
   const user = userEvent.setup();
   const { store, release } = setup(true);

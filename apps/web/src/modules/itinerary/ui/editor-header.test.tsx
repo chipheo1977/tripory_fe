@@ -51,18 +51,16 @@ const draft: Itinerary = {
 
 const originalMatchMedia = window.matchMedia;
 
-/** Mặc định dưới `sm`; `true` mô phỏng từ `sm` (min-width 640px). */
-const setSm = (sm: boolean) => {
+/** Nút Xuất bản hỏi `(min-width: 1024px)` để chọn tooltip hay dải giải thích: ở đây luôn là màn hẹp. */
+beforeEach(() => {
   window.matchMedia = ((query: string) =>
     ({
-      matches: sm && query.includes("640px"),
+      matches: false,
       media: query,
       addEventListener: () => undefined,
       removeEventListener: () => undefined,
     }) as unknown as MediaQueryList) as typeof window.matchMedia;
-};
-
-beforeEach(() => setSm(false));
+});
 afterEach(() => {
   window.matchMedia = originalMatchMedia;
   vi.useRealTimers();
@@ -75,20 +73,17 @@ function setup(itinerary: Itinerary = draft) {
     onDeleteItinerary: vi.fn(),
     onRequestPublish: vi.fn(),
   };
-  const menuTriggerRef = createRef<HTMLButtonElement>();
+  const tripInfoButtonRef = createRef<HTMLButtonElement>();
   const view = render(
     <EditorHeader
       itinerary={itinerary}
-      menuTriggerRef={menuTriggerRef}
       pendingIds={new Set()}
-      viewer={viewer}
+      tripInfoButtonRef={tripInfoButtonRef}
       {...handlers}
     />,
   );
-  return { ...handlers, menuTriggerRef, ...view };
+  return { ...handlers, tripInfoButtonRef, ...view };
 }
-
-const PUBLISHED_LINE = "Thay đổi hiển thị ngay với người xem";
 
 it("shows the title as a truncated h1 and goes back through onBack", async () => {
   const user = userEvent.setup();
@@ -107,61 +102,120 @@ it("is a sticky header on the sticky layer", () => {
   expect(header.className).toContain("z-sticky");
 });
 
-it("a draft offers Xuất bản, no published hint and no share action", async () => {
+it("a draft offers Xuất bản and no share action", async () => {
   const user = userEvent.setup();
   const { onRequestPublish } = setup();
-  expect(screen.queryByText(PUBLISHED_LINE)).toBeNull();
   expect(screen.queryByText(/Chia s\u1EBB/)).toBeNull();
   await user.click(screen.getByRole("button", { name: "Xuất bản" }));
   expect(onRequestPublish).toHaveBeenCalledTimes(1);
 });
 
-it("a published itinerary hides Xuất bản and says edits are visible at once", () => {
+it("a published itinerary hides Xuất bản and shows only the title in the title block", () => {
   setup({ ...draft, isPublic: true });
   expect(screen.queryByRole("button", { name: "Xuất bản" })).toBeNull();
-  expect(screen.getByText(PUBLISHED_LINE)).toBeTruthy();
+  expect(screen.getByRole("heading", { level: 1 }).parentElement?.children.length).toBe(1);
   expect(screen.queryByText(/Chia s\u1EBB/)).toBeNull();
 });
 
-it("the actions menu opens trip info and the delete flow", async () => {
+it("puts the info icon right after the title block and opens trip info", async () => {
   const user = userEvent.setup();
-  const { onOpenTripInfo, onDeleteItinerary } = setup();
-  await user.click(screen.getByRole("button", { name: "Thao tác lịch trình" }));
-  await user.click(await screen.findByRole("menuitem", { name: "Thông tin chuyến đi" }));
+  const { onOpenTripInfo } = setup();
+  const info = screen.getByRole("button", { name: "Thông tin chuyến đi" });
+  const titleBlock = screen.getByRole("heading", { level: 1 }).parentElement as HTMLElement;
+  expect(titleBlock.nextElementSibling).toBe(info);
+  expect(info.className).toContain("shrink-0");
+  expect(titleBlock.className).toContain("min-w-0");
+  await user.click(info);
   expect(onOpenTripInfo).toHaveBeenCalledTimes(1);
+});
 
-  await user.click(screen.getByRole("button", { name: "Thao tác lịch trình" }));
-  const remove = await screen.findByRole("menuitem", { name: "Xóa lịch trình" });
-  expect(remove.getAttribute("data-variant")).toBe("danger");
+it("puts the delete button outside any menu, in the right side, and asks to delete the itinerary", async () => {
+  const user = userEvent.setup();
+  const { onDeleteItinerary } = setup();
+  const remove = screen.getByRole("button", { name: "Xóa lịch trình" });
+  const actions = screen.getByTestId("save-indicator").parentElement as HTMLElement;
+  expect(actions.contains(remove)).toBe(true);
+  expect(remove.className).toContain("text-danger");
+  expect(remove.getAttribute("aria-haspopup")).toBeNull();
   await user.click(remove);
   expect(onDeleteItinerary).toHaveBeenCalledTimes(1);
 });
 
-it("exposes the menu trigger ref for focus restoration", () => {
-  const { menuTriggerRef } = setup();
-  expect(menuTriggerRef.current).toBe(screen.getByRole("button", { name: "Thao tác lịch trình" }));
+it("no longer has the ⋯ menu or the user menu", () => {
+  setup();
+  expect(screen.queryByRole("button", { name: "Thao tác lịch trình" })).toBeNull();
+  expect(screen.queryByRole("menuitem")).toBeNull();
+  expect(screen.queryByTestId("user-menu")).toBeNull();
 });
 
-it("contains the save indicator and a compact user menu", () => {
+it("exposes the info button ref for focus restoration", () => {
+  const { tripInfoButtonRef } = setup();
+  expect(tripInfoButtonRef.current).toBe(screen.getByRole("button", { name: "Thông tin chuyến đi" }));
+});
+
+it("keeps a 44px touch target on every icon button while the icons are size sm", () => {
+  setup();
+  const names = ["Về Lịch trình của tôi", "Thông tin chuyến đi", "Xóa lịch trình", "Xuất bản"];
+  for (const name of names) {
+    const button = screen.getByRole("button", { name });
+    expect(button.className).toContain("min-w-touch");
+    expect(button.className).toContain("min-h-touch");
+    const icon = button.querySelector("svg");
+    expect(icon?.getAttribute("class")).toContain("size-(--spinner-size-sm)");
+  }
+});
+
+it("contains the save indicator", () => {
   setup();
   expect(screen.getAllByTestId("save-indicator")).toHaveLength(1);
-  expect(screen.getAllByTestId("user-menu")).toHaveLength(1);
-  expect(screen.getByTestId("user-menu").getAttribute("data-compact")).toBe("true");
 });
 
-it("below sm puts save indicator and Xuất bản on a second row", () => {
+it("puts save indicator, Xuất bản and the delete button together in the right side of the header", () => {
   setup();
-  const row = screen.getByTestId("save-indicator").closest(".border-t");
-  expect(row).not.toBeNull();
-  expect(row?.contains(screen.getByRole("button", { name: "Xuất bản" }))).toBe(true);
-  expect(row?.contains(screen.getByRole("heading", { level: 1 }))).toBe(false);
+  const header = screen.getByRole("banner");
+  const actions = screen.getByTestId("save-indicator").parentElement as HTMLElement;
+  expect(header.contains(actions)).toBe(true);
+  expect(actions.contains(screen.getByRole("button", { name: "Xuất bản" }))).toBe(true);
+  expect(actions.contains(screen.getByRole("heading", { level: 1 }))).toBe(false);
+  expect(actions.className).toContain("shrink-0");
 });
 
-it("from sm keeps everything on a single row", () => {
-  setSm(true);
+it("has a single row at every width: no separate row for the save indicator and Xuất bản", () => {
   setup();
-  expect(screen.getByTestId("save-indicator").closest(".border-t")).toBeNull();
-  expect(screen.getByRole("button", { name: "Xuất bản" }).closest(".border-t")).toBeNull();
+  expect(screen.getByRole("banner").querySelector(".border-t")).toBeNull();
+});
+
+it("the title block shrinks and truncates to make room for the right side", () => {
+  setup();
+  const block = screen.getByRole("heading", { level: 1 }).parentElement as HTMLElement;
+  expect(block.className).toContain("min-w-0");
+  const wrapper = block.parentElement as HTMLElement;
+  expect(wrapper.className).toContain("min-w-0");
+  expect(wrapper.className).toContain("flex-1");
+});
+
+it("below md Xuất bản keeps its accessible name through a screen-reader-only label", () => {
+  setup();
+  const button = screen.getByRole("button", { name: "Xuất bản" });
+  const label = screen.getByText("Xuất bản", { selector: "span" });
+  expect(button.contains(label)).toBe(true);
+  expect(label.className).toContain("sr-only");
+  expect(label.className).toContain("md:not-sr-only");
+  expect(button.className).toContain("min-w-touch");
+});
+
+it("a blocked Xuất bản stays focusable below md and keeps its explanation", async () => {
+  const user = userEvent.setup();
+  setup({ ...draft, waypoints: [] });
+  const button = screen.getByRole("button", { name: "Xuất bản" });
+  expect(button.getAttribute("aria-disabled")).toBe("true");
+  await user.tab();
+  await user.tab();
+  await user.tab();
+  expect(document.activeElement).toBe(button);
+  expect(document.getElementById(button.getAttribute("aria-describedby") as string)?.textContent).toBe(
+    "Thêm ít nhất 1 điểm đến để xuất bản",
+  );
 });
 
 it("a blocked press shows the hint strip for 4 seconds, then hides it", () => {

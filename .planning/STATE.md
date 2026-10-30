@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 04-22-PLAN.md
-last_updated: "2026-10-29T04:24:08.295Z"
-last_activity: 2026-10-29
+status: ready_to_plan
+stopped_at: Phase 4 complete (UAT 23/23 PASS)
+last_updated: "2026-10-30T00:00:00.000Z"
+last_activity: 2026-10-30
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 50
-  completed_plans: 49
-  percent: 98
+  completed_plans: 50
+  percent: 100
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình du lịch thật trên bản triển khai công khai, rồi trao đổi về chuyến đi với người khác.
-**Current focus:** Phase 4 — Itinerary CRUD & Editor
+**Current focus:** Phase 5 — SVG Map & Public View (kế tiếp, chưa lập kế hoạch)
 
 ## Current Position
 
-Phase: 4
-Plan: 23 of 23 (04-23 UAT thủ công đang chờ)
-Status: Executed 04-01..04-22; chờ UAT thủ công 04-23
-Last activity: 2026-10-29
+Phase: 4 hoàn tất, kế tiếp Phase 5
+Plan: 23 of 23 (UAT thủ công 04-23 xong, 23/23 bước PASS)
+Status: Phase 4 complete; next = Phase 5 (`/gsd-discuss-phase 5` hoặc `/gsd-plan-phase 5`)
+Last activity: 2026-10-30
 
 Phase 1 progress: [██████████] 100% — verified complete
 
@@ -198,6 +198,7 @@ Recent decisions affecting current work:
 - [Phase 4]: 04-19: DragOverlay portal ra body với style.zIndex = var(--z-index-toast) (ghi đè zIndex 999 mặc định), target lấy bằng useSyncExternalStore
 - [Phase 4]: 04-20: EditorHeader/Minimal nhan viewer qua prop (UserMenu can); SaveIndicator+PublishButton render mot ban theo useMediaQuery sm; EditorLayout boc header trong wrapper sticky de ResizeObserver do insetTop cho Sheet
 - [Phase 4]: 04-21: ItineraryEditor nhan viewer (Viewer) thay viewerId; co data thi luon hien editor; co entry-flag xoa khi back dung no (khong o cleanup effect vi StrictMode); leaving giu khung cho sau khi xoa lich trinh
+- [Phase 04]: UAT thủ công 23/23 PASS (người chạy xác nhận, không đính kèm ảnh chụp); 04-SECURITY đóng 70/70 threat, UF-01..04 vẫn OPEN không chặn; Phase 4 nghiệm thu
 - [Phase 04]: 04-22: invariant <img regex ends at '/>' (=> in handlers breaks '>' match); BE dependencies for Phase 4 recorded in 04-BE-DEPENDENCIES.md
 
 ### Pending Todos
@@ -218,6 +219,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-29T04:24:08.291Z
-Stopped at: Completed 04-22-PLAN.md
+Last session: 2026-10-30T00:00:00.000Z
+Stopped at: Phase 4 complete (UAT 23/23 PASS)
 Resume file: None

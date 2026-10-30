@@ -53,7 +53,7 @@ Exceptions: none. Các kích thước dưới đây thuộc sizing contract, kh�
 | `--editor-timeline-width` | `400px` | `packages/design-tokens/src/components.css` | Bề rộng cột timeline desktop từ `lg` (D-13). Grid `lg:grid-cols-[var(--editor-timeline-width)_1fr]` |
 | `--itinerary-cover-ratio` | `16 / 9` | `packages/design-tokens/src/components.css` | Tỉ lệ ảnh bìa ở thẻ, canvas, nền mobile, preview trong dialog. Dùng `aspect-(--itinerary-cover-ratio)` |
 
-Cập nhật `tokens.test.ts` cho hai token này. Chiều cao header editor là kết quả bố cục (64px một hàng, 64 + 44px hai hàng ở `<640px`), app đo bằng `ResizeObserver` để truyền cho Sheet (xem Sheet mở rộng), không khai báo token.
+Cập nhật `tokens.test.ts` cho hai token này. Chiều cao header editor là kết quả bố cục (64px, luôn một hàng ở mọi breakpoint; cụm chỉ báo lưu + Xuất bản đã chuyển lên vùng bên phải header), app đo bằng `ResizeObserver` để truyền cho Sheet (xem Sheet mở rộng), không khai báo token.
 
 ### Hằng tương tác (app constant, không phải token)
 
@@ -80,7 +80,7 @@ Không đổi so với Phase 1, chỉ gán vai trò:
 | Body | 16px | 400 | 1.5 | Giá trị Input/Textarea, mô tả trong canvas, nội dung dialog xác nhận, mục menu, phụ đề ngày |
 | Body (semibold) | 16px | 600 | 1.5 | Tiêu đề trên header editor (`h1`, cắt ellipsis), tên waypoint trong thẻ |
 | Label | 14px | 600 | 1.5 | Chữ nút, tab lọc, dòng 1 tab ngày ("Ngày 2"), Badge, nhãn ô |
-| Label (regular) | 14px | 400 | 1.5 | Địa chỉ waypoint, meta thẻ ("Khởi hành … · … km"), dòng 2 tab ngày (km), chỉ báo lưu, dòng "Đã nhận: …", mô tả ô, lỗi field, dòng "Thay đổi hiển thị ngay với người xem", dòng giải thích nút Xuất bản |
+| Label (regular) | 14px | 400 | 1.5 | Địa chỉ waypoint, meta thẻ ("Khởi hành … · … km"), dòng 2 tab ngày (km), chỉ báo lưu, dòng "Đã nhận: …", mô tả ô, lỗi field, dòng giải thích nút Xuất bản (dòng D-41 "Thay đổi hiển thị ngay với người xem" đã bỏ) |
 | Heading | 20px | 600 | 1.2 | Tiêu đề thẻ lịch trình (tối đa 2 dòng), `DialogTitle`/`SheetTitle`, heading EmptyState/ErrorState, tiêu đề chuyến đi trong nền mobile |
 | Display | 28px | 600 | 1.2 | `h1` "Lịch trình của tôi", tiêu đề chuyến đi trong canvas desktop |
 
@@ -144,7 +144,7 @@ Contrast: dùng lại bằng chứng Phase 1/3. Badge `success` (`success` trên
 
 | Component | Thay đổi |
 |-----------|----------|
-| `UserMenu` | Thêm prop `compact?: boolean`: chỉ hiện `Avatar sm` ở mọi breakpoint (ẩn tên và chevron). Header editor dùng `compact` (D-16). `aria-label` trigger giữ nguyên |
+| `UserMenu` | Thêm prop `compact?: boolean`: chỉ hiện `Avatar sm` ở mọi breakpoint (ẩn tên và chevron). Chỉ header rút gọn của editor (tải/lỗi/403) dùng `compact`; header editor đầy đủ không có UserMenu. `aria-label` trigger giữ nguyên |
 | `SubmitStatus` | Chuyển từ `modules/identity/ui` sang `apps/web/src/components/submit-status.tsx` (cùng API, cùng `COLD_START_MESSAGE`), identity import lại từ đây. Itinerary dùng chung |
 
 ### Organism nghiệp vụ mới (`apps/web/src/modules/itinerary/ui/`)
@@ -156,7 +156,7 @@ Contrast: dùng lại bằng chứng Phase 1/3. Badge `success` (`success` trên
 | `CreateItineraryDialog` | Dialog tạo nhanh một ô |
 | `DeleteItineraryDialog` | Xác nhận xóa, dùng chung cho thẻ và editor (D-42) |
 | `EditorLayout` | Khung editor có 4 slot: `header`, `timeline`, `canvas`, `summary`. Desktop đặt `summary` trong `canvas` ở Phase 4; mobile đặt `summary` trên nền phía sau sheet. Phase 5 thay `canvas` bằng bản đồ và chuyển `summary` lên đầu cột trái mà không đổi các slot khác (D-13, D-14) |
-| `EditorHeader` | Back, tiêu đề, chỉ báo lưu, Xuất bản, menu ⋯, `UserMenu compact` |
+| `EditorHeader` | Back, tiêu đề + icon "i" (Thông tin chuyến đi), chỉ báo lưu, Xuất bản, nút xóa. Không có menu ⋯ và `UserMenu` |
 | `SaveIndicator` | 4 trạng thái (D-30) |
 | `TripSummary` | Ảnh bìa lớn + tiêu đề + badge + ngày khởi hành + tổng km + mô tả + nút "Sửa thông tin" |
 | `TripInfoDialog` | Form metadata (Dialog từ `md`, Sheet modal dưới `md`) |
@@ -241,25 +241,25 @@ article (Card default, padding 0, overflow-hidden, relative, group)
 
 Sticky top, `z-(--z-sticky)`, `bg-surface border-b border-border`, `pt-[env(safe-area-inset-top)]`, padding ngang `px-page-inline sm:px-page-inline-md lg:px-page-inline-lg`.
 
-**Từ `sm` (≥640px), một hàng cao 64px**, gap 8px:
+**Ở mọi breakpoint, một hàng cao 64px** (không còn hàng 2). Gap 4px dưới `sm`, 8px từ `sm`:
 
 ```text
-[← IconButton] [khối tiêu đề, flex-1 min-w-0] [SaveIndicator] [Xuất bản] [⋯ IconButton] [UserMenu compact]
-               dòng 1: h1 Body semibold, truncate
-               dòng 2 (chỉ khi đã xuất bản): "Thay đổi hiển thị ngay với người xem" Label regular text-muted, truncate (D-41)
+[← IconButton] [ khối tiêu đề + "i", flex-1 min-w-0: [khối chữ, min-w-0] [i IconButton, shrink-0] ] [ vùng phải, shrink-0: [SaveIndicator] [Xuất bản] [Xóa IconButton] ]
+                 dòng 1: h1 Body semibold, truncate
+dải giải thích (chỉ khi cần, dưới hàng, xem PublishButton)
 ```
 
-**Dưới `sm` (<640px), hai hàng**, gap 4px giữa icon button:
+- Vùng phải `shrink-0`: khối chữ của tiêu đề là phần duy nhất co và truncate, nên header không tràn ngang ở 320px; icon "i" `shrink-0` nên luôn nhìn thấy cạnh tiêu đề. Xuất bản vẫn ngoài mọi menu. Header không còn menu ⋯ và không còn `UserMenu` (chỉ header rút gọn của trạng thái tải/lỗi/403 còn `UserMenu compact`).
+- **Icon trong header cỡ `sm`** (16px, `Icon size="sm"` / `Spinner size="sm"`): `ArrowLeft`, `Info`, `Trash2`, icon của SaveIndicator, `Globe` của Xuất bản. Nút vẫn có vùng chạm `min-h-touch min-w-touch` (44px).
+- **Dưới `md` (<768px) thu gọn**: `SaveIndicator` chỉ còn icon, `Xuất bản` chỉ còn icon `Globe`; chữ của cả hai chuyển sang `sr-only` (tên truy cập vẫn là "Đang lưu…" / "Đã lưu" / "Lỗi – Thử lại" / "Xuất bản"). **Từ `md` (≥768px)** hiện đủ chữ như cũ. Ngưỡng `md` là ngưỡng sẵn có của dự án (Dialog↔Sheet), một breakpoint cho cả hai thành phần.
+- Ước lượng (tính tay, chưa đo trên trình duyệt) ở 320px: padding 16×2, back 44, "i" 44, Xuất bản 44, xóa 44, chỉ báo lưu 16, gap 4 giữa các phần tử (2 gap ngoài + 1 gap tiêu đề–"i" + 2 gap trong vùng phải = 5 × 4): khối chữ tiêu đề còn khoảng 76px; khi chỉ báo ở trạng thái lỗi (nút 44px) còn khoảng 48px; khi đã xuất bản (không còn nút Xuất bản) còn khoảng 124px.
+- **Lệch so với D-41 (theo yêu cầu user 2026-10-30):** dòng "Thay đổi hiển thị ngay với người xem" (`PublishedNote`) đã bị bỏ. Khối tiêu đề chỉ còn `h1` (`min-w-0`, `truncate`).
 
-```text
-hàng 1 (64px): [←] [khối tiêu đề như trên] [⋯] [UserMenu compact]
-hàng 2 (min-h-touch, border-t border-border): [SaveIndicator] ......... [Xuất bản]  (bản nháp)
-                                              [SaveIndicator]                      (đã xuất bản)
-dải giải thích (chỉ khi cần, xem PublishButton)
-```
+> **Lệch so với D-16 / PLAN cũ (đã được user chọn, Phương án C):** trước đây dưới `sm` header có hàng 2 chứa chỉ báo lưu và Xuất bản. Nay chỉ báo lưu và Xuất bản nằm ở vùng phải của hàng duy nhất, thu thành icon dưới `md`. D-16 ("chỉ báo trạng thái lưu, nút Xuất bản... nằm trên header") vẫn đúng; D-30 (3 trạng thái, `aria-live`) và D-38 (`aria-disabled` + giải thích) giữ nguyên hành vi, chỉ đổi cách hiển thị dưới `md`.
 
 - Back: `IconButton ghost` icon `ArrowLeft`, `aria-label` "Về Lịch trình của tôi". Hành vi theo D-47; đi qua chặn rời trang D-35.
-- Menu ⋯: `IconButton ghost` icon `MoreHorizontal`, `aria-label` "Thao tác lịch trình", menu `align="end"`: icon `Info` "Thông tin chuyến đi"; `DropdownMenuSeparator`; `danger` icon `Trash2` "Xóa lịch trình".
+- "i": `IconButton ghost` icon `Info` cạnh phải tiêu đề, `aria-label` "Thông tin chuyến đi", mở dialog Thông tin chuyến đi; đóng dialog thì focus về nút này.
+- Xóa: `IconButton ghost` + `text-danger`, icon `Trash2`, `aria-label` "Xóa lịch trình", nằm ở cuối vùng phải, mở `DeleteItineraryDialog`; đóng hộp thoại (Hủy) thì focus về nút này.
 - Đã xuất bản: nút "Xuất bản" không render (D-40); không có nút "Chia sẻ".
 
 ### SaveIndicator (D-30)
@@ -273,14 +273,19 @@ Bọc trong `div aria-live="polite"`, luôn có trong DOM. Ưu tiên: còn mutat
 | Đã lưu | `Icon Check sm text-success` + "Đã lưu" `text-label text-muted` |
 | Lỗi | `Button ghost size="sm"` `text-danger`, icon `CircleAlert`, nhãn "Lỗi – Thử lại". Bấm thì gửi lại đúng thao tác đã lỗi, chỉ báo về "Đang lưu…" |
 
+- Dưới `md` chữ của cả ba trạng thái là `sr-only` (`sr-only md:not-sr-only`) và vẫn nằm trong vùng `aria-live`, chỉ còn icon trên màn hình. Nút "Lỗi – Thử lại" có `min-h-touch min-w-touch` (44px) để bấm được khi chỉ còn icon.
+
 - Lỗi của form (thêm/sửa waypoint, metadata, tạo, xuất bản, xóa lịch trình) hiện trong form/dialog. Chỉ báo vẫn hiện "Đang lưu…" trong lúc gửi, nhưng không chuyển sang "Lỗi" khi các mutation đó lỗi; xong thì về trạng thái trước.
 - Thao tác nền lỗi: chỉ báo "Lỗi – Thử lại" **và** toast error theo chính sách Phase 2 (`selectErrorMessage`).
 - Lệnh xóa đang chờ 5 giây không tính là đang lưu; khi commit thì tính.
 
 ### PublishButton (D-38)
 
-- `Button primary size="sm"` "Xuất bản" (hit area 44px sẵn có).
-- `canPublish` false (0 waypoint, không tính waypoint đang chờ xóa): **`aria-disabled="true"`**, không dùng `disabled`; vẫn focus được; style giống disabled (`bg-surface-muted text-disabled border-border`); bấm không mở hộp xác nhận. Nút có `aria-describedby` trỏ phần tử giải thích "Thêm ít nhất 1 điểm đến để xuất bản" (luôn có trong DOM).
+- `Button size="sm"` "Xuất bản" (hit area 44px sẵn có, thêm `min-w-touch`), luôn là `<button>` thật. Nằm ở vùng phải header ở mọi breakpoint. Variant chọn theo `useMediaQuery("(min-width: 768px)")`, cùng một cây component (không dựng lại nút, giữ focus):
+  - Dưới `md`: variant `ghost`, **không khung/nền nhìn thấy**, chỉ còn icon `Globe` (size `sm`); chữ "Xuất bản" là `sr-only`, tên truy cập vẫn là "Xuất bản"; vùng chạm `min-h-touch min-w-touch` (≥ 44px) không viền/nền. Trạng thái nghiệp vụ chỉ thể hiện qua icon: cho phép = `text-primary` (hover/focus nền nhẹ `surface-muted` + focus ring); bị chặn = `text-disabled` + `cursor-not-allowed`, không nền khi hover; đã xuất bản = không render.
+  - Từ `md`: variant `primary` hiện chữ, không icon.
+  - SSR/hydrate: snapshot server là "dưới `md`" (theo `useMediaQuery` của repo), từ `md` tự đúng sau hydrate.
+- `canPublish` false (0 waypoint, không tính waypoint đang chờ xóa): **`aria-disabled="true"`**, không dùng `disabled`; vẫn focus được; từ `md` style giống disabled (`bg-surface-muted text-disabled border-border`), dưới `md` chỉ icon `text-disabled`; bấm không mở hộp xác nhận. Nút có `aria-describedby` trỏ phần tử giải thích "Thêm ít nhất 1 điểm đến để xuất bản" (luôn có trong DOM).
   - Từ `lg`: phần tử giải thích là `TooltipContent`, mở khi hover/focus và khi bấm.
   - Dưới `lg`: dải dưới header `bg-surface-muted px-page-inline py-inline-sm text-label text-muted`, hiện khi nút đang focus hoặc trong 4 giây sau khi chạm; ẩn bằng `hidden` (vẫn đọc được qua `aria-describedby`).
 - `canPublish` true: bấm mở `PublishDialog`.
@@ -423,7 +428,7 @@ Dòng trạng thái nằm ngay dưới ô (sau mô tả), `aria-live="polite"`, 
 - `DialogContent size="sm"` ở mọi breakpoint. `DialogTitle` "Xuất bản lịch trình?"; `DialogDescription` "Ai có link đều xem được lịch trình này. Bạn vẫn sửa được nội dung sau khi xuất bản, nhưng không thể chuyển lại về nháp."
 - Footer `flex flex-col-reverse gap-inline-sm sm:flex-row sm:justify-end`: `DialogClose` "Hủy" (`secondary`, **`initialFocus`**) + `Button primary` "Xuất bản" (`loadingLabel` "Đang xuất bản…").
 - Đang gửi: Esc/scrim/"Hủy" không đóng; `SubmitStatus`. Lỗi: `InlineAlert` trong dialog (gồm `Itinerary.CannotPublishEmpty` → "Thêm ít nhất 1 điểm đến để xuất bản."), dialog vẫn mở.
-- Thành công: đóng, toast success "Đã xuất bản lịch trình", badge thành "Đã xuất bản", nút "Xuất bản" biến mất, header hiện "Thay đổi hiển thị ngay với người xem" (D-40, D-41). Focus về nút menu ⋯ của header (nút Xuất bản không còn).
+- Thành công: đóng, toast success "Đã xuất bản lịch trình", badge thành "Đã xuất bản", nút "Xuất bản" biến mất, header không hiện dòng ghi chú nào (D-40; dòng D-41 đã bỏ theo yêu cầu user 2026-10-30). Focus về nút "i" của header (nút Xuất bản không còn).
 
 ### DeleteItineraryDialog (D-42)
 
@@ -485,7 +490,7 @@ Dòng trạng thái nằm ngay dưới ô (sau mô tả), `aria-live="polite"`, 
 | Menu header editor | Trigger "Thao tác lịch trình"; "Thông tin chuyến đi", "Xóa lịch trình" |
 | Nút back editor | `aria-label` "Về Lịch trình của tôi" |
 | Chỉ báo lưu (D-30) | "Đang lưu…", "Đã lưu", "Lỗi – Thử lại" |
-| Dòng đã xuất bản (D-41) | "Thay đổi hiển thị ngay với người xem" |
+| Dòng đã xuất bản (D-41) | ~~"Thay đổi hiển thị ngay với người xem"~~ (đã bỏ theo yêu cầu user 2026-10-30) |
 | Giải thích Xuất bản (D-38) | "Thêm ít nhất 1 điểm đến để xuất bản" |
 | Tóm tắt | "Sửa thông tin", "Thêm ảnh bìa" |
 | Tab ngày | "Ngày {N}", nút "Thêm ngày" |
@@ -567,7 +572,7 @@ Giọng văn theo Phase 1/3: tiếng Việt trung tính, câu ngắn, không d�
 | `MyItinerariesView` | Tab đọc/ghi `?status`, giá trị lạ → Tất cả; skeleton trang đầu; ErrorState + Thử lại khi trang đầu lỗi; EmptyState đúng copy từng tab, chỉ Tất cả có CTA; sentinel gọi `fetchNextPage`; trang kế lỗi không render nút/thông báo, sentinel lần sau gọi lại; hết trang không render gì |
 | `ItineraryCard` | Link tới editor; menu Mở/Xóa; ẩn km = 0, ẩn ngày khởi hành khi null; ảnh lỗi → nền dự phòng; không hiện số ngày/điểm |
 | `CreateItineraryDialog` | Giá trị đầu được chọn sẵn; Enter gửi; trim + 1–100; "Đang tạo…" + chặn gửi lần hai; cold start 5s; lỗi field/alert; thành công điều hướng, không toast |
-| `EditorHeader` / `SaveIndicator` | 4 trạng thái theo mutation; bấm "Lỗi – Thử lại" gửi lại đúng thao tác; ẩn Xuất bản khi đã xuất bản; dòng D-41 |
+| `EditorHeader` / `SaveIndicator` | 4 trạng thái theo mutation; bấm "Lỗi – Thử lại" gửi lại đúng thao tác; ẩn Xuất bản khi đã xuất bản; không còn dòng D-41 (đã bỏ) |
 | `PublishButton` / `PublishDialog` | `aria-disabled` + describedby khi 0 điểm (tính cả điểm đang chờ xóa); focus đầu ở Hủy; loading; lỗi inline; thành công đổi badge, ẩn nút, toast |
 | `DeleteItineraryDialog` | Câu thêm khi đã xuất bản; focus đầu ở Hủy; danger + loading; điều hướng + toast |
 | `DayTabs` | Vẽ đủ dải ngày thưa; km dòng 2; Thêm ngày optimistic + chọn + focus, rollback khi lỗi |
@@ -602,7 +607,7 @@ Test bằng Vitest + Testing Library (jsdom), fake `HttpClient`, không MSW. Kh�
 | Codebase scout | `notify` ép 8 giây và không có `duration`; `InlineAlert` chỉ có `danger`; `Sheet` (lúc khảo sát) luôn có "Đóng bảng", mở mặc định 0.6, expanded 0.92 viewport (sẽ che header editor); `ErrorState` copy cố định; `FormFieldLabel required` hiện "(bắt buộc)"; `SubmitStatus` đang nằm trong `modules/identity/ui`; `Card` interactive là `<button>` (không chứa được menu) |
 | BE scout (`tripory_be`) | Tên waypoint ≤ 200 (`WaypointName`), địa chỉ ≤ 500, ghi chú ≤ 2000, ảnh bìa ≤ 500 (EF config); tiêu đề 1–100, mô tả ≤ 1000, phụ đề ≤ 100 (validator); `InvalidDayNumber` chỉ chặn dayNumber < 1; `pageSize` 1–100 |
 | FE cũ (chỉ tham khảo UX) | Thẻ waypoint 3 phần (tay cầm, thân, thao tác), placeholder nét đứt khi kéo, EmptyState theo ngày có CTA |
-| Mặc định của researcher | Ngưỡng Dialog↔Sheet ở `md`; header editor hai hàng dưới `sm`; `notify.undoable` không tự hết hạn (app sở hữu đồng hồ); một toast hoàn tác tại một thời điểm; form dialog không đóng khi bấm scrim; `router.replace` khi đổi tab lọc; 180ms/8px/4px cho cảm biến; sentinel 400px; tay cầm ẩn khi ngày có 1 điểm; số thứ tự màu trung tính; dialog rời trang tự đi tiếp khi request xong; toàn bộ copy phụ (empty từng tab, lỗi vị trí, menu, title, announcements, 403 body) |
+| Mặc định của researcher | Ngưỡng Dialog↔Sheet ở `md`; header editor một hàng ở mọi breakpoint, chỉ báo lưu và Xuất bản thu thành icon dưới `md` (xem §EditorHeader); `notify.undoable` không tự hết hạn (app sở hữu đồng hồ); một toast hoàn tác tại một thời điểm; form dialog không đóng khi bấm scrim; `router.replace` khi đổi tab lọc; 180ms/8px/4px cho cảm biến; sentinel 400px; tay cầm ẩn khi ngày có 1 điểm; số thứ tự màu trung tính; dialog rời trang tự đi tiếp khi request xong; toàn bộ copy phụ (empty từng tab, lỗi vị trí, menu, title, announcements, 403 body) |
 
 ---
 

@@ -43,7 +43,7 @@ const TITLE_FALLBACK = "Sửa lịch trình · Tripory";
 export type ItineraryEditorProps = Readonly<{
   itineraryId: ItineraryId;
   /**
-   * Người đang đăng nhập: `canEdit` cần `id`, còn `UserMenu` ở header cần cả đối tượng. Page RSC truyền vào cùng `key`
+   * Người đang đăng nhập: `canEdit` cần `id`, còn `UserMenu` ở header rút gọn (403/lỗi/tải) cần cả đối tượng. Page RSC truyền vào cùng `key`
    * theo `viewer.id` để đổi tài khoản không giữ lại state của người trước (Pitfall 4, T-04-61).
    */
   viewer: Viewer;
@@ -216,7 +216,7 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
   const [focusMenuAfterPublish, setFocusMenuAfterPublish] = useState(false);
 
   const addButtonRef = useRef<HTMLButtonElement | null>(null);
-  const menuTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const tripInfoButtonRef = useRef<HTMLButtonElement | null>(null);
   const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const leave = useEditorLeaveGuard({ itineraryId, formDirty: formDirty || tripInfoDirty });
@@ -233,10 +233,12 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
     [],
   );
 
-  // Xuất bản xong thì nút "Xuất bản" biến mất khi dữ liệu tải lại (isPublic true): trả focus về nút ⋯ của header.
+  // Xuất bản xong thì nút "Xuất bản" biến mất khi dữ liệu tải lại (isPublic true): trả focus về nút "i" của header.
   const { isPublic } = itinerary;
   useEffect(() => {
-    if (isPublic && focusMenuAfterPublish) menuTriggerRef.current?.focus();
+    if (!isPublic) return;
+    if (!focusMenuAfterPublish) return;
+    tripInfoButtonRef.current?.focus();
   }, [isPublic, focusMenuAfterPublish]);
 
   const days = useMemo(() => buildDayRange(itinerary), [itinerary]);
@@ -318,13 +320,12 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
         header={
           <EditorHeader
             itinerary={itinerary}
-            menuTriggerRef={menuTriggerRef}
             onBack={requestBack}
             onDeleteItinerary={handleDeleteItinerary}
             onOpenTripInfo={openTripInfo}
             onRequestPublish={() => setPublishOpen(true)}
             pendingIds={pendingIds}
-            viewer={viewer}
+            tripInfoButtonRef={tripInfoButtonRef}
           />
         }
         summary={<TripSummary itinerary={itinerary} onEdit={openTripInfo} variant="compact" />}

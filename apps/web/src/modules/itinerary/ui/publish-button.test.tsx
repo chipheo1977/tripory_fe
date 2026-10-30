@@ -35,11 +35,22 @@ const draft: Itinerary = {
 const HINT_ID = "publish-hint";
 const originalMatchMedia = window.matchMedia;
 
-/** Mặc định dưới `lg`; `true` mô phỏng từ `lg` (min-width 1024px). */
+/** Mặc định dưới `md`; `setFromMd` mô phỏng từ `md` (768px) nhưng dưới `lg`. */
+const setFromMd = () => {
+  window.matchMedia = ((query: string) =>
+    ({
+      matches: query.includes("768px"),
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    }) as unknown as MediaQueryList) as typeof window.matchMedia;
+};
+
+/** `true` mô phỏng từ `lg` (min-width 1024px, kéo theo từ `md`). */
 const setWide = (wide: boolean) => {
   window.matchMedia = ((query: string) =>
     ({
-      matches: wide && query.includes("1024px"),
+      matches: wide,
       media: query,
       addEventListener: () => undefined,
       removeEventListener: () => undefined,
@@ -91,10 +102,44 @@ it("with no waypoint uses aria-disabled (not disabled), stays focusable and poin
   expect(document.activeElement).toBe(button);
 });
 
-it("looks disabled while blocked", () => {
+it("below md it is a bare icon: no filled primary frame, accent colour when allowed", () => {
+  setup({ itinerary: { ...draft, waypoints: [waypoint("a")] } });
+  const className = publish().className;
+  expect(className).not.toContain("bg-primary");
+  expect(className).toContain("bg-transparent");
+  expect(className).toContain("not-aria-disabled:text-primary");
+  expect(className).toContain("min-w-touch");
+  expect(publish().querySelector("svg")).not.toBeNull();
+});
+
+it("below md blocked shows only a disabled icon colour, not a frame", async () => {
+  const user = userEvent.setup();
   setup();
+  const button = publish();
+  expect(button.className).not.toContain("bg-primary");
+  expect(button.className).toContain("aria-disabled:text-disabled");
+  expect(button.className).toContain("aria-disabled:cursor-not-allowed");
+  expect(button.className).not.toContain("aria-disabled:bg-surface-muted");
+  expect(button.getAttribute("aria-disabled")).toBe("true");
+  expect(button.getAttribute("aria-describedby")).toBe(HINT_ID);
+  await user.tab();
+  expect(document.activeElement).toBe(button);
+});
+
+it("from md it is the primary button with its label, and looks disabled while blocked", () => {
+  setFromMd();
+  setup();
+  expect(publish().className).toContain("bg-primary");
   expect(publish().className).toContain("aria-disabled:bg-surface-muted");
   expect(publish().className).toContain("aria-disabled:text-disabled");
+  expect(screen.getByText("Xuất bản", { selector: "span" }).className).toContain("md:not-sr-only");
+});
+
+it("from md an allowed button keeps the primary fill", () => {
+  setFromMd();
+  setup({ itinerary: { ...draft, waypoints: [waypoint("a")] } });
+  expect(publish().className).toContain("bg-primary");
+  expect(publish().className).not.toContain("not-aria-disabled:text-primary");
 });
 
 it("does not ask to publish when blocked, but reports the blocked press", async () => {

@@ -1,10 +1,10 @@
 ---
 phase: 04
 slug: itinerary-crud-editor
-status: open
+status: closed
 threats_total: 70
-threats_closed: 66
-threats_open: 4
+threats_closed: 70
+threats_open: 0
 asvs_level: 1
 block_on: high
 created: 2026-10-29
@@ -16,7 +16,7 @@ created: 2026-10-29
 > Kiểm tra này chỉ xác nhận các biện pháp đã khai báo trong `<threat_model>` của 23 plan (04-01 … 04-23) có mặt trong code. Không quét lớp đe dọa mới. Các phát hiện bảo mật thật từ `04-REVIEW.md` được ghi ở mục "Unregistered Flags".
 > File implementation chỉ đọc, không sửa.
 
-**Kết luận:** 66/70 CLOSED, 4/70 OPEN. Cả 4 mục OPEN (T-04-66 … T-04-69) có biện pháp khai báo là bước UAT thủ công của plan 04-23, chưa chạy (`04-UAT-CHECKLIST.md` còn trống). Kiểm soát kỹ thuật bên dưới các mục đó đã được xác nhận trong code (xem cột Bằng chứng). Không có mục OPEN nào ở mức `high`, nên không vượt ngưỡng `block_on: high`.
+**Kết luận:** 70/70 CLOSED, 0/70 OPEN. Bốn mục từng OPEN (T-04-66 … T-04-69) có biện pháp khai báo là bước UAT thủ công của plan 04-23; nay đã đóng bằng kết quả UAT (bước 10, 19, 20, 7–8). Nguồn bằng chứng của bốn mục này là UAT thủ công do người chạy xác nhận PASS 2026-10-30, không đính kèm ảnh chụp, nên chưa có tệp đối chứng độc lập. Kiểm soát kỹ thuật bên dưới các mục đó đã được xác nhận trong code (xem cột Bằng chứng). Các Unregistered Flags UF-01 … UF-04 vẫn OPEN, không chặn (không có mục nào ở mức `high`, không vượt ngưỡng `block_on: high`).
 
 ---
 
@@ -107,10 +107,10 @@ Cấu hình: ASVS level 1, `block_on: high`. Trạng thái: CLOSED = biện phá
 | T-04-63 | Information Disclosure | ảnh không no-referrer | mitigate | Invariant 2: `itinerary-invariants.test.ts:58-69`; cả hai `<img>` (`cover-image.tsx:34`, `trip-info-dialog.tsx:68`) đạt | CLOSED |
 | T-04-64 | Spoofing (CSRF) | route resolve thêm GET | mitigate | Invariant 4: `itinerary-invariants.test.ts:87-93` | CLOSED |
 | T-04-65 | Elevation | dnd-kit/DOM lọt vào package | mitigate | Invariant 3: `itinerary-invariants.test.ts:72-84` + boundaries self-test | CLOSED |
-| T-04-66 | Spoofing (CSRF) | DELETE keepalive thiếu Origin bị BFF chặn | mitigate | Biện pháp khai báo là UAT bước 10 (kiểm header `Origin` trên máy thật). Chưa chạy: `04-UAT-CHECKLIST.md` trống. Kiểm soát code đã có (T-04-04, T-04-50) | OPEN |
-| T-04-67 | Elevation (UI) | người không phải chủ sửa được | mitigate | Biện pháp khai báo là UAT bước 19 với BE thật. Chưa chạy. Code: `itinerary-editor.tsx:178`, `permissions.ts:6-7` | OPEN |
-| T-04-68 | Spoofing | Bearer stale → 403 oan | mitigate | Biện pháp khai báo là UAT bước 20 (mở editor với token stale). Chưa chạy. Code: `bff.ts:119-121`, `edit/page.tsx:9-10` | OPEN |
-| T-04-69 | Info Disclosure / SSRF | resolve link trên hạ tầng Vercel | mitigate | Biện pháp khai báo là UAT bước 7–8 trên bản deploy. Chưa chạy. Code + test tự động: `maps-resolve.ts`, `maps-resolve.test.ts:117-190` | OPEN |
+| T-04-66 | Spoofing (CSRF) | DELETE keepalive thiếu Origin bị BFF chặn | mitigate | UAT bước 10 (keepalive DELETE khi đóng tab, header `Origin`): PASS. Nguồn bằng chứng: UAT thủ công do người chạy xác nhận PASS 2026-10-30, không đính kèm ảnh chụp Network. Kiểm soát code: T-04-04, T-04-50 | CLOSED |
+| T-04-67 | Elevation (UI) | người không phải chủ sửa được | mitigate | UAT bước 19 với BE thật (người khác mở editor: 403 không lộ nội dung; id sai: 404): PASS. Nguồn bằng chứng: UAT thủ công do người chạy xác nhận PASS 2026-10-30, không đính kèm ảnh chụp. Code: `itinerary-editor.tsx:178`, `permissions.ts:6-7` | CLOSED |
+| T-04-68 | Spoofing | Bearer stale → 403 oan | mitigate | UAT bước 20 (chủ mở thẳng editor bản nháp khi access token đã hết hạn, không bị 403 oan): PASS. Nguồn bằng chứng: UAT thủ công do người chạy xác nhận PASS 2026-10-30, không đính kèm ảnh chụp. Code: `bff.ts:119-121`, `edit/page.tsx:9-10` | CLOSED |
+| T-04-69 | Info Disclosure / SSRF | resolve link trên hạ tầng Vercel | mitigate | UAT bước 7–8 trên bản deploy Vercel HTTPS (resolve link rút gọn ghim; link POI không tọa độ hiện câu hướng dẫn): PASS. Nguồn bằng chứng: UAT thủ công do người chạy xác nhận PASS 2026-10-30, không đính kèm ảnh chụp. Code + test tự động: `maps-resolve.ts`, `maps-resolve.test.ts:117-190` | CLOSED |
 | T-04-70 | Denial of Service | lạm dụng route resolve (không rate limit) | accept | AR-01 (D-51); UAT kết luận phải ghi nhận khi chạy 04-23 | CLOSED |
 
 *Status: OPEN · CLOSED*
@@ -185,6 +185,7 @@ Các phát hiện từ `04-REVIEW.md` có tác động bảo mật nhưng không
 | Audit Date | Threats Total | Closed | Open | Run By |
 |------------|---------------|--------|------|--------|
 | 2026-10-29 | 70 | 66 | 4 | gsd-security-auditor (/gsd-secure-phase 4) |
+| 2026-10-30 | 70 | 70 | 0 | Đóng T-04-66 … T-04-69 theo kết quả UAT thủ công (người chạy xác nhận PASS, không ảnh chụp); không chạy lại auditor |
 
 Phương pháp: đọc `<threat_model>` của 23 plan, đối chiếu từng biện pháp `mitigate` với code (grep + đọc file), kiểm `accept` có mục trong Accepted Risks Log, đối chiếu `## Threat Flags` của SUMMARY và `04-REVIEW.md` (verdict `APPROVED`, 0 blocker, 0 high, 1 medium, 6 low). Chưa chạy lại test trong lần kiểm này; chỉ trích dẫn kết quả `04-REVIEW.md` (vitest `apps/web` 1417 test pass, `tsc` và `eslint` sạch).
 
@@ -194,9 +195,9 @@ Phương pháp: đọc `<threat_model>` của 23 plan, đối chiếu từng bi�
 
 - [x] Mọi mối đe dọa có disposition (mitigate / accept / transfer)
 - [x] Rủi ro đã chấp nhận ghi trong Accepted Risks Log
-- [ ] `threats_open: 0` — hiện là 4 (T-04-66 … T-04-69, chờ UAT 04-23)
-- [ ] `status: verified` — đặt sau khi UAT bước 7–8, 10, 19, 20 PASS và quyết định xử lý UF-01
+- [x] `threats_open: 0` — T-04-66 … T-04-69 đóng theo UAT bước 10, 19, 20, 7–8 (2026-10-30)
+- [ ] `status: verified` — còn chờ quyết định xử lý UF-01 (UAT bước 10 chỉ phủ đóng tab bình thường, không phủ `visibilitychange` với token stale)
 
-**Approval:** pending
+**Approval:** pending (chờ quyết định UF-01)
 
-Việc cần làm để đóng 4 mục OPEN: chạy UAT 04-23 các bước 10 (T-04-66), 19 (T-04-67), 20 (T-04-68), 7–8 (T-04-69), ghi kết quả vào `04-UAT-CHECKLIST.md`, rồi chạy lại `/gsd-secure-phase 4`. Nên sửa UF-01 trước khi phát hành.
+Ghi chú: UAT PASS không đổi trạng thái UF-01 … UF-04; cả bốn vẫn OPEN, không chặn. Nên sửa UF-01 trước khi phát hành. Có thể chạy lại `/gsd-secure-phase 4` để kiểm độc lập.

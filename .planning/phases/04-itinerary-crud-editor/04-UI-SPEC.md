@@ -130,11 +130,13 @@ Contrast: dùng lại bằng chứng Phase 1/3. Badge `success` (`success` trên
 
 ### Mở rộng `ui-web` (generic, không chứa copy nghiệp vụ, mỗi mục có test theo DS-07)
 
+> **Cập nhật theo yêu cầu người dùng (2026-10):** `SheetControls` và các nút "Thu gọn bảng", "Mở rộng bảng", "Đóng bảng" đã bị gỡ khỏi `Sheet` (cùng `stepSnapPoint`). Người dùng đổi giữa ba mức thấp (peek) / vừa (medium) / mở rộng (expanded) bằng cách vuốt, hoặc giữ và kéo thanh kéo (`SheetHandle`) lên/xuống; đóng sheet bằng vuốt xuống, Esc, hoặc nút "Hủy" của form. Không thêm nút thay thế (người dùng đã xác nhận). Đánh đổi a11y đã biết: người dùng chỉ dùng bàn phím không còn cách đổi mức snap (chỉ Esc đóng được khi `dismissible`), và không còn nút đóng nhìn thấy trong sheet. Vùng cuộn nội dung của Sheet chỉ bật ở mức mở rộng (expanded); ở mức thấp/vừa nội dung không cuộn, vuốt hoặc giữ-kéo thanh kéo để đổi mức (sửa lỗi vuốt không đổi mức khi form cao hơn vùng hiển thị).
+
 | Component | Vị trí | Contract |
 |-----------|--------|----------|
 | `notify.undoable` | `molecules/toast.tsx` | Chữ ký `notify.undoable(title, { actionLabel, onAction, onDismiss }): ToastId`. Toast variant `info` (`role="status"`, `aria-live="polite"`), có nút action và nút đóng sẵn có. **Không tự hết hạn** (Sonner `duration: Infinity`): app sở hữu đồng hồ 5 giây và gọi `notify.dismiss(id)` khi commit/flush/hoàn tác (D-31). `onAction` gọi đúng một lần rồi đóng toast. `onDismiss` gọi khi người dùng bấm nút đóng hoặc vuốt bỏ, và khi `notify.dismiss(id)`. Các `notify.*` hiện có giữ nguyên (không mở `duration`). Test: còn hiện sau 10 giây với fake timers; action gọi một lần, bàn phím Tab tới được và Enter kích hoạt; nút đóng gọi `onDismiss`; `dismiss(id)` đóng toast |
 | `InlineAlert` prop `variant?: "danger" \| "info"` | `molecules/inline-alert.tsx` | Mặc định `danger` (giữ nguyên hành vi, `role="alert"`). `info`: `border-border bg-surface-muted text-text`, icon `Info` 20px `text-muted`, `role="status"`. Dùng cho "Đã khôi phục nội dung chưa lưu" (D-36). Test: role theo variant |
-| `Sheet` prop `dismissible?: boolean` (mặc định `true`) | `molecules/sheet.tsx` | `false`: không render nút "Đóng bảng" trong `SheetControls`, vuốt xuống ở mức peek dừng tại peek (không đóng), Esc không đóng. Dùng cho timeline không modal (D-14) |
+| `Sheet` prop `dismissible?: boolean` (mặc định `true`) | `molecules/sheet.tsx` | `false`: vuốt xuống ở mức peek dừng tại peek (không đóng), Esc không đóng. Dùng cho timeline không modal (D-14) |
 | `Sheet` prop `defaultSnap?: "peek" \| "medium" \| "expanded"` (mặc định `medium`) | `molecules/sheet.tsx` | Mức mở ban đầu. Form waypoint/metadata dùng `expanded` (D-18), timeline dùng `medium` (D-15) |
 | `Sheet` prop `insetTop?: number` (px, mặc định 0) | `molecules/sheet.tsx` + `sheet-snap.ts` | `resolveSnapPoints(viewportHeight, insetTop)`: mức `expanded` = `min(0.92 × vh, vh − insetTop)` quy ra px; peek/medium giữ nguyên nếu nhỏ hơn mức expanded. Editor truyền chiều cao header đo được để sheet không bao giờ che header (D-16). Test bảng giá trị trong `sheet-snap.test.ts` |
 
@@ -309,7 +311,7 @@ grid lg:grid-cols-[var(--editor-timeline-width)_1fr], cao 100dvh − header
 ### Bố cục mobile/tablet (dưới `lg`, D-14, D-15)
 
 - Nền (sau sheet, cuộn được, tương tác được): `TripSummary` dạng gọn: ảnh bìa full-width `aspect-(--itinerary-cover-ratio)`, rồi khối `p-stack-md` gồm hàng badge/meta, tiêu đề Heading, mô tả `line-clamp-3`, nút "Sửa thông tin". Padding dưới bằng chiều cao mức peek để nội dung cuối không bị sheet che.
-- Timeline: `Sheet modal={false} dismissible={false} defaultSnap="medium" insetTop={chiều cao header}` luôn mở. `SheetTitle` sr-only "Lịch trình theo ngày". Nội dung theo thứ tự: `SheetControls` sẵn có ("Thu gọn bảng", "Mở rộng bảng"), DayTabs (sticky trong vùng cuộn của sheet), DaySubtitle, WaypointList, thanh "Thêm điểm đến" sticky bottom (như desktop, cộng `env(safe-area-inset-bottom)`).
+- Timeline: `Sheet modal={false} dismissible={false} defaultSnap="medium" insetTop={chiều cao header}` luôn mở. `SheetTitle` sr-only "Lịch trình theo ngày". Nội dung theo thứ tự: DayTabs (sticky trong vùng cuộn của sheet), DaySubtitle, WaypointList, thanh "Thêm điểm đến" sticky bottom (như desktop, cộng `env(safe-area-inset-bottom)`).
 - Sheet không bao giờ che header ở cả ba mức (nhờ `insetTop`).
 - Kéo thả trong sheet: chỉ tay cầm nhận nhấn giữ 180ms; vuốt ở chỗ khác của sheet vẫn là cuộn/snap sheet (D-34).
 
@@ -369,7 +371,7 @@ grid lg:grid-cols-[var(--editor-timeline-width)_1fr], cao 100dvh − header
 
 ### WaypointFormDialog (D-18..D-22)
 
-- Từ `md`: `DialogContent size="md"`. Dưới `md`: `Sheet modal defaultSnap="expanded"`. Form dialog **không đóng khi bấm scrim** (`disablePointerDismissal`); Esc, "Hủy", nút đóng của Sheet thì đóng và bỏ thay đổi. Đang gửi: không đóng được bằng bất kỳ cách nào.
+- Từ `md`: `DialogContent size="md"`. Dưới `md`: `Sheet modal defaultSnap="expanded"`. Form dialog **không đóng khi bấm scrim** (`disablePointerDismissal`); Esc, vuốt xuống (Sheet), "Hủy" thì đóng và bỏ thay đổi. Đang gửi: không đóng được bằng bất kỳ cách nào.
 - Tiêu đề: thêm "Thêm điểm đến vào Ngày N"; sửa "Sửa điểm đến". Không có ô ngày (D-23).
 - Đầu form: `InlineAlert variant="info"` "Đã khôi phục nội dung chưa lưu" khi mở lại từ bản nháp `sessionStorage` (D-36); `InlineAlert` lỗi khi có lỗi không gắn field.
 - Field (thứ tự cố định, hiện cùng lúc, cách 16px), Tên được focus khi mở:
@@ -560,7 +562,7 @@ Giọng văn theo Phase 1/3: tiếng Việt trung tính, câu ngắn, không d�
 |-----------|---------------|
 | `notify.undoable` | Không tự đóng sau 10 giây (fake timers); action gọi một lần + đóng; nút đóng gọi `onDismiss`; `dismiss(id)` đóng; `role="status"` |
 | `InlineAlert variant="info"` | `role="status"`, không render khi rỗng; `danger` giữ `role="alert"` |
-| `Sheet dismissible/defaultSnap/insetTop` | Không có "Đóng bảng" và Esc không đóng khi `dismissible={false}`; mức mở đầu theo `defaultSnap`; `resolveSnapPoints(vh, insetTop)` bảng giá trị (gồm 568 và 844 với header 108/64) |
+| `Sheet dismissible/defaultSnap/insetTop` | Esc và vuốt không đóng khi `dismissible={false}`; không có nút "Thu gọn bảng", "Mở rộng bảng", "Đóng bảng" ở mọi vị trí; mức mở đầu theo `defaultSnap`; `resolveSnapPoints(vh, insetTop)` bảng giá trị (gồm 568 và 844 với header 108/64) |
 | `UserMenu compact` | Chỉ avatar ở mọi breakpoint, `aria-label` giữ nguyên |
 | `MyItinerariesView` | Tab đọc/ghi `?status`, giá trị lạ → Tất cả; skeleton trang đầu; ErrorState + Thử lại khi trang đầu lỗi; EmptyState đúng copy từng tab, chỉ Tất cả có CTA; sentinel gọi `fetchNextPage`; trang kế lỗi không render nút/thông báo, sentinel lần sau gọi lại; hết trang không render gì |
 | `ItineraryCard` | Link tới editor; menu Mở/Xóa; ẩn km = 0, ẩn ngày khởi hành khi null; ảnh lỗi → nền dự phòng; không hiện số ngày/điểm |
@@ -597,7 +599,7 @@ Test bằng Vitest + Testing Library (jsdom), fake `HttpClient`, không MSW. Kh�
 | `01-UI-SPEC.md` | Token, typography, spacing, màu, accent, focus ring, state matrix, Sheet snap, EmptyState/ErrorState, Toast, 404 |
 | `03-UI-SPEC.md` | `loadingLabel`, `SubmitStatus`, `InlineAlert`, validate blur + gửi, focus field lỗi, giọng lỗi field, `DropdownMenuLinkItem`, link dạng `buttonVariants` |
 | `REQUIREMENTS.md` | ITIN-01..14 (ITIN-11 theo ghi chú D-40) |
-| Codebase scout | `notify` ép 8 giây và không có `duration`; `InlineAlert` chỉ có `danger`; `Sheet` luôn có "Đóng bảng", mở mặc định 0.6, expanded 0.92 viewport (sẽ che header editor); `ErrorState` copy cố định; `FormFieldLabel required` hiện "(bắt buộc)"; `SubmitStatus` đang nằm trong `modules/identity/ui`; `Card` interactive là `<button>` (không chứa được menu) |
+| Codebase scout | `notify` ép 8 giây và không có `duration`; `InlineAlert` chỉ có `danger`; `Sheet` (lúc khảo sát) luôn có "Đóng bảng", mở mặc định 0.6, expanded 0.92 viewport (sẽ che header editor); `ErrorState` copy cố định; `FormFieldLabel required` hiện "(bắt buộc)"; `SubmitStatus` đang nằm trong `modules/identity/ui`; `Card` interactive là `<button>` (không chứa được menu) |
 | BE scout (`tripory_be`) | Tên waypoint ≤ 200 (`WaypointName`), địa chỉ ≤ 500, ghi chú ≤ 2000, ảnh bìa ≤ 500 (EF config); tiêu đề 1–100, mô tả ≤ 1000, phụ đề ≤ 100 (validator); `InvalidDayNumber` chỉ chặn dayNumber < 1; `pageSize` 1–100 |
 | FE cũ (chỉ tham khảo UX) | Thẻ waypoint 3 phần (tay cầm, thân, thao tác), placeholder nét đứt khi kéo, EmptyState theo ngày có CTA |
 | Mặc định của researcher | Ngưỡng Dialog↔Sheet ở `md`; header editor hai hàng dưới `sm`; `notify.undoable` không tự hết hạn (app sở hữu đồng hồ); một toast hoàn tác tại một thời điểm; form dialog không đóng khi bấm scrim; `router.replace` khi đổi tab lọc; 180ms/8px/4px cho cảm biến; sentinel 400px; tay cầm ẩn khi ngày có 1 điểm; số thứ tự màu trung tính; dialog rời trang tự đi tiếp khi request xong; toàn bộ copy phụ (empty từng tab, lỗi vị trí, menu, title, announcements, 403 body) |

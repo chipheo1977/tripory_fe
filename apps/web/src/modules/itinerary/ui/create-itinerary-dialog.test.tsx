@@ -5,6 +5,7 @@ import { notify } from "@tripory/ui-web";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { makeQueryClient } from "@/composition/query-client";
 import { CreateItineraryDialog } from "./create-itinerary-dialog";
@@ -104,15 +105,58 @@ it("submits on Enter with the trimmed title, marks the list entry and navigates 
   for (const toast of toasts) expect(toast).not.toHaveBeenCalled();
 });
 
-it("keeps the form locked after success so a second create cannot start while navigating", async () => {
+function Harness() {
+  const [open, setOpen] = useState(true);
+  return (
+    <>
+      <button onClick={() => setOpen(true)} type="button">
+        mở lại
+      </button>
+      <CreateItineraryDialog onOpenChange={setOpen} open={open} />
+    </>
+  );
+}
+
+it("closes itself on success and reopens as a fresh form while the page stays mounted (Activity hidden)", async () => {
+  const user = userEvent.setup();
+  const order: string[] = [];
+  h.push.mockImplementation(() => order.push(`push:enteredFromList=${String(enteredFromList())}`));
+  render(
+    <QueryClientProvider client={makeQueryClient()}>
+      <Harness />
+    </QueryClientProvider>,
+  );
+  await user.clear(input());
+  await user.type(input(), "Đà Lạt");
+  await user.click(submit());
+  await waitFor(() => expect(h.push).toHaveBeenCalledWith(`/itineraries/${ID}/edit`));
+  expect(order).toEqual(["push:enteredFromList=true"]);
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+
+  fireEvent.click(screen.getByRole("button", { name: "mở lại" }));
+  expect(await screen.findByRole("dialog", { name: "Lịch trình mới" })).toBeTruthy();
+  await waitFor(() => expect(input().value).toBe("Chuyến đi mới"));
+  expect(input().readOnly).toBe(false);
+  expect(submit().getAttribute("aria-busy")).not.toBe("true");
+  expect((submit() as HTMLButtonElement).disabled).toBe(false);
+  expect((screen.getByRole("button", { name: "Hủy" }) as HTMLButtonElement).disabled).toBe(false);
+  expect(screen.queryByText("Máy chủ đang khởi động, có thể mất tới 30 giây…")).toBeNull();
+  expect(screen.queryByRole("alert")?.textContent ?? "").toBe("");
+  expect(h.create).toHaveBeenCalledTimes(1);
+});
+
+it("does not start a second create while the first request is in flight", async () => {
+  let resolve: (value: Itinerary) => void = () => undefined;
+  h.create.mockReturnValue(new Promise<Itinerary>((r) => (resolve = r)));
   const { user } = setup();
   await user.click(submit());
-  await waitFor(() => expect(h.push).toHaveBeenCalledTimes(1));
-  expect(input().readOnly).toBe(true);
+  await waitFor(() => expect(input().readOnly).toBe(true));
   expect(submit().getAttribute("aria-busy")).toBe("true");
   await user.type(input(), "{Enter}");
   fireEvent.click(submit());
   expect(h.create).toHaveBeenCalledTimes(1);
+  await act(async () => resolve(created("Chuyến đi mới")));
+  await waitFor(() => expect(h.push).toHaveBeenCalledTimes(1));
 });
 
 it("rejects a blank title with the locked copy and does not call the server", async () => {

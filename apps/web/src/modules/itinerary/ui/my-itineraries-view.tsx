@@ -5,21 +5,12 @@
 // hiện ErrorState. Sentinel chỉ gọi `fetchNextPage` khi nó đi từ ngoài vào trong viewport, nên trang kế lỗi sẽ được
 // thử lại khi người dùng cuộn ra rồi vào lại, không tự lặp vô hạn.
 import { parseStatusFilter, STATUS_FILTERS, type ItinerarySummary, type StatusFilter } from "@tripory/itinerary";
-import {
-  Button,
-  EmptyState,
-  ErrorState,
-  Icon,
-  Skeleton,
-  Tabs,
-  TabsList,
-  TabsPanel,
-  TabsTrigger,
-} from "@tripory/ui-web";
-import { Map as MapIcon, Plus } from "lucide-react";
+import { EmptyState, ErrorState, Icon, Skeleton, Tabs, TabsList, TabsPanel, TabsTrigger } from "@tripory/ui-web";
+import { Map as MapIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { itinerary } from "@/composition/itinerary.client";
+import { AddButton } from "./add-button";
 import { CreateItineraryDialog } from "./create-itinerary-dialog";
 import { DeleteItineraryDialog, type DeleteTarget } from "./delete-itinerary-dialog";
 import { ItineraryCard } from "./itinerary-card";
@@ -201,14 +192,7 @@ export function MyItinerariesView() {
       const copy = EMPTY_COPY[status];
       return (
         <EmptyState
-          action={
-            status === "all" ? (
-              <Button onClick={openCreate} ref={emptyCtaRef} variant="primary">
-                <Icon icon={Plus} size="sm" />
-                Tạo lịch trình
-              </Button>
-            ) : undefined
-          }
+          action={<AddButton label="Tạo lịch trình" onClick={openCreate} ref={emptyCtaRef} visible={status === "all"} />}
           body={copy.body}
           heading={copy.heading}
           icon={<Icon icon={MapIcon} size="lg" />}
@@ -247,10 +231,7 @@ export function MyItinerariesView() {
     <div className="flex flex-col gap-stack-lg">
       <div className="flex flex-wrap items-center justify-between gap-stack-md">
         <h1 className="text-display font-semibold text-text">Lịch trình của tôi</h1>
-        <Button onClick={openCreate} ref={headerCtaRef} size="md" variant="primary">
-          <Icon icon={Plus} size="sm" />
-          Tạo lịch trình
-        </Button>
+        <AddButton label="Tạo lịch trình" onClick={openCreate} ref={headerCtaRef} />
       </div>
       <Tabs onValueChange={handleTabChange} value={status} variant="line">
         <TabsList>

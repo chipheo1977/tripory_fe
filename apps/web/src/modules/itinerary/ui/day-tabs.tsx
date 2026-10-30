@@ -6,10 +6,10 @@
 // Thêm ngày là thao tác nền (D-30): optimistic ở hook, lỗi thì gỡ tab, chọn lại ngày trước, trả focus về nút
 // và báo "Lỗi – Thử lại" qua store (toast lỗi do MutationCache mặc định lo).
 import { buildDayRange, nextDayNumber, type Itinerary } from "@tripory/itinerary";
-import { Plus } from "lucide-react";
-import { Button, Icon, Tabs, TabsList, TabsTrigger } from "@tripory/ui-web";
+import { Tabs, TabsList, TabsTrigger } from "@tripory/ui-web";
 import { useEffect, useMemo, useRef } from "react";
 import { itinerary as itineraryHooks } from "@/composition/itinerary.client";
+import { AddButton } from "./add-button";
 import { formatKm } from "./format";
 import { useSaveStatusStore } from "./save-status";
 
@@ -90,10 +90,7 @@ export function DayTabs({ itinerary, selectedDay, onSelectDay }: DayTabsProps) {
             );
           })}
         </TabsList>
-        <Button className="shrink-0" onClick={handleAdd} ref={addButtonRef} size="sm" variant="ghost">
-          <Icon icon={Plus} size="sm" />
-          Thêm ngày
-        </Button>
+        <AddButton className="shrink-0" label="Thêm ngày" onClick={handleAdd} ref={addButtonRef} size="sm" variant="ghost" />
       </div>
     </Tabs>
   );

@@ -6,9 +6,8 @@
 // Nút "Thêm điểm đến" chỉ có MỘT bản tại mỗi thời điểm, và `addButtonRef` luôn trỏ vào nó: ngày có điểm thì là thanh dưới
 // sticky; ngày không còn điểm hiển thị thì là nút trong EmptyState (do WaypointList render khi có `emptyAction`).
 import { buildDayRange, type Itinerary, type Waypoint } from "@tripory/itinerary";
-import { Button, Icon } from "@tripory/ui-web";
-import { Plus } from "lucide-react";
 import { useMemo, type RefObject } from "react";
+import { AddButton } from "./add-button";
 import { DayTabs } from "./day-tabs";
 import { DaySubtitle } from "./day-subtitle";
 import { WaypointList, type WaypointFocusRequest } from "./waypoint-list";
@@ -71,14 +70,16 @@ export function TimelinePanel({
           pendingIds={pendingIds}
         />
       </div>
-      {hasVisibleWaypoints ? (
-        <div className="sticky bottom-0 border-t border-border bg-surface p-stack-md pb-[calc(var(--semantic-space-stack-md)+env(safe-area-inset-bottom))]">
-          <Button className="w-full" onClick={add} ref={addButtonRef} variant="secondary">
-            <Icon icon={Plus} size="sm" />
-            Thêm điểm đến
-          </Button>
-        </div>
-      ) : null}
+      <div className="sticky bottom-0 border-t border-border bg-surface p-stack-md pb-[calc(var(--semantic-space-stack-md)+env(safe-area-inset-bottom))] empty:hidden">
+        <AddButton
+          className="w-full"
+          label="Thêm điểm đến"
+          onClick={add}
+          ref={addButtonRef}
+          variant="secondary"
+          visible={hasVisibleWaypoints}
+        />
+      </div>
     </div>
   );
 }

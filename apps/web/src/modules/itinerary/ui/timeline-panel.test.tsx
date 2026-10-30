@@ -87,14 +87,14 @@ function setup(overrides: Partial<TimelinePanelProps> = {}) {
     addButtonRef: createRef<HTMLButtonElement>(),
     ...overrides,
   };
-  render(
+  const { container } = render(
     <QueryClientProvider client={makeQueryClient()}>
       <SaveStatusProvider store={createSaveStatusStore()}>
         <TimelinePanel {...props} />
       </SaveStatusProvider>
     </QueryClientProvider>,
   );
-  return { user, props };
+  return { user, props, container };
 }
 
 it("renders the day tabs, the subtitle and the waypoints of the selected day", () => {
@@ -130,6 +130,20 @@ it("treats a day whose waypoints are all pending delete as empty", () => {
   setup({ pendingIds: new Set(["w1", "w2"]) });
   expect(screen.getByText("Chưa có điểm đến nào trong Ngày 1")).toBeTruthy();
   expect(screen.getAllByRole("button", { name: "Thêm điểm đến" })).toHaveLength(1);
+});
+
+it("leaves the sticky bar empty (collapsed by empty:hidden) when the day has no visible waypoints", () => {
+  const { container } = setup({ selectedDay: 2 });
+  const bar = container.querySelector(".sticky.bottom-0");
+  expect(bar).not.toBeNull();
+  expect(bar?.childNodes.length).toBe(0);
+  expect(bar?.className).toContain("empty:hidden");
+});
+
+it("puts the button inside the sticky bar when the day has visible waypoints", () => {
+  const { container } = setup();
+  const bar = container.querySelector(".sticky.bottom-0");
+  expect(within(bar as HTMLElement).getByRole("button", { name: "Thêm điểm đến" })).toBeTruthy();
 });
 
 it("calls onSelectDay when another tab is chosen", async () => {

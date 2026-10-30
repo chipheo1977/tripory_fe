@@ -2,7 +2,7 @@
 
 // Bề mặt chung của mọi form editor (UI-SPEC §Ngưỡng Dialog ↔ Sheet): Dialog từ `md`, Sheet modal mở ở mức `expanded`
 // dưới `md`. Không đóng khi bấm scrim ở cả hai (mất nội dung do chạm nhầm là lỗi đắt trên mobile). `locked` (đang
-// gửi) chặn mọi đường đóng còn lại: Esc, nút "Đóng bảng", vuốt xuống. Không chứa copy nghiệp vụ.
+// gửi) chặn mọi đường đóng còn lại: Esc và vuốt xuống (Sheet không còn nút đóng riêng; form tự có nút "Hủy"). Không chứa copy nghiệp vụ.
 import { Dialog, DialogContent, DialogTitle, Sheet, SheetContent, SheetTitle } from "@tripory/ui-web";
 import type { ComponentProps, ReactNode } from "react";
 import { useMediaQuery } from "./use-media-query";
@@ -19,7 +19,7 @@ export type ResponsiveFormSurfaceProps = Readonly<{
   children: ReactNode;
   /** Đang gửi: không cho đóng bằng bất kỳ đường nào. */
   locked: boolean;
-  /** Ô nhận focus khi mở (Sheet không tự focus ô đầu vì nút "Thu gọn bảng" nằm trước). */
+  /** Ô nhận focus khi mở. Truyền tường minh để không phụ thuộc thứ tự tab mặc định của Dialog/Sheet. */
   initialFocus?: ComponentProps<typeof DialogContent>["initialFocus"];
 }>;
 

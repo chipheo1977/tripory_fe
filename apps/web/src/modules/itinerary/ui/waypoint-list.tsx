@@ -26,13 +26,14 @@ import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrate
 import { isApiError } from "@tripory/api-client";
 import { isSameOrder, isValidDayOrder, moveItem, type DayView, type Itinerary, type Waypoint } from "@tripory/itinerary";
 import { itineraryKeys } from "@tripory/itinerary/react";
-import { Button, EmptyState, Icon, notify } from "@tripory/ui-web";
+import { EmptyState, Icon, notify } from "@tripory/ui-web";
 import { useQueryClient } from "@tanstack/react-query";
-import { MapPin, Plus } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { itinerary as itineraryHooks } from "@/composition/itinerary.client";
 import { decideMutationError } from "@/lib/feedback";
+import { AddButton } from "./add-button";
 import { VI_DRAG_INSTRUCTIONS, viAnnouncements } from "./dnd-announcements";
 import { useMediaQuery } from "./use-media-query";
 import { useSaveStatusStore } from "./save-status";
@@ -182,12 +183,13 @@ export function WaypointList({
     return (
       <EmptyState
         action={
-          emptyAction === undefined ? undefined : (
-            <Button onClick={emptyAction} ref={addButtonRef} variant="primary">
-              <Icon icon={Plus} size="sm" />
-              Thêm điểm đến
-            </Button>
-          )
+          <AddButton
+            label="Thêm điểm đến"
+            onClick={emptyAction}
+            ref={addButtonRef}
+            variant="primary"
+            visible={emptyAction !== undefined}
+          />
         }
         body="Dán tọa độ hoặc link Google Maps để thêm điểm đầu tiên."
         heading={`Chưa có điểm đến nào trong Ngày ${day.dayNumber}`}

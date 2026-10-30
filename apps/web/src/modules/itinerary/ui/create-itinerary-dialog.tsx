@@ -40,14 +40,12 @@ export function CreateItineraryDialog({ open, onOpenChange }: CreateItineraryDia
   });
   const create = itinerary.useCreateItinerary({ meta: { feedback: { errorToast: false } } });
   const [alert, setAlert] = useState<string | null>(null);
-  // Sau khi tạo xong, dialog vẫn mở cho tới khi trang đổi: khóa tiếp để không tạo lần hai trong lúc điều hướng.
-  const [navigating, setNavigating] = useState(false);
   // Enter trong ô vẫn kích hoạt submit khi nút đang loading, nên chặn gọi lần hai bằng ref (D-12).
   const submittingRef = useRef(false);
   const inputRef = useRef<HTMLElement | null>(null);
 
   const { errors, isSubmitting } = form.formState;
-  const locked = isSubmitting || navigating;
+  const locked = isSubmitting;
   const { ref: registerRef, ...titleField } = form.register("title");
 
   // Bôi đen sau khi Dialog đặt focus: `select()` trước rồi lặp lại ở frame kế, vì focus có thể đặt lại vùng chọn.
@@ -79,13 +77,15 @@ export function CreateItineraryDialog({ open, onOpenChange }: CreateItineraryDia
       }
       return;
     }
-    setNavigating(true);
     markEnteredFromList();
     router.push(`/itineraries/${created.id}/edit`);
+    onOpenChange(false);
+    form.reset({ title: DEFAULT_TITLE });
+    setAlert(null);
   });
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (submittingRef.current || navigating) {
+    if (submittingRef.current) {
       event.preventDefault();
       return;
     }

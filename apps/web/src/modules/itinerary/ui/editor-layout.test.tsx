@@ -119,8 +119,9 @@ it("below lg shows the summary behind a non-modal, non-dismissible timeline shee
   const sheet = await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
   expect(within(sheet).getByTestId("timeline")).toBeTruthy();
   expect(summary.closest("[role=dialog]")).toBeNull();
-  expect(screen.queryByRole("button", { name: "Đóng bảng" })).toBeNull();
-  expect(screen.getByRole("button", { name: "Thu gọn bảng" })).toBeTruthy();
+  for (const name of ["Thu gọn bảng", "Mở rộng bảng", "Đóng bảng"]) {
+    expect(screen.queryByRole("button", { name })).toBeNull();
+  }
   expect(document.querySelector("[data-sheet-backdrop]")).toBeNull();
 
   const props = h.sheetProps.mock.calls.at(-1)?.[0] as Record<string, unknown>;

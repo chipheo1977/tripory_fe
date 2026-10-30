@@ -7,7 +7,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formatCoordinate, type PlaceHint, type Waypoint } from "@tripory/itinerary";
 import type { ItineraryId, Wgs84Coordinate } from "@tripory/shared-kernel";
-import { Button, FormField, FormFieldLabel, Icon, InlineAlert, Input, Textarea } from "@tripory/ui-web";
+import { Button, FormField, FormFieldLabel, InlineAlert, Input, Textarea } from "@tripory/ui-web";
 import { Trash2 } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -319,18 +319,17 @@ function WaypointForm({
             <Button disabled={locked} onClick={() => handleOpenChange(false)} type="button" variant="secondary">
               Hủy
             </Button>
-            {adding ? null : (
-              <Button
-                className="mt-stack-md text-danger md:mt-0 md:mr-auto"
-                disabled={locked}
-                onClick={requestDelete}
-                type="button"
-                variant="ghost"
-              >
-                <Icon icon={Trash2} size="sm" />
-                Xóa điểm đến
-              </Button>
-            )}
+            <Button
+              className="mt-stack-md text-danger md:mt-0 md:mr-auto"
+              disabled={locked}
+              icon={Trash2}
+              onClick={requestDelete}
+              type="button"
+              variant="ghost"
+              visible={!adding}
+            >
+              Xóa điểm đến
+            </Button>
           </div>
           <SubmitStatus pending={locked} />
         </div>

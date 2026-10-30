@@ -209,6 +209,20 @@ it.each([
   expect(screen.getAllByRole("button", { name: "Tạo lịch trình" })).toHaveLength(hasCta ? 2 : 1);
 });
 
+it("leaves no empty action box in the empty state on the draft tab", async () => {
+  h.search.value = "status=draft";
+  h.listMine.mockResolvedValue(page([], 1, false));
+  setup();
+  const heading = await screen.findByRole("heading", { level: 2, name: "Chưa có bản nháp nào" });
+  const section = heading.closest("section") as HTMLElement;
+  expect(within(section).queryByRole("button")).toBeNull();
+  const wrapper = section.lastElementChild as HTMLElement;
+  if (wrapper !== heading.parentElement) {
+    expect(wrapper.childNodes.length).toBe(0);
+    expect(wrapper.className).toContain("empty:hidden");
+  }
+});
+
 it("opens the create dialog from the header button", async () => {
   const { user } = setup();
   await screen.findByText("Lịch trình 1");

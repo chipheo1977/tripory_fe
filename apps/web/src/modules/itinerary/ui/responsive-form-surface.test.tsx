@@ -92,8 +92,9 @@ describe("ResponsiveFormSurface", () => {
     expect(screen.getByText("nội dung form")).toBeTruthy();
     expect(document.getElementById("surface-title")?.textContent).toBe("Thông tin chuyến đi");
     expect(document.querySelector("[data-sheet-backdrop]")).not.toBeNull();
-    // expanded là mức trên cùng nên nút "Mở rộng bảng" bị khóa.
-    expect(screen.getByRole("button", { name: "Mở rộng bảng" }).hasAttribute("disabled")).toBe(true);
+    for (const name of ["Thu gọn bảng", "Mở rộng bảng", "Đóng bảng"]) {
+      expect(screen.queryByRole("button", { name })).toBeNull();
+    }
   });
 
   it.each([true, false])("không đóng khi bấm scrim (wide=%s)", async (wide) => {
@@ -122,20 +123,5 @@ describe("ResponsiveFormSurface", () => {
     fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
     expect(closes(onOpenChange)).toBe(false);
     expect(screen.getByRole("dialog")).toBeTruthy();
-  });
-
-  it("locked: nút Đóng bảng của Sheet không có tác dụng", async () => {
-    const user = userEvent.setup();
-    const { onOpenChange } = setup({ wide: false, locked: true });
-    await user.click(await screen.findByRole("button", { name: "Đóng bảng" }));
-    expect(closes(onOpenChange)).toBe(false);
-    expect(screen.getByRole("dialog")).toBeTruthy();
-  });
-
-  it("nút Đóng bảng đóng Sheet khi không khóa", async () => {
-    const user = userEvent.setup();
-    const { onOpenChange } = setup({ wide: false });
-    await user.click(await screen.findByRole("button", { name: "Đóng bảng" }));
-    expect(closes(onOpenChange)).toBe(true);
   });
 });

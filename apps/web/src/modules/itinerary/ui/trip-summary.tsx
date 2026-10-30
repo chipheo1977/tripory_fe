@@ -81,8 +81,7 @@ export function TripSummary({ itinerary, variant, onEdit }: TripSummaryProps) {
           )}
 
           <div>
-            <Button onClick={onEdit} size="sm" variant="secondary">
-              <Icon icon={Pencil} size="sm" />
+            <Button icon={Pencil} onClick={onEdit} size="sm" variant="secondary">
               Sửa thông tin
             </Button>
           </div>

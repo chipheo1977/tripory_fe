@@ -23,8 +23,7 @@ export function SaveIndicator({ itineraryId }: SaveIndicatorProps) {
           <span className="text-label text-muted">Đang lưu…</span>
         </>
       ) : failure !== null ? (
-        <Button className="text-danger" onClick={failure.retry} size="sm" variant="ghost">
-          <Icon icon={CircleAlert} size="sm" />
+        <Button className="text-danger" icon={CircleAlert} onClick={failure.retry} size="sm" variant="ghost">
           Lỗi – Thử lại
         </Button>
       ) : hasSaved ? (

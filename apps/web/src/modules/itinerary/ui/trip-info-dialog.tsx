@@ -239,12 +239,9 @@ export function TripInfoDialog({
         <FormFieldRow error={errors.startDate?.message} label="Ngày khởi hành">
           <div className="flex w-full items-center gap-inline-sm">
             <Input {...startDateField} className="min-w-0 flex-1" readOnly={locked} size="lg" type="date" />
-            {startDateValue === "" ? null : (
-              <Button disabled={locked} onClick={() => clearField("startDate")} size="sm" type="button" variant="ghost">
-                <Icon icon={X} size="sm" />
-                Xóa ngày
-              </Button>
-            )}
+            <Button disabled={locked} icon={X} onClick={() => clearField("startDate")} size="sm" type="button" variant="ghost" visible={startDateValue !== ""}>
+              Xóa ngày
+            </Button>
           </div>
         </FormFieldRow>
 
@@ -264,18 +261,9 @@ export function TripInfoDialog({
                 size="lg"
                 type="url"
               />
-              {coverValue === "" ? null : (
-                <Button
-                  disabled={locked}
-                  onClick={() => clearField("coverImageUrl")}
-                  size="sm"
-                  type="button"
-                  variant="ghost"
-                >
-                  <Icon icon={X} size="sm" />
-                  Xóa ảnh bìa
-                </Button>
-              )}
+              <Button disabled={locked} icon={X} onClick={() => clearField("coverImageUrl")} size="sm" type="button" variant="ghost" visible={coverValue !== ""}>
+                Xóa ảnh bìa
+              </Button>
             </div>
           </FormFieldRow>
           {previewUrl === null ? null : <CoverPreview url={previewUrl} />}

@@ -844,19 +844,23 @@ export const viAnnouncements = (ids: () => readonly string[], nameOf: (id: strin
 | A12 | Mẫu `isMutating === 1` của TkDodo | Pattern 5 | Thấp |
 | A13 | IntersectionObserver phát entry đầu khi `observe` | Pattern 6 | Thấp: chỉ ảnh hưởng thời điểm thử lại |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Copy cho link POI không có tọa độ (Pitfall 1)**
    - What we know: phần lớn link chia sẻ từ app là dạng này; không lấy được tọa độ nếu không dùng API.
    - What's unclear: người dùng có chấp nhận chỉ tự điền tên và yêu cầu dán tọa độ không, hay muốn đưa geocoding (MAP-01) lên sớm.
    - Recommendation: Phase 4 giữ D-20 (chỉ redirect), thêm một mã kết quả `no-coordinate` với câu riêng; ghi rủi ro UX vào UAT. Planner nên hỏi người dùng chốt câu hoặc chấp nhận câu đề xuất.
+   - RESOLVED: D-48.
 2. **Commit sớm khi tab bị ẩn (`visibilitychange`)**
    - Recommendation: chấp nhận (cùng tinh thần D-32); nếu người dùng muốn giữ đúng 5 giây khi chuyển tab trên desktop thì chỉ dùng `pagehide`.
+   - RESOLVED: D-50.
 3. **Tách tên/địa chỉ từ `/place/<tên, địa chỉ>/`**
    - Recommendation: lấy phần trước dấu phẩy đầu làm Tên, không tự điền Địa chỉ (D-21 chỉ khóa Tên).
+   - RESOLVED: D-49 (mở rộng: phần sau dấu phẩy điền vào Địa chỉ khi ô đang trống).
 4. **Rate limit route resolve**
    - What we know: route đòi phiên và Origin; serverless không có bộ nhớ chung để đếm.
    - Recommendation: không làm ở Phase 4; ghi vào threat model là rủi ro chấp nhận (người đã đăng nhập có thể dùng server làm máy gọi `maps.app.goo.gl`).
+   - RESOLVED: D-51.
 
 ## Environment Availability
 
@@ -1585,13 +1589,13 @@ Tên gợi ý `.planning/phases/04-itinerary-crud-editor/04-BE-CONTRACT.md`, kè
 | A7 | FluentValidation trả lỗi theo thứ tự khai báo rule | R5.2(a) | Lỗi BE trỏ sai khối đầu tiên (FE vẫn hiện được) |
 | A8 | DB có thể có `CoverImageUrl` không phải https | R5.2(b) | Bước lọc migration thừa nhưng vô hại |
 
-## Câu hỏi mở cho user
+## Câu hỏi mở cho user (RESOLVED)
 
-1. `destinationCode` bắt buộc ở BE hay chỉ ở FE? Đề xuất: chỉ FE (tránh vỡ FE cũ, dữ liệu cũ vẫn null).
-2. BE mặc định `dayCount` khi thiếu: 1 (giữ hành vi cũ, đề xuất) hay 3?
-3. URL ảnh bìa cũ không phải `https://` khi migration: bỏ (đề xuất) hay giữ?
-4. Có chấp nhận ảnh CC BY/BY-SA (cần trang ghi công) hay chỉ Unsplash/Pexels/CC0/tự chụp (đề xuất)?
-5. Ảnh thật giao trong phase này hay để placeholder gradient và thay sau?
+1. `destinationCode` bắt buộc ở BE hay chỉ ở FE? Đề xuất: chỉ FE (tránh vỡ FE cũ, dữ liệu cũ vẫn null). — RESOLVED: D-102 (bắt buộc ở BE với lịch trình mới, khác đề xuất).
+2. BE mặc định `dayCount` khi thiếu: 1 (giữ hành vi cũ, đề xuất) hay 3? — RESOLVED: D-103 (mặc định 1).
+3. URL ảnh bìa cũ không phải `https://` khi migration: bỏ (đề xuất) hay giữ? — RESOLVED: D-104 (bỏ).
+4. Có chấp nhận ảnh CC BY/BY-SA (cần trang ghi công) hay chỉ Unsplash/Pexels/CC0/tự chụp (đề xuất)? — RESOLVED: D-105 (không nhận CC BY / CC BY-SA).
+5. Ảnh thật giao trong phase này hay để placeholder gradient và thay sau? — RESOLVED: D-106 (ảnh giữ chỗ, ảnh thật giao sau).
 
 ### Tóm tắt của lượt nghiên cứu này
 **Tóm tắt:**
@@ -1988,19 +1992,19 @@ Bước khác: bước 4 thêm "thẻ không có ảnh bìa nhưng có điểm �
 | 13 | ToggleGroup trả giá trị theo thứ tự bấm | Thấp | `normalizeInterests` |
 | 14 | Sửa tài liệu ở repo khác (`tripory/docs` PT-01, D-98) | Thấp | Plan docs ghi rõ đường dẫn tuyệt đối và việc commit ở repo đó do user quyết |
 
-### R8.2 Câu hỏi mở (theo thứ tự cần trả lời)
+### R8.2 Câu hỏi mở (theo thứ tự cần trả lời) (RESOLVED)
 
-1. **Hợp đồng ảnh bìa A (một `PUT` mang danh sách + ảnh chọn) hay B (endpoint riêng)?** Do R2/R5 quyết. Thiết kế FE theo A ở R4.2; B ở R4.4. Ảnh chọn biểu diễn bằng URL hay vị trí trong DTO?
-2. `destinationCode` bắt buộc ở request tạo? (UI bắt buộc theo D-92; BE nên bắt buộc với lịch trình mới, `null` cho dữ liệu cũ.)
-3. User duyệt slug, alias "SUY RA", mã sở thích, thứ tự "Tất cả" (R1) ở checkpoint 04-25 trước khi sửa BE.
-4. Gốc URL ảnh (env hay hằng) và đường dẫn ảnh: theo R2.
-5. Bỏ bản nháp metadata (khuyến nghị) hay giữ?
-6. Có tách lỗi nền theo thao tác trong `save-status` không (R4.3 mục 10)? Khuyến nghị: không, ngoài phạm vi.
-7. `04-24` phụ thuộc `04-23` (UAT checkpoint gốc, chưa có SUMMARY)? Khuyến nghị `depends_on: ["04-23"]` để giữ thứ tự wave; nếu 04-23 coi như xong thì để `[]`.
-8. Sửa UI-SPEC cho NumberStepper (PageUp/PageDown, blur trống) hay chỉ ghi lệch trong SUMMARY?
-9. `firstInvalidBlock` và tóm tắt khối đặt ở app (khuyến nghị, vì "khối" là khái niệm UI) hay domain (chữ của UI-SPEC)?
-10. Nhãn sở thích ở domain (khuyến nghị) hay app?
-11. Plan docs có được sửa repo `C:\Users\OS\Documents\personal\tripory` (PT-01) và có commit ở đó không?
+1. **Hợp đồng ảnh bìa A (một `PUT` mang danh sách + ảnh chọn) hay B (endpoint riêng)?** Do R2/R5 quyết. Thiết kế FE theo A ở R4.2; B ở R4.4. Ảnh chọn biểu diễn bằng URL hay vị trí trong DTO? — RESOLVED: phương án A, R5.2(d) (`coverImages` + `selectedCoverIndex`).
+2. `destinationCode` bắt buộc ở request tạo? (UI bắt buộc theo D-92; BE nên bắt buộc với lịch trình mới, `null` cho dữ liệu cũ.) — RESOLVED: D-102.
+3. User duyệt slug, alias "SUY RA", mã sở thích, thứ tự "Tất cả" (R1) ở checkpoint 04-25 trước khi sửa BE. — RESOLVED: checkpoint 04-25.
+4. Gốc URL ảnh (env hay hằng) và đường dẫn ảnh: theo R2. — RESOLVED: R2.5 + D-106 (hằng cứng ở composition `destination-catalog.ts`, không `NEXT_PUBLIC_*`).
+5. Bỏ bản nháp metadata (khuyến nghị) hay giữ? — RESOLVED: D-107 (bỏ).
+6. Có tách lỗi nền theo thao tác trong `save-status` không (R4.3 mục 10)? Khuyến nghị: không, ngoài phạm vi. — RESOLVED: không làm, ngoài phạm vi phần mở lại.
+7. `04-24` phụ thuộc `04-23` (UAT checkpoint gốc, chưa có SUMMARY)? Khuyến nghị `depends_on: ["04-23"]` để giữ thứ tự wave; nếu 04-23 coi như xong thì để `[]`. — RESOLVED: D-108.
+8. Sửa UI-SPEC cho NumberStepper (PageUp/PageDown, blur trống) hay chỉ ghi lệch trong SUMMARY? — RESOLVED: D-109 (sửa UI-SPEC ở plan 04-27).
+9. `firstInvalidBlock` và tóm tắt khối đặt ở app (khuyến nghị, vì "khối" là khái niệm UI) hay domain (chữ của UI-SPEC)? — RESOLVED: Claude's Discretion (đặt ở app).
+10. Nhãn sở thích ở domain (khuyến nghị) hay app? — RESOLVED: Claude's Discretion (domain).
+11. Plan docs có được sửa repo `C:\Users\OS\Documents\personal\tripory` (PT-01) và có commit ở đó không? — RESOLVED: D-110 (sửa, không commit).
 
 ### R8.3 Đề xuất chia plan 04-24 trở đi
 
@@ -2034,4 +2038,4 @@ Ghi chú chia plan:
 - **R4:** Controller tự lưu theo kiểu single-flight + trailing, đặt ở cấp editor. Lệnh luôn gửi ảnh chụp đầy đủ, ô sai thì dùng giá trị đã gửi gần nhất. Debounce 800 ms, blur và cleanup đều flush. `useUpdateMetadata` thêm optimistic `withMetadata` để sửa LW-02. Khuyến nghị bỏ bản nháp metadata; `findFirst` tự dọn khóa cũ.
 - **R6:** Bảng file cụ thể cho domain, port `DestinationCatalog`, adapter tĩnh và composition, cùng 4 component `ui-web` mới. Subpath Base UI đã có trong allowlist ESLint, không cần sửa rule.
 - **R7:** Danh sách test cần viết lại, trong đó có khoảng 17 file fixture vỡ typecheck khi `Itinerary` thêm trường. Có nháp UAT cho bước 2, 2a, 5a–5c và 6 dòng lỗi thời của `04-VALIDATION.md`.
-- **R8:** 14 rủi ro, 11 câu hỏi mở và cách chia 11 plan (04-24..04-34). Ba plan `autonomous: false`: 04-25 chờ BE, 04-26 ảnh, 04-34 UAT cuối.
+- **R8:** 14 rủi ro, 11 câu hỏi mở và cách chia 11 plan (04-24..04-34). Ba plan `autonomous: false`: 04-25 chờ BE, 04-26 ảnh, 04-34 UAT cuối. (Lưu ý: cách chia này đã được chia lại thành 18 plan 04-24..04-41, xem danh sách trong ROADMAP.md Phase 4; số thứ tự và checkpoint trong dòng này chỉ là bản nháp lúc nghiên cứu.)

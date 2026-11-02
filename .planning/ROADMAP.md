@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: HTTP & Shared Kernel** - `api-client` chuẩn hóa lỗi BE, single-flight refresh và `shared-kernel` dùng chung (completed 2026-10-12)
 - [x] **Phase 3: Identity & Session (BFF)** - Đăng ký, đăng nhập, phiên cookie httpOnly, refresh im lặng và BFF có allowlist
  (completed 2026-10-23)
-- [ ] **Phase 4: Itinerary CRUD & Editor** - "Lịch trình của tôi" và editor đầy đủ tới bước xuất bản (reopened 2026-10-30: form tạo 4 khối thay tạo nhanh (ITIN-02), nhiều ảnh bìa và tự lưu "Thông tin chuyến đi" (ITIN-03) đang làm; PUB-02 chuyển từ Phase 5 để sau; 23/23 plan đã xong, cần plan mới)
+- [ ] **Phase 4: Itinerary CRUD & Editor** - "Lịch trình của tôi" và editor đầy đủ tới bước xuất bản (reopened 2026-10-30: form tạo 4 khối thay tạo nhanh (ITIN-02), nhiều ảnh bìa và tự lưu "Thông tin chuyến đi" (ITIN-03) đang làm; PUB-02 chuyển từ Phase 5 để sau; 23/41 plan đã xong, 18 plan mở lại 04-24..04-41 đã lập cho ITIN-02, ITIN-03 và chưa thực thi, PUB-02 chưa lập)
 - [ ] **Phase 5: SVG Map & Public View** - Trang công khai SSR, bản đồ SVG dùng chung, chia sẻ và Open Graph
 - [ ] **Phase 6: Profile & Users** - Hồ sơ thật, tab lịch trình, danh bạ và lối vào hội thoại
 - [ ] **Phase 7: Chat, Voice & Calls** - Chat realtime, tin nhắn thoại và gọi thoại 1-1 qua TURN
@@ -122,7 +122,7 @@ Plans:
   3. Người dùng xóa waypoint và hoàn tác được trong 5 giây; kéo thả sắp xếp waypoint trong ngày bằng chuột, cảm ứng hoặc bàn phím, thấy rollback khi BE lỗi
   4. Người dùng luôn thấy trạng thái Đang lưu / Đã lưu / Lỗi – thử lại, được cảnh báo khi rời trang lúc còn request; xuất bản được khi có ≥ 1 waypoint sau khi xác nhận không thể hủy, rồi thấy lịch trình chuyển sang "Đã xuất bản" (hộp chia sẻ sau khi xuất bản chuyển sang Phase 5 theo `04-CONTEXT.md` D-40)
   5. Người không phải chủ không thấy thao tác sửa; trên mobile, timeline nằm trong bottom sheet nhiều mức và vẫn thao tác đủ các bước trên
-**Plans**: 23 plans (đã xong) + plan bổ sung cho form tạo 4 khối, nhiều ảnh bìa và tự lưu metadata (ITIN-02, ITIN-03; chưa lập, làm trước; plan đầu là tài liệu hợp đồng BE rồi checkpoint chờ user sửa BE) + plan cho PUB-02 (chưa lập, để sau)
+**Plans**: 41 plans (23 đã xong + 18 plan mở lại 04-24..04-41 cho ITIN-02, ITIN-03, chưa thực thi: tài liệu hợp đồng BE, checkpoint chờ user sửa BE, rồi FE và UAT; 04-41 tách từ 04-30 nên xếp ở wave 18, trước 04-31) + plan cho PUB-02 (chưa lập, để sau; PUB-02 KHÔNG nằm trong 04-24..04-41)
 **UI hint**: yes
 **Research flag**: cần research sâu khi plan (parse link Google Maps, dnd-kit với React 19 StrictMode, `CalendarDate`, mapper ngày thưa)
 
@@ -150,6 +150,24 @@ Plans:
 - [x] 04-21-PLAN.md — `TimelinePanel`, container `ItineraryEditor` (tải/403/404/lỗi, dialog, khôi phục bản nháp, back D-47), page RSC `/itineraries/[id]/edit`
 - [x] 04-22-PLAN.md — Bất biến tĩnh Phase 4, `04-BE-DEPENDENCIES.md`, full suite + build, VALIDATION xanh
 - [x] 04-23-PLAN.md — UAT thủ công với BE thật và điện thoại thật (checkpoint; 23/23 bước PASS)
+- [ ] 04-24-PLAN.md — Tài liệu hợp đồng BE (không code, không ca kiểm thử, 5W1H) cho form tạo 4 khối, danh sách ảnh bìa, `PUT` giữ nguyên trường thiếu; cập nhật `04-BE-DEPENDENCIES.md`
+- [ ] 04-25-PLAN.md — Checkpoint: user duyệt tài liệu, tự sửa và deploy `tripory_be`, xác nhận bằng một lần tạo thật (mọi plan FE phụ thuộc plan này)
+- [ ] 04-26-PLAN.md — Domain thuần: `Destination`, tìm không dấu + alias, tên mặc định, số ngày 1-30, 7 sở thích
+- [ ] 04-27-PLAN.md — `ui-web`: `Accordion`, `ToggleChipGroup`, `NumberStepper`, `RadioGroup`/`Radio`; sửa phần `NumberStepper` của UI-SPEC (D-109)
+- [ ] 04-28-PLAN.md — `ui-web`: `InlineAlert action`, `DialogContent showCloseButton`/`closeDisabled`, `Sheet fixedSnap`
+- [ ] 04-29-PLAN.md — Port `DestinationCatalog`, adapter tĩnh 34 điểm đến, composition `destination-catalog.ts` (file riêng, không động `itinerary.client.ts`)
+- [ ] 04-30-PLAN.md — Read model: điểm đến, sở thích, danh sách ảnh bìa (domain, DTO, mapper, fixture package) + fixture BE của app và 2 test literal (wave 17)
+- [ ] 04-41-PLAN.md — Đồng bộ 12 test còn lại của app với read model mới, typecheck/lint/test toàn gói app xanh (tách từ 04-30; wave 18)
+- [ ] 04-31-PLAN.md — Chuỗi ảnh dự phòng (ảnh hiển thị, ảnh mặc định của điểm đến, nền token) cho thẻ và tóm tắt (wave 19)
+- [ ] 04-32-PLAN.md — `MetadataInput` phương án A (`coverImages` + `selectedCoverIndex`), `withMetadata` optimistic (sửa LW-02) (wave 19)
+- [ ] 04-33-PLAN.md — Nền chung: schema tạo + khối + map lỗi/`ERROR_MESSAGES` + `ResponsiveFormSurface` mở rộng (wave 20)
+- [ ] 04-34-PLAN.md — Khối UI form tạo: Điểm đến, Tên, Thời gian, Sở thích, chân form dính đáy (wave 21)
+- [ ] 04-35-PLAN.md — Cơ chế tự lưu: payload, bộ điều khiển (debounce 800 ms, single-flight + trailing), hook (wave 21)
+- [ ] 04-36-PLAN.md — Lưới 5 ảnh bìa: domain `cover-images`, `CoverImageField`, khung "Link ảnh", khung trống bấm được bằng chuột/chạm (wave 21)
+- [ ] 04-37-PLAN.md — Hợp đồng tạo một request + `CreateItineraryDialog` 4 khối accordion (wave 22)
+- [ ] 04-38-PLAN.md — `TripInfoDialog` tự lưu + lưới ảnh, editor host tự lưu, bỏ bản nháp metadata, dọn export cũ của hộp tạo nhanh (wave 23)
+- [ ] 04-39-PLAN.md — UAT bổ sung, ghi chú VALIDATION, BE-DEPENDENCIES, PT-01 (repo `tripory`, không commit), bất biến tĩnh, full suite + build (wave 24)
+- [ ] 04-40-PLAN.md — UAT thủ công cuối phần mở lại (BE thật; desktop, iPhone Safari, Android Chrome; checkpoint; wave 25)
 
 ### Phase 5: SVG Map & Public View
 **Goal**: Khách chưa đăng nhập mở link chia sẻ và đọc được lịch trình đã xuất bản dưới dạng bài viết hoặc bản đồ SVG; link hiển thị preview đẹp khi dán vào ứng dụng nhắn tin
@@ -215,7 +233,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 1. Design System, UI Skeleton & Walking Skeleton | 8/8 | Complete | 2026-10-12 |
 | 2. HTTP & Shared Kernel | 4/4 | CompleComplete
 | 3. Identity & Session (BFF) | 15/15 | Executed (UAT 19/19 PASS, chờ verify-work) | 2026-10-23 |
-| 4. Itinerary CRUD & Editor | 23/23 | Reopened: 23/23 plan đã xong (UAT 23/23 PASS) nhưng thiếu PUB-02, cần plan mới | - (đã xong 23 plan ngày 2026-10-30) |
+| 4. Itinerary CRUD & Editor | 23/41 | Reopened: 18 plan mở lại 04-24..04-41 đã lập, chưa thực thi (UAT 23/23 PASS cho 23 plan đầu; PUB-02 chưa lập) | - (đã xong 23 plan ngày 2026-10-30) |
 | 5. SVG Map & Public View | 0/TBD | Not started | - |
 | 6. Profile & Users | 0/TBD | Not started | - |
 | 7. Chat, Voice & Calls | 0/TBD | Not started | - |

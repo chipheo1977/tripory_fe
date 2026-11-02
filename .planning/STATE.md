@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: "Phase 4 reopened; next = wizard tạo lịch trình (ITIN-02, phương án B: sửa BE + FE): `/gsd-discuss-phase 4` (cập nhật CONTEXT, giữ D-01..D-51) → `/gsd-ui-phase 4` → `/gsd-plan-phase 4 --research` (chỉ thêm plan 04-24+). PUB-02 để sau; vẫn chờ user xác nhận phạm vi PUB-02 trong editor và việc PUB-06 có chuyển theo không"
-stopped_at: Phase 4 UI-SPEC approved (mở lại ITIN-02, ITIN-03)
+status: "Phase 4 mở lại đã lập kế hoạch: 18 plan mới 04-24..04-41 (ITIN-02 form tạo 4 khối, ITIN-03 nhiều ảnh bìa và tự lưu); next = plan 04-24 viết tài liệu hợp đồng BE rồi checkpoint 04-25 chờ user sửa tripory_be: `/gsd-execute-phase 4`. PUB-02 hoãn, chưa lập kế hoạch"
+stopped_at: Phase 4 reopened plans 04-24..04-41 created and checked
 last_updated: "2026-11-02T09:31:43.551Z"
-last_activity: 2026-10-30
+last_activity: 2026-11-02
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 50
+  total_plans: 68
   completed_plans: 49
-  percent: 98
+  percent: 72
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình du lịch thật trên bản triển khai công khai, rồi trao đổi về chuyến đi với người khác.
-**Current focus:** Phase 4 mở lại: làm wizard tạo lịch trình 4 bước (ITIN-02) trước; PUB-02 (chuyển từ Phase 5) để sau; chưa lập kế hoạch
+**Current focus:** Phase 4 mở lại: 18 plan mới 04-24..04-41 đã lập; bắt đầu bằng tài liệu hợp đồng BE (04-24) rồi checkpoint 04-25 chờ user sửa tripory_be; PUB-02 hoãn
 
 ## Current Position
 
-Phase: 4 mở lại (reopened) vì PUB-02; 23/23 plan và UAT 23/23 PASS vẫn giữ nguyên
-Plan: 23 of 23 đã xong; cần plan bổ sung cho PUB-02 (chưa làm)
-Status: Phase 4 reopened; next = wizard tạo lịch trình (ITIN-02, phương án B: sửa BE + FE): `/gsd-discuss-phase 4` (cập nhật CONTEXT, giữ D-01..D-51) → `/gsd-ui-phase 4` → `/gsd-plan-phase 4 --research` (chỉ thêm plan 04-24+). PUB-02 để sau; vẫn chờ user xác nhận phạm vi PUB-02 trong editor và việc PUB-06 có chuyển theo không
-Last activity: 2026-10-30
+Phase: 4 mở lại (reopened) cho ITIN-02, ITIN-03; 23 plan cũ và UAT 23/23 PASS giữ nguyên; PUB-02 hoãn
+Plan: 23 of 41 đã xong; 18 plan mới 04-24..04-41 chưa chạy
+Status: Phase 4 mở lại đã lập kế hoạch: 18 plan mới 04-24..04-41 (ITIN-02 form tạo 4 khối, ITIN-03 nhiều ảnh bìa và tự lưu); next = plan 04-24 viết tài liệu hợp đồng BE rồi checkpoint 04-25 chờ user sửa tripory_be: `/gsd-execute-phase 4`. PUB-02 hoãn, chưa lập kế hoạch
+Last activity: 2026-11-02
 
 Phase 1 progress: [██████████] 100% — verified complete
 

@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: HTTP & Shared Kernel** - `api-client` chuẩn hóa lỗi BE, single-flight refresh và `shared-kernel` dùng chung (completed 2026-10-12)
 - [x] **Phase 3: Identity & Session (BFF)** - Đăng ký, đăng nhập, phiên cookie httpOnly, refresh im lặng và BFF có allowlist
  (completed 2026-10-23)
-- [ ] **Phase 4: Itinerary CRUD & Editor** - "Lịch trình của tôi" và editor đầy đủ tới bước xuất bản (reopened 2026-10-30: còn PUB-02 chuyển từ Phase 5; 23/23 plan đã xong, cần plan mới)
+- [ ] **Phase 4: Itinerary CRUD & Editor** - "Lịch trình của tôi" và editor đầy đủ tới bước xuất bản (reopened 2026-10-30: form tạo 4 khối thay tạo nhanh (ITIN-02), nhiều ảnh bìa và tự lưu "Thông tin chuyến đi" (ITIN-03) đang làm; PUB-02 chuyển từ Phase 5 để sau; 23/23 plan đã xong, cần plan mới)
 - [ ] **Phase 5: SVG Map & Public View** - Trang công khai SSR, bản đồ SVG dùng chung, chia sẻ và Open Graph
 - [ ] **Phase 6: Profile & Users** - Hồ sơ thật, tab lịch trình, danh bạ và lối vào hội thoại
 - [ ] **Phase 7: Chat, Voice & Calls** - Chat realtime, tin nhắn thoại và gọi thoại 1-1 qua TURN
@@ -117,12 +117,12 @@ Plans:
 **Requirements**: ITIN-01, ITIN-02, ITIN-03, ITIN-04, ITIN-05, ITIN-06, ITIN-07, ITIN-08, ITIN-09, ITIN-10, ITIN-11, ITIN-12, ITIN-13, ITIN-14, PUB-02
 **Success Criteria** (what must be TRUE):
   0. (PUB-02, chuyển từ Phase 5 theo yêu cầu user 2026-10-30, chưa lập kế hoạch) Người xem chuyển được giữa chế độ Bài viết và Bản đồ SVG: pin theo ngày, polyline, zoom/pan, chọn điểm đồng bộ với danh sách
-  1. Người dùng thấy "Lịch trình của tôi" có phân trang và lọc Tất cả/Nháp/Đã xuất bản, tạo nhanh bằng tiêu đề rồi vào thẳng editor, và xóa được lịch trình sau khi xác nhận
-  2. Trong editor, người dùng sửa metadata (tiêu đề, mô tả, ngày khởi hành, ảnh bìa URL có preview), chuyển/thêm ngày, sửa phụ đề ngày inline, thêm/sửa waypoint bằng cách dán tọa độ "lat, lng" hoặc link Google Maps, và thấy quãng đường theo ngày cùng tổng do BE tính
+  1. Người dùng thấy "Lịch trình của tôi" có phân trang và lọc Tất cả/Nháp/Đã xuất bản, tạo lịch trình trong một modal 4 khối accordion (điểm đến trong 34 tỉnh/thành, tên mặc định theo điểm đến, ngày khởi hành và số ngày, sở thích) rồi vào thẳng editor với đủ số ngày đã chọn và ảnh bìa mặc định theo điểm đến, và xóa được lịch trình sau khi xác nhận (thay tạo nhanh bằng tiêu đề, mở lại 2026-10-30; BE lưu điểm đến, sở thích, ngày khởi hành, số ngày và ảnh bìa mặc định trong một request)
+  2. Trong editor, người dùng sửa metadata (tiêu đề, mô tả, ngày khởi hành, ảnh bìa URL có preview; mở lại 2026-10-30: tự lưu không có nút Lưu, tối đa 5 ảnh bìa dạng lưới và chọn một ảnh hiển thị), chuyển/thêm ngày, sửa phụ đề ngày inline, thêm/sửa waypoint bằng cách dán tọa độ "lat, lng" hoặc link Google Maps, và thấy quãng đường theo ngày cùng tổng do BE tính
   3. Người dùng xóa waypoint và hoàn tác được trong 5 giây; kéo thả sắp xếp waypoint trong ngày bằng chuột, cảm ứng hoặc bàn phím, thấy rollback khi BE lỗi
   4. Người dùng luôn thấy trạng thái Đang lưu / Đã lưu / Lỗi – thử lại, được cảnh báo khi rời trang lúc còn request; xuất bản được khi có ≥ 1 waypoint sau khi xác nhận không thể hủy, rồi thấy lịch trình chuyển sang "Đã xuất bản" (hộp chia sẻ sau khi xuất bản chuyển sang Phase 5 theo `04-CONTEXT.md` D-40)
   5. Người không phải chủ không thấy thao tác sửa; trên mobile, timeline nằm trong bottom sheet nhiều mức và vẫn thao tác đủ các bước trên
-**Plans**: 23 plans (đã xong) + plan bổ sung cho PUB-02 (chưa lập)
+**Plans**: 23 plans (đã xong) + plan bổ sung cho form tạo 4 khối, nhiều ảnh bìa và tự lưu metadata (ITIN-02, ITIN-03; chưa lập, làm trước; plan đầu là tài liệu hợp đồng BE rồi checkpoint chờ user sửa BE) + plan cho PUB-02 (chưa lập, để sau)
 **UI hint**: yes
 **Research flag**: cần research sâu khi plan (parse link Google Maps, dnd-kit với React 19 StrictMode, `CalendarDate`, mapper ngày thưa)
 

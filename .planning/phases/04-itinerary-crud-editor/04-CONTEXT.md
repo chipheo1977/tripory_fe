@@ -1,7 +1,8 @@
 # Phase 4: Itinerary CRUD & Editor - Context
 
 **Gathered:** 2026-10-23
-**Status:** Ready for planning
+**Updated:** 2026-10-30 (mở lại: form tạo lịch trình 4 khối, nhiều ảnh bìa, tự lưu "Thông tin chuyến đi"; D-52..D-101)
+**Status:** Ready for planning (phần mở lại ITIN-02/ITIN-03; PUB-02 để sau)
 
 <domain>
 ## Phase Boundary
@@ -14,6 +15,13 @@ Phase này giao, cho người dùng đã đăng nhập và bằng API BE thật:
 4. Chỉ chủ vào được editor; `canEdit` suy ra ở domain (ITIN-13).
 5. Bố cục desktop hai vùng và mobile có bottom sheet nhiều mức cho timeline (ITIN-14).
 6. Dựng đủ 4 tầng của `packages/itinerary` (domain, application, infrastructure, react) và composition `itinerary.client.ts` / `itinerary.server.ts`.
+
+**Mở lại 2026-10-30 (làm trước, PUB-02 để sau):**
+
+7. Thay hộp tạo nhanh bằng **form tạo 4 khối dạng accordion** trong một modal: Điểm đến (34 tỉnh/thành) → Tên chuyến đi → Thời gian (ngày khởi hành, số ngày) → Sở thích. BE lưu đủ trong một request và tạo sẵn Ngày 1..N (ITIN-02, D-52..D-78, D-92..D-101).
+8. Ảnh bìa: mặc định theo điểm đến, lưu tối đa 5 ảnh, chọn một ảnh hiển thị trong "Thông tin chuyến đi" (ITIN-03, D-79..D-86).
+9. "Thông tin chuyến đi" tự lưu khi có thay đổi, không còn nút Lưu/Hủy (ITIN-03, D-87..D-91).
+10. Tài liệu đặc tả hợp đồng BE cho 7–9 (không kèm code); user tự sửa `tripory_be` trước, FE làm sau (D-52, D-57, D-58).
 
 Nằm ngoài phase:
 - Bản đồ SVG trong editor và trang công khai (PUB-02, PUB-06 → Phase 5). Phase 4 chỉ chừa vùng "canvas" để Phase 5 thay bằng bản đồ. [Lệch: PUB-02 đã chuyển từ Phase 5 vào Phase 4 theo yêu cầu user 2026-10-30, chưa lập kế hoạch; PUB-06 vẫn ở Phase 5, chờ user xác nhận.]
@@ -38,9 +46,9 @@ Nằm ngoài phase:
 - **D-08:** Mỗi tab có empty state riêng. Tab "Tất cả" trống thì có CTA "Tạo lịch trình" (D-10). Loading dùng Skeleton dạng thẻ, lỗi dùng `ErrorState` có "Thử lại".
 
 ### Tạo nhanh (ITIN-02)
-- **D-09:** Nút "Tạo lịch trình" mở `Dialog` có một ô tiêu đề, **điền sẵn "Chuyến đi mới" và bôi đen sẵn**. Enter là tạo. Validate 1–100 ký tự (theo validator BE), trim.
+- **D-09:** Nút "Tạo lịch trình" mở `Dialog` có một ô tiêu đề, **điền sẵn "Chuyến đi mới" và bôi đen sẵn**. Enter là tạo. Validate 1–100 ký tự (theo validator BE), trim. **[Lệch 2026-10-30: thay bằng form 4 khối accordion D-62..D-75, D-92..D-101; Enter ở ô Tên không gửi form (D-68). Giữ giới hạn 1–100 và trim.]**
 - **D-10:** Nút nằm ở đầu trang danh sách, cạnh tiêu đề "Lịch trình của tôi", và trong EmptyState. Không dùng FAB, không thêm lối tạo trên header.
-- **D-11:** Tạo xong (`POST /itineraries` trả 201 kèm `ItineraryDetailDto`) thì chuyển thẳng tới `/itineraries/[id]/edit`, **không toast**. Editor mở ở Ngày 1 (BE tạo sẵn) có EmptyState hướng dẫn thêm điểm đầu tiên. Cache danh sách bị invalidate.
+- **D-11:** Tạo xong (`POST /itineraries` trả 201 kèm `ItineraryDetailDto`) thì chuyển thẳng tới `/itineraries/[id]/edit`, **không toast**. Editor mở ở Ngày 1 (BE tạo sẵn) có EmptyState hướng dẫn thêm điểm đầu tiên. Cache danh sách bị invalidate. **[Lệch 2026-10-30: vẫn chuyển thẳng vào editor ở Ngày 1, không toast; nay BE tạo sẵn Ngày 1..N theo số ngày đã chọn (D-56) trong cùng request tạo.]**
 - **D-12:** Lúc đang gửi dùng lại mẫu Phase 3 (D-30, D-31 của Phase 3): nút đổi thành "Đang tạo…" kèm Spinner, `aria-busy`, chặn bấm lần hai. Sau khoảng 5 giây hiện dòng "Máy chủ đang khởi động, có thể mất tới 30 giây…". Lỗi hiện inline trong dialog (`errorToast: false`), lỗi có field thì gắn vào ô.
 
 ### Bố cục editor (ITIN-14)
@@ -63,8 +71,8 @@ Nằm ngoài phase:
 - **D-23:** Bấm vào thẻ waypoint thì mở form sửa. "Xóa" nằm trong menu ⋯ của thẻ và trong form sửa. **Tay cầm kéo tách riêng** và có `aria-label` (ví dụ "Kéo để sắp xếp {tên}"). `UpdateWaypoint` không đổi được ngày, nên form sửa không có ô ngày.
 
 ### Cách lưu metadata và ngày (ITIN-03, 04, 09, 10)
-- **D-24:** Dialog "Thông tin chuyến đi" có hai nút "Lưu" và "Hủy". Đang lưu thì nút loading và chặn gửi lần hai. Lưu xong đóng dialog, không toast. Lỗi field gắn vào ô theo mẫu Phase 3. Validate client bằng Zod theo validator BE: tiêu đề 1–100, mô tả ≤ 1000.
-- **D-25:** Ảnh bìa: preview hiện ngay khi URL hợp lệ (debounce), **chỉ nhận `https://`**. Ảnh không tải được thì hiện nền dự phòng kèm dòng "Không tải được ảnh từ link này", **nhưng vẫn cho lưu**. Có nút xóa ảnh bìa. Dùng thẻ `<img>` thường (host tùy ý), không dùng `next/image` với `remotePatterns`; planner chốt chính sách `referrerPolicy`/CSP nếu cần.
+- **D-24:** Dialog "Thông tin chuyến đi" có hai nút "Lưu" và "Hủy". Đang lưu thì nút loading và chặn gửi lần hai. Lưu xong đóng dialog, không toast. Lỗi field gắn vào ô theo mẫu Phase 3. Validate client bằng Zod theo validator BE: tiêu đề 1–100, mô tả ≤ 1000. **[Lệch 2026-10-30: bỏ nút "Lưu"/"Hủy", tự lưu theo D-87..D-91. Giữ validate Zod và lỗi field gắn vào ô.]**
+- **D-25:** Ảnh bìa: preview hiện ngay khi URL hợp lệ (debounce), **chỉ nhận `https://`**. Ảnh không tải được thì hiện nền dự phòng kèm dòng "Không tải được ảnh từ link này", **nhưng vẫn cho lưu**. Có nút xóa ảnh bìa. Dùng thẻ `<img>` thường (host tùy ý), không dùng `next/image` với `remotePatterns`; planner chốt chính sách `referrerPolicy`/CSP nếu cần. **[Lệch 2026-10-30: một ảnh bìa thành lưới tối đa 5 ảnh, chọn một ảnh hiển thị (D-79..D-86). Giữ: chỉ `https://`, preview, ảnh lỗi vẫn cho thêm, thẻ `<img>` thường.]**
 - **D-26:** Ngày khởi hành dùng `<input type="date">` gốc của trình duyệt, xóa được (để trống thì gửi `null`). Giá trị giữ bằng value object `CalendarDate` (`YYYY-MM-DD`, không qua `new Date()` local; PITFALLS). Không hiện ngày thực theo từng ngày (UX-03, v2).
 - **D-27:** "Thêm ngày" **lưu lên BE ngay** bằng `PUT /itineraries/{id}/days/{max+1}/subtitle` với `subtitle: null`. Đã kiểm code BE: `SetDaySubtitle` gọi `GetOrCreateDay`, nên ngày được tạo thật và reload vẫn còn. Ngày mới được chọn ngay. **Ngày đã thêm không xóa được** (BE không có endpoint); không thêm xác nhận. Researcher kiểm giới hạn `InvalidDayNumber` của BE (dayNumber tối đa?).
 - **D-28:** Tab ngày **luôn vẽ đủ dải từ Ngày 1 tới ngày lớn nhất**; ngày thiếu trong DTO (ngày thưa) hiện như ngày trống. Mapper ACL sắp `days` theo `dayNumber` và `waypoints` theo `(dayNumber, orderIndex)` vì BE không `OrderBy`. Mỗi tab hiện "Ngày N" và km của ngày (`dayDistanceKm`, nếu có). Thanh tab cuộn ngang trên mobile, nút "+ Thêm ngày" nằm cuối thanh. Tổng km (`totalDistanceKm`) hiện ở vùng tóm tắt. Km luôn lấy số của BE sau refetch; FE không tự tính rồi coi là số thật.
@@ -104,6 +112,63 @@ Nằm ngoài phase:
 - **D-50:** Lệnh xóa đang chờ được gửi ngay cả khi tab bị ẩn (`visibilitychange` → `hidden`), không chỉ khi `pagehide`. Lý do: trình duyệt mobile có thể kill tab ở nền. Mở rộng D-32.
 - **D-51:** Route resolve link rút gọn **không có rate limit** ở Phase 4 (chỉ cần phiên + Origin + allowlist host + giới hạn hop/timeout). Rủi ro chấp nhận ghi vào threat model: người đã đăng nhập có thể dùng server gọi `maps.app.goo.gl`.
 
+### Mở lại 2026-10-30: hợp đồng BE và cách làm BE (ITIN-02, ITIN-03)
+- **D-52:** **User tự sửa `tripory_be`.** Agent chỉ viết tài liệu đặc tả, **không kèm code chính xác**, không sửa repo BE.
+- **D-53:** Danh mục 34 điểm đến ở BE là **hằng số C# kèm validator**. FE và BE dùng chung **mã slug có tiền tố quốc gia** (ví dụ `vn-da-nang`, `vn-lam-dong`) để mở rộng ra global sau. Không dùng mã số hành chính làm id.
+- **D-54:** `PUT /itineraries/{id}` (Thông tin chuyến đi) **thiếu trường điểm đến hoặc sở thích thì BE giữ nguyên**, không xóa.
+- **D-55:** Sở thích lưu ở cột `text[]`, mỗi phần tử là mã cố định (ví dụ `history-culture`, `nature`), không trùng, tối đa 7 mục (bằng số lựa chọn).
+- **D-56:** Request tạo nhận số ngày; BE **tạo đủ bản ghi Ngày 1..N** ngay khi tạo. Validator 1–30.
+- **D-57:** Tài liệu BE chỉ đặc tả hợp đồng: endpoint, JSON request/response, luật validate kèm mã lỗi đề xuất (ví dụ `Itinerary.DestinationUnknown`, `Itinerary.DayCountOutOfRange`, `Itinerary.InterestUnknown`, lỗi danh sách ảnh bìa), trường mới trong `ItineraryDetailDto`/`ItinerarySummaryDto`, cách `PUT` giữ nguyên, danh mục mã điểm đến và mã sở thích, migration mô tả bằng lời. **Không có ca kiểm thử, không có code.** Mỗi thay đổi có giải thích **5W1H** (What, Why, Who, When, Where, How).
+- **D-58:** **Làm tuần tự:** plan đầu chỉ viết tài liệu BE rồi dừng ở checkpoint chờ user xác nhận BE đã sửa xong; mọi plan FE chạy sau checkpoint đó.
+
+### Mở lại 2026-10-30: form tạo lịch trình (ITIN-02)
+- **D-92:** Khối Điểm đến: chọn **đúng một** trong **34 đơn vị cấp tỉnh** sau sắp xếp 2025 (Nghị quyết 202/2025/QH15), **bắt buộc**. Danh sách và tên chính thức phải đối chiếu văn bản gốc (và mã theo Quyết định 19/2025/QĐ-TTg chỉ để tham chiếu) trước khi code; researcher không được đoán.
+- **D-59:** Tìm theo **alias**: tên tỉnh cũ và vài thành phố du lịch lớn. Gõ "Đà Lạt" ra Lâm Đồng, kèm dòng phụ "gồm Đà Lạt". Danh sách vẫn chỉ có 34 mục. Ánh xạ alias phải được xác minh.
+- **D-60:** Danh sách chia **hai nhóm**: "Phổ biến" (khoảng 8 mục đầu theo hạng) và "Tất cả" (theo chữ cái). Ô tìm ở trên, lọc tại chỗ, tìm không dấu (bỏ dấu, `đ→d`, chữ thường).
+- **D-61:** Hạng phổ biến là **bảng tĩnh** (user duyệt): Đà Nẵng, TP. Hồ Chí Minh, Hà Nội, Khánh Hòa, Lâm Đồng, Quảng Ninh, An Giang, Lào Cai, Huế, Ninh Bình, rồi các tỉnh còn lại theo chữ cái. Sau này có thể đổi sang thống kê của BE.
+- **D-62:** **Không làm wizard từng bước.** Cả 4 phần nằm trên **một modal**, chia **4 khối xếp từ trên xuống**, mỗi khối bấm để đóng/mở, **chỉ mở được một khối tại một thời điểm** (accordion).
+- **D-72:** Thứ tự khối: **Điểm đến → Tên chuyến đi → Thời gian → Sở thích**.
+- **D-63:** Khối đang đóng hiện tiêu đề khối, **giá trị đã chọn dạng tóm tắt** (ví dụ "Điểm đến · Đà Nẵng", "Thời gian · 3 ngày, từ 12/11/2026", "Sở thích · Thiên nhiên, Mua sắm") và **dấu báo lỗi** nếu khối còn thiếu.
+- **D-64:** Khối **chọn một** (Điểm đến) chọn xong thì **tự đóng và mở khối kế tiếp**. Khối **chọn nhiều** (Sở thích) và khối **Thời gian** không tự chuyển; người dùng tự bấm mở khối khác.
+- **D-68:** Khối Tên không tự chuyển. **Enter trong ô Tên không gửi form.**
+- **D-65:** Mở được khối bất kỳ, theo thứ tự nào cũng được. Mở modal thì **khối Điểm đến mở sẵn**.
+- **D-66:** Nút **"Tạo lịch trình" dính ở đáy modal, luôn thấy được** (cạnh "Hủy").
+- **D-69:** Bấm Tạo khi còn thiếu/sai (chưa chọn điểm đến, tên trống...) thì **mở khối lỗi đầu tiên, focus ô lỗi, hiện lỗi dưới ô**. Lỗi field do BE trả về cũng xử lý như vậy.
+- **D-67:** Bề mặt dùng `ResponsiveFormSurface`: `Dialog` giữa màn hình từ `md`, bottom `Sheet` modal dưới `md` (có nút X đóng). Cùng accordion ở cả hai.
+- **D-93:** Tên mặc định **"Chuyến đi {Tên điểm đến}"**; chưa chọn điểm đến thì "Chuyến đi mới". Đổi điểm đến thì tên đổi theo **cho tới khi người dùng tự sửa tên**; xóa trắng rồi rời ô thì coi như chưa sửa và điền lại mặc định. Logic là hàm thuần ở domain.
+- **D-73:** Số ngày: nút **"−" / "+"** hai bên con số, gõ số trực tiếp được, **1–30, mặc định 3**, mỗi nút vùng chạm 44px.
+- **D-75:** Ngày khởi hành **tùy chọn**, **không chặn ngày quá khứ**. Dùng `Input type="date"` có sẵn (icon lịch bên trái, `allowClear`, `clearLabel="Xóa Ngày khởi hành"`), giá trị qua `CalendarDate`.
+- **D-74:** **Không hiện ngày kết thúc.**
+- **D-94:** Khối Sở thích **chọn nhiều, tùy chọn**.
+- **D-70:** Danh sách sở thích (theo thứ tự): **Lịch sử & Văn hóa, Thiên nhiên, Mua sắm, Ẩm thực & Đồ uống, Giải trí, Sức khỏe, Khác**. "Food & Drink" đổi thành "Ẩm thực & Đồ uống" (luật chuỗi tiếng Việt). "Khác" chỉ là một nhãn, không có ô nhập.
+- **D-71:** Sở thích là **chip chữ**, bấm để bật/tắt, xếp nhiều dòng.
+- **D-95:** Đóng modal giữa chừng **không hỏi xác nhận**, bỏ dữ liệu; mở lại là form mới.
+- **D-96:** Gửi **một request duy nhất** ở cuối (không tạo sớm). Trạng thái gửi, khóa khi đang gửi, dòng cold start giữ như D-12. Thành công thì chuyển vào editor, không toast (D-11).
+- **D-97:** Modal tạo **không có khối ảnh bìa**; ảnh bìa mặc định lấy theo điểm đến (D-79, D-80).
+- **D-76:** Điểm đến và sở thích **chưa hiện trong editor** ở phase này, chỉ lưu lên BE.
+- **D-77:** **Chưa sửa được** điểm đến và sở thích sau khi tạo; "Thông tin chuyến đi" không có hai trường này.
+- **D-78:** Thẻ trong "Lịch trình của tôi" **chưa hiện điểm đến**.
+- **D-98:** Cập nhật đặc tả nghiệp vụ `tripory/docs` PT-01 ("chỉ nhập Tên chuyến đi") theo luồng mới.
+
+### Mở lại 2026-10-30: ảnh bìa (ITIN-03)
+- **D-79:** Ảnh mặc định lấy từ **bộ 34 ảnh tuyển sẵn, tự lưu trữ** (mỗi tỉnh/thành một ảnh, trong app hoặc CDN của mình, URL https tuyệt đối dùng được cho Open Graph Phase 5). Danh mục điểm đến ở FE và BE mang URL ảnh này. **Giấy phép từng ảnh phải được xác minh** (ảnh tự chụp hoặc giấy phép cho phép dùng thương mại và tự lưu trữ). Không dùng Unsplash API hay Wikimedia động.
+- **D-80:** Lúc tạo, **BE ghi ảnh mặc định thành ảnh 1 và đặt làm ảnh đang hiển thị**. Ảnh này tính vào giới hạn 5, xóa/thay được như ảnh thường.
+- **D-99:** Lưu **tối đa 5 ảnh bìa**, chọn **một ảnh đang hiển thị**. DTO giữ trường `coverImageUrl` = ảnh đang hiển thị (code cũ, thẻ, tóm tắt không vỡ); thêm danh sách ảnh và ảnh đang chọn. Dữ liệu `CoverImageUrl` cũ chuyển thành ảnh 1 và được chọn.
+- **D-81:** Ảnh bìa vẫn **chỉ nhập bằng URL https**. Không có tải ảnh lên.
+- **D-100:** **Chỉ sửa ảnh bìa trong "Thông tin chuyến đi".**
+- **D-82:** Ảnh bìa hiện dạng **lưới 5 ô**. Bấm ảnh để chọn ảnh hiển thị; ô trống bấm để dán URL.
+- **D-84:** Bấm ô trống thì mở **ô nhập URL ngay dưới lưới** (`allowClear`, preview, nút "Thêm" và "Hủy"). Ảnh không tải được vẫn báo "Không tải được ảnh từ link" và vẫn cho thêm (giữ quy tắc D-25). Không mở modal chồng.
+- **D-85:** Ảnh đang hiển thị có **viền nhấn và dấu tích**. Lưới là nhóm **chọn một (radio)**: mũi tên di chuyển, Space chọn. Nhãn đọc màn hình "Ảnh bìa N, đang hiển thị" / "Chọn ảnh N làm ảnh bìa".
+- **D-86:** Mỗi ô có ảnh có **nút X** để xóa. Thay ảnh = xóa rồi thêm. Xóa ảnh đang hiển thị thì **ảnh đầu tiên còn lại tự được chọn**. Xóa hết thì giao diện hiện **ảnh của điểm đến làm dự phòng**, nhưng không tự ghi ảnh đó vào danh sách.
+
+### Mở lại 2026-10-30: "Thông tin chuyến đi" tự lưu (ITIN-03)
+- **D-87:** "Thông tin chuyến đi" **tự lưu khi có thay đổi**, **không có nút "Lưu"**. Áp cho mọi trường: tiêu đề, mô tả, ngày khởi hành, ảnh bìa.
+- **D-88:** Ô chữ (tiêu đề, mô tả) lưu **khi rời ô (blur) và khi ngừng gõ khoảng 800 ms**. Ngày khởi hành và thao tác ảnh (thêm, xóa, chọn) **lưu ngay**. Lệnh ghi **xếp hàng tuần tự** như các lệnh ghi khác của editor (cùng scope `itinerary:{id}`), vì `PUT` ghi đè toàn bộ và BE không có ETag.
+- **D-89:** Giá trị không hợp lệ (tiêu đề trống, quá 100 ký tự, URL không phải https...) **không gửi lên BE**, chỉ hiện lỗi dưới ô. Đóng form khi còn lỗi thì **bỏ giá trị lỗi, giữ giá trị đã lưu gần nhất**.
+- **D-90:** Trong form **chỉ báo khi lưu lỗi** (lỗi kèm "Thử lại", giá trị vẫn còn trong ô). Không hiện "Đang lưu" hay "Đã lưu" trong form. Chỉ báo trên header editor vẫn như D-30.
+- **D-91:** Chân form **không có nút nào**. Đóng bằng nút X hoặc vuốt xuống (sheet), Esc hoặc nút đóng (dialog).
+- **D-101:** Thay thế D-24 (Lưu/Hủy) và phần "Lưu" của D-25. Bản nháp `sessionStorage` của form metadata (D-36) còn cần hay không do planner quyết theo cơ chế tự lưu (Claude's Discretion).
+
 ### Claude's Discretion
 - Hình dạng 4 tầng của `packages/itinerary`: tên type, use case, port, Zod DTO (`z.iso.datetime({ offset: true })`, `z.iso.date()`), mapper ACL, query key, `createItineraryHooks`.
 - Dữ liệu editor lấy bằng RSC prefetch kèm hydrate React Query hay chỉ fetch ở client có skeleton. Chọn theo `cacheComponents` và bẫy Bearer stale ở D-46.
@@ -112,6 +177,7 @@ Nằm ngoài phase:
 - Tên và vị trí route handler resolve link rút gọn (ví dụ `/api/maps/resolve`), thời gian timeout, số bước redirect tối đa.
 - Copy phụ chưa chốt (tiêu đề trang, nhãn menu, empty state từng tab, thông báo lỗi parse vị trí), miễn theo giọng copy Phase 1 và Phase 3. Nên chạy `/gsd-ui-phase 4` để chốt UI-SPEC.
 - Ngưỡng "gần cuối" của infinite scroll, ngưỡng nhấn giữ cảm ứng trong khoảng 150–200ms.
+- (Mở lại 2026-10-30) Hình dạng type `Destination` (slug, tên hiển thị, loại, hạng, alias, URL ảnh), port danh mục điểm đến và adapter tĩnh, tên hàm thuần (tìm không dấu, tên mặc định, kiểm số ngày); vị trí đặt 34 ảnh (app `public/` hay CDN) miễn URL https tuyệt đối ổn định; component mới trong `ui-web` (accordion, chip chọn nhiều, nút −/+ số, lưới chọn ảnh) dựng trên Base UI 1.8.0; số mục nhóm "Phổ biến" (khoảng 8); giá trị debounce (khoảng 800 ms); có giữ bản nháp D-36 cho form metadata khi đã tự lưu hay không; tên file tài liệu BE (gợi ý cập nhật `04-BE-DEPENDENCIES.md` và thêm `04-BE-CONTRACT.md`); mã lỗi BE chính xác (chỉ đề xuất, user quyết khi sửa BE).
 
 </decisions>
 
@@ -150,6 +216,15 @@ Nằm ngoài phase:
 - `tripory_be/src/Services/Tripory/Tripory.Persistence/Repositories/ItineraryRepository.cs`: `/mine` sắp theo `UpdatedAt` giảm dần, thiếu `Include` (đếm sai).
 - `DomainErrors` của BE: `Itinerary.NotFound`, `Itinerary.Forbidden`, `Itinerary.CannotPublishEmpty`, `Itinerary.InvalidUserId`, `Itinerary.InvalidDayNumber`, `Itinerary.InvalidReorderList`, `Waypoint.NotFound`.
 
+### Mở lại 2026-10-30: form tạo, ảnh bìa, tự lưu
+- `.agents/tasks/create-itinerary-wizard-proposal.md`: phân tích luồng tạo hiện tại và khả năng BE (có file:line), dữ liệu điểm đến, phương án A/B/C. Lưu ý: đề xuất trong đó là wizard từng bước; **D-62 đã đổi thành accordion một modal**, D-52/D-58 đổi cách làm BE.
+- `.planning/REQUIREMENTS.md` ITIN-02, ITIN-03 (đã viết lại 2026-10-30); `.planning/ROADMAP.md` §Phase 4 tiêu chí 1, 2.
+- `.planning/phases/04-itinerary-crud-editor/04-BE-DEPENDENCIES.md`: thêm mục cho hợp đồng mới (D-57).
+- Nghị quyết 202/2025/QH15 (sắp xếp đơn vị hành chính cấp tỉnh, hiệu lực 01/07/2025) và Quyết định 19/2025/QĐ-TTg (danh mục, mã số đơn vị hành chính): nguồn chính thức cho 34 điểm đến (D-92). Researcher phải lấy văn bản gốc.
+- BE: `tripory_be/src/Services/Tripory/Tripory.API/Controllers/V1/ItinerariesController.cs` (tạo `:23-39`, `PUT` metadata `:78-97`), `Tripory.API/Contracts/V1/Itineraries/Requests/CreateItineraryRequest.cs`, `Tripory.Domain/Entities/Itinerary.cs` (`CreateQuickDraft :48-66`, `UpdateMetadata :68-81`, `SetDaySubtitle :194-203`), `Tripory.Persistence/Configurations/ItineraryDayConfiguration.cs`.
+- Đặc tả nghiệp vụ (repo `C:\Users\OS\Documents\personal\tripory`): `docs/traveler/ITINERARY_01_MAP+TIMELINE/PT-01_metadata.md` (cần sửa theo D-98), `docs/traveler/DISCOVERY_FEED_01/PT-01_hero_and_smart_search.md` (danh mục Discovery), BRD (lọc theo destination, duration, interests).
+- `.kiro/steering/coding-rules.md`, `.kiro/steering/code-review.md`: không dùng `? :`/`&&` để ẩn/hiện component (dùng prop `visible`), SOLID, giới hạn khoảng 7 prop / 150 dòng.
+
 ### FE cũ (tham khảo UX, không port code mock)
 - `C:\Users\OS\Documents\personal\tripory\src\pages\ItineraryEditorPage.tsx`
 - `C:\Users\OS\Documents\personal\tripory\src\components\itinerary\{TimelineSheet,DaySwitcher,SortableWaypointList,SortableWaypointItem,WaypointItem,WaypointDetailModal,EmptyTimelineState,PublishModal}.tsx`
@@ -186,6 +261,14 @@ Nằm ngoài phase:
 - `apps/web/src/app/api/...` (mới): route resolve link rút gọn Google Maps (D-20).
 - `pnpm-workspace.yaml` catalog: thêm dnd-kit (pin cứng).
 
+### Mở lại 2026-10-30 (hiện trạng sau 23 plan và các sửa UAT)
+- Luồng tạo hiện tại: `apps/web/src/modules/itinerary/ui/create-itinerary-dialog.tsx` (một ô tiêu đề, `Dialog size="sm"`, chưa dùng `ResponsiveFormSurface`), mở từ `AddButton` trong `my-itineraries-view.tsx`; schema `form-schemas.ts` (`createItinerarySchema`), hook `useCreateItinerary` (`packages/itinerary/src/react/index.ts`), port `create({ title })`, adapter `http-itinerary-repository.ts`, map lỗi `form-error-mapping.ts`.
+- `responsive-form-surface.tsx`: Dialog từ `md`, Sheet modal dưới `md` mở `expanded`, `locked` chặn đóng; `Sheet` của `ui-web` có nút X "Đóng" ở góc trên phải, cuộn cùng nội dung.
+- `trip-info-dialog.tsx`: form metadata đang có nút Lưu/Hủy, ô ngày và ô ảnh bìa dùng `allowClear` của `Input`; sẽ chuyển sang tự lưu (D-87) và lưới ảnh (D-82).
+- `ui-web`: `Input`/`Textarea` có `allowClear`, `clearLabel`; `type="date"` có icon lịch bên trái (`atoms/field-adornments.tsx`); `SearchInput` (`clearable`); `Button` (`icon`, `visible`, `loading`); `IconButton`. Base UI 1.8.0 có `accordion`, `toggle-group`, `number-field`, `radio-group`.
+- Lệnh ghi editor dùng `useWriteMutation` chung `mutationKey` và `scope: itinerary:{id}` (xếp hàng tuần tự); `SaveIndicator` đọc `useIsMutating` (D-30) — tự lưu metadata đi qua cùng cơ chế.
+- `domain/calendar-date.ts` (`CalendarDate`), `domain/day-range.ts` (`buildDayRange`).
+
 </code_context>
 
 <specifics>
@@ -209,6 +292,13 @@ Nằm ngoài phase:
 - Ngày thực theo `startDate` (UX-03), khoảng cách từng chặng (UX-04), "Chuyển sang ngày…" (UX-07) → v2.
 - Tìm địa điểm theo tên (MAP-01), chọn vị trí trên bản đồ (MAP-02) → v2.
 - Đề xuất BE: endpoint xóa ngày, hủy xuất bản, chuyển waypoint sang ngày khác, `UpdatedAt` trong `ItinerarySummaryDto`, ETag/version.
+- (Mở lại 2026-10-30) Hiện điểm đến và sở thích trong editor/tóm tắt (D-76) và trên thẻ danh sách (D-78).
+- Sửa điểm đến và sở thích sau khi tạo (D-77).
+- Tải ảnh bìa lên (upload, cần kho lưu trữ) (D-81).
+- Điểm đến ngoài Việt Nam (global), chọn nhiều điểm đến, chọn thẳng điểm du lịch (Đà Lạt, Phú Quốc...) thay vì tỉnh.
+- Xếp hạng phổ biến theo thống kê BE thay bảng tĩnh (D-61).
+- Dùng sở thích để lọc/gợi ý ở Discovery.
+- PUB-02 (chuyển từ Phase 5) và câu hỏi PUB-06: lập kế hoạch sau phần mở lại này.
 
 ### Reviewed Todos (not folded)
 Không có todo nào khớp với Phase 4.
@@ -219,3 +309,4 @@ Không có todo nào khớp với Phase 4.
 
 *Phase: 04-itinerary-crud-editor*
 *Context gathered: 2026-10-23*
+*Context updated: 2026-10-30 (mở lại ITIN-02, ITIN-03)*

@@ -41,8 +41,8 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 ### Lịch trình — danh sách và editor (ITIN)
 
 - [x] **ITIN-01**: Người dùng thấy "Lịch trình của tôi" có phân trang và lọc Tất cả/Nháp/Đã xuất bản
-- [x] **ITIN-02**: Người dùng có thể tạo lịch trình nhanh bằng tiêu đề và vào thẳng editor
-- [x] **ITIN-03**: Người dùng có thể sửa metadata: tiêu đề, mô tả, ngày khởi hành, ảnh bìa dạng URL (có preview và nền dự phòng)
+- [ ] **ITIN-02**: Người dùng tạo lịch trình trong một modal có 4 khối accordion (chỉ mở một khối mỗi lúc) rồi vào thẳng editor với đủ số ngày: (1) chọn một điểm đến trong 34 tỉnh/thành Việt Nam, nhóm "Phổ biến" và "Tất cả", tìm không dấu và theo alias (bắt buộc); (2) tên chuyến đi, mặc định "Chuyến đi {điểm đến}"; (3) ngày khởi hành (tùy chọn) và số ngày (mặc định 3, từ 1 tới 30); (4) sở thích (chọn nhiều, tùy chọn). Ảnh bìa mặc định theo điểm đến (xem `04-CONTEXT.md` D-52..D-101). BE lưu đủ các trường trong một request (phương án B). Mở lại 2026-10-30: bản tạo nhanh bằng tiêu đề đã giao ở Phase 4 (UAT bước 2 PASS) nay được thay bằng wizard; đề xuất ở `.agents/tasks/create-itinerary-wizard-proposal.md`
+- [ ] **ITIN-03**: Người dùng có thể sửa metadata: tiêu đề, mô tả, ngày khởi hành, ảnh bìa dạng URL (có preview và nền dự phòng). Mở lại 2026-10-30: "Thông tin chuyến đi" tự lưu khi có thay đổi (không có nút Lưu); lưu tối đa 5 ảnh bìa dạng lưới và chọn một ảnh hiển thị; ảnh bìa chỉ sửa ở đây (xem `04-CONTEXT.md` D-79..D-91)
 - [x] **ITIN-04**: Người dùng có thể chuyển tab ngày, thêm ngày và sửa phụ đề ngày inline
 - [x] **ITIN-05**: Người dùng có thể thêm waypoint (tên, địa chỉ, ghi chú) và nhập vị trí bằng cách dán tọa độ "lat, lng" hoặc link Google Maps
 - [x] **ITIN-06**: Người dùng có thể sửa waypoint
@@ -188,8 +188,8 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | AUTH-07 | Phase 3 | Complete |
 | AUTH-08 | Phase 3 | Complete |
 | ITIN-01 | Phase 4 | Complete |
-| ITIN-02 | Phase 4 | Complete |
-| ITIN-03 | Phase 4 | Complete |
+| ITIN-02 | Phase 4 | Pending (mở lại: form tạo 4 khối) |
+| ITIN-03 | Phase 4 | Pending (mở lại: tự lưu, nhiều ảnh bìa) |
 | ITIN-04 | Phase 4 | Complete |
 | ITIN-05 | Phase 4 | Complete |
 | ITIN-06 | Phase 4 | Complete |

@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: "Phase 4 reopened; next = wizard tạo lịch trình (ITIN-02, phương án B: sửa BE + FE): `/gsd-discuss-phase 4` (cập nhật CONTEXT, giữ D-01..D-51) → `/gsd-ui-phase 4` → `/gsd-plan-phase 4 --research` (chỉ thêm plan 04-24+). PUB-02 để sau; vẫn chờ user xác nhận phạm vi PUB-02 trong editor và việc PUB-06 có chuyển theo không"
-stopped_at: Phase 4 context gathered (mở lại ITIN-02, ITIN-03)
-last_updated: "2026-11-02T08:40:49.995Z"
+stopped_at: Phase 4 UI-SPEC approved (mở lại ITIN-02, ITIN-03)
+last_updated: "2026-11-02T09:31:43.551Z"
 last_activity: 2026-10-30
 progress:
   total_phases: 8
@@ -219,6 +219,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-11-02T08:40:49.991Z
-Stopped at: Phase 4 context gathered (mở lại ITIN-02, ITIN-03)
-Resume file: .planning/phases/04-itinerary-crud-editor/04-CONTEXT.md
+Last session: 2026-11-02T09:31:43.546Z
+Stopped at: Phase 4 UI-SPEC approved (mở lại ITIN-02, ITIN-03)
+Resume file: .planning/phases/04-itinerary-crud-editor/04-UI-SPEC.md

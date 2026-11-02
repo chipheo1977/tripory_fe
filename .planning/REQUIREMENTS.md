@@ -202,7 +202,7 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | ITIN-13 | Phase 4 | Complete |
 | ITIN-14 | Phase 4 | Complete |
 | PUB-01 | Phase 5 | Pending |
-| PUB-02 | Phase 5 | Pending |
+| PUB-02 | Phase 4 | Pending (chuyển từ Phase 5 theo yêu cầu user 2026-10-30) |
 | PUB-03 | Phase 5 | Pending |
 | PUB-04 | Phase 5 | Pending |
 | PUB-05 | Phase 5 | Pending |

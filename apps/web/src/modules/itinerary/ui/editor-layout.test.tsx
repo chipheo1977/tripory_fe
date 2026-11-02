@@ -97,6 +97,7 @@ it("from lg renders the two-column grid with timeline on the left and the canvas
   expect(screen.queryByTestId("summary")).toBeNull();
   expect(screen.queryByRole("dialog")).toBeNull();
   expect(screen.queryByRole("button", { name: "Thu gọn bảng" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Đóng" })).toBeNull();
   expect(h.sheetProps).not.toHaveBeenCalled();
 });
 
@@ -120,9 +121,11 @@ it("below lg shows the summary behind a non-modal, non-dismissible timeline shee
   const sheet = await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
   expect(within(sheet).getByTestId("timeline")).toBeTruthy();
   expect(summary.closest("[role=dialog]")).toBeNull();
+  // Sheet timeline non-modal vẫn có nút X "Đóng" (như vuốt xuống hết); mở lại bằng chip "Lịch trình".
   for (const name of ["Thu gọn bảng", "Mở rộng bảng", "Đóng bảng"]) {
     expect(screen.queryByRole("button", { name })).toBeNull();
   }
+  expect(within(sheet).getByRole("button", { name: "Đóng" })).toBeTruthy();
   expect(document.querySelector("[data-sheet-backdrop]")).toBeNull();
 
   const props = h.sheetProps.mock.calls.at(-1)?.[0] as Record<string, unknown>;
@@ -148,6 +151,22 @@ it("closing the timeline sheet shows a chip that reopens it", async () => {
   expect(await screen.findByRole("dialog", { name: "Lịch trình theo ngày" })).toBeTruthy();
   expect(screen.queryByRole("button", { name: "Lịch trình" })).toBeNull();
   expect((h.sheetProps.mock.calls.at(-1)?.[0] as { defaultSnap: string }).defaultSnap).toBe("medium");
+});
+
+it("the X button closes the timeline sheet, shows the chip, and the chip reopens it", async () => {
+  installMatchMedia(false);
+  setup();
+  const sheet = await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
+
+  await userEvent.click(within(sheet).getByRole("button", { name: "Đóng" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  expect((h.sheetProps.mock.calls.at(-1)?.[0] as { open: boolean }).open).toBe(false);
+  const chip = screen.getByRole("button", { name: "Lịch trình" });
+
+  await userEvent.click(chip);
+  const reopened = await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
+  expect(within(reopened).getByRole("button", { name: "Đóng" })).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Lịch trình" })).toBeNull();
 });
 
 it("passes the measured header height to the sheet as insetTop", () => {

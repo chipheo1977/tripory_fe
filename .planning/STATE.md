@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_plan
-stopped_at: Phase 4 complete (UAT 23/23 PASS)
+stopped_at: Phase 4 reopened vì PUB-02 (23/23 plan và UAT 23/23 PASS vẫn giữ); dừng, chưa lập kế hoạch bổ sung
 last_updated: "2026-10-30T00:00:00.000Z"
 last_activity: 2026-10-30
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 3
   total_plans: 50
   completed_plans: 50
   percent: 100
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình du lịch thật trên bản triển khai công khai, rồi trao đổi về chuyến đi với người khác.
-**Current focus:** Phase 5 — SVG Map & Public View (kế tiếp, chưa lập kế hoạch)
+**Current focus:** Phase 4 mở lại vì PUB-02 (chuyển từ Phase 5 theo yêu cầu user 2026-10-30); chưa lập kế hoạch
 
 ## Current Position
 
-Phase: 4 hoàn tất, kế tiếp Phase 5
-Plan: 23 of 23 (UAT thủ công 04-23 xong, 23/23 bước PASS)
-Status: Phase 4 complete; next = Phase 5 (`/gsd-discuss-phase 5` hoặc `/gsd-plan-phase 5`)
+Phase: 4 mở lại (reopened) vì PUB-02; 23/23 plan và UAT 23/23 PASS vẫn giữ nguyên
+Plan: 23 of 23 đã xong; cần plan bổ sung cho PUB-02 (chưa làm)
+Status: Phase 4 reopened; next = lập kế hoạch bổ sung cho PUB-02 (chưa làm, đang dừng). Chờ user xác nhận phạm vi PUB-02 trong editor và việc PUB-06 có chuyển theo không
 Last activity: 2026-10-30
 
 Phase 1 progress: [██████████] 100% — verified complete

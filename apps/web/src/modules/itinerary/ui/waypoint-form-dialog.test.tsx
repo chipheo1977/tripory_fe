@@ -422,3 +422,34 @@ it("uses a bottom sheet below the md breakpoint with the same fields", async () 
   expect(nameInput()).toBeTruthy();
   expect(locationInput()).toBeTruthy();
 });
+
+it("closes the bottom sheet with the X button like a swipe down", async () => {
+  setWide(false);
+  const { user, onClose } = setup();
+  await screen.findByRole("dialog", { name: "Thêm điểm đến vào Ngày 2" });
+  await user.click(screen.getByRole("button", { name: "Đóng" }));
+  await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+});
+
+it("disables the sheet X button while sending", async () => {
+  setWide(false);
+  h.add.mockImplementation(() => new Promise(() => undefined));
+  const { user, onClose } = setup();
+  await screen.findByRole("dialog");
+  set(nameInput(), "Chợ");
+  set(locationInput(), COORDS_INPUT);
+  await user.click(submitButton());
+  await waitFor(() => expect(h.add).toHaveBeenCalledTimes(1));
+  const close = screen.getByRole("button", { name: "Đóng" }) as HTMLButtonElement;
+  expect(close.disabled).toBe(true);
+  fireEvent.click(close);
+  expect(onClose).not.toHaveBeenCalled();
+  expect(screen.getByRole("dialog")).toBeTruthy();
+});
+
+it("has no sheet X button in the desktop dialog", async () => {
+  setup();
+  await screen.findByRole("dialog");
+  expect(screen.queryByRole("button", { name: "Đóng" })).toBeNull();
+});

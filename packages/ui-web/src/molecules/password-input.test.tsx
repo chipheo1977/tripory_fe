@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { createRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { FormField, FormFieldLabel } from './form-field';
-import { PasswordInput } from './password-input';
+import { PasswordInput, type PasswordInputProps } from './password-input';
 
 const getInput = (container: HTMLElement) => container.querySelector('input') as HTMLInputElement;
 
@@ -172,6 +172,15 @@ describe('PasswordInput', () => {
 
     expect(screen.getByLabelText('Mật khẩu', { selector: 'input' })).toBe(input);
     expect(screen.getByRole('button', { name: 'Hiện mật khẩu' }).getAttribute('aria-controls')).toBe(input.id);
+  });
+
+  it('không có nút X dù có giá trị, và type không nhận allowClear/clearLabel', () => {
+    // @ts-expect-error PasswordInput không nhận allowClear: bên phải dành cho nút hiện/ẩn.
+    const props: PasswordInputProps = { allowClear: true, 'aria-label': 'Mật khẩu', defaultValue: 'abc' };
+    render(<PasswordInput {...props} />);
+
+    expect(screen.queryByRole('button', { name: 'Xóa nội dung' })).toBeNull();
+    expect(screen.getAllByRole('button')).toHaveLength(1);
   });
 
   it('gõ giá trị uncontrolled hoạt động và toggle không làm mất giá trị', async () => {

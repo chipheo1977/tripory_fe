@@ -82,7 +82,35 @@ describe("ResponsiveFormSurface", () => {
     expect(dialog.getAttribute("data-sheet-position")).toBeNull();
     expect(screen.getByText("nội dung form")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Đóng bảng" })).toBeNull();
+    // Dialog desktop không có nút X tự động (đóng bằng Esc hoặc nút "Hủy" của form); chỉ Sheet modal có.
+    expect(screen.queryByRole("button", { name: "Đóng" })).toBeNull();
     expect(document.getElementById("surface-title")?.textContent).toBe("Thông tin chuyến đi");
+  });
+
+  it("dưới md Sheet có nút X: bấm gọi onOpenChange(false)", async () => {
+    const user = userEvent.setup();
+    const { onOpenChange } = setup({ wide: false });
+    await screen.findByRole("dialog");
+    const button = screen.getByRole("button", { name: "Đóng" }) as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
+
+    await user.click(button);
+
+    expect(closes(onOpenChange)).toBe(true);
+  });
+
+  it("dưới md khi locked nút X bị vô hiệu và bấm không đóng", async () => {
+    const user = userEvent.setup();
+    const { onOpenChange } = setup({ wide: false, locked: true });
+    await screen.findByRole("dialog");
+    const button = screen.getByRole("button", { name: "Đóng" }) as HTMLButtonElement;
+    expect(button.disabled).toBe(true);
+
+    await user.click(button);
+    fireEvent.click(button);
+
+    expect(closes(onOpenChange)).toBe(false);
+    expect(screen.getByRole("dialog")).toBeTruthy();
   });
 
   it("dưới md render Sheet modal ở mức expanded với SheetTitle", async () => {

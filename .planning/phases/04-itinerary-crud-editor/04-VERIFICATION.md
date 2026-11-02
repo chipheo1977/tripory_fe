@@ -44,6 +44,7 @@ human_verification:
 **Phase Goal:** Người dùng đã đăng nhập tạo, sửa, sắp xếp và xuất bản một lịch trình thật bằng API BE, trên cả desktop và mobile.
 **Verified:** 2026-10-29T04:41:54Z
 **Branch:** `phase_4` (HEAD `6523ba2`, working tree clean before this file)
+**Ghi chú 2026-10-30:** PUB-02 được chuyển từ Phase 5 vào phạm vi Phase 4 sau khi xác minh này; báo cáo chưa phủ PUB-02.
 **Status:** passed (cập nhật 2026-10-30: `human_needed` → `passed`)
 **Re-verification:** Cập nhật trạng thái sau UAT thủ công. Phần kiểm tự động ở dưới giữ nguyên, không chạy lại.
 

@@ -16,7 +16,7 @@ Phase này giao, cho người dùng đã đăng nhập và bằng API BE thật:
 6. Dựng đủ 4 tầng của `packages/itinerary` (domain, application, infrastructure, react) và composition `itinerary.client.ts` / `itinerary.server.ts`.
 
 Nằm ngoài phase:
-- Bản đồ SVG trong editor và trang công khai (PUB-02, PUB-06 → Phase 5). Phase 4 chỉ chừa vùng "canvas" để Phase 5 thay bằng bản đồ.
+- Bản đồ SVG trong editor và trang công khai (PUB-02, PUB-06 → Phase 5). Phase 4 chỉ chừa vùng "canvas" để Phase 5 thay bằng bản đồ. [Lệch: PUB-02 đã chuyển từ Phase 5 vào Phase 4 theo yêu cầu user 2026-10-30, chưa lập kế hoạch; PUB-06 vẫn ở Phase 5, chờ user xác nhận.]
 - Trang công khai `/itineraries/[id]`, copy link / Web Share / QR, **hộp chia sẻ sau khi xuất bản** (D-40 → Phase 5, cùng PUB-04).
 - Tìm địa điểm theo tên (MAP-01), bấm lên bản đồ để chọn vị trí (MAP-02): v2.
 - Kéo waypoint giữa các ngày, xóa/đổi thứ tự ngày, hủy xuất bản: BE không có endpoint.
@@ -47,7 +47,7 @@ Nằm ngoài phase:
 - **D-13:** Desktop (từ `lg`) chia **hai vùng**. Bên trái là cột timeline rộng khoảng 400px: tab ngày, phụ đề, danh sách waypoint, nút thêm điểm. Bên phải là vùng **canvas**: Phase 4 hiện ảnh bìa lớn và tóm tắt chuyến đi (tiêu đề, mô tả, ngày khởi hành, tổng km, badge). Phase 5 thay canvas bằng bản đồ SVG, còn ảnh bìa và tóm tắt chuyển vào đầu cột trái. Cấu trúc component phải tách canvas thành một slot để Phase 5 thay mà không dựng lại.
 - **D-14:** Mobile: ảnh bìa và tóm tắt nằm ở nửa trên làm nền. Timeline nằm trong `Sheet` **không modal** của `ui-web`, có 3 mức peek/medium/expanded. Nền vẫn tương tác được (Phase 1 đã có `disablePointerDismissal` cho sheet không modal). Phase 5 thay nền bằng bản đồ.
 - **D-15:** Mở editor trên mobile thì sheet ở mức **medium**.
-- **D-16:** Editor dùng **layout toàn màn**: **header riêng của editor thay AppHeader**, dính trên cùng. Header có nút back, tiêu đề rút gọn (ellipsis), chỉ báo trạng thái lưu (D-30), nút "Xuất bản" (D-38), menu ⋯ (Thông tin chuyến đi, Xóa lịch trình) và avatar UserMenu thu gọn. Trên mobile header giữ nguyên, không bị sheet che. Vẫn nằm trong `(dashboard)` để có gate. Cách tách layout (route group lồng hay layout riêng) do planner chốt theo docs Next 16.4.
+- **D-16:** Editor dùng **layout toàn màn**: **header riêng của editor thay AppHeader**, dính trên cùng. Header có nút back, tiêu đề rút gọn (ellipsis), chỉ báo trạng thái lưu (D-30), nút "Xuất bản" (D-38), menu ⋯ (Thông tin chuyến đi, Xóa lịch trình) và avatar UserMenu thu gọn. **[Lệch: header hiện tại là [back] [tiêu đề] [nút "i" mở Thông tin chuyến đi] ... [SaveIndicator] [Xuất bản: icon Globe trần dưới md, nút primary có chữ từ md] [nút xóa Trash2 ngoài]. Không còn menu ⋯, không còn avatar UserMenu ở EditorHeader (chỉ header rút gọn tải/lỗi/403 còn `UserMenu compact`); icon header cỡ sm. Theo yêu cầu user 2026-10-30; nội dung quyết định giữ nguyên làm lịch sử.]** Trên mobile header giữ nguyên, không bị sheet che. Vẫn nằm trong `(dashboard)` để có gate. Cách tách layout (route group lồng hay layout riêng) do planner chốt theo docs Next 16.4.
 - **D-17:** Sửa metadata trong dialog **"Thông tin chuyến đi"** (desktop là `Dialog`, mobile là `Sheet` modal), mở từ menu ⋯ hoặc khi bấm vào vùng tóm tắt/canvas.
 
 ### Form waypoint và nhập vị trí (ITIN-05, 06)

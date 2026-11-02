@@ -126,11 +126,13 @@ Contrast: dùng lại bằng chứng Phase 1/3. Badge `success` (`success` trên
 
 ### Dùng lại nguyên trạng (`@tripory/ui-web`)
 
-`Card` (`default`), `Tabs`/`TabsList`/`TabsTrigger`/`TabsPanel` (`line`), `Dialog`/`DialogContent` (`sm`, `md`)/`DialogTitle`/`DialogDescription`/`DialogClose`, `DropdownMenu*` (gồm `DropdownMenuLinkItem`, item `danger`), `Tooltip*`, `Badge` (`neutral`, `success`), `Skeleton`, `EmptyState` (`compact`, `page`), `ErrorState` (`page`, `card`), `FormField*`, `Input` (`md`, `lg`), `Textarea`, `Button` (`loadingLabel`), `IconButton`, `InlineAlert`, `Avatar`, `Spinner`, `Icon`, `Separator`, `Sheet*`.
+`Card` (`default`), `Tabs`/`TabsList`/`TabsTrigger`/`TabsPanel` (`line`), `Dialog`/`DialogContent` (`sm`, `md`)/`DialogTitle`/`DialogDescription`/`DialogClose`, `DropdownMenu*` (gồm `DropdownMenuLinkItem`, item `danger`), `Tooltip*`, `Badge` (`neutral`, `success`), `Skeleton`, `EmptyState` (`compact`, `page`), `ErrorState` (`page`, `card`), `FormField*`, `Input` (`md`, `lg`; `allowClear`, `clearLabel`), `Textarea` (`allowClear`, `clearLabel`), `Button` (`loadingLabel`), `IconButton`, `InlineAlert`, `Avatar`, `Spinner`, `Icon`, `Separator`, `Sheet*`.
 
 ### Mở rộng `ui-web` (generic, không chứa copy nghiệp vụ, mỗi mục có test theo DS-07)
 
-> **Cập nhật theo yêu cầu người dùng (2026-10):** `SheetControls` và các nút "Thu gọn bảng", "Mở rộng bảng", "Đóng bảng" đã bị gỡ khỏi `Sheet` (cùng `stepSnapPoint`). Người dùng đổi giữa ba mức thấp (peek) / vừa (medium) / mở rộng (expanded) bằng cách vuốt, hoặc giữ và kéo thanh kéo (`SheetHandle`) lên/xuống; đóng sheet bằng vuốt xuống, Esc, hoặc nút "Hủy" của form. Không thêm nút thay thế (người dùng đã xác nhận). Đánh đổi a11y đã biết: người dùng chỉ dùng bàn phím không còn cách đổi mức snap (chỉ Esc đóng được khi `dismissible`), và không còn nút đóng nhìn thấy trong sheet. Vùng cuộn nội dung của Sheet chỉ bật ở mức mở rộng (expanded); ở mức thấp/vừa nội dung không cuộn, vuốt hoặc giữ-kéo thanh kéo để đổi mức (sửa lỗi vuốt không đổi mức khi form cao hơn vùng hiển thị).
+> **Cập nhật theo yêu cầu người dùng (2026-10):** `SheetControls` và các nút "Thu gọn bảng", "Mở rộng bảng", "Đóng bảng" đã bị gỡ khỏi `Sheet` (cùng `stepSnapPoint`). Người dùng đổi giữa ba mức thấp (peek) / vừa (medium) / mở rộng (expanded) bằng cách vuốt, hoặc giữ và kéo thanh kéo (`SheetHandle`) lên/xuống; đóng sheet bằng vuốt xuống, Esc, hoặc nút "Hủy" của form. Không thêm nút thay thế cho việc đổi mức snap (người dùng đã xác nhận). Đánh đổi a11y đã biết: người dùng chỉ dùng bàn phím không còn cách đổi mức snap (chỉ Esc đóng được khi `dismissible`).
+
+> **Nút X đóng của Sheet bottom (2026-10, yêu cầu người dùng; mở rộng cho non-modal ở lượt sau):** khác với các nút đổi mức đã gỡ, mọi `Sheet` **bottom đóng được (`dismissible`), modal lẫn non-modal** có nút icon `X` (lucide, size `sm`) ở góc trên phải popup, `aria-label` "Đóng", vùng chạm `min-h-touch min-w-touch` (44px), đặt cùng dải cao với `SheetHandle` nên không che tay cầm giữa và không đè tiêu đề (tiêu đề nằm dưới dải này). Nút chỉ đóng sheet qua `onOpenChange(false)` (cùng đường với vuốt hết xuống và Esc), **không đổi mức snap**; focus trả về phần tử đã mở. Có `data-base-ui-swipe-ignore` để chạm vào nút không bắt đầu cử chỉ vuốt. `SheetContent` prop `closeDisabled` vô hiệu nút (form dùng khi `locked`, đang gửi). Sheet timeline của editor (non-modal) cũng có X: bấm X thì sheet đóng, chip "Lịch trình" ở đáy hiện ra để mở lại (viewport non-modal là `pointer-events-none` nhưng popup và X là `pointer-events-auto`). **X cuộn cùng nội dung (2026-10, người dùng xác nhận phương án A, sửa lỗi X bị ghim cứng khi cuộn dọc):** X không `fixed`/`sticky` mà nằm trong luồng nội dung cuộn của popup, ở hàng đầu tiên cao 0 (`relative h-0`, X `absolute right-0 top-0` so với hàng này), trước `SheetHandle`; ở mức expanded (popup `overflow-y-auto`) cuộn nội dung thì X trôi lên và biến mất cùng nội dung, ở mức peek/medium (popup `overflow-y-hidden`) X luôn thấy ở góc trên phải. Vì X không còn dính mép, hàng sticky của `DayTabs` không cần chừa chỗ cho X (đã bỏ `pr-touch`); lúc nghỉ X nằm trong dải tay cầm, phía trên hàng tab. Sheet `dismissible={false}` và sheet cạnh trái/phải không có nút. `Dialog` từ `md` không có X tự động: đóng bằng Esc hoặc nút "Hủy" của form (giữ nguyên). Vùng cuộn nội dung của Sheet chỉ bật ở mức mở rộng (expanded); ở mức thấp/vừa nội dung không cuộn, vuốt hoặc giữ-kéo thanh kéo để đổi mức (sửa lỗi vuốt không đổi mức khi form cao hơn vùng hiển thị).
 
 | Component | Vị trí | Contract |
 |-----------|--------|----------|
@@ -316,7 +318,7 @@ grid lg:grid-cols-[var(--editor-timeline-width)_1fr], cao 100dvh − header
 ### Bố cục mobile/tablet (dưới `lg`, D-14, D-15)
 
 - Nền (sau sheet, cuộn được, tương tác được): `TripSummary` dạng gọn: ảnh bìa full-width `aspect-(--itinerary-cover-ratio)`, rồi khối `p-stack-md` gồm hàng badge/meta, tiêu đề Heading, mô tả `line-clamp-3`, nút "Sửa thông tin". Padding dưới bằng chiều cao mức peek để nội dung cuối không bị sheet che.
-- Timeline: `Sheet modal={false} defaultSnap="medium" insetTop={chiều cao header}` + `SheetContent fillSnap` (popup cao cố định bằng mức expanded, nếu không Base UI gộp mất mức vừa khi nội dung ngắn). Có đủ ba mức peek/vừa/mở rộng; vuốt xuống hết từ peek thì đóng (state `open` ở `EditorLayout`) và hiện chip `Button` "Lịch trình" cố định ở đáy để mở lại (mở lại ở mức vừa). `SheetTitle` sr-only "Lịch trình theo ngày". Nội dung theo thứ tự: DayTabs (sticky trong vùng cuộn của sheet), DaySubtitle, WaypointList, thanh "Thêm điểm đến" sticky bottom (như desktop, cộng `env(safe-area-inset-bottom)`).
+- Timeline: `Sheet modal={false} defaultSnap="medium" insetTop={chiều cao header}` + `SheetContent fillSnap` (popup cao cố định bằng mức expanded, nếu không Base UI gộp mất mức vừa khi nội dung ngắn). Có đủ ba mức peek/vừa/mở rộng; vuốt xuống hết từ peek hoặc bấm nút X "Đóng" ở góc trên phải thì đóng (cùng `onOpenChange(false)`, state `open` ở `EditorLayout`) và hiện chip `Button` "Lịch trình" cố định ở đáy để mở lại (mở lại ở mức vừa). `SheetTitle` sr-only "Lịch trình theo ngày". Nội dung theo thứ tự: DayTabs (sticky trong vùng cuộn của sheet), DaySubtitle, WaypointList, thanh "Thêm điểm đến" sticky bottom (như desktop, cộng `env(safe-area-inset-bottom)`).
 - Sheet không bao giờ che header ở cả ba mức (nhờ `insetTop`).
 - Kéo thả trong sheet: chỉ tay cầm nhận nhấn giữ 180ms; vuốt ở chỗ khác của sheet vẫn là cuộn/snap sheet (D-34).
 
@@ -376,7 +378,7 @@ grid lg:grid-cols-[var(--editor-timeline-width)_1fr], cao 100dvh − header
 
 ### WaypointFormDialog (D-18..D-22)
 
-- Từ `md`: `DialogContent size="md"`. Dưới `md`: `Sheet modal defaultSnap="expanded"`. Form dialog **không đóng khi bấm scrim** (`disablePointerDismissal`); Esc, vuốt xuống (Sheet), "Hủy" thì đóng và bỏ thay đổi. Đang gửi: không đóng được bằng bất kỳ cách nào.
+- Từ `md`: `DialogContent size="md"`. Dưới `md`: `Sheet modal defaultSnap="expanded"`. Form dialog **không đóng khi bấm scrim** (`disablePointerDismissal`); Esc, vuốt xuống hoặc nút X góc trên phải (Sheet), "Hủy" thì đóng và bỏ thay đổi. Đang gửi: không đóng được bằng bất kỳ cách nào (nút X bị vô hiệu).
 - Tiêu đề: thêm "Thêm điểm đến vào Ngày N"; sửa "Sửa điểm đến". Không có ô ngày (D-23).
 - Đầu form: `InlineAlert variant="info"` "Đã khôi phục nội dung chưa lưu" khi mở lại từ bản nháp `sessionStorage` (D-36); `InlineAlert` lỗi khi có lỗi không gắn field.
 - Field (thứ tự cố định, hiện cùng lúc, cách 16px), Tên được focus khi mở:
@@ -417,8 +419,8 @@ Dòng trạng thái nằm ngay dưới ô (sau mô tả), `aria-live="polite"`, 
 |-------|---------|----------|----------|---------|
 | Tiêu đề | `Input lg` | `required` | 1–100 sau trim | Focus khi mở |
 | Mô tả | `Textarea` | không | ≤ 1000 | |
-| Ngày khởi hành | `Input lg type="date"` | không | `CalendarDate` | Có giá trị thì hiện `Button ghost sm` icon `X` "Xóa ngày" cạnh ô (Safari iOS không có nút xóa gốc); để trống gửi `null` |
-| Ảnh bìa | `Input lg type="url" inputMode="url"` | không | `https://`, ≤ 500 (cột BE) | Mô tả "Dán link ảnh bắt đầu bằng https://". Có giá trị thì hiện `Button ghost sm` icon `X` "Xóa ảnh bìa" |
+| Ngày khởi hành | `Input lg type="date"` | không | `CalendarDate` | `allowClear` mặc định của `type="date"`: có giá trị thì hiện nút X bên phải trong ô, `clearLabel="Xóa Ngày khởi hành"` (Safari iOS không có nút xóa gốc); biểu tượng lịch bên trái; để trống gửi `null` |
+| Ảnh bìa | `Input lg type="url" inputMode="url"` | không | `https://`, ≤ 500 (cột BE) | Mô tả "Dán link ảnh bắt đầu bằng https://". `allowClear` + `clearLabel="Xóa Ảnh bìa"`: có giá trị thì hiện nút X bên phải trong ô |
 
 - Preview ảnh bìa dưới ô (cách 8px), `aspect-(--itinerary-cover-ratio) rounded-container overflow-hidden`, chỉ khi URL hợp lệ, debounce 400ms: đang tải `Skeleton block`; tải được `<img alt="Xem trước ảnh bìa" referrerPolicy="no-referrer">`; lỗi tải → nền `surface-muted` + icon `ImageOff` 24px `text-subtle` + dòng "Không tải được ảnh từ link này" (`text-label text-muted`), **vẫn cho lưu** (D-25).
 - Footer: "Hủy" `secondary` + "Lưu" `primary` (`loadingLabel` "Đang lưu…"), bố cục như form waypoint (không có nút xóa). `SubmitStatus` dưới footer. Lưu xong đóng, không toast (D-24); focus về nút đã mở dialog.
@@ -499,7 +501,7 @@ Dòng trạng thái nằm ngay dưới ô (sau mô tả), `aria-live="polite"`, 
 | Dialog tạo (D-09, D-12) | Title "Lịch trình mới"; nhãn "Tiêu đề"; giá trị đầu "Chuyến đi mới"; nút "Tạo lịch trình" / "Đang tạo…"; "Hủy" |
 | Form waypoint | Title "Thêm điểm đến vào Ngày {N}" / "Sửa điểm đến"; nhãn "Tên", "Vị trí", "Địa chỉ", "Ghi chú"; mô tả vị trí "Dán tọa độ (ví dụ 10.7769, 106.7009) hoặc link Google Maps."; "Đã lấy tên từ link, bạn có thể sửa."; nút "Thêm điểm đến" / "Đang thêm…", "Lưu" / "Đang lưu…", "Hủy", "Xóa điểm đến" |
 | Vị trí (D-21) | "Đã nhận: {lat}, {lng}"; "Đang đọc link…" |
-| Dialog Thông tin chuyến đi (D-24, D-25) | Title "Thông tin chuyến đi"; nhãn "Tiêu đề", "Mô tả", "Ngày khởi hành", "Ảnh bìa"; mô tả "Dán link ảnh bắt đầu bằng https://"; "Xóa ngày", "Xóa ảnh bìa"; "Không tải được ảnh từ link này"; nút "Lưu" / "Đang lưu…", "Hủy" |
+| Dialog Thông tin chuyến đi (D-24, D-25) | Title "Thông tin chuyến đi"; nhãn "Tiêu đề", "Mô tả", "Ngày khởi hành", "Ảnh bìa"; mô tả "Dán link ảnh bắt đầu bằng https://"; "Xóa Ngày khởi hành", "Xóa Ảnh bìa" (aria-label của nút X trong ô); "Không tải được ảnh từ link này"; nút "Lưu" / "Đang lưu…", "Hủy" |
 | Khôi phục bản nháp (D-36) | "Đã khôi phục nội dung chưa lưu" |
 | Cold start | "Máy chủ đang khởi động, có thể mất tới 30 giây…" (Phase 3) |
 | Toast | "Đã xóa "{tên}"" + action "Hoàn tác" (D-31) · "Đã xuất bản lịch trình" (D-40) · "Đã xóa lịch trình" (D-42) · "Danh sách đã thay đổi, đã tải lại" (D-37, info) · lỗi theo `selectErrorMessage` |
@@ -550,7 +552,7 @@ Giọng văn theo Phase 1/3: tiếng Việt trung tính, câu ngắn, không d�
 - Mỗi trang đúng một `h1` (danh sách: "Lịch trình của tôi"; editor: tiêu đề trên header). Dialog/Sheet có title; form `aria-labelledby` trỏ title.
 - Thẻ lịch trình: một link duy nhất (tiêu đề) + một nút menu; không lồng phần tử tương tác. Thẻ waypoint: tay cầm, nút chính, nút menu tách rời.
 - Tabs (lọc, ngày) theo pattern Base UI: ←/→, Home/End, `aria-selected`; nút "Thêm ngày" ngoài roving focus.
-- Mọi icon button có `aria-label` (back, ⋯, tay cầm, xóa ngày, xóa ảnh bìa có chữ thấy được).
+- Mọi icon button có `aria-label` (back, ⋯, tay cầm, nút X trong ô "Xóa Ngày khởi hành", "Xóa Ảnh bìa" có aria-label theo nhãn của ô).
 - `aria-disabled` cho "Xuất bản" kèm `aria-describedby` giải thích; không dùng `disabled` thật (D-38).
 - Live region: chỉ báo lưu, dòng trạng thái vị trí, `SubmitStatus`, live region editor (thêm điểm), announcements dnd-kit, status tải. Toast hoàn tác `role="status"` và tới được bằng bàn phím (vùng toast của Sonner có phím tắt và nút có thể Tab tới).
 - Dialog xác nhận phá hủy và xuất bản đặt focus đầu ở "Hủy"/"Ở lại"; trả focus đúng chỗ theo các quy tắc ở trên sau khi đóng.
@@ -579,7 +581,7 @@ Giọng văn theo Phase 1/3: tiếng Việt trung tính, câu ngắn, không d�
 | `DaySubtitle` | Enter/blur lưu, Esc hủy, rỗng → null, > 100 báo lỗi, không đổi không gửi |
 | `WaypointList` | Xóa ẩn ngay + toast; hoàn tác trả đúng vị trí, không gọi BE; 5s gửi DELETE; xóa thứ hai commit lệnh thứ nhất; kéo khi đang chờ thì flush trước; reorder bằng bàn phím (Space/↑/↓/Space, Esc) + announcements tiếng Việt; rollback khi lỗi; `InvalidReorderList` toast info + refetch; focus sau xóa/hoàn tác |
 | `WaypointFormDialog` / `LocationField` | Thứ tự field, focus Tên; các mẫu parse (bảng do planner/researcher lập ở domain) hiện "Đã nhận"; tự điền tên khi trống, không ghi đè khi đã có; resolve rút gọn (fake fetch) và lỗi resolve; lỗi khi blur/gửi; khôi phục bản nháp hiện InlineAlert info; Xóa điểm đến từ form chạy luồng hoàn tác |
-| `TripInfoDialog` | Preview debounce + lỗi tải vẫn lưu được; chỉ nhận https; Xóa ngày → null; Xóa ảnh bìa; validate 1–100 / ≤ 1000 |
+| `TripInfoDialog` | Preview debounce + lỗi tải vẫn lưu được; chỉ nhận https; nút X "Xóa Ngày khởi hành" → null; nút X "Xóa Ảnh bìa"; validate 1–100 / ≤ 1000 |
 | `LeaveEditorDialog` | Hiện khi còn request; tự đóng và đi tiếp khi request xong; focus đầu ở "Ở lại" |
 | `EditorForbidden` | Copy D-45, link về `/itineraries/mine` |
 

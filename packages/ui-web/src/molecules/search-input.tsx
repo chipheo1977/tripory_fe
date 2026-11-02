@@ -9,7 +9,7 @@ import type { InputProps } from '../atoms/input';
 import { Spinner } from '../atoms/spinner';
 import { cn } from '../lib/cn';
 
-type SearchInputBaseProps = Omit<InputProps, 'aria-label' | 'defaultValue' | 'onValueChange' | 'ref' | 'size' | 'type' | 'value'>;
+type SearchInputBaseProps = Omit<InputProps, 'allowClear' | 'aria-label' | 'clearLabel' | 'defaultValue' | 'onValueChange' | 'ref' | 'size' | 'type' | 'value' | 'wrapperClassName'>;
 
 export type SearchInputProps = SearchInputBaseProps & {
   clearable?: boolean;

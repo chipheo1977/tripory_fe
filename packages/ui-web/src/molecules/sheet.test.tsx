@@ -12,7 +12,8 @@ import {
 
 type Position = 'bottom' | 'left' | 'right';
 
-function ExampleSheet({ modal = true, position = 'bottom', onSnapPointChange, ...sheetProps }: {
+function ExampleSheet({ modal = true, position = 'bottom', onSnapPointChange, closeDisabled, ...sheetProps }: {
+  closeDisabled?: boolean;
   modal?: boolean;
   position?: Position;
   onSnapPointChange?: (snapPoint: number | string | null) => void;
@@ -28,7 +29,7 @@ function ExampleSheet({ modal = true, position = 'bottom', onSnapPointChange, ..
       <button type="button">Nội dung nền</button>
       <Sheet modal={modal} position={position} onSnapPointChange={onSnapPointChange} {...sheetProps}>
         <SheetTrigger>Mở bảng {position}</SheetTrigger>
-        <SheetContent>
+        <SheetContent closeDisabled={closeDisabled}>
           <SheetTitle>Lịch trình</SheetTitle>
           <SheetDescription>Các điểm đến trong ngày.</SheetDescription>
           <button type="button">Hành động đầu</button>
@@ -115,6 +116,136 @@ it('nút close tùy chỉnh đóng Sheet', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Mở bảng bottom' }));
   fireEvent.click(await screen.findByRole('button', { name: 'Đóng tùy chỉnh' }));
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+});
+
+describe('nút X đóng của Sheet bottom (modal và non-modal)', () => {
+  const closes = (fn: ReturnType<typeof vi.fn>) => fn.mock.calls.some(([next]) => next === false);
+
+  it('có nút "Đóng" với icon X, vùng chạm min-h-touch min-w-touch, không che tay cầm', async () => {
+    render(<ExampleSheet open />);
+    const sheet = await screen.findByRole('dialog', { name: 'Lịch trình' });
+    const button = screen.getByRole('button', { name: 'Đóng' });
+
+    expect(sheet.contains(button)).toBe(true);
+    expect(button.querySelector('svg.lucide-x')).not.toBeNull();
+    expect(button.className.split(/\s+/)).toEqual(expect.arrayContaining(['min-h-touch', 'min-w-touch', 'absolute', 'right-0', 'top-0']));
+    expect(button.hasAttribute('data-base-ui-swipe-ignore')).toBe(true);
+    expect((button as HTMLButtonElement).disabled).toBe(false);
+    // Tay cầm ở giữa vẫn là phần tử riêng, không bị nút thay thế.
+    expect(document.querySelector('[data-sheet-handle]')?.contains(button)).toBe(false);
+  });
+
+  it('nút X nằm trong luồng nội dung cuộn của popup: không fixed/sticky ở nút hay tổ tiên tới popup', async () => {
+    render(<ExampleSheet defaultSnap="expanded" open />);
+    const sheet = await screen.findByRole('dialog', { name: 'Lịch trình' });
+    const button = screen.getByRole('button', { name: 'Đóng' });
+    const row = button.parentElement as HTMLElement;
+
+    // Popup là vùng cuộn ở mức expanded, hàng chứa X là con trực tiếp (cuộn cùng nội dung).
+    expect(sheet.className.split(/\s+/)).toContain('overflow-y-auto');
+    expect(row.parentElement).toBe(sheet);
+    // Hàng neo `absolute` của nút, nằm trong luồng (relative), không ghim theo viewport hay popup.
+    expect(row.className.split(/\s+/)).toEqual(expect.arrayContaining(['relative', 'h-0']));
+
+    for (const node of [button, row, sheet]) {
+      const classes = node.className.split(/\s+/);
+      expect(classes).not.toContain('fixed');
+      expect(classes).not.toContain('sticky');
+    }
+    // Tay cầm và nội dung cùng là con của popup nên cuộn chung với hàng X.
+    expect(document.querySelector('[data-sheet-handle]')?.parentElement).toBe(sheet);
+  });
+
+  it.each(['peek', 'medium'] as const)('defaultSnap=%s: popup không cuộn và vẫn có nút X ở góc trên phải', async (defaultSnap) => {
+    render(<ExampleSheet defaultSnap={defaultSnap} open />);
+    const sheet = await screen.findByRole('dialog', { name: 'Lịch trình' });
+    const button = screen.getByRole('button', { name: 'Đóng' });
+
+    expect(sheet.className.split(/\s+/)).toContain('overflow-y-hidden');
+    expect(sheet.contains(button)).toBe(true);
+    expect(button.className.split(/\s+/)).toEqual(expect.arrayContaining(['right-0', 'top-0']));
+  });
+
+  it('bấm nút gọi onOpenChange(false), đóng Sheet, trả focus cho trigger và không đổi mức snap', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    const onSnapPointChange = vi.fn();
+    render(<ExampleSheet onOpenChange={onOpenChange} onSnapPointChange={onSnapPointChange} />);
+    const trigger = screen.getByRole('button', { name: 'Mở bảng bottom' });
+    trigger.focus();
+    await user.keyboard('{Enter}');
+    await screen.findByRole('dialog');
+    onSnapPointChange.mockClear();
+
+    await user.click(screen.getByRole('button', { name: 'Đóng' }));
+
+    expect(closes(onOpenChange)).toBe(true);
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(document.activeElement).toBe(trigger);
+    expect(onSnapPointChange).not.toHaveBeenCalled();
+  });
+
+  it('closeDisabled: nút bị vô hiệu và bấm không đóng', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    render(<ExampleSheet closeDisabled open onOpenChange={onOpenChange} />);
+    await screen.findByRole('dialog');
+    const button = screen.getByRole('button', { name: 'Đóng' }) as HTMLButtonElement;
+    expect(button.disabled).toBe(true);
+
+    await user.click(button);
+
+    expect(closes(onOpenChange)).toBe(false);
+    expect(screen.getByRole('dialog')).toBeTruthy();
+  });
+
+  it('bottom non-modal (timeline) có nút X trong popup, nhận pointer', async () => {
+    render(<ExampleSheet modal={false} open />);
+    const sheet = await screen.findByRole('dialog');
+    const button = screen.getByRole('button', { name: 'Đóng' });
+
+    expect(sheet.contains(button)).toBe(true);
+    expect(sheet.className).toContain('pointer-events-auto');
+    expect(button.querySelector('svg.lucide-x')).not.toBeNull();
+    expect(button.className.split(/\s+/)).toEqual(expect.arrayContaining(['min-h-touch', 'min-w-touch']));
+    expect(button.hasAttribute('data-base-ui-swipe-ignore')).toBe(true);
+  });
+
+  it('bottom non-modal: bấm X gọi onOpenChange(false) và đóng Sheet', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    render(<ExampleSheet modal={false} onOpenChange={onOpenChange} />);
+    await user.click(screen.getByRole('button', { name: 'Mở bảng bottom' }));
+    await screen.findByRole('dialog');
+
+    await user.click(screen.getByRole('button', { name: 'Đóng' }));
+
+    expect(closes(onOpenChange)).toBe(true);
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  });
+
+  it('bottom non-modal với closeDisabled: nút X bị vô hiệu', async () => {
+    render(<ExampleSheet closeDisabled modal={false} open />);
+    await screen.findByRole('dialog');
+    expect((screen.getByRole('button', { name: 'Đóng' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it.each([true, false] as const)('bottom dismissible={false} modal={%s}: không có nút X', async (modal) => {
+    render(<ExampleSheet dismissible={false} modal={modal} open />);
+    await screen.findByRole('dialog');
+    expect(screen.queryByRole('button', { name: 'Đóng' })).toBeNull();
+  });
+
+  it.each([
+    ['left modal', 'left', true],
+    ['right modal', 'right', true],
+    ['left non-modal', 'left', false],
+  ] as const)('%s không có nút X', async (_label, position, modal) => {
+    render(<ExampleSheet modal={modal} open position={position} />);
+    await screen.findByRole('dialog');
+    expect(screen.queryByRole('button', { name: 'Đóng' })).toBeNull();
+    expect(document.querySelector('[data-sheet-close]')).toBeNull();
+  });
 });
 
 describe('Sheet mở rộng cho editor', () => {

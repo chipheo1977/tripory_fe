@@ -40,3 +40,10 @@ it('không hiện nút xóa khi clear bị tắt hoặc giá trị rỗng', () =
   rerender(<SearchInput key="empty" label="Tìm kiếm" />);
   expect(screen.queryByRole('button', { name: 'Xóa tìm kiếm' })).toBeNull();
 });
+
+it('chỉ có nút xóa riêng của SearchInput, không thêm nút allowClear thứ hai', () => {
+  const { container } = render(<SearchInput label="Tìm kiếm" defaultValue="Tripory" />);
+  expect(screen.getAllByRole('button')).toHaveLength(1);
+  expect(screen.queryByRole('button', { name: 'Xóa nội dung' })).toBeNull();
+  expect((container.firstElementChild as HTMLElement).children).toHaveLength(3);
+});

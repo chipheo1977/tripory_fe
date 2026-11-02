@@ -166,8 +166,8 @@ it("fills null description, date and cover as empty strings", async () => {
   expect(description().value).toBe("");
   expect(startDate().value).toBe("");
   expect(cover().value).toBe("");
-  expect(screen.queryByRole("button", { name: "Xóa ngày" })).toBeNull();
-  expect(screen.queryByRole("button", { name: "Xóa ảnh bìa" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Xóa Ngày khởi hành" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Xóa Ảnh bìa" })).toBeNull();
 });
 
 it("saves the trimmed metadata, marks saved, closes without any toast", async () => {
@@ -281,15 +281,18 @@ it("falls back with the load-error copy but still saves the cover URL", async ()
   expect(h.update).toHaveBeenCalledWith(expect.objectContaining({ coverImageUrl: "https://img.test/broken.jpg" }));
 });
 
-it("clears the date and the cover with their buttons and sends null", async () => {
+it("clears the date and the cover with the input's built-in X and sends null", async () => {
   const { user } = setup();
   await screen.findByRole("dialog");
-  await user.click(screen.getByRole("button", { name: "Xóa ngày" }));
+  await user.click(screen.getByRole("button", { name: "Xóa Ngày khởi hành" }));
   expect(startDate().value).toBe("");
-  expect(screen.queryByRole("button", { name: "Xóa ngày" })).toBeNull();
-  await user.click(screen.getByRole("button", { name: "Xóa ảnh bìa" }));
+  expect(document.activeElement).toBe(startDate());
+  expect(screen.queryByRole("button", { name: "Xóa Ngày khởi hành" })).toBeNull();
+  await user.click(screen.getByRole("button", { name: "Xóa Ảnh bìa" }));
   expect(cover().value).toBe("");
-  expect(screen.queryByRole("button", { name: "Xóa ảnh bìa" })).toBeNull();
+  expect(document.activeElement).toBe(cover());
+  expect(screen.queryByRole("button", { name: "Xóa Ảnh bìa" })).toBeNull();
+  expect(screen.queryByAltText("Xem trước ảnh bìa")).toBeNull();
   await user.click(save());
   await waitFor(() => expect(h.update).toHaveBeenCalledTimes(1));
   expect(h.update).toHaveBeenCalledWith({ title: "Đà Lạt", description: "Săn mây", startDate: null, coverImageUrl: null });
@@ -372,4 +375,27 @@ it("renders as a Sheet below md and keeps the title focused", async () => {
   const sheet = await screen.findByRole("dialog", { name: "Thông tin chuyến đi" });
   expect(sheet.getAttribute("data-sheet-position")).toBe("bottom");
   await waitFor(() => expect(document.activeElement).toBe(title()));
+});
+
+it("closes the Sheet with the X button, dropping the draft like Hủy", async () => {
+  setWide(false);
+  const { user, onOpenChange } = setup();
+  await screen.findByRole("dialog");
+  await user.type(title(), "x");
+  await user.click(screen.getByRole("button", { name: "Đóng" }));
+  await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+  expect(window.sessionStorage.getItem(DRAFT_KEY)).toBeNull();
+});
+
+it("keeps the Sheet X button disabled while saving", async () => {
+  setWide(false);
+  h.update.mockReturnValue(new Promise<void>(() => undefined));
+  const { user, onOpenChange } = setup();
+  await screen.findByRole("dialog");
+  await user.click(save());
+  await screen.findByRole("button", { name: /Đang lưu/ });
+  const close = screen.getByRole("button", { name: "Đóng" }) as HTMLButtonElement;
+  expect(close.disabled).toBe(true);
+  fireEvent.click(close);
+  expect(onOpenChange).not.toHaveBeenCalled();
 });

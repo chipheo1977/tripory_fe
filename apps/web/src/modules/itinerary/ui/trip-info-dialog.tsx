@@ -9,7 +9,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Itinerary } from "@tripory/itinerary";
 import { Button, cn, Icon, InlineAlert, Input, Skeleton, Textarea } from "@tripory/ui-web";
-import { ImageOff, X } from "lucide-react";
+import { ImageOff } from "lucide-react";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { SubmitStatus } from "@/components/submit-status";
@@ -146,14 +146,6 @@ export function TripInfoDialog({
   }, [validCover]);
   const previewUrl = validCover !== "" && debouncedCover === validCover ? validCover : null;
 
-  const startDateValue = useWatch({ control: form.control, name: "startDate" }) ?? "";
-
-  const clearField = (name: "startDate" | "coverImageUrl") => {
-    form.setValue(name, "", { shouldDirty: true, shouldTouch: true, shouldValidate: true });
-    // Nút biến mất khi ô rỗng, trả focus về ô để không rơi về <body>.
-    form.setFocus(name);
-  };
-
   const handle = form.handleSubmit(async (values) => {
     setAlert(null);
     try {
@@ -237,12 +229,7 @@ export function TripInfoDialog({
         </FormFieldRow>
 
         <FormFieldRow error={errors.startDate?.message} label="Ngày khởi hành">
-          <div className="flex w-full items-center gap-inline-sm">
-            <Input {...startDateField} className="min-w-0 flex-1" readOnly={locked} size="lg" type="date" />
-            <Button disabled={locked} icon={X} onClick={() => clearField("startDate")} size="sm" type="button" variant="ghost" visible={startDateValue !== ""}>
-              Xóa ngày
-            </Button>
-          </div>
+          <Input {...startDateField} clearLabel="Xóa Ngày khởi hành" readOnly={locked} size="lg" type="date" />
         </FormFieldRow>
 
         <div className="flex flex-col">
@@ -251,20 +238,16 @@ export function TripInfoDialog({
             error={errors.coverImageUrl?.message}
             label="Ảnh bìa"
           >
-            <div className="flex w-full items-center gap-inline-sm">
-              <Input
-                {...coverField}
-                autoComplete="off"
-                className="min-w-0 flex-1"
-                inputMode="url"
-                readOnly={locked}
-                size="lg"
-                type="url"
-              />
-              <Button disabled={locked} icon={X} onClick={() => clearField("coverImageUrl")} size="sm" type="button" variant="ghost" visible={coverValue !== ""}>
-                Xóa ảnh bìa
-              </Button>
-            </div>
+            <Input
+              {...coverField}
+              allowClear
+              autoComplete="off"
+              clearLabel="Xóa Ảnh bìa"
+              inputMode="url"
+              readOnly={locked}
+              size="lg"
+              type="url"
+            />
           </FormFieldRow>
           {previewUrl === null ? null : <CoverPreview url={previewUrl} />}
         </div>

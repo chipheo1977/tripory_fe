@@ -7,9 +7,7 @@ import type { ReactNode } from "react";
 
 export type FormFieldRowProps = Readonly<{
   label: string;
-  /** Message lỗi của ô (Zod hoặc BE); `undefined` = ô hợp lệ. */
   error: string | undefined;
-  /** Hiện "(bắt buộc)" cạnh nhãn. Form một ô thì để mặc định. */
   required?: boolean;
   description?: ReactNode;
   /** Id của control khi nó KHÔNG phải ô Base UI (như `Textarea` thuần): nhãn cần `htmlFor` tường minh. */

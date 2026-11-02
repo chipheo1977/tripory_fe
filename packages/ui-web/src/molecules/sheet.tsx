@@ -1,8 +1,10 @@
 'use client';
 
 import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
+import { X } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { Icon } from '../atoms/icon';
 import { cn } from '../lib/cn';
 import { isTopSnap, resolveSnapPoints } from './sheet-snap';
 
@@ -172,9 +174,10 @@ export type SheetContentProps = ComponentProps<typeof BaseDrawer.Popup> & {
    * trùng nhau, nên nội dung ngắn hơn mức vừa/mở rộng làm mất mức giữa. Dùng cho sheet có nội dung thấp (timeline).
    */
   fillSnap?: boolean;
+  closeDisabled?: boolean;
 };
 
-export function SheetContent({ children, className, fillSnap = false, style, ...props }: SheetContentProps) {
+export function SheetContent({ children, className, closeDisabled = false, fillSnap = false, style, ...props }: SheetContentProps) {
   const { modal, position, atTopSnap, topSnapHeight } = useSheetContext();
   const fixedHeight = fillSnap && position === 'bottom' && topSnapHeight !== null ? { height: topSnapHeight } : undefined;
 
@@ -194,6 +197,7 @@ export function SheetContent({ children, className, fillSnap = false, style, ...
             className,
           )}
         >
+          <SheetCloseButton disabled={closeDisabled} />
           {position === 'bottom' ? <SheetHandle /> : null}
           <BaseDrawer.Content className="mx-auto flex w-full max-w-content-sm flex-col gap-stack-md">
             {children}
@@ -201,6 +205,25 @@ export function SheetContent({ children, className, fillSnap = false, style, ...
         </BaseDrawer.Popup>
       </BaseDrawer.Viewport>
     </BaseDrawer.Portal>
+  );
+}
+
+function SheetCloseButton({ disabled }: { disabled: boolean }) {
+  const { dismissible, position } = useSheetContext();
+  if (position !== 'bottom') return null;
+  if (!dismissible) return null;
+  return (
+    <div data-sheet-close-row="" className="relative h-0 shrink-0">
+      <BaseDrawer.Close
+        aria-label="Đóng"
+        data-base-ui-swipe-ignore=""
+        data-sheet-close=""
+        disabled={disabled}
+        className="absolute right-0 top-0 inline-flex min-h-touch min-w-touch items-center justify-center rounded-control text-text transition-colors duration-(--semantic-motion-duration-fast) hover:not-data-disabled:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring data-disabled:cursor-not-allowed data-disabled:text-disabled"
+      >
+        <Icon icon={X} size="sm" />
+      </BaseDrawer.Close>
+    </div>
   );
 }
 

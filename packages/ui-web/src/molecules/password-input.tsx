@@ -8,8 +8,7 @@ import { Input } from '../atoms/input';
 import type { InputProps } from '../atoms/input';
 import { cn } from '../lib/cn';
 
-// Không Omit `ref`: React Hook Form `register` cần ref xuống thẳng <input> (React 19 nhận ref như prop thường).
-export type PasswordInputProps = Omit<InputProps, 'type'>;
+export type PasswordInputProps = Omit<InputProps, 'allowClear' | 'clearLabel' | 'type' | 'wrapperClassName'>;
 
 export function PasswordInput({ className, id, readOnly, size = 'lg', value, ...props }: PasswordInputProps) {
   const generatedId = useId();
@@ -26,6 +25,7 @@ export function PasswordInput({ className, id, readOnly, size = 'lg', value, ...
     <div className="relative w-full">
       <Input
         {...props}
+        allowClear={false}
         className={cn('pr-page-block', className)}
         id={inputId}
         readOnly={readOnly}

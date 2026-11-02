@@ -389,8 +389,8 @@ Primary hover dùng `#A83C22`, không làm giảm contrast với white. Coral b�
 |-----------|------------------|------------------------------|
 | `Button` | `primary`, `secondary`, `ghost`, `danger`; `sm` 32, `md` 40, `lg` 48 | hover, focus-visible, pressed, disabled, loading; loading giữ nguyên width, có Spinner, `aria-busy`, chặn double action; target ≥44px |
 | `IconButton` | `ghost`, `secondary`, `danger`; `sm`, `md`, `lg` | bắt buộc accessible name qua `aria-label`; icon decorative `aria-hidden`; target ≥44×44; Tooltip chỉ bổ trợ, không thay label |
-| `Input` | `md`, `lg` | default, hover border, focus-visible, disabled, read-only, error (`aria-invalid`, `aria-describedby`); không dùng placeholder thay Label |
-| `Textarea` | `md`, `lg`; resize vertical | như Input; min-height 96px; error/help association |
+| `Input` | `md`, `lg`; `allowClear` (mặc định false, riêng `type="date"` mặc định true); `clearLabel` (mặc định "Xóa nội dung"); `wrapperClassName` | default, hover border, focus-visible, disabled, read-only, error (`aria-invalid`, `aria-describedby`); không dùng placeholder thay Label. `allowClear`: nút X (IconButton `sm`, vùng chạm 44px, `type="button"`) căn phải trong ô, chỉ hiện khi có giá trị và ô không disabled/readOnly; bấm thì xóa, trả focus về ô và bắn sự kiện `input` (tương thích `register` của React Hook Form lẫn ô controlled). `type="date"`: biểu tượng lịch `CalendarDays` bên trái (bấm mở bộ chọn ngày qua `showPicker()`), ẩn nút lịch gốc của trình duyệt để bên phải dành cho X. `SearchInput` giữ `clearable` riêng; `PasswordInput` không nhận `allowClear` |
+| `Textarea` | `md`, `lg`; resize vertical; `allowClear`, `clearLabel`, `wrapperClassName` | như Input; min-height 96px; error/help association. `allowClear`: nút X căn góc trên bên phải |
 | `Label` | required/optional indicator | `htmlFor` khớp control; required không chỉ biểu thị bằng màu |
 | `Checkbox` | checked, unchecked, indeterminate | click/Space toggle; visible focus; disabled; label hit area ≥44px |
 | `Switch` | on/off | role `switch`, `aria-checked`; Space toggle; label ngoài; không dùng cho action tức thời |
@@ -413,7 +413,7 @@ Primary hover dùng `#A83C22`, không làm giảm contrast với white. Coral b�
 | `Tooltip` | top/right/bottom/left | hover + keyboard focus; delay 400ms; Esc đóng; không chứa thông tin thiết yếu duy nhất; không dùng trên touch làm đường duy nhất |
 | `Toast` | success, error, info, warning | Sonner adapter; title/body/action; `aria-live` phù hợp; max 3; auto-dismiss 5s trừ actionable/error 8s; pause on hover/focus |
 | `Dialog` | `sm` 400, `md` 560, `lg` 720 | modal, title/description/close named exports; trap focus; Esc và scrim đóng trừ thao tác destructive đang commit; restore focus; body scroll lock |
-| `Sheet` | bottom mặc định; side optional cho desktop | multi-snap mobile; drag handle; keyboard tương đương; trap focus khi modal; Esc đóng; safe-area; snap points dưới đây |
+| `Sheet` | bottom mặc định; side optional cho desktop | multi-snap mobile; drag handle (đổi mức chỉ bằng vuốt hoặc giữ-kéo `SheetHandle`, không có nút Thu gọn/Mở rộng/Đóng bảng; mọi bottom Sheet đóng được, modal lẫn non-modal, có nút X "Đóng" góc trên phải chỉ để đóng); trap focus khi modal; Esc đóng; safe-area; snap points dưới đây |
 | `Card` | `default`, `interactive`, `selected`; padding `sm`, `md`, `lg` | hover/focus chỉ khi interactive; toàn card không giả button; selected có icon/border ngoài màu |
 | `EmptyState` | compact, page | icon/illustration nhỏ, heading, body, optional action; không render CTA giả/route chưa có |
 | `ErrorState` | inline, card, page | heading/body, retry `Button` mặc định label “Thử lại”; callback optional; lỗi không lộ stack/technical details |
@@ -454,7 +454,8 @@ Bottom Sheet mobile có ba snap points tính trên **available viewport height**
 
 - Component token: `--sheet-snap-peek`, `--sheet-snap-medium`, `--sheet-snap-expanded`.
 - Mở mặc định ở `medium`; drag qua midpoint hoặc velocity threshold để snap gần nhất; swipe xuống từ `peek` đóng.
-- Drag handle có target 44px. Người dùng bàn phím có control accessible “Mở rộng bảng”, “Thu gọn bảng”, “Đóng bảng”; không bắt buộc drag.
+- Drag handle có target 44px. Sheet đổi mức chỉ bằng vuốt hoặc giữ-kéo `SheetHandle`; các nút “Mở rộng bảng”, “Thu gọn bảng”, “Đóng bảng” (SnapButton/SheetControls) đã bị xóa.
+- Mọi Sheet bottom đóng được (`dismissible`, **modal lẫn non-modal**) có nút icon `X` (size `sm`, `aria-label` "Đóng", vùng chạm 44px) ở góc trên phải, cùng dải cao với `SheetHandle`; chỉ đóng sheet qua `onOpenChange(false)` như vuốt hết xuống, không đổi mức snap. `SheetContent closeDisabled` vô hiệu nút khi consumer đang khóa đóng. Sheet `dismissible={false}` và sheet cạnh không có nút. Nút nằm trong popup (`pointer-events-auto`) nên vẫn nhận chạm khi viewport của sheet non-modal là `pointer-events-none`. Nút cuộn cùng nội dung: nằm trong luồng cuộn của popup (không `fixed`/`sticky`), trôi đi khi cuộn dọc ở mức expanded.
 - Nội dung trong sheet scroll độc lập chỉ khi ở snap hiện tại; overscroll không kéo body.
 - Khi virtual keyboard mở, dùng `visualViewport`/available viewport adapter ở app nếu cần; action cuối không bị bàn phím hoặc safe-area che.
 - Từ `md` trở lên, consumer có thể chuyển cùng nội dung sang panel/sidebar; Sheet base vẫn hỗ trợ bottom placement.
@@ -592,7 +593,7 @@ Không dùng Storybook, `/dev/ui`, showcase hoặc visual demo route. Mỗi base
 | Select/Tabs/DropdownMenu | open/close; Arrow/Home/End; Enter/Space; Esc; focus restore/roving focus |
 | Tooltip | mở bằng focus/hover, Esc đóng, accessible relation |
 | Dialog | focus trap, initial focus, Tab/Shift+Tab, Esc đóng, close control, restore focus, body scroll contract |
-| Sheet | focus trap, Esc đóng, accessible snap controls, close/restore focus; drag logic test bằng unit adapter thay vì brittle pointer pixel |
+| Sheet | focus trap, Esc đóng, `SheetHandle` (vuốt/giữ-kéo đổi mức), close/restore focus; drag logic test bằng unit adapter thay vì brittle pointer pixel |
 | Toast | live region/role theo severity, action keyboard, dismiss, timer pause |
 | EmptyState/ErrorState | heading/body/action role; “Thử lại” gọi đúng callback một lần |
 | Spinner/Skeleton/Separator/Icon/Avatar/Badge/Card | semantics decorative vs informative, fallback, interactive Card keyboard only when configured |

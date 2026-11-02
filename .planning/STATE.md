@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_plan
-stopped_at: Phase 4 reopened vì PUB-02 (23/23 plan và UAT 23/23 PASS vẫn giữ); dừng, chưa lập kế hoạch bổ sung
-last_updated: "2026-10-30T00:00:00.000Z"
+status: "Phase 4 reopened; next = wizard tạo lịch trình (ITIN-02, phương án B: sửa BE + FE): `/gsd-discuss-phase 4` (cập nhật CONTEXT, giữ D-01..D-51) → `/gsd-ui-phase 4` → `/gsd-plan-phase 4 --research` (chỉ thêm plan 04-24+). PUB-02 để sau; vẫn chờ user xác nhận phạm vi PUB-02 trong editor và việc PUB-06 có chuyển theo không"
+stopped_at: Phase 4 context gathered (mở lại ITIN-02, ITIN-03)
+last_updated: "2026-11-02T08:40:49.995Z"
 last_activity: 2026-10-30
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 50
-  completed_plans: 50
-  percent: 100
+  completed_plans: 49
+  percent: 98
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình du lịch thật trên bản triển khai công khai, rồi trao đổi về chuyến đi với người khác.
-**Current focus:** Phase 4 mở lại vì PUB-02 (chuyển từ Phase 5 theo yêu cầu user 2026-10-30); chưa lập kế hoạch
+**Current focus:** Phase 4 mở lại: làm wizard tạo lịch trình 4 bước (ITIN-02) trước; PUB-02 (chuyển từ Phase 5) để sau; chưa lập kế hoạch
 
 ## Current Position
 
 Phase: 4 mở lại (reopened) vì PUB-02; 23/23 plan và UAT 23/23 PASS vẫn giữ nguyên
 Plan: 23 of 23 đã xong; cần plan bổ sung cho PUB-02 (chưa làm)
-Status: Phase 4 reopened; next = lập kế hoạch bổ sung cho PUB-02 (chưa làm, đang dừng). Chờ user xác nhận phạm vi PUB-02 trong editor và việc PUB-06 có chuyển theo không
+Status: Phase 4 reopened; next = wizard tạo lịch trình (ITIN-02, phương án B: sửa BE + FE): `/gsd-discuss-phase 4` (cập nhật CONTEXT, giữ D-01..D-51) → `/gsd-ui-phase 4` → `/gsd-plan-phase 4 --research` (chỉ thêm plan 04-24+). PUB-02 để sau; vẫn chờ user xác nhận phạm vi PUB-02 trong editor và việc PUB-06 có chuyển theo không
 Last activity: 2026-10-30
 
 Phase 1 progress: [██████████] 100% — verified complete
@@ -219,6 +219,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-30T00:00:00.000Z
-Stopped at: Phase 4 complete (UAT 23/23 PASS)
-Resume file: None
+Last session: 2026-11-02T08:40:49.991Z
+Stopped at: Phase 4 context gathered (mở lại ITIN-02, ITIN-03)
+Resume file: .planning/phases/04-itinerary-crud-editor/04-CONTEXT.md

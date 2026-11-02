@@ -167,7 +167,18 @@ Nằm ngoài phase:
 - **D-89:** Giá trị không hợp lệ (tiêu đề trống, quá 100 ký tự, URL không phải https...) **không gửi lên BE**, chỉ hiện lỗi dưới ô. Đóng form khi còn lỗi thì **bỏ giá trị lỗi, giữ giá trị đã lưu gần nhất**.
 - **D-90:** Trong form **chỉ báo khi lưu lỗi** (lỗi kèm "Thử lại", giá trị vẫn còn trong ô). Không hiện "Đang lưu" hay "Đã lưu" trong form. Chỉ báo trên header editor vẫn như D-30.
 - **D-91:** Chân form **không có nút nào**. Đóng bằng nút X hoặc vuốt xuống (sheet), Esc hoặc nút đóng (dialog).
-- **D-101:** Thay thế D-24 (Lưu/Hủy) và phần "Lưu" của D-25. Bản nháp `sessionStorage` của form metadata (D-36) còn cần hay không do planner quyết theo cơ chế tự lưu (Claude's Discretion).
+- **D-101:** Thay thế D-24 (Lưu/Hủy) và phần "Lưu" của D-25. Bản nháp `sessionStorage` của form metadata (D-36) còn cần hay không do planner quyết theo cơ chế tự lưu (Claude's Discretion). **[Chốt 2026-11-02: bỏ, xem D-107.]**
+
+### Mở lại 2026-10-30: chốt sau nghiên cứu (2026-11-02)
+- **D-102:** `destinationCode` **bắt buộc ở BE với lịch trình tạo mới**; lịch trình cũ để `null`. Form cũng bắt buộc (D-92).
+- **D-103:** Khi request tạo không gửi `dayCount`, BE mặc định **1** (giữ hành vi cũ). Form luôn gửi số ngày (mặc định 3, D-73).
+- **D-104:** Khi chuyển `CoverImageUrl` cũ thành ảnh 1 trong danh sách, URL **không phải `https://` thì bỏ**.
+- **D-105:** Khi có ảnh thật, chỉ nhận ảnh **Unsplash, Pexels, CC0 hoặc ảnh user tự chụp**; **không nhận CC BY / CC BY-SA** (tránh trang ghi công). Mỗi ảnh có bản ghi giấy phép.
+- **D-106:** **Ảnh thật giao sau**, không thuộc Phase 4. Phase này dùng **ảnh giữ chỗ**: BE ghi URL cố định theo slug (ví dụ `/destinations/<slug>.webp`, gốc URL do hợp đồng BE chốt); khi ảnh chưa có (404) FE rơi về nền dự phòng theo token (`onError`). **Không có plan checkpoint ảnh** và UAT cuối không kiểm ảnh thật. Việc cung cấp 34 ảnh + bản ghi giấy phép chuyển vào Deferred. Thay đổi so với đề xuất 04-26 của nghiên cứu.
+- **D-107:** **Bỏ bản nháp `sessionStorage` của form "Thông tin chuyến đi"** (phần metadata của D-36), vì form đã tự lưu. Bản nháp form waypoint (D-36) giữ nguyên.
+- **D-108:** Plan **04-23 (UAT gốc) được đánh dấu xong** bằng `04-23-SUMMARY.md` (UAT 23/23 PASS, 2026-10-30) để plan mới phụ thuộc `04-23` và `/gsd-execute-phase 4` không chạy lại nó.
+- **D-109:** Sửa `04-UI-SPEC.md` phần `NumberStepper` cho khớp Base UI 1.8.0 (không có PageUp/PageDown, ô trống khi blur trả `null`, `aria-roledescription` tiếng Anh cần ghi đè) trong plan component `ui-web`.
+- **D-110:** Sửa đặc tả `tripory/docs` PT-01 (D-98) ở repo `C:\Users\OS\Documents\personal\tripory`: agent sửa file, **không commit ở repo đó** (user tự commit).
 
 ### Claude's Discretion
 - Hình dạng 4 tầng của `packages/itinerary`: tên type, use case, port, Zod DTO (`z.iso.datetime({ offset: true })`, `z.iso.date()`), mapper ACL, query key, `createItineraryHooks`.
@@ -177,6 +188,7 @@ Nằm ngoài phase:
 - Tên và vị trí route handler resolve link rút gọn (ví dụ `/api/maps/resolve`), thời gian timeout, số bước redirect tối đa.
 - Copy phụ chưa chốt (tiêu đề trang, nhãn menu, empty state từng tab, thông báo lỗi parse vị trí), miễn theo giọng copy Phase 1 và Phase 3. Nên chạy `/gsd-ui-phase 4` để chốt UI-SPEC.
 - Ngưỡng "gần cuối" của infinite scroll, ngưỡng nhấn giữ cảm ứng trong khoảng 150–200ms.
+- (Mở lại, chốt 2026-11-02) `firstInvalidBlock` và phần tóm tắt khối đặt ở app (vì "khối" là khái niệm UI); nhãn sở thích tiếng Việt đặt ở domain cùng mã sở thích; ảnh bìa dùng phương án A (một `PUT` metadata mang danh sách ảnh và ảnh đang chọn) theo `04-RESEARCH.md` R5.2(d); vị trí lưu ảnh giữ chỗ và gốc URL theo R2.5.
 - (Mở lại 2026-10-30) Hình dạng type `Destination` (slug, tên hiển thị, loại, hạng, alias, URL ảnh), port danh mục điểm đến và adapter tĩnh, tên hàm thuần (tìm không dấu, tên mặc định, kiểm số ngày); vị trí đặt 34 ảnh (app `public/` hay CDN) miễn URL https tuyệt đối ổn định; component mới trong `ui-web` (accordion, chip chọn nhiều, nút −/+ số, lưới chọn ảnh) dựng trên Base UI 1.8.0; số mục nhóm "Phổ biến" (khoảng 8); giá trị debounce (khoảng 800 ms); có giữ bản nháp D-36 cho form metadata khi đã tự lưu hay không; tên file tài liệu BE (gợi ý cập nhật `04-BE-DEPENDENCIES.md` và thêm `04-BE-CONTRACT.md`); mã lỗi BE chính xác (chỉ đề xuất, user quyết khi sửa BE).
 
 </decisions>
@@ -292,6 +304,7 @@ Nằm ngoài phase:
 - Ngày thực theo `startDate` (UX-03), khoảng cách từng chặng (UX-04), "Chuyển sang ngày…" (UX-07) → v2.
 - Tìm địa điểm theo tên (MAP-01), chọn vị trí trên bản đồ (MAP-02) → v2.
 - Đề xuất BE: endpoint xóa ngày, hủy xuất bản, chuyển waypoint sang ngày khác, `UpdatedAt` trong `ItinerarySummaryDto`, ETag/version.
+- (Mở lại 2026-11-02) Cung cấp 34 ảnh bìa thật + bản ghi giấy phép (D-105, D-106) và thay ảnh giữ chỗ.
 - (Mở lại 2026-10-30) Hiện điểm đến và sở thích trong editor/tóm tắt (D-76) và trên thẻ danh sách (D-78).
 - Sửa điểm đến và sở thích sau khi tạo (D-77).
 - Tải ảnh bìa lên (upload, cần kho lưu trữ) (D-81).

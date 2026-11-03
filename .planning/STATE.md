@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: "Phase 4 mở lại đã lập kế hoạch: 18 plan mới 04-24..04-41 (ITIN-02 form tạo 4 khối, ITIN-03 nhiều ảnh bìa và tự lưu); next = plan 04-24 viết tài liệu hợp đồng BE rồi checkpoint 04-25 chờ user sửa tripory_be: `/gsd-execute-phase 4`. PUB-02 hoãn, chưa lập kế hoạch"
-stopped_at: Phase 4 reopened plans 04-24..04-41 created and checked
-last_updated: "2026-11-02T09:31:43.551Z"
-last_activity: 2026-11-02
+status: "Plan 04-24 xong (tài liệu hợp đồng BE 04-BE-CONTRACT.md); next = checkpoint 04-25: user duyệt tài liệu, tự sửa và deploy tripory_be, gõ 'BE xong'; sau đó /gsd-execute-phase 4 chạy 04-26..04-41 (FE). PUB-02 hoãn"
+stopped_at: "Completed 04-24-PLAN.md (BE contract); next: checkpoint 04-25 (user edits tripory_be)"
+last_updated: "2026-11-03T01:32:18.468Z"
+last_activity: 2026-11-03
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 68
-  completed_plans: 49
-  percent: 72
+  completed_plans: 51
+  percent: 75
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 4 mở lại (reopened) cho ITIN-02, ITIN-03; 23 plan cũ và UAT 23/23 PASS giữ nguyên; PUB-02 hoãn
-Plan: 23 of 41 đã xong; 18 plan mới 04-24..04-41 chưa chạy
-Status: Phase 4 mở lại đã lập kế hoạch: 18 plan mới 04-24..04-41 (ITIN-02 form tạo 4 khối, ITIN-03 nhiều ảnh bìa và tự lưu); next = plan 04-24 viết tài liệu hợp đồng BE rồi checkpoint 04-25 chờ user sửa tripory_be: `/gsd-execute-phase 4`. PUB-02 hoãn, chưa lập kế hoạch
-Last activity: 2026-11-02
+Plan: 24 of 41 đã xong; 04-25 là checkpoint của user (sửa tripory_be); 04-26..04-41 (FE) chưa chạy
+Status: Plan 04-24 xong (tài liệu hợp đồng BE `04-BE-CONTRACT.md`); next = checkpoint 04-25: user duyệt tài liệu, tự sửa và deploy `tripory_be`, gõ "BE xong"; sau đó `/gsd-execute-phase 4` chạy các plan FE 04-26..04-41. PUB-02 hoãn
+Last activity: 2026-11-03
 
 Phase 1 progress: [██████████] 100% — verified complete
 
@@ -103,6 +103,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | Phase 4 P20 | 10min | 3 tasks | 9 files |
 | Phase 4 P21 | 25min | 3 tasks | 6 files |
 | Phase 04 P22 | 20min | 2 tasks | 3 files |
+| Phase 04 P24 | 15 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -219,6 +220,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-11-02T09:31:43.546Z
-Stopped at: Phase 4 UI-SPEC approved (mở lại ITIN-02, ITIN-03)
-Resume file: .planning/phases/04-itinerary-crud-editor/04-UI-SPEC.md
+Last session: 2026-11-03T01:32:18.464Z
+Stopped at: Completed 04-24-PLAN.md (BE contract); next: checkpoint 04-25 (user edits tripory_be)
+Resume file: .planning/phases/04-itinerary-crud-editor/04-25-PLAN.md

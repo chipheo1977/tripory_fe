@@ -18,6 +18,18 @@ const DOMAIN_NAMES = [
   'moveItem',
   'applyDayOrder',
   'reorderWaypoints',
+  'searchDestinations',
+  'normalizeSearchText',
+  'popularDestinations',
+  'defaultTripTitle',
+  'onDestinationChanged',
+  'onTitleInput',
+  'onTitleBlur',
+  'clampDayCount',
+  'isValidDayCount',
+  'normalizeInterests',
+  'INTERESTS',
+  'POPULAR_GROUP_SIZE',
 ] as const;
 
 const INFRASTRUCTURE_NAMES = [

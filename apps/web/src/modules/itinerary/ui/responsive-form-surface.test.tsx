@@ -1,4 +1,4 @@
-import { act, fireEvent, render, renderHook, screen } from "@testing-library/react";
+import { act, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ResponsiveFormSurface } from "./responsive-form-surface";
@@ -43,15 +43,46 @@ afterEach(() => media.restore());
 
 const closes = (fn: ReturnType<typeof vi.fn>) => fn.mock.calls.some(([next]) => next === false);
 
-function setup(props: { wide: boolean; locked?: boolean; onOpenChange?: (open: boolean) => void }) {
+type SetupProps = {
+  wide: boolean;
+  locked?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  closeButton?: boolean;
+  fixedSnap?: boolean;
+  open?: boolean;
+  onOpenChangeComplete?: (open: boolean) => void;
+  scopedInput?: boolean;
+};
+
+function ScopedInput({ visible }: { visible: boolean }) {
+  if (!visible) return null;
+  return <input aria-label="Ô tìm" data-escape-scope="" />;
+}
+
+function Surface({ props }: { props: SetupProps }) {
+  return (
+    <ResponsiveFormSurface
+      closeButton={props.closeButton}
+      fixedSnap={props.fixedSnap}
+      locked={props.locked ?? false}
+      onOpenChange={props.onOpenChange ?? (() => undefined)}
+      onOpenChangeComplete={props.onOpenChangeComplete}
+      open={props.open ?? true}
+      title="Thông tin chuyến đi"
+      titleId="surface-title"
+    >
+      <p>nội dung form</p>
+      <ScopedInput visible={props.scopedInput ?? false} />
+      <button type="button">Nút thường</button>
+    </ResponsiveFormSurface>
+  );
+}
+
+function setup(props: SetupProps) {
   media = installMatchMedia(props.wide);
   const onOpenChange = props.onOpenChange ?? vi.fn();
-  render(
-    <ResponsiveFormSurface locked={props.locked ?? false} onOpenChange={onOpenChange} open title="Thông tin chuyến đi" titleId="surface-title">
-      <p>nội dung form</p>
-    </ResponsiveFormSurface>,
-  );
-  return { onOpenChange: onOpenChange as ReturnType<typeof vi.fn> };
+  const view = render(<Surface props={{ ...props, onOpenChange }} />);
+  return { onOpenChange: onOpenChange as ReturnType<typeof vi.fn>, view };
 }
 
 describe("useMediaQuery", () => {
@@ -151,5 +182,72 @@ describe("ResponsiveFormSurface", () => {
     fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
     expect(closes(onOpenChange)).toBe(false);
     expect(screen.getByRole("dialog")).toBeTruthy();
+  });
+});
+
+describe("ResponsiveFormSurface: closeButton, fixedSnap, hoàn tất đóng, phạm vi Esc (04-33)", () => {
+  it("mặc định ở Dialog không có nút X", async () => {
+    setup({ wide: true });
+    await screen.findByRole("dialog");
+    expect(screen.queryByRole("button", { name: "Đóng" })).toBeNull();
+  });
+
+  it("closeButton ở Dialog hiện nút X, bấm gọi onOpenChange(false, details)", async () => {
+    const user = userEvent.setup();
+    const { onOpenChange } = setup({ wide: true, closeButton: true });
+    await screen.findByRole("dialog");
+    await user.click(screen.getByRole("button", { name: "Đóng" }));
+    const call = onOpenChange.mock.calls.find(([next]) => next === false);
+    expect(call).toBeTruthy();
+    expect(typeof call?.[1]?.cancel).toBe("function");
+  });
+
+  it("closeButton + locked: nút X của Dialog bị vô hiệu", async () => {
+    setup({ wide: true, closeButton: true, locked: true });
+    await screen.findByRole("dialog");
+    expect(screen.getByRole("button", { name: "Đóng" }).hasAttribute("data-disabled")).toBe(true);
+  });
+
+  it("fixedSnap ở Sheet vẫn render popup với tiêu đề", async () => {
+    setup({ wide: false, fixedSnap: true });
+    const sheet = await screen.findByRole("dialog", { name: "Thông tin chuyến đi" });
+    expect(sheet.getAttribute("data-sheet-position")).toBe("bottom");
+  });
+
+  it.each([true, false])("onOpenChangeComplete(false) chạy sau khi đóng (wide=%s)", async (wide) => {
+    const onOpenChangeComplete = vi.fn();
+    const { view } = setup({ wide, onOpenChangeComplete });
+    await screen.findByRole("dialog");
+    view.rerender(<Surface props={{ wide, open: false, onOpenChangeComplete }} />);
+    await waitFor(() => expect(onOpenChangeComplete).toHaveBeenCalledWith(false));
+  });
+
+  it.each([true, false])("Esc khi focus trong data-escape-scope không đóng modal (wide=%s)", async (wide) => {
+    const user = userEvent.setup();
+    const { onOpenChange } = setup({ wide, scopedInput: true });
+    await screen.findByRole("dialog");
+    screen.getByLabelText("Ô tìm").focus();
+    await user.keyboard("{Escape}");
+    expect(closes(onOpenChange)).toBe(false);
+    expect(screen.getByRole("dialog")).toBeTruthy();
+  });
+
+  it.each([true, false])("Esc khi focus ở nơi khác gọi onOpenChange(false, escape-key) (wide=%s)", async (wide) => {
+    const user = userEvent.setup();
+    const { onOpenChange } = setup({ wide });
+    await screen.findByRole("dialog");
+    screen.getByRole("button", { name: "Nút thường" }).focus();
+    await user.keyboard("{Escape}");
+    const call = onOpenChange.mock.calls.find(([next]) => next === false);
+    expect(call?.[1]).toMatchObject({ reason: "escape-key" });
+  });
+
+  it.each([true, false])("onOpenChange nhận details có cancel là hàm (wide=%s)", async (wide) => {
+    const user = userEvent.setup();
+    const { onOpenChange } = setup({ wide });
+    await screen.findByRole("dialog");
+    screen.getByRole("button", { name: "Nút thường" }).focus();
+    await user.keyboard("{Escape}");
+    expect(typeof onOpenChange.mock.calls.find(([next]) => next === false)?.[1]?.cancel).toBe("function");
   });
 });

@@ -30,6 +30,17 @@ const EXPECTED = [
   ["Itinerary.InvalidDayNumber", "Ngày không hợp lệ."],
   ["Itinerary.InvalidUserId", GENERIC_ERROR_MESSAGE],
   ["ItineraryTitle.Empty", "Vui lòng nhập tiêu đề."],
+  ["Itinerary.DestinationRequired", "Vui lòng chọn điểm đến."],
+  ["Itinerary.DestinationUnknown", "Điểm đến không hợp lệ. Vui lòng chọn lại."],
+  ["Itinerary.DayCountOutOfRange", "Số ngày từ 1 đến 30."],
+  ["Itinerary.InterestUnknown", "Có sở thích không hợp lệ. Vui lòng chọn lại."],
+  ["Itinerary.InterestDuplicated", "Sở thích bị trùng. Vui lòng chọn lại."],
+  ["Itinerary.TooManyInterests", "Chọn tối đa 7 sở thích."],
+  ["Itinerary.TooManyCoverImages", "Chỉ lưu được tối đa 5 ảnh bìa."],
+  ["Itinerary.CoverImageInvalidUrl", "Link ảnh phải bắt đầu bằng https://."],
+  ["Itinerary.CoverImageTooLong", "Link ảnh tối đa 500 ký tự."],
+  ["Itinerary.CoverImageDuplicated", "Ảnh này đã có trong danh sách."],
+  ["Itinerary.CoverSelectionInvalid", GENERIC_ERROR_MESSAGE],
   ["WaypointName.Empty", "Vui lòng nhập tên điểm đến."],
   ["Waypoint.NotFound", "Điểm đến không còn tồn tại."],
   ["Maps.UnresolvableLink", "Không mở được link rút gọn này. Thử dán link đầy đủ hoặc tọa độ."],
@@ -71,9 +82,9 @@ const UNMAPPED = [
 ] as const;
 
 describe("ERROR_MESSAGES", () => {
-  it("có đúng 40 mã (D-16 + Maps.UnresolvableLink)", () => {
-    expect(ERROR_MESSAGES.size).toBe(40);
-    expect(EXPECTED).toHaveLength(40);
+  it("có đúng 51 mã (D-16 + Maps.UnresolvableLink + 11 mã form tạo và ảnh bìa)", () => {
+    expect(ERROR_MESSAGES.size).toBe(51);
+    expect(EXPECTED).toHaveLength(51);
   });
 
   it.each(EXPECTED)("%s → %s", (code, message) => {

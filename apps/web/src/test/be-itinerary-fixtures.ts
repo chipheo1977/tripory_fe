@@ -40,6 +40,10 @@ export type ItineraryDetailJson = {
   title: string;
   description: string | null;
   coverImageUrl: string | null;
+  coverImages: readonly string[] | null;
+  selectedCoverIndex: number | null;
+  destinationCode: string | null;
+  interests: readonly string[] | null;
   startDate: string | null;
   isPublic: boolean;
   totalDistanceKm: number;
@@ -55,6 +59,9 @@ export type ItinerarySummaryJson = {
   title: string;
   description: string | null;
   coverImageUrl: string | null;
+  coverImages: readonly string[] | null;
+  selectedCoverIndex: number | null;
+  destinationCode: string | null;
   startDate: string | null;
   isPublic: boolean;
   totalDistanceKm: number;
@@ -81,6 +88,10 @@ export function itineraryDetailJson(overrides: Partial<ItineraryDetailJson> = {}
     title: "Sài Gòn 3 ngày",
     description: null,
     coverImageUrl: null,
+    coverImages: [],
+    selectedCoverIndex: null,
+    destinationCode: null,
+    interests: [],
     startDate: "2026-10-12",
     isPublic: false,
     totalDistanceKm: 12.4,
@@ -134,6 +145,9 @@ export function summaryJson(overrides: Partial<ItinerarySummaryJson> = {}): Itin
     title: "Sài Gòn 3 ngày",
     description: null,
     coverImageUrl: null,
+    coverImages: [],
+    selectedCoverIndex: null,
+    destinationCode: null,
     startDate: "2026-10-12",
     isPublic: false,
     totalDistanceKm: 12.4,

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Completed 04-30-PLAN.md (read model: destination, interests, cover images); next: 04-41 (wave 18)"
-last_updated: "2026-11-04T06:31:44.348Z"
+stopped_at: "Completed 04-41-PLAN.md (app tests synced with read model); next: 04-31 (wave 19)"
+last_updated: "2026-11-04T09:05:34.223Z"
 last_activity: 2026-11-04
 progress:
   total_phases: 8
   completed_phases: 3
   total_plans: 68
-  completed_plans: 57
-  percent: 84
+  completed_plans: 58
+  percent: 85
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 ## Current Position
 
 Phase: 4 mở lại (reopened) cho ITIN-02, ITIN-03; 23 plan cũ và UAT 23/23 PASS giữ nguyên; PUB-02 hoãn
-Plan: 30 of 41 đã xong; 04-25 là checkpoint của user (sửa tripory_be); 04-26..04-41 (FE) chưa chạy
+Plan: 31 of 41 đã xong; 04-25 là checkpoint của user (sửa tripory_be); 04-26..04-41 (FE) chưa chạy
 Status: Ready to execute
 Last activity: 2026-11-04
 
@@ -220,6 +220,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-11-04T06:31:44.343Z
-Stopped at: Completed 04-30-PLAN.md (read model: destination, interests, cover images); next: 04-41 (wave 18)
-Resume file: .planning/phases/04-itinerary-crud-editor/04-41-PLAN.md
+Last session: 2026-11-04T09:05:34.218Z
+Stopped at: Completed 04-41-PLAN.md (app tests synced with read model); next: 04-31 (wave 19)
+Resume file: .planning/phases/04-itinerary-crud-editor/04-31-PLAN.md

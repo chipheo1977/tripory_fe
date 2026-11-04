@@ -151,7 +151,7 @@ Plans:
 - [x] 04-22-PLAN.md — Bất biến tĩnh Phase 4, `04-BE-DEPENDENCIES.md`, full suite + build, VALIDATION xanh
 - [x] 04-23-PLAN.md — UAT thủ công với BE thật và điện thoại thật (checkpoint; 23/23 bước PASS)
 - [x] 04-24-PLAN.md — Tài liệu hợp đồng BE (không code, không ca kiểm thử, 5W1H) cho form tạo 4 khối, danh sách ảnh bìa, `PUT` giữ nguyên trường thiếu; cập nhật `04-BE-DEPENDENCIES.md`
-- [ ] 04-25-PLAN.md — Checkpoint: user duyệt tài liệu, tự sửa và deploy `tripory_be`, xác nhận bằng một lần tạo thật (mọi plan FE phụ thuộc plan này)
+- [x] 04-25-PLAN.md — Checkpoint: user duyệt tài liệu, tự sửa và deploy `tripory_be`, xác nhận bằng một lần tạo thật (mọi plan FE phụ thuộc plan này)
 - [ ] 04-26-PLAN.md — Domain thuần: `Destination`, tìm không dấu + alias, tên mặc định, số ngày 1-30, 7 sở thích
 - [ ] 04-27-PLAN.md — `ui-web`: `Accordion`, `ToggleChipGroup`, `NumberStepper`, `RadioGroup`/`Radio`; sửa phần `NumberStepper` của UI-SPEC (D-109)
 - [ ] 04-28-PLAN.md — `ui-web`: `InlineAlert action`, `DialogContent showCloseButton`/`closeDisabled`, `Sheet fixedSnap`

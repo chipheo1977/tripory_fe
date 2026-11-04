@@ -1,142 +1,167 @@
 "use client";
 
-// Dialog "Lịch trình mới" (ITIN-02; D-09..D-12): một ô Tiêu đề điền sẵn và bôi đen, Enter gửi, thành công đi
-// thẳng tới editor (không toast). Lỗi BE gắn vào ô hoặc InlineAlert trong dialog (`errorToast: false`).
-import { zodResolver } from "@hookform/resolvers/zod";
+// Modal "Lịch trình mới" 4 khối accordion (ITIN-02; D-62..D-72, D-93..D-97): Điểm đến → Tên chuyến đi → Thời gian → Sở thích,
+// gửi MỘT request, thành công đi thẳng tới editor (không toast). Lỗi BE gắn vào ô hoặc InlineAlert (`errorToast: false`).
+// Container chỉ nối hook với JSX: logic form ở `use-create-itinerary-form.ts`, khối đang mở ở `use-create-blocks.ts`.
+import { INTERESTS, type InterestCode } from "@tripory/itinerary";
+import { InlineAlert } from "@tripory/ui-web";
+import { useEffect, useId, useRef, type KeyboardEvent } from "react";
+import { useWatch } from "react-hook-form";
+import { destinationCatalog } from "@/composition/destination-catalog";
+import { CreateItineraryAccordion, type CreateAccordionModel } from "./create-itinerary-accordion";
 import {
-  Button,
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogTitle,
-  InlineAlert,
-  Input,
-} from "@tripory/ui-web";
-import { useRouter } from "next/navigation";
-import { useId, useRef, useState, type FormEvent } from "react";
-import { useForm } from "react-hook-form";
-import { SubmitStatus } from "@/components/submit-status";
-import { itinerary } from "@/composition/itinerary.client";
-import { markEnteredFromList } from "./entry-flag";
-import { FormFieldRow } from "./form-field-row";
-import { mapCreateItineraryError } from "./form-error-mapping";
-import { createItinerarySchema, type CreateItineraryValues } from "./form-schemas";
+  blockSummary,
+  focusTargetOfBlock,
+  type BlockErrors,
+  type CreateBlockId,
+  type CreateTripField,
+} from "./create-itinerary-blocks";
+import type { DestinationBlockHandle } from "./destination-block";
+import { ResponsiveFormSurface, useIsWide } from "./responsive-form-surface";
+import { StickyFormFooter } from "./sticky-form-footer";
+import { useCreateBlocks } from "./use-create-blocks";
+import { useCreateItineraryForm } from "./use-create-itinerary-form";
 
-const DEFAULT_TITLE = "Chuyến đi mới";
+const DESTINATIONS = destinationCatalog.list();
 
 export type CreateItineraryDialogProps = Readonly<{
   open: boolean;
   onOpenChange(open: boolean): void;
 }>;
 
+// Enter trong ô nhập không gửi form (D-68); Enter trên nút trigger/chip vẫn bật tắt.
+const blockEnterSubmit = (event: KeyboardEvent<HTMLFormElement>): void => {
+  if (event.key === "Enter" && event.target instanceof HTMLInputElement) event.preventDefault();
+};
+
+const labelsOf = (codes: readonly string[]): readonly string[] =>
+  INTERESTS.filter((interest) => codes.includes(interest.code)).map((interest) => interest.label);
+
 export function CreateItineraryDialog({ open, onOpenChange }: CreateItineraryDialogProps) {
-  const router = useRouter();
   const titleId = useId();
-  const form = useForm<CreateItineraryValues>({
-    resolver: zodResolver(createItinerarySchema),
-    mode: "onTouched",
-    shouldFocusError: true,
-    defaultValues: { title: DEFAULT_TITLE },
-  });
-  const create = itinerary.useCreateItinerary({ meta: { feedback: { errorToast: false } } });
-  const [alert, setAlert] = useState<string | null>(null);
-  // Enter trong ô vẫn kích hoạt submit khi nút đang loading, nên chặn gọi lần hai bằng ref (D-12).
-  const submittingRef = useRef(false);
-  const inputRef = useRef<HTMLElement | null>(null);
+  const wide = useIsWide();
+  const blocks = useCreateBlocks();
+  const destinationRef = useRef<DestinationBlockHandle>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const startInputRef = useRef<HTMLInputElement>(null);
+  const daysInputRef = useRef<HTMLInputElement>(null);
+  const firstChipRef = useRef<HTMLButtonElement>(null);
+  const alertRef = useRef<HTMLDivElement>(null);
 
-  const { errors, isSubmitting } = form.formState;
-  const locked = isSubmitting;
-  const { ref: registerRef, ...titleField } = form.register("title");
-
-  // Bôi đen sau khi Dialog đặt focus: `select()` trước rồi lặp lại ở frame kế, vì focus có thể đặt lại vùng chọn.
-  const initialFocus = (): HTMLElement | null => {
-    const input = inputRef.current;
-    if (!(input instanceof HTMLInputElement)) return null;
-    input.select();
-    requestAnimationFrame(() => {
-      if (inputRef.current instanceof HTMLInputElement) inputRef.current.select();
-    });
-    return input;
+  const focusTargets: Record<CreateTripField, () => void> = {
+    destinationCode: () => destinationRef.current?.focusFirstOption(),
+    title: () => titleInputRef.current?.focus(),
+    startDate: () => startInputRef.current?.focus(),
+    dayCount: () => daysInputRef.current?.focus(),
+    interests: () => firstChipRef.current?.focus(),
   };
+  const focusField = (block: CreateBlockId, errors: BlockErrors): void => focusTargets[focusTargetOfBlock(block, errors)]();
 
-  const handle = form.handleSubmit(async (values) => {
-    setAlert(null);
-    let created;
-    try {
-      created = await create.mutateAsync({ title: values.title.trim() });
-    } catch (error) {
-      const mapped = mapCreateItineraryError(error);
-      if (!mapped) return;
-      const fields = Object.entries(mapped.fieldErrors) as [keyof CreateItineraryValues, string][];
-      fields.forEach(([name, message], index) => {
-        form.setError(name, { message }, { shouldFocus: index === 0 });
-      });
-      if (mapped.alert !== null) {
-        setAlert(mapped.alert);
-        if (fields.length === 0) form.setFocus("title");
-      }
-      return;
-    }
-    markEnteredFromList();
-    router.push(`/itineraries/${created.id}/edit`);
-    onOpenChange(false);
-    form.reset({ title: DEFAULT_TITLE });
-    setAlert(null);
+  const created = useCreateItineraryForm({
+    onCreated: () => onOpenChange(false),
+    onInvalid: (block, errors) => blocks.openAndFocus(block, () => focusField(block, errors)),
   });
+  const { form } = created;
+  const startDate = useWatch({ control: form.control, name: "startDate" });
+  const dayCount = useWatch({ control: form.control, name: "dayCount" });
+  const interests = useWatch({ control: form.control, name: "interests" });
+  const destinationCode = useWatch({ control: form.control, name: "destinationCode" });
+  const formErrors = form.formState.errors;
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (submittingRef.current) {
-      event.preventDefault();
-      return;
-    }
-    submittingRef.current = true;
-    void handle(event).finally(() => {
-      submittingRef.current = false;
-    });
-  };
+  useEffect(() => {
+    if (created.alert !== null) alertRef.current?.scrollIntoView?.({ block: "nearest" });
+  }, [created.alert]);
 
-  // Đang gửi: Esc, scrim và "Hủy" đều không đóng được (UI-SPEC §Dialog tạo nhanh).
-  const handleOpenChange = (next: boolean) => {
-    if (!next && locked) return;
+  const handleOpenChange = (next: boolean): void => {
+    if (!next && created.locked) return;
     onOpenChange(next);
   };
 
-  // Mở lại dialog là form mới: dọn sau khi dialog đã đóng hẳn (xong animation) để không chớp nội dung.
-  const handleOpenChangeComplete = (isOpen: boolean) => {
+  // Mở lại là form mới (D-95): dọn sau khi modal đã đóng hẳn để không chớp nội dung.
+  const handleComplete = (isOpen: boolean): void => {
     if (isOpen) return;
-    form.reset({ title: DEFAULT_TITLE });
-    setAlert(null);
+    created.reset();
+    blocks.reset();
+  };
+
+  const initialFocus = (): HTMLElement | null => {
+    if (wide) return destinationRef.current?.getSearchElement() ?? null;
+    return blocks.triggerElement("destination");
+  };
+
+  const summaryInput = {
+    destinationName: created.destinationName,
+    title: created.title.value,
+    startDate,
+    dayCount,
+    interestLabels: labelsOf(interests),
+  };
+
+  const model: CreateAccordionModel = {
+    openBlocks: blocks.openBlocks,
+    onOpenBlocksChange: blocks.setOpenBlocks,
+    triggerRef: blocks.triggerRef,
+    destinations: DESTINATIONS,
+    destination: {
+      value: destinationCode,
+      onValueChange: created.selectDestination,
+      onCommit: (slug) => {
+        created.selectDestination(slug);
+        blocks.advanceFromDestination();
+      },
+    },
+    title: created.title,
+    dates: {
+      start: { value: startDate, onChange: (value) => form.setValue("startDate", value, { shouldValidate: true }) },
+      days: { value: dayCount, onChange: (value) => form.setValue("dayCount", value, { shouldValidate: true }) },
+    },
+    interests: {
+      value: interests as readonly InterestCode[],
+      onChange: (next) => form.setValue("interests", [...next]),
+    },
+    errors: {
+      destinationCode: formErrors.destinationCode?.message,
+      title: formErrors.title?.message,
+      startDate: formErrors.startDate?.message,
+      dayCount: formErrors.dayCount?.message,
+      interests: formErrors.interests?.message,
+    },
+    summaries: {
+      destination: blockSummary("destination", summaryInput),
+      name: blockSummary("name", summaryInput),
+      dates: blockSummary("dates", summaryInput),
+      interests: blockSummary("interests", summaryInput),
+    },
+    disabled: created.locked,
   };
 
   return (
-    <Dialog onOpenChange={handleOpenChange} onOpenChangeComplete={handleOpenChangeComplete} open={open}>
-      <DialogContent initialFocus={initialFocus} size="sm">
-        <DialogTitle id={titleId}>Lịch trình mới</DialogTitle>
-        <InlineAlert>{alert}</InlineAlert>
-        <form aria-labelledby={titleId} className="flex flex-col gap-stack-lg" noValidate onSubmit={onSubmit}>
-          <FormFieldRow error={errors.title?.message} label="Tiêu đề">
-            <Input
-              {...titleField}
-              autoComplete="off"
-              readOnly={locked}
-              ref={(element) => {
-                registerRef(element);
-                inputRef.current = element;
-              }}
-              size="lg"
-            />
-          </FormFieldRow>
-          <div className="flex flex-col">
-            <div className="flex flex-col-reverse gap-inline-sm sm:flex-row sm:justify-end">
-              <DialogClose disabled={locked}>Hủy</DialogClose>
-              <Button loading={locked} loadingLabel="Đang tạo…" type="submit">
-                Tạo lịch trình
-              </Button>
-            </div>
-            <SubmitStatus pending={locked} />
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <ResponsiveFormSurface
+      fixedSnap
+      initialFocus={initialFocus}
+      locked={created.locked}
+      onOpenChange={handleOpenChange}
+      onOpenChangeComplete={handleComplete}
+      open={open}
+      title="Lịch trình mới"
+      titleId={titleId}
+    >
+      <div ref={alertRef}>
+        <InlineAlert>{created.alert}</InlineAlert>
+      </div>
+      <form aria-labelledby={titleId} className="flex flex-col gap-stack-md" noValidate onKeyDown={blockEnterSubmit} onSubmit={created.submit}>
+        <CreateItineraryAccordion
+          model={model}
+          refs={{
+            destination: destinationRef,
+            title: titleInputRef,
+            start: startInputRef,
+            days: daysInputRef,
+            firstChip: firstChipRef,
+          }}
+        />
+        <StickyFormFooter onCancel={() => handleOpenChange(false)} pending={created.locked} />
+      </form>
+    </ResponsiveFormSurface>
   );
 }

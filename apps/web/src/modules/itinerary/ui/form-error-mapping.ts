@@ -9,10 +9,9 @@
 // React, không bao giờ qua HTML (T-04-29).
 import { isApiError, makeApiError, type ApiError, type FieldErrors } from "@tripory/api-client";
 import { mapFormError, FORM_ALERT as ALERT, type FormErrorMapping, type FormErrorTarget as Target } from "@/lib/feedback";
-import { CREATE_ITINERARY_FIELDS, CREATE_TRIP_FIELDS, METADATA_FIELDS, WAYPOINT_FIELDS } from "./form-schemas";
+import { CREATE_TRIP_FIELDS, METADATA_FIELDS, WAYPOINT_FIELDS } from "./form-schemas";
 
 export type { FormErrorMapping };
-type CreateField = (typeof CREATE_ITINERARY_FIELDS)[number];
 type CreateTripField = (typeof CREATE_TRIP_FIELDS)[number];
 type MetadataField = (typeof METADATA_FIELDS)[number];
 type WaypointField = (typeof WAYPOINT_FIELDS)[number];
@@ -35,13 +34,6 @@ function normalizeFieldKeys(error: unknown, alias: Readonly<Record<string, strin
   return makeApiError({ kind, status, code, message, fieldErrors } satisfies Omit<ApiError, "type">);
 }
 
-const CREATE_TARGETS: ReadonlyMap<string, Target<CreateField>> = new Map<string, Target<CreateField>>([
-  ["ItineraryTitle.Empty", "title"],
-  ["ItineraryTitle.TooLong", "title"],
-  ["Itinerary.NotFound", ALERT],
-  ["Itinerary.Forbidden", ALERT],
-]);
-
 const CREATE_TRIP_TARGETS: ReadonlyMap<string, Target<CreateTripField>> = new Map<string, Target<CreateTripField>>([
   ["Itinerary.DestinationRequired", "destinationCode"],
   ["Itinerary.DestinationUnknown", "destinationCode"],
@@ -59,6 +51,11 @@ const METADATA_TARGETS: ReadonlyMap<string, Target<MetadataField>> = new Map<str
   ["ItineraryTitle.Empty", "title"],
   ["ItineraryTitle.TooLong", "title"],
   ["ItineraryDescription.TooLong", "description"],
+  ["Itinerary.TooManyCoverImages", "coverImages"],
+  ["Itinerary.CoverImageInvalidUrl", "coverImages"],
+  ["Itinerary.CoverImageTooLong", "coverImages"],
+  ["Itinerary.CoverImageDuplicated", "coverImages"],
+  ["Itinerary.CoverSelectionInvalid", "coverImages"],
   ["Itinerary.NotFound", ALERT],
   ["Itinerary.Forbidden", ALERT],
 ]);
@@ -82,9 +79,6 @@ const NO_TARGETS: ReadonlyMap<string, Target<NoField>> = new Map<string, Target<
 
 // ASP.NET đặt tên theo property của DTO; ô vị trí gom cả vĩ độ và kinh độ.
 const WAYPOINT_ALIASES = { latitude: "location", longitude: "location" } as const;
-
-export const mapCreateItineraryError = (error: unknown): FormErrorMapping<CreateField> | null =>
-  mapFormError(normalizeFieldKeys(error), CREATE_ITINERARY_FIELDS, CREATE_TARGETS);
 
 export const mapCreateTripError = (error: unknown): FormErrorMapping<CreateTripField> | null =>
   mapFormError(normalizeFieldKeys(error), CREATE_TRIP_FIELDS, CREATE_TRIP_TARGETS);

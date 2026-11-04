@@ -3,7 +3,7 @@
 //
 // Độ dài đếm trên giá trị THÔ (kể cả khoảng trắng đầu/cuối): BE kiểm độ dài trước khi trim (Pitfall 10),
 // nên chuỗi 99 ký tự + 2 khoảng trắng phải bị chặn ở client thay vì chờ 400/5xx. Mỗi ô chỉ phát một lỗi.
-import { isValidDayCount, parseCalendarDate, type CalendarDate, type MetadataInput } from "@tripory/itinerary";
+import { isValidDayCount, parseCalendarDate } from "@tripory/itinerary";
 import { z } from "zod";
 
 export const TITLE_REQUIRED = "Vui lòng nhập tiêu đề.";
@@ -54,31 +54,14 @@ const startDateField = z.string().superRefine((value, ctx) => {
   }
 });
 
-const coverImageField = z.string().superRefine((value, ctx) => {
-  const trimmed = value.trim();
-  if (trimmed === "") return;
-  if (!isHttpsUrl(trimmed)) ctx.addIssue({ code: "custom", message: COVER_NOT_HTTPS });
-  else if (value.length > COVER_MAX) ctx.addIssue({ code: "custom", message: COVER_TOO_LONG });
-});
-
 // Ô vị trí chỉ kiểm "không rỗng": parse tọa độ/link và resolve link rút gọn là việc của LocationField
 // (04-17), nó gắn lỗi bằng `setError` vì cần gọi mạng.
 const locationField = z.string().superRefine((value, ctx) => {
   if (value.trim().length === 0) ctx.addIssue({ code: "custom", message: LOCATION_REQUIRED });
 });
 
-export const CREATE_ITINERARY_FIELDS = ["title"] as const;
-export const METADATA_FIELDS = ["title", "description", "startDate", "coverImageUrl"] as const;
+export const METADATA_FIELDS = ["title", "description", "startDate", "coverImages"] as const;
 export const WAYPOINT_FIELDS = ["name", "location", "address", "notes"] as const;
-
-export const createItinerarySchema = z.object({ title: titleField });
-
-export const metadataSchema = z.object({
-  title: titleField,
-  description: optionalText(DESCRIPTION_TOO_LONG, DESCRIPTION_MAX),
-  startDate: startDateField,
-  coverImageUrl: coverImageField,
-});
 
 export const CREATE_TRIP_FIELDS = ["destinationCode", "title", "startDate", "dayCount", "interests"] as const;
 
@@ -111,8 +94,6 @@ export const waypointSchema = z.object({
   notes: optionalText(NOTES_TOO_LONG, NOTES_MAX),
 });
 
-export type CreateItineraryValues = z.infer<typeof createItinerarySchema>;
-export type MetadataValues = z.infer<typeof metadataSchema>;
 export type WaypointValues = z.infer<typeof waypointSchema>;
 export type CreateTripValues = z.infer<typeof createTripSchema>;
 export type MetadataFieldsValues = z.infer<typeof metadataFieldsSchema>;
@@ -128,23 +109,3 @@ export function validateCoverUrl(raw: string, existing: readonly string[]): stri
 
 /** Phụ đề ngày không có form riêng (sửa tại chỗ): trả copy lỗi hoặc `null` khi hợp lệ. */
 export const validateSubtitle = (raw: string): string | null => (raw.length > SUBTITLE_MAX ? SUBTITLE_TOO_LONG : null);
-
-const emptyToNull = (value: string): string | null => {
-  const trimmed = value.trim();
-  return trimmed === "" ? null : trimmed;
-};
-
-/** Giá trị form (đã qua `metadataSchema`) thành input gửi BE: trim, rỗng thành `null`, ngày thành `CalendarDate`. */
-export function toMetadataInput(values: MetadataValues): MetadataInput {
-  const startDate = emptyToNull(values.startDate);
-  const parsed: CalendarDate | null = startDate === null ? null : parseCalendarDate(startDate);
-  const cover = emptyToNull(values.coverImageUrl);
-  // Ánh xạ TẠM của ô URL ảnh bìa đơn thành danh sách một phần tử; plan 04-38 thay bằng lưới ảnh và xóa hàm này.
-  return {
-    title: values.title.trim(),
-    description: emptyToNull(values.description),
-    startDate: parsed,
-    coverImages: cover === null ? [] : [cover],
-    selectedCoverIndex: cover === null ? null : 0,
-  };
-}

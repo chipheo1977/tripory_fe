@@ -186,6 +186,41 @@ describe("lỗi", () => {
   });
 });
 
+describe("lỗi nền không báo hai lần; retry không gửi trùng", () => {
+  it("lệnh gửi lại sau closeForm lỗi tiếp thì không báo lỗi nền lần hai", () => {
+    const { autosave, onBackgroundFailure, snapshot } = setup();
+    snapshot.title = "A";
+    autosave.request();
+    autosave.settled({ ok: false, failure: GENERIC_FAILURE });
+    snapshot.title = "B";
+    autosave.request();
+    autosave.closeForm();
+    expect(onBackgroundFailure).toHaveBeenCalledTimes(1);
+    autosave.settled({ ok: false, failure: GENERIC_FAILURE });
+    expect(onBackgroundFailure).toHaveBeenCalledTimes(1);
+  });
+
+  it("sau retry thủ công, một lỗi mới được báo lại", () => {
+    const { autosave, onBackgroundFailure, snapshot } = setup();
+    snapshot.title = "A";
+    autosave.request();
+    autosave.settled({ ok: false, failure: GENERIC_FAILURE });
+    autosave.closeForm();
+    autosave.retry();
+    autosave.settled({ ok: false, failure: GENERIC_FAILURE });
+    expect(onBackgroundFailure).toHaveBeenCalledTimes(2);
+  });
+
+  it("retry với payload trùng lệnh đang chạy thì không gửi thêm", () => {
+    const { autosave, send, snapshot } = setup();
+    snapshot.title = "A";
+    autosave.request();
+    autosave.retry();
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(autosave.getState().queued).toBe(false);
+  });
+});
+
 describe("đóng form, detach, openForm", () => {
   it("closeForm khi còn đồng hồ chữ hợp lệ gửi ngay", () => {
     const { autosave, send, snapshot } = setup();

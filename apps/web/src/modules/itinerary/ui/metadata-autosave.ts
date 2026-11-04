@@ -67,6 +67,8 @@ export function createMetadataAutosave(deps: AutosaveDeps): MetadataAutosave {
   let formOpen = false;
   let timer: unknown = null;
   let failure: AutosaveFailure | null = null;
+  // Đã báo lỗi nền cho đợt lỗi hiện tại: lệnh gửi lại do blur có thể lỗi tiếp, không báo hai lần. Xóa khi thành công, mở form hoặc thử lại.
+  let reportedBackground = false;
   const listeners = new Set<() => void>();
 
   const computeState = (): AutosaveState => {
@@ -114,18 +116,26 @@ export function createMetadataAutosave(deps: AutosaveDeps): MetadataAutosave {
 
   const retry = (): void => {
     failure = null;
+    reportedBackground = false;
     const payload = build() ?? lastBuilt;
     if (payload === null) {
       notify();
       return;
     }
     lastBuilt = payload;
+    // Cùng payload với lệnh đang chạy (ví dụ blur vừa gửi lại): không gửi trùng.
+    if (inFlight !== null && isSameMetadata(payload, inFlight)) {
+      notify();
+      return;
+    }
     if (inFlight !== null) queued = payload;
     else sendNow(payload);
     notify();
   };
 
   const reportBackground = (current: AutosaveFailure): void => {
+    if (reportedBackground) return;
+    reportedBackground = true;
     deps.onBackgroundFailure(current, retry);
   };
 
@@ -139,6 +149,7 @@ export function createMetadataAutosave(deps: AutosaveDeps): MetadataAutosave {
     openForm(baseline) {
       formOpen = true;
       failure = null;
+      reportedBackground = false;
       if (inFlight === null && queued === null) {
         lastSaved = baseline;
         lastSent = baseline;
@@ -178,6 +189,7 @@ export function createMetadataAutosave(deps: AutosaveDeps): MetadataAutosave {
       if (outcome.ok) {
         lastSaved = sent ?? lastSaved;
         failure = null;
+        reportedBackground = false;
         const next = queued;
         queued = null;
         if (next !== null) sendNow(next);

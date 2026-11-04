@@ -2,7 +2,6 @@ import { makeApiError, sessionExpiredError, type FieldErrors } from "@tripory/ap
 import { describe, expect, it } from "vitest";
 import { FIELD_INVALID_MESSAGE, GENERIC_ERROR_MESSAGE } from "@/lib/feedback";
 import {
-  mapCreateItineraryError,
   mapCreateTripError,
   mapDeleteItineraryError,
   mapMetadataError,
@@ -17,7 +16,6 @@ const validation = (fieldErrors: FieldErrors) =>
   makeApiError({ kind: "http", status: 400, code: null, message: null, fieldErrors });
 
 const forms = [
-  ["mapCreateItineraryError", mapCreateItineraryError, "title"],
   ["mapCreateTripError", mapCreateTripError, "destinationCode"],
   ["mapMetadataError", mapMetadataError, "description"],
   ["mapWaypointError", mapWaypointError, "name"],
@@ -57,21 +55,6 @@ describe.each(forms)("%s (hành vi chung)", (_name, map, knownField) => {
       }
     });
   }
-});
-
-describe("mapCreateItineraryError", () => {
-  it("ItineraryTitle.Empty → ô title", () => {
-    expect(mapCreateItineraryError(http(400, "ItineraryTitle.Empty", "x"))).toEqual({
-      fieldErrors: { title: "Vui lòng nhập tiêu đề." },
-      alert: null,
-    });
-  });
-
-  it("ItineraryTitle.TooLong → ô title với message BE", () => {
-    const mapped = mapCreateItineraryError(http(400, "ItineraryTitle.TooLong", "Tiêu đề quá dài."));
-    expect(mapped?.fieldErrors.title).toBe("Tiêu đề quá dài.");
-    expect(mapped?.alert).toBeNull();
-  });
 });
 
 describe("mapCreateTripError", () => {
@@ -169,6 +152,24 @@ describe("mapDeleteItineraryError", () => {
     expect(mapDeleteItineraryError(http(404, "Itinerary.NotFound", "x"))).toEqual({
       fieldErrors: {},
       alert: "Không tìm thấy lịch trình.",
+    });
+  });
+});
+
+describe("mapMetadataError: lỗi danh sách ảnh bìa", () => {
+  it.each([
+    ["Itinerary.TooManyCoverImages", "Chỉ lưu được tối đa 5 ảnh bìa."],
+    ["Itinerary.CoverImageInvalidUrl", "Link ảnh phải bắt đầu bằng https://."],
+    ["Itinerary.CoverImageTooLong", "Link ảnh tối đa 500 ký tự."],
+    ["Itinerary.CoverImageDuplicated", "Ảnh này đã có trong danh sách."],
+    ["Itinerary.CoverSelectionInvalid", GENERIC_ERROR_MESSAGE],
+  ] as const)("%s → ô coverImages", (code, message) => {
+    expect(mapMetadataError(http(400, code, "x"))).toEqual({ fieldErrors: { coverImages: message }, alert: null });
+  });
+
+  it("key ASP.NET CoverImages được chuẩn hóa về coverImages", () => {
+    expect(mapMetadataError(validation({ CoverImages: ["x"] }))?.fieldErrors).toEqual({
+      coverImages: FIELD_INVALID_MESSAGE,
     });
   });
 });

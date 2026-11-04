@@ -1,17 +1,16 @@
 import { makeApiError } from "@tripory/api-client";
-import { parseCalendarDate, type Itinerary } from "@tripory/itinerary";
+import { parseCalendarDate, type Itinerary, type MetadataInput } from "@tripory/itinerary";
 import { parseItineraryId, parseUserId } from "@tripory/shared-kernel";
 import { notify } from "@tripory/ui-web";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
-import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { makeQueryClient } from "@/composition/query-client";
-import { draftKey, draftStorage } from "./draft-storage";
-import type { MetadataValues } from "./form-schemas";
 import { createSaveStatusStore, SaveStatusProvider, type SaveStatusStore } from "./save-status";
 import { TripInfoDialog } from "./trip-info-dialog";
+import { useMetadataAutosave } from "./use-metadata-autosave";
 
 const h = vi.hoisted(() => ({ update: vi.fn() }));
 
@@ -43,15 +42,13 @@ vi.mock("@/composition/session-events.client", async (importOriginal) => {
   return { sessionEvents: actual.makeSessionEvents({ createChannel: () => null }) };
 });
 
-import { sessionEvents } from "@/composition/session-events.client";
-
 const ID = parseItineraryId("3f2a6c1e-8b7d-4e21-9c55-0a1b2c3d4e5f");
 const OWNER = parseUserId("3f2504e0-4f89-11d3-9a0c-0305e82c3301");
 const START = parseCalendarDate("2026-10-12");
 if (ID === null || OWNER === null || START === null) throw new Error("dữ liệu mẫu phải hợp lệ");
 
-const VIEWER: string = OWNER;
 const COVER = "https://img.test/da-lat.jpg";
+const COVER_B = "https://img.test/b.jpg";
 
 const base: Itinerary = {
   id: ID,
@@ -68,22 +65,17 @@ const base: Itinerary = {
   days: [{ dayNumber: 1, subtitle: null, distanceKm: null }],
   waypoints: [],
 };
-const bare: Itinerary = { ...base, description: null, coverImageUrl: null, coverImages: [], startDate: null };
+const twoCovers: Itinerary = { ...base, coverImages: [COVER, COVER_B] };
 
 const http = (status: number, code: string | null, message: string | null) =>
   makeApiError({ kind: "http", status, code, message });
 
-const DRAFT_KEY = draftKey({ viewerId: OWNER, itineraryId: ID, kind: "metadata" });
-
-const title = () => screen.getByLabelText(/^Tiêu đề/) as HTMLInputElement;
-const description = () => screen.getByLabelText("Mô tả") as HTMLTextAreaElement;
+const title = () => screen.getByRole("textbox", { name: /^Tiêu đề/ }) as HTMLInputElement;
+const description = () => screen.getByRole("textbox", { name: "Mô tả" }) as HTMLTextAreaElement;
 const startDate = () => screen.getByLabelText("Ngày khởi hành") as HTMLInputElement;
-const cover = () => screen.getByLabelText("Ảnh bìa") as HTMLInputElement;
-const save = () => screen.getByRole("button", { name: /^Lưu|Đang lưu/ });
-const cancel = () => screen.getByRole("button", { name: "Hủy" });
+const lastPayload = (): MetadataInput => h.update.mock.calls.at(-1)?.[0] as MetadataInput;
 
 const originalMatchMedia = window.matchMedia;
-/** Mặc định desktop (Dialog); `false` cho Sheet. */
 const setWide = (wide: boolean) => {
   window.matchMedia = ((query: string) =>
     ({
@@ -94,50 +86,66 @@ const setWide = (wide: boolean) => {
     }) as unknown as MediaQueryList) as typeof window.matchMedia;
 };
 
-function setup(
-  props: Partial<{
-    itinerary: Itinerary;
-    restored: MetadataValues | null;
-    onOpenChange: (open: boolean) => void;
-    onDirtyChange: (dirty: boolean) => void;
-    store: SaveStatusStore;
-  }> = {},
-) {
-  const user = userEvent.setup();
-  const onOpenChange = props.onOpenChange ?? vi.fn();
-  const store = props.store ?? createSaveStatusStore();
-  // Cha giữ `open` như editor thật: đóng thì dialog đóng, nên báo "hết bẩn" kiểm được.
-  function Harness() {
-    const [open, setOpen] = useState(true);
-    return (
+type HarnessProps = {
+  itinerary: Itinerary;
+  onOpenChange: (open: boolean) => void;
+};
+
+function Harness({ itinerary, onOpenChange }: HarnessProps) {
+  const autosave = useMetadataAutosave(itinerary.id);
+  const [open, setOpen] = useState(true);
+  return (
+    <>
+      <button onClick={() => setOpen(true)} type="button">
+        Mở lại
+      </button>
       <TripInfoDialog
-        itinerary={props.itinerary ?? base}
-        onDirtyChange={props.onDirtyChange}
+        autosave={autosave}
+        itinerary={itinerary}
         onOpenChange={(next) => {
           setOpen(next);
           onOpenChange(next);
         }}
         open={open}
-        restored={props.restored}
-        viewerId={VIEWER}
       />
-    );
-  }
-  render(
-    <QueryClientProvider client={makeQueryClient()}>
-      <SaveStatusProvider store={store}>
-        <Harness />
-      </SaveStatusProvider>
-    </QueryClientProvider>,
+    </>
   );
-  return { user, onOpenChange, store };
+}
+
+async function setup(options: { itinerary?: Itinerary; store?: SaveStatusStore; fakeTimers?: boolean } = {}) {
+  if (options.fakeTimers === true) vi.useFakeTimers();
+  const user = userEvent.setup(options.fakeTimers === true ? { advanceTimers: vi.advanceTimersByTime } : {});
+  const onOpenChange = vi.fn();
+  const store = options.store ?? createSaveStatusStore();
+  const wrap = (itinerary: Itinerary) => (
+    <QueryClientProvider client={client}>
+      <SaveStatusProvider store={store}>
+        <Harness itinerary={itinerary} onOpenChange={onOpenChange} />
+      </SaveStatusProvider>
+    </QueryClientProvider>
+  );
+  const client = makeQueryClient();
+  const view = render(wrap(options.itinerary ?? base));
+  if (options.fakeTimers === true) {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
+    });
+  } else {
+    await screen.findByRole("dialog");
+    await waitFor(() => expect(document.activeElement).toBe(title()));
+  }
+  return { user, onOpenChange, store, rerenderWith: (itinerary: Itinerary) => view.rerender(wrap(itinerary)) };
+}
+
+async function settleMicrotasks() {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(0);
+  });
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
   setWide(true);
-  window.sessionStorage.clear();
-  sessionEvents.rearmExpired();
   h.update.mockResolvedValue(undefined);
 });
 
@@ -145,267 +153,233 @@ afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
   window.matchMedia = originalMatchMedia;
-  window.sessionStorage.clear();
-  sessionEvents.dispose();
 });
 
-it("opens with the title focused and fields filled from the itinerary", async () => {
-  setup();
-  expect(await screen.findByRole("dialog", { name: "Thông tin chuyến đi" })).toBeTruthy();
-  await waitFor(() => expect(document.activeElement).toBe(title()));
-  expect(title().value).toBe("Đà Lạt");
-  expect(description().value).toBe("Săn mây");
-  expect(startDate().value).toBe("2026-10-12");
-  expect(startDate().type).toBe("date");
-  expect(cover().value).toBe(COVER);
-  expect(cover().type).toBe("url");
-  expect(cover().getAttribute("inputmode")).toBe("url");
-  expect(screen.getByText("Dán link ảnh bắt đầu bằng https://")).toBeTruthy();
-});
-
-it("fills null description, date and cover as empty strings", async () => {
-  setup({ itinerary: bare });
-  await screen.findByRole("dialog");
-  expect(description().value).toBe("");
-  expect(startDate().value).toBe("");
-  expect(cover().value).toBe("");
-  expect(screen.queryByRole("button", { name: "Xóa Ngày khởi hành" })).toBeNull();
-  expect(screen.queryByRole("button", { name: "Xóa Ảnh bìa" })).toBeNull();
-});
-
-it("saves the trimmed metadata, marks saved, closes without any toast", async () => {
-  const toasts = [vi.spyOn(notify, "success"), vi.spyOn(notify, "error"), vi.spyOn(notify, "info")];
-  window.sessionStorage.setItem(DRAFT_KEY, "{}");
-  const { user, onOpenChange, store } = setup();
-  await screen.findByRole("dialog");
-  await user.clear(title());
-  await user.type(title(), "  Đà Lạt 3N  ");
-  await user.clear(description());
-  await user.click(save());
-  await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
-  expect(h.update).toHaveBeenCalledTimes(1);
-  expect(h.update).toHaveBeenCalledWith({
-    title: "Đà Lạt 3N",
-    description: null,
-    startDate: START,
-    coverImages: [COVER],
-    selectedCoverIndex: 0,
+describe("TripInfoDialog: cấu trúc", () => {
+  it("không nút Lưu/Hủy, không trạng thái Đang lưu/Đã lưu, có nút Đóng và đủ 4 trường", async () => {
+    await setup();
+    const dialog = await screen.findByRole("dialog", { name: "Thông tin chuyến đi" });
+    expect(screen.queryByRole("button", { name: /^Lưu|^Hủy/ })).toBeNull();
+    expect(dialog.textContent).not.toMatch(/Đang lưu|Đã lưu/);
+    expect(screen.getByRole("button", { name: "Đóng" })).toBeTruthy();
+    expect(title()).toBeTruthy();
+    expect(description()).toBeTruthy();
+    expect(startDate()).toBeTruthy();
+    expect(screen.getByRole("radiogroup", { name: "Ảnh bìa" })).toBeTruthy();
+    expect(screen.queryByLabelText(/điểm đến|sở thích/i)).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(title()));
   });
-  expect(store.getSnapshot().hasSaved).toBe(true);
-  expect(window.sessionStorage.getItem(DRAFT_KEY)).toBeNull();
-  for (const toast of toasts) expect(toast).not.toHaveBeenCalled();
-});
 
-it("locks while saving: busy label, no second submit, Hủy disabled, Esc keeps it open, closes when done", async () => {
-  let resolve: () => void = () => undefined;
-  h.update.mockReturnValue(new Promise<void>((r) => (resolve = r)));
-  const { user, onOpenChange } = setup();
-  await screen.findByRole("dialog");
-  await user.click(save());
-  const busy = await screen.findByRole("button", { name: /Đang lưu/ });
-  expect(busy.textContent).toBe("Đang lưu…");
-  expect(busy.getAttribute("aria-busy")).toBe("true");
-  expect(title().readOnly).toBe(true);
-  const cancelButton = cancel() as HTMLButtonElement;
-  expect(cancelButton.hasAttribute("disabled") || cancelButton.getAttribute("aria-disabled") === "true").toBe(true);
-  fireEvent.submit(document.querySelector("form") as HTMLFormElement);
-  fireEvent.click(busy);
-  fireEvent.click(cancelButton);
-  fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
-  await user.keyboard("{Escape}");
-  expect(h.update).toHaveBeenCalledTimes(1);
-  expect(onOpenChange).not.toHaveBeenCalled();
-  await act(async () => resolve());
-  await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
-});
-
-it("validates title, description and cover before calling the server", async () => {
-  const { user } = setup({ itinerary: bare });
-  await screen.findByRole("dialog");
-  await user.clear(title());
-  await user.click(save());
-  expect(await screen.findByText("Vui lòng nhập tiêu đề.")).toBeTruthy();
-  expect(title().getAttribute("aria-invalid")).toBe("true");
-
-  await user.click(title());
-  await user.paste("a".repeat(101));
-  await user.click(save());
-  expect(await screen.findByText("Tiêu đề tối đa 100 ký tự.")).toBeTruthy();
-
-  await user.clear(title());
-  await user.type(title(), "ok");
-  await user.click(description());
-  await user.paste("b".repeat(1001));
-  await user.type(cover(), "http://img.test/a.jpg");
-  await user.click(save());
-  expect(await screen.findByText("Mô tả tối đa 1000 ký tự.")).toBeTruthy();
-  expect(await screen.findByText("Link ảnh phải bắt đầu bằng https://.")).toBeTruthy();
-  expect(h.update).not.toHaveBeenCalled();
-});
-
-it("shows the cover preview only after 400ms for a valid https URL, with no referrer", async () => {
-  setup({ itinerary: bare });
-  await screen.findByRole("dialog");
-  vi.useFakeTimers();
-  fireEvent.change(cover(), { target: { value: "https://img.test/new.jpg" } });
-  await act(() => vi.advanceTimersByTimeAsync(399));
-  expect(screen.queryByAltText("Xem trước ảnh bìa")).toBeNull();
-  await act(() => vi.advanceTimersByTimeAsync(1));
-  const preview = screen.getByAltText("Xem trước ảnh bìa") as HTMLImageElement;
-  expect(preview.getAttribute("src")).toBe("https://img.test/new.jpg");
-  expect(preview.getAttribute("referrerpolicy")).toBe("no-referrer");
-  // URL không hợp lệ thì preview biến mất ngay, không chờ debounce.
-  fireEvent.change(cover(), { target: { value: "http://img.test/new.jpg" } });
-  expect(screen.queryByAltText("Xem trước ảnh bìa")).toBeNull();
-});
-
-it("never previews javascript:, data: or http: URLs", async () => {
-  setup({ itinerary: bare });
-  await screen.findByRole("dialog");
-  vi.useFakeTimers();
-  for (const value of ["javascript:alert(1)", "data:image/png;base64,AAAA", "http://img.test/a.jpg"]) {
-    fireEvent.change(cover(), { target: { value } });
-    await act(() => vi.advanceTimersByTimeAsync(1000));
-    expect(screen.queryByAltText("Xem trước ảnh bìa")).toBeNull();
-  }
-});
-
-it("falls back with the load-error copy but still saves the cover URL", async () => {
-  const { user, onOpenChange } = setup({ itinerary: bare });
-  await screen.findByRole("dialog");
-  vi.useFakeTimers();
-  fireEvent.change(cover(), { target: { value: "https://img.test/broken.jpg" } });
-  await act(() => vi.advanceTimersByTimeAsync(400));
-  fireEvent.error(screen.getByAltText("Xem trước ảnh bìa"));
-  expect(screen.getByText("Không tải được ảnh từ link này")).toBeTruthy();
-  expect(screen.queryByAltText("Xem trước ảnh bìa")).toBeNull();
-  vi.useRealTimers();
-  await user.click(save());
-  await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
-  expect(h.update).toHaveBeenCalledWith(expect.objectContaining({ coverImages: ["https://img.test/broken.jpg"], selectedCoverIndex: 0 }));
-});
-
-it("clears the date and the cover with the input's built-in X and sends null", async () => {
-  const { user } = setup();
-  await screen.findByRole("dialog");
-  await user.click(screen.getByRole("button", { name: "Xóa Ngày khởi hành" }));
-  expect(startDate().value).toBe("");
-  expect(document.activeElement).toBe(startDate());
-  expect(screen.queryByRole("button", { name: "Xóa Ngày khởi hành" })).toBeNull();
-  await user.click(screen.getByRole("button", { name: "Xóa Ảnh bìa" }));
-  expect(cover().value).toBe("");
-  expect(document.activeElement).toBe(cover());
-  expect(screen.queryByRole("button", { name: "Xóa Ảnh bìa" })).toBeNull();
-  expect(screen.queryByAltText("Xem trước ảnh bìa")).toBeNull();
-  await user.click(save());
-  await waitFor(() => expect(h.update).toHaveBeenCalledTimes(1));
-  expect(h.update).toHaveBeenCalledWith({
-    title: "Đà Lạt",
-    description: "Săn mây",
-    startDate: null,
-    coverImages: [],
-    selectedCoverIndex: null,
+  it("dưới md render bằng Sheet có nút Đóng", async () => {
+    setWide(false);
+    await setup();
+    const sheet = await screen.findByRole("dialog", { name: "Thông tin chuyến đi" });
+    expect(sheet.getAttribute("data-sheet-position")).toBe("bottom");
+    expect(screen.getByRole("button", { name: "Đóng" })).toBeTruthy();
   });
 });
 
-it("attaches ItineraryTitle.Empty from the server under the title and stays open without a toast", async () => {
-  const errorToast = vi.spyOn(notify, "error");
-  h.update.mockRejectedValue(http(400, "ItineraryTitle.Empty", "Title must not be empty"));
-  const { user, onOpenChange } = setup();
-  await screen.findByRole("dialog");
-  await user.click(save());
-  expect(await screen.findByText("Vui lòng nhập tiêu đề.")).toBeTruthy();
-  expect(title().getAttribute("aria-invalid")).toBe("true");
-  expect(screen.getByRole("dialog")).toBeTruthy();
-  expect(onOpenChange).not.toHaveBeenCalled();
-  expect(errorToast).not.toHaveBeenCalled();
+describe("TripInfoDialog: tự lưu ô chữ", () => {
+  it("gõ tiêu đề: 799 ms chưa gửi, 800 ms gửi MỘT lệnh với payload 5 khóa", async () => {
+    await setup({ fakeTimers: true });
+    fireEvent.change(title(), { target: { value: "Đà Lạt!" } });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(799);
+    });
+    expect(h.update).not.toHaveBeenCalled();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    await settleMicrotasks();
+    expect(h.update).toHaveBeenCalledTimes(1);
+    expect(Object.keys(lastPayload()).toSorted()).toEqual([
+      "coverImages",
+      "description",
+      "selectedCoverIndex",
+      "startDate",
+      "title",
+    ]);
+    expect(lastPayload()).toMatchObject({ title: "Đà Lạt!", coverImages: [COVER], selectedCoverIndex: 0 });
+  });
+
+  it("blur gửi ngay; blur không đổi gì thì không gửi; blur ngay sau lần lưu do debounce không gửi lại", async () => {
+    const { user } = await setup();
+    await user.click(title());
+    await user.tab();
+    expect(h.update).not.toHaveBeenCalled();
+    await user.click(description());
+    await user.type(description(), " thêm");
+    await user.tab();
+    await waitFor(() => expect(h.update).toHaveBeenCalledTimes(1));
+    expect(lastPayload().description).toBe("Săn mây thêm");
+    await user.click(description());
+    await user.tab();
+    expect(h.update).toHaveBeenCalledTimes(1);
+  });
+
+  it("tiêu đề trống, 101 ký tự và mô tả 1001 ký tự: không gửi, lỗi dưới ô", async () => {
+    const { user } = await setup();
+    await user.clear(title());
+    await user.tab();
+    expect(await screen.findByText("Vui lòng nhập tiêu đề.")).toBeTruthy();
+    fireEvent.change(title(), { target: { value: "a".repeat(101) } });
+    await user.tab();
+    expect(await screen.findByText("Tiêu đề tối đa 100 ký tự.")).toBeTruthy();
+    fireEvent.change(description(), { target: { value: "b".repeat(1001) } });
+    fireEvent.blur(description());
+    expect(await screen.findByText("Mô tả tối đa 1000 ký tự.")).toBeTruthy();
+    expect(h.update).not.toHaveBeenCalled();
+  });
+
+  it("payload dùng giá trị hợp lệ gần nhất: tiêu đề sai + đổi ngày mang tiêu đề cũ", async () => {
+    await setup();
+    fireEvent.change(title(), { target: { value: "" } });
+    fireEvent.change(startDate(), { target: { value: "2026-11-12" } });
+    await waitFor(() => expect(h.update).toHaveBeenCalledTimes(1));
+    expect(lastPayload()).toMatchObject({ title: "Đà Lạt", startDate: "2026-11-12" });
+  });
 });
 
-it("shows other server errors in an InlineAlert, keeps the dialog open and allows retry", async () => {
-  const errorToast = vi.spyOn(notify, "error");
-  h.update.mockRejectedValueOnce(http(500, null, null));
-  const { user, onOpenChange } = setup();
-  await screen.findByRole("dialog");
-  await user.click(save());
-  const alert = await screen.findByRole("alert");
-  expect(alert.textContent).toBeTruthy();
-  expect(screen.getByRole("dialog")).toBeTruthy();
-  expect(title().value).toBe("Đà Lạt");
-  expect(errorToast).not.toHaveBeenCalled();
-  expect(onOpenChange).not.toHaveBeenCalled();
-  await user.click(save());
-  await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
+describe("TripInfoDialog: ngày khởi hành", () => {
+  it("đổi ngày gửi ngay; bấm Xóa Ngày khởi hành gửi startDate null", async () => {
+    const { user } = await setup();
+    fireEvent.change(startDate(), { target: { value: "2026-11-12" } });
+    await waitFor(() => expect(h.update).toHaveBeenCalledTimes(1));
+    await user.click(screen.getByRole("button", { name: "Xóa Ngày khởi hành" }));
+    await waitFor(() => expect(h.update).toHaveBeenCalledTimes(2));
+    expect(lastPayload().startDate).toBeNull();
+  });
+
+  it("ô đang focus chuyển thành rỗng do gõ dở không gửi null; blur với ô rỗng thì gửi", async () => {
+    await setup();
+    startDate().focus();
+    fireEvent.change(startDate(), { target: { value: "" } });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(h.update).not.toHaveBeenCalled();
+    fireEvent.blur(startDate());
+    await waitFor(() => expect(h.update).toHaveBeenCalledTimes(1));
+    expect(lastPayload().startDate).toBeNull();
+  });
 });
 
-it("restores a draft with an info alert, then removes the draft on Hủy", async () => {
-  window.sessionStorage.setItem(DRAFT_KEY, "{}");
-  const restored: MetadataValues = { title: "Bản nháp", description: "", startDate: "", coverImageUrl: "" };
-  const { user, onOpenChange } = setup({ restored });
-  await screen.findByRole("dialog");
-  expect(title().value).toBe("Bản nháp");
-  expect(startDate().value).toBe("");
-  expect(screen.getByText("Đã khôi phục nội dung chưa lưu").closest('[role="status"]')).not.toBeNull();
-  await user.click(cancel());
-  expect(onOpenChange).toHaveBeenCalledWith(false);
-  expect(window.sessionStorage.getItem(DRAFT_KEY)).toBeNull();
-  expect(h.update).not.toHaveBeenCalled();
+describe("TripInfoDialog: đóng và mở lại", () => {
+  it("đóng khi còn debounce hợp lệ thì gửi ngay lúc đóng", async () => {
+    const { user, onOpenChange } = await setup();
+    await user.type(title(), "!");
+    await user.click(screen.getByRole("button", { name: "Đóng" }));
+    await waitFor(() => expect(h.update).toHaveBeenCalledTimes(1));
+    expect(lastPayload().title).toBe("Đà Lạt!");
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("đóng khi còn ô sai rồi mở lại: ô hiện giá trị đã lưu", async () => {
+    const { user } = await setup();
+    fireEvent.change(title(), { target: { value: "" } });
+    await user.click(screen.getByRole("button", { name: "Đóng" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(h.update).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Mở lại" }));
+    await screen.findByRole("dialog");
+    expect(title().value).toBe("Đà Lạt");
+  });
+
+  it("refetch (đổi prop itinerary) khi đang mở không ghi đè ô đang gõ", async () => {
+    const { user, rerenderWith } = await setup();
+    await user.type(title(), "!!");
+    rerenderWith({ ...base, title: "Tên từ server" });
+    expect(title().value).toBe("Đà Lạt!!");
+  });
 });
 
-it("shows no restore alert without a draft", async () => {
-  setup();
-  await screen.findByRole("dialog");
-  expect(screen.queryByText("Đã khôi phục nội dung chưa lưu")).toBeNull();
+describe("TripInfoDialog: ảnh bìa", () => {
+  it("thêm ảnh qua khung Link ảnh gửi ngay một lệnh có coverImages mới", async () => {
+    const { user } = await setup();
+    await user.click(screen.getByRole("button", { name: "Thêm ảnh bìa" }));
+    await user.type(screen.getByLabelText("Link ảnh"), `${COVER_B}{Enter}`);
+    await waitFor(() => expect(h.update).toHaveBeenCalledTimes(1));
+    expect(lastPayload()).toMatchObject({ coverImages: [COVER, COVER_B], selectedCoverIndex: 0 });
+  });
+
+  it("chọn ảnh khác bằng mũi tên và xóa ảnh gửi ngay", async () => {
+    const { user } = await setup({ itinerary: twoCovers });
+    screen.getByRole("radio", { name: "Ảnh bìa 1, đang hiển thị" }).focus();
+    await user.keyboard("{ArrowRight}");
+    await waitFor(() => expect(h.update).toHaveBeenCalledTimes(1));
+    expect(lastPayload().selectedCoverIndex).toBe(1);
+    await user.click(screen.getByRole("button", { name: "Xóa ảnh bìa 1" }));
+    await waitFor(() => expect(h.update).toHaveBeenCalledTimes(2));
+    expect(lastPayload()).toMatchObject({ coverImages: [COVER_B], selectedCoverIndex: 0 });
+  });
+
+  it("chuỗi thao tác ảnh khi lệnh đầu chưa xong sinh tối đa 2 lệnh", async () => {
+    h.update.mockReturnValueOnce(new Promise<void>(() => undefined));
+    const { user } = await setup({ itinerary: twoCovers });
+    const first = screen.getByRole("radio", { name: "Ảnh bìa 1, đang hiển thị" });
+    first.focus();
+    await user.keyboard("{ArrowRight}{ArrowLeft}{ArrowRight}{ArrowLeft}");
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(h.update.mock.calls.length).toBeLessThanOrEqual(1);
+  });
 });
 
-it("saves the form values as a draft when the session expires", async () => {
-  const { user } = setup();
-  await screen.findByRole("dialog");
-  await user.clear(title());
-  await user.type(title(), "Chưa lưu");
-  act(() => sessionEvents.emitExpired());
-  const raw = JSON.parse(window.sessionStorage.getItem(DRAFT_KEY) ?? "null") as { values: MetadataValues } | null;
-  expect(raw?.values).toEqual({ title: "Chưa lưu", description: "Săn mây", startDate: "2026-10-12", coverImageUrl: COVER });
-  expect(draftStorage.findFirst(`tripory:draft:v1:${OWNER}:${ID}:`)).toEqual({ key: DRAFT_KEY, kind: "metadata" });
+describe("TripInfoDialog: lỗi", () => {
+  it("lỗi 500: InlineAlert kèm Thử lại; giá trị vẫn trong ô; Thử lại gửi payload mới nhất", async () => {
+    h.update.mockRejectedValueOnce(http(500, null, null));
+    const { user } = await setup();
+    fireEvent.change(title(), { target: { value: "Đà Lạt!" } });
+    fireEvent.blur(title());
+    expect(await screen.findByText(/Chưa lưu được thay đổi\./)).toBeTruthy();
+    expect(title().value).toBe("Đà Lạt!");
+    fireEvent.change(title(), { target: { value: "Đà Lạt!?" } });
+    await user.click(screen.getByRole("button", { name: "Thử lại" }));
+    await waitFor(() => expect(h.update.mock.calls.length).toBeGreaterThanOrEqual(2));
+    expect(lastPayload().title).toBe("Đà Lạt!?");
+    await waitFor(() => expect(screen.queryByText(/Chưa lưu được thay đổi\./)).toBeNull());
+  });
+
+  it("đóng khi còn lỗi chung: markFailed và toast lỗi", async () => {
+    const error = vi.spyOn(notify, "error").mockReturnValue("t");
+    h.update.mockRejectedValue(http(500, null, null));
+    const { user, store } = await setup();
+    fireEvent.change(title(), { target: { value: "Đà Lạt!" } });
+    fireEvent.blur(title());
+    await screen.findByText(/Chưa lưu được thay đổi\./);
+    await user.click(screen.getByRole("button", { name: "Đóng" }));
+    await waitFor(() => expect(store.getSnapshot().failure).not.toBeNull());
+    expect(error).toHaveBeenCalledTimes(1);
+  });
+
+  it("lỗi field BE gắn vào ô Tiêu đề, không có nút Thử lại", async () => {
+    h.update.mockRejectedValueOnce(http(400, "ItineraryTitle.TooLong", "Tiêu đề quá dài."));
+    const { user } = await setup();
+    await user.type(title(), "!");
+    await user.tab();
+    expect(await screen.findByText("Tiêu đề quá dài.")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Thử lại" })).toBeNull();
+  });
+
+  it("lỗi Itinerary.TooManyCoverImages hiện dưới lưới ảnh và lưới quay về danh sách đã lưu", async () => {
+    h.update.mockRejectedValueOnce(http(400, "Itinerary.TooManyCoverImages", "x"));
+    const { user } = await setup();
+    await user.click(screen.getByRole("button", { name: "Thêm ảnh bìa" }));
+    await user.type(screen.getByLabelText("Link ảnh"), `${COVER_B}{Enter}`);
+    const alerts = await screen.findAllByText("Chỉ lưu được tối đa 5 ảnh bìa.");
+    expect(alerts.length).toBeGreaterThan(0);
+    await waitFor(() => expect(screen.getAllByRole("radio")).toHaveLength(1));
+  });
 });
 
-it("reports dirtiness through onDirtyChange", async () => {
-  const onDirtyChange = vi.fn();
-  const { user } = setup({ onDirtyChange });
-  await screen.findByRole("dialog");
-  expect(onDirtyChange).toHaveBeenLastCalledWith(false);
-  await user.type(title(), "x");
-  await waitFor(() => expect(onDirtyChange).toHaveBeenLastCalledWith(true));
-  await user.click(cancel());
-  await waitFor(() => expect(onDirtyChange).toHaveBeenLastCalledWith(false));
-});
-
-it("renders as a Sheet below md and keeps the title focused", async () => {
-  setWide(false);
-  setup();
-  const sheet = await screen.findByRole("dialog", { name: "Thông tin chuyến đi" });
-  expect(sheet.getAttribute("data-sheet-position")).toBe("bottom");
-  await waitFor(() => expect(document.activeElement).toBe(title()));
-});
-
-it("closes the Sheet with the X button, dropping the draft like Hủy", async () => {
-  setWide(false);
-  const { user, onOpenChange } = setup();
-  await screen.findByRole("dialog");
-  await user.type(title(), "x");
-  await user.click(screen.getByRole("button", { name: "Đóng" }));
-  await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
-  expect(window.sessionStorage.getItem(DRAFT_KEY)).toBeNull();
-});
-
-it("keeps the Sheet X button disabled while saving", async () => {
-  setWide(false);
-  h.update.mockReturnValue(new Promise<void>(() => undefined));
-  const { user, onOpenChange } = setup();
-  await screen.findByRole("dialog");
-  await user.click(save());
-  await screen.findByRole("button", { name: /Đang lưu/ });
-  const close = screen.getByRole("button", { name: "Đóng" }) as HTMLButtonElement;
-  expect(close.disabled).toBe(true);
-  fireEvent.click(close);
-  expect(onOpenChange).not.toHaveBeenCalled();
+describe("TripInfoDialog: Esc", () => {
+  it("Esc trong khung Link ảnh chỉ đóng khung; Esc ở ô Tiêu đề đóng dialog", async () => {
+    const { user, onOpenChange } = await setup();
+    await user.click(screen.getByRole("button", { name: "Thêm ảnh bìa" }));
+    expect(screen.getByLabelText("Link ảnh")).toBeTruthy();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByLabelText("Link ảnh")).toBeNull();
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+    title().focus();
+    await user.keyboard("{Escape}");
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
 });

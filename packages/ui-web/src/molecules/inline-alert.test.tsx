@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 import { InlineAlert } from './inline-alert';
 
 describe('InlineAlert', () => {
@@ -81,5 +82,46 @@ describe('InlineAlert', () => {
     );
 
     expect(screen.getByRole('alert').textContent).toContain('Chú ý: hết hạn');
+  });
+});
+
+describe('InlineAlert action', () => {
+  it('hiện action trong alert và bấm được', async () => {
+    const user = userEvent.setup();
+    const onRetry = vi.fn();
+    render(<InlineAlert action={<button onClick={onRetry} type="button">Thử lại</button>}>Không lưu được.</InlineAlert>);
+    const alert = screen.getByRole('alert');
+    const button = screen.getByRole('button', { name: 'Thử lại' });
+    expect(alert.contains(button)).toBe(true);
+    await user.click(button);
+    expect(onRetry).toHaveBeenCalledTimes(1);
+  });
+
+  it('không có action thì chỉ có icon và nội dung', () => {
+    render(<InlineAlert>Lỗi</InlineAlert>);
+    const alert = screen.getByRole('alert');
+    expect(alert.children).toHaveLength(2);
+    expect(alert.children[0]?.tagName.toLowerCase()).toBe('svg');
+    expect(alert.children[1]?.tagName.toLowerCase()).toBe('span');
+  });
+
+  it('variant info kèm action vẫn là role status', () => {
+    render(
+      <InlineAlert action={<button type="button">Xem</button>} variant="info">
+        Đã khôi phục
+      </InlineAlert>,
+    );
+    expect(screen.getByRole('status')).toBeTruthy();
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('mặc định kèm action vẫn là role alert', () => {
+    render(<InlineAlert action={<button type="button">Thử lại</button>}>Lỗi</InlineAlert>);
+    expect(screen.getByRole('alert')).toBeTruthy();
+  });
+
+  it('không render khi children rỗng dù có action', () => {
+    const { container } = render(<InlineAlert action={<button type="button">Thử lại</button>}>{null}</InlineAlert>);
+    expect(container.innerHTML).toBe('');
   });
 });

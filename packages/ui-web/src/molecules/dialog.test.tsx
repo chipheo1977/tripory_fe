@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { expect, it } from 'vitest';
+import { useState } from 'react';
+import { expect, it, vi } from 'vitest';
 import * as publicUi from '../index';
 import {
   Dialog,
@@ -94,4 +95,71 @@ it('công khai compound parts bằng named exports', () => {
   const names = ['Dialog', 'DialogTrigger', 'DialogContent', 'DialogBackdrop', 'DialogTitle', 'DialogDescription', 'DialogClose'];
   expect(names.every((name) => name in publicUi)).toBe(true);
   expect(DialogBackdrop).toBeTruthy();
+});
+
+type CloseButtonDialogProps = {
+  showCloseButton?: boolean;
+  closeDisabled?: boolean;
+  onOpenChange?: (open: boolean) => void;
+};
+
+function CloseButtonDialog({ showCloseButton, closeDisabled, onOpenChange }: CloseButtonDialogProps) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Dialog
+      onOpenChange={(next) => {
+        onOpenChange?.(next);
+        setOpen(next);
+      }}
+      open={open}
+    >
+      <DialogTrigger>Mở hộp thoại</DialogTrigger>
+      <DialogContent closeDisabled={closeDisabled} showCloseButton={showCloseButton}>
+        <DialogTitle>Thông tin chuyến đi</DialogTitle>
+        <button type="button">Nội dung</button>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+it('mặc định không có nút X Đóng', async () => {
+  const user = userEvent.setup();
+  render(<CloseButtonDialog />);
+  await user.click(screen.getByRole('button', { name: 'Mở hộp thoại' }));
+  await screen.findByRole('dialog');
+  expect(screen.queryByRole('button', { name: 'Đóng' })).toBeNull();
+});
+
+it('showCloseButton hiện nút X, bấm gọi onOpenChange(false) và trả focus về trigger', async () => {
+  const user = userEvent.setup();
+  const onOpenChange = vi.fn();
+  render(<CloseButtonDialog onOpenChange={onOpenChange} showCloseButton />);
+  const trigger = screen.getByRole('button', { name: 'Mở hộp thoại' });
+  await user.click(trigger);
+  await user.click(await screen.findByRole('button', { name: 'Đóng' }));
+  expect(onOpenChange).toHaveBeenLastCalledWith(false);
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  expect(document.activeElement).toBe(trigger);
+});
+
+it('Esc vẫn đóng khi có nút X', async () => {
+  const user = userEvent.setup();
+  render(<CloseButtonDialog showCloseButton />);
+  await user.click(screen.getByRole('button', { name: 'Mở hộp thoại' }));
+  await screen.findByRole('dialog');
+  await user.keyboard('{Escape}');
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+});
+
+it('closeDisabled vô hiệu nút X và bấm không đóng', async () => {
+  const user = userEvent.setup();
+  const onOpenChange = vi.fn();
+  render(<CloseButtonDialog closeDisabled onOpenChange={onOpenChange} showCloseButton />);
+  await user.click(screen.getByRole('button', { name: 'Mở hộp thoại' }));
+  const close = await screen.findByRole('button', { name: 'Đóng' });
+  expect(close.hasAttribute('data-disabled')).toBe(true);
+  onOpenChange.mockClear();
+  await user.click(close);
+  expect(onOpenChange).not.toHaveBeenCalled();
+  expect(screen.getByRole('dialog')).toBeTruthy();
 });

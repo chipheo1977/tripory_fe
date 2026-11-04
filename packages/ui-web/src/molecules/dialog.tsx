@@ -2,7 +2,9 @@
 
 import { Dialog as BaseDialog } from '@base-ui/react/dialog';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { X } from 'lucide-react';
 import type { ComponentProps } from 'react';
+import { Icon } from '../atoms/icon';
 import { cn } from '../lib/cn';
 
 const dialogContentVariants = cva(
@@ -46,14 +48,42 @@ export function DialogBackdrop({ className, ...props }: ComponentProps<typeof Ba
   );
 }
 
-type DialogContentProps = ComponentProps<typeof BaseDialog.Popup> & VariantProps<typeof dialogContentVariants>;
+type DialogContentProps = ComponentProps<typeof BaseDialog.Popup> &
+  VariantProps<typeof dialogContentVariants> & {
+    /** Hiện nút X "Đóng" ở góc phải trên; cùng đường đóng với Esc. Caller thêm `pr-touch` cho tiêu đề. */
+    showCloseButton?: boolean;
+    /** Vô hiệu nút X khi đang gọi dữ liệu. */
+    closeDisabled?: boolean;
+  };
 
-export function DialogContent({ children, className, size, ...props }: DialogContentProps) {
+function DialogCloseButton({ visible, disabled }: { visible: boolean; disabled: boolean }) {
+  if (!visible) return null;
+  return (
+    <BaseDialog.Close
+      aria-label="Đóng"
+      className="absolute right-stack-md top-stack-md inline-flex min-h-touch min-w-touch items-center justify-center rounded-control text-text transition-colors duration-(--semantic-motion-duration-fast) hover:not-data-disabled:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring data-disabled:cursor-not-allowed data-disabled:text-disabled"
+      data-base-ui-swipe-ignore=""
+      disabled={disabled}
+    >
+      <Icon icon={X} size="sm" />
+    </BaseDialog.Close>
+  );
+}
+
+export function DialogContent({
+  children,
+  className,
+  closeDisabled = false,
+  showCloseButton = false,
+  size,
+  ...props
+}: DialogContentProps) {
   return (
     <BaseDialog.Portal>
       <DialogBackdrop />
       <BaseDialog.Viewport className="fixed inset-0 z-modal">
         <BaseDialog.Popup {...props} className={dialogContentVariants({ className, size })}>
+          <DialogCloseButton disabled={closeDisabled} visible={showCloseButton} />
           {children}
         </BaseDialog.Popup>
       </BaseDialog.Viewport>

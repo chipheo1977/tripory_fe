@@ -19,6 +19,7 @@ const h = vi.hoisted(() => ({
   publish: vi.fn(),
   remove: vi.fn(),
   setDaySubtitle: vi.fn(),
+  updateMetadata: vi.fn(),
   router: { back: vi.fn(), push: vi.fn(), replace: vi.fn() },
 }));
 
@@ -31,7 +32,7 @@ vi.mock("@/composition/itinerary.client", async () => {
         listMine: unused,
         getById: () => h.getById(),
         create: unused,
-        updateMetadata: unused,
+        updateMetadata: (id: string, input: unknown) => h.updateMetadata(id, input),
         publish: () => h.publish(),
         remove: (id: string) => h.remove(id),
         addWaypoint: (id: string, input: unknown) => h.addWaypoint(id, input),
@@ -248,7 +249,7 @@ it("opens 'Thông tin chuyến đi' from the header 'i' button and from the summ
   await user.click(screen.getByRole("button", { name: "Thông tin chuyến đi" }));
   const first = await screen.findByRole("dialog");
   expect(within(first).getByLabelText(/^Tiêu đề/)).toBeTruthy();
-  await user.click(within(first).getByRole("button", { name: "Hủy" }));
+  await user.click(within(first).getByRole("button", { name: "Đóng" }));
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 
   const summary = screen.getByRole("region", { name: "Thông tin chuyến đi" });
@@ -372,7 +373,7 @@ it("returns focus to the 'i' button when the trip info dialog closes", async () 
   await loaded();
   const tripInfo = await openTripInfoFromHeader(user);
 
-  await user.click(within(tripInfo).getByRole("button", { name: "Hủy" }));
+  await user.click(within(tripInfo).getByRole("button", { name: "Đóng" }));
 
   await waitFor(() => expect(allDialogs()).toHaveLength(0));
   await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "Thông tin chuyến đi" })));
@@ -395,4 +396,36 @@ it("has no ⋯ menu and no user menu in the loaded editor header", async () => {
   await loaded();
   expect(screen.queryByRole("button", { name: "Thao tác lịch trình" })).toBeNull();
   expect(screen.queryByTestId("user-menu")).toBeNull();
+});
+
+it("auto-saves a title change after 800 ms and the summary title updates at once (optimistic, LW-02)", async () => {
+  h.updateMetadata.mockImplementation(() => new Promise(() => undefined));
+  const { user } = setup();
+  await loaded();
+  const tripInfo = await openTripInfoFromHeader(user);
+  const title = within(tripInfo).getByRole("textbox", { name: /^Tiêu đề/ });
+  await user.clear(title);
+  await user.type(title, "Tên mới");
+  await waitFor(() => expect(h.updateMetadata).toHaveBeenCalledTimes(1), { timeout: 3000 });
+  expect(h.updateMetadata.mock.calls[0]?.[1]).toMatchObject({ title: "Tên mới" });
+  expect(screen.getAllByText("Tên mới").length).toBeGreaterThan(0);
+});
+
+it("ignores and cleans a legacy 'metadata' draft instead of reopening the dialog (D-107)", async () => {
+  const key = `tripory:draft:v1:${OWNER}:${ID}:metadata`;
+  sessionStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), values: { title: "Bản nháp cũ" } }));
+  setup();
+  await loaded();
+  expect(screen.queryByRole("dialog")).toBeNull();
+  expect(sessionStorage.getItem(key)).toBeNull();
+});
+
+it("warns before leaving the tab while an auto-save is still pending", async () => {
+  const { user } = setup();
+  await loaded();
+  const tripInfo = await openTripInfoFromHeader(user);
+  await user.type(within(tripInfo).getByRole("textbox", { name: /^Tiêu đề/ }), "x");
+  const event = new Event("beforeunload", { cancelable: true });
+  window.dispatchEvent(event);
+  expect(event.defaultPrevented).toBe(true);
 });

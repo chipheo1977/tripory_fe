@@ -1,4 +1,5 @@
-// Bản nháp form lưu vào `sessionStorage` khi phiên hết hạn thật (D-36, RESEARCH Pattern 18).
+// Bản nháp form lưu vào `sessionStorage` khi phiên hết hạn thật (D-36, RESEARCH Pattern 18). Chỉ còn form waypoint:
+// form "Thông tin chuyến đi" tự lưu nên không có bản nháp (D-101, D-107); khóa `metadata` cũ bị `findFirst` dọn như kind lạ.
 //
 // - Khóa có `viewerId` để tài khoản khác đăng nhập cùng tab không thấy nội dung của người trước (Pitfall 4, T-04-41).
 // - Giá trị lưu là `{ savedAt, values }`; đọc lại luôn qua Zod, bản hỏng/sai schema hoặc quá 24 giờ bị xóa và coi như không có.
@@ -8,10 +9,13 @@ import type { z } from "zod";
 const KEY_PREFIX = "tripory:draft:v1:";
 const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 
-export type DraftKind = "metadata" | `add:${number}` | `edit:${string}`;
+export type DraftKind = `add:${number}` | `edit:${string}`;
+
+export const draftPrefix = (p: { viewerId: string; itineraryId: string }): string =>
+  `${KEY_PREFIX}${p.viewerId}:${p.itineraryId}:`;
 
 export const draftKey = (p: { viewerId: string; itineraryId: string; kind: DraftKind }): string =>
-  `${KEY_PREFIX}${p.viewerId}:${p.itineraryId}:${p.kind}`;
+  `${draftPrefix(p)}${p.kind}`;
 
 export type DraftStorage = Readonly<{
   save(key: string, values: unknown): void;
@@ -28,7 +32,6 @@ export type DraftStorageDeps = Readonly<{
 }>;
 
 const isDraftKind = (value: string): value is DraftKind => {
-  if (value === "metadata") return true;
   if (value.startsWith("edit:")) return value.length > "edit:".length;
   if (value.startsWith("add:")) return /^add:\d+$/.test(value);
   return false;

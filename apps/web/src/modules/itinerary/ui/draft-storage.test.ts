@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { createDraftStorage, draftKey, draftStorage } from "./draft-storage";
+import { createDraftStorage, draftKey, draftStorage, draftPrefix } from "./draft-storage";
 import { useFormDraft } from "./use-form-draft";
 
 // `sessionEvents` thật nhưng không có BroadcastChannel: chỉ cần `emitExpired` / `rearmExpired` / `on`.
@@ -35,7 +35,7 @@ function memoryStorage(initial: Record<string, string> = {}) {
 describe("draftKey", () => {
   it("dựng khóa có viewerId và itineraryId", () => {
     expect(draftKey({ viewerId: "u1", itineraryId: "i1", kind: "edit:w1" })).toBe("tripory:draft:v1:u1:i1:edit:w1");
-    expect(draftKey({ viewerId: "u1", itineraryId: "i1", kind: "metadata" })).toBe("tripory:draft:v1:u1:i1:metadata");
+    expect(draftKey({ viewerId: "u1", itineraryId: "i1", kind: "add:1" })).toBe("tripory:draft:v1:u1:i1:add:1");
     expect(draftKey({ viewerId: "u1", itineraryId: "i1", kind: "add:2" })).toBe("tripory:draft:v1:u1:i1:add:2");
   });
 });
@@ -96,7 +96,7 @@ describe("createDraftStorage", () => {
 
   it("findFirst trả khóa và kind đầu tiên theo prefix, bỏ qua viewer khác", () => {
     const storage = memoryStorage({
-      "tripory:draft:v1:u2:i1:metadata": JSON.stringify({ savedAt: now, values: {} }),
+      "tripory:draft:v1:u2:i1:add:1": JSON.stringify({ savedAt: now, values: {} }),
       "unrelated": "1",
     });
     const drafts = createDraftStorage({ storage, nowMs });
@@ -104,9 +104,9 @@ describe("createDraftStorage", () => {
     drafts.save(`${PREFIX}edit:w1`, { title: "x" });
     expect(drafts.findFirst(PREFIX)).toEqual({ key: `${PREFIX}edit:w1`, kind: "edit:w1" });
     drafts.remove(`${PREFIX}edit:w1`);
-    drafts.save(`${PREFIX}metadata`, { title: "x" });
-    expect(drafts.findFirst(PREFIX)).toEqual({ key: `${PREFIX}metadata`, kind: "metadata" });
-    drafts.remove(`${PREFIX}metadata`);
+    drafts.save(`${PREFIX}add:1`, { title: "x" });
+    expect(drafts.findFirst(PREFIX)).toEqual({ key: `${PREFIX}add:1`, kind: "add:1" });
+    drafts.remove(`${PREFIX}add:1`);
     drafts.save(`${PREFIX}add:3`, { title: "x" });
     expect(drafts.findFirst(PREFIX)).toEqual({ key: `${PREFIX}add:3`, kind: "add:3" });
   });
@@ -117,8 +117,8 @@ describe("createDraftStorage", () => {
     drafts.save(`${PREFIX}edit:old`, { title: "x" });
     storage.setItem(`${PREFIX}weird`, JSON.stringify({ savedAt: now, values: {} }));
     now += 24 * HOUR_MS + 1;
-    drafts.save(`${PREFIX}metadata`, { title: "y" });
-    expect(drafts.findFirst(PREFIX)).toEqual({ key: `${PREFIX}metadata`, kind: "metadata" });
+    drafts.save(`${PREFIX}add:1`, { title: "y" });
+    expect(drafts.findFirst(PREFIX)).toEqual({ key: `${PREFIX}add:1`, kind: "add:1" });
     expect(storage.map.has(`${PREFIX}edit:old`)).toBe(false);
   });
 
@@ -149,9 +149,9 @@ describe("draftStorage (singleton)", () => {
   afterEach(() => window.sessionStorage.clear());
 
   it("dùng window.sessionStorage", () => {
-    draftStorage.save("tripory:draft:v1:u1:i1:metadata", { title: "x" });
-    expect(window.sessionStorage.getItem("tripory:draft:v1:u1:i1:metadata")).not.toBeNull();
-    expect(draftStorage.load("tripory:draft:v1:u1:i1:metadata", schema)).toEqual({ title: "x" });
+    draftStorage.save("tripory:draft:v1:u1:i1:add:1", { title: "x" });
+    expect(window.sessionStorage.getItem("tripory:draft:v1:u1:i1:add:1")).not.toBeNull();
+    expect(draftStorage.load("tripory:draft:v1:u1:i1:add:1", schema)).toEqual({ title: "x" });
   });
 });
 
@@ -165,7 +165,7 @@ describe("useFormDraft", () => {
     window.sessionStorage.clear();
   });
 
-  const KEY = draftKey({ viewerId: "u1", itineraryId: "i1", kind: "metadata" });
+  const KEY = draftKey({ viewerId: "u1", itineraryId: "i1", kind: "add:1" });
 
   it("lưu giá trị form khi phiên hết hạn", () => {
     renderHook(() => useFormDraft({ key: KEY, getValues: () => ({ title: "Đang gõ" }), enabled: true }));
@@ -204,5 +204,31 @@ describe("useFormDraft", () => {
     rerender({ enabled: false });
     sessionEvents.emitExpired();
     expect(window.sessionStorage.getItem(KEY)).toBeNull();
+  });
+});
+
+describe("draftPrefix và khóa metadata cũ (D-107)", () => {
+  it("draftPrefix khớp tiền tố của draftKey", () => {
+    const params = { viewerId: "u1", itineraryId: "i1" };
+    expect(draftKey({ ...params, kind: "add:2" }).startsWith(draftPrefix(params))).toBe(true);
+    expect(draftPrefix(params)).toBe("tripory:draft:v1:u1:i1:");
+  });
+
+  it("khóa metadata cũ trong storage bị bỏ qua và dọn", () => {
+    const store = new Map<string, string>([
+      ["tripory:draft:v1:u1:i1:metadata", JSON.stringify({ savedAt: Date.now(), values: { title: "cũ" } })],
+    ]);
+    const storage = {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => void store.set(key, value),
+      removeItem: (key: string) => void store.delete(key),
+      key: (index: number) => [...store.keys()][index] ?? null,
+      get length() {
+        return store.size;
+      },
+    };
+    const drafts = createDraftStorage({ storage, nowMs: () => Date.now() });
+    expect(drafts.findFirst(draftPrefix({ viewerId: "u1", itineraryId: "i1" }))).toBeNull();
+    expect(store.size).toBe(0);
   });
 });

@@ -19,18 +19,19 @@ import { NotFoundView } from "@/components/not-found-view";
 import { itinerary as itineraryHooks } from "@/composition/itinerary.client";
 import type { ItineraryId } from "@tripory/shared-kernel";
 import { DeleteItineraryDialog, type DeleteTarget } from "./delete-itinerary-dialog";
-import { draftKey, draftStorage } from "./draft-storage";
+import { draftPrefix, draftStorage } from "./draft-storage";
 import { EditorForbidden } from "./editor-forbidden";
 import { EditorHeader, EditorHeaderMinimal } from "./editor-header";
 import { EditorLayout } from "./editor-layout";
 import { EditorSkeleton } from "./editor-skeleton";
 import { clearEnteredFromList, enteredFromList } from "./entry-flag";
-import { metadataSchema, waypointSchema, type MetadataValues, type WaypointValues } from "./form-schemas";
+import { waypointSchema, type WaypointValues } from "./form-schemas";
 import { useEditorLeaveGuard } from "./leave-guard";
 import { PublishDialog } from "./publish-dialog";
 import { createSaveStatusStore, SaveStatusProvider } from "./save-status";
 import { TimelinePanel } from "./timeline-panel";
 import { TripInfoDialog } from "./trip-info-dialog";
+import { useMetadataAutosave } from "./use-metadata-autosave";
 import { TripSummary } from "./trip-summary";
 import { usePendingDelete } from "./use-pending-delete";
 import { WaypointFormDialog, type WaypointFormMode } from "./waypoint-form-dialog";
@@ -61,25 +62,20 @@ function navigateBack(router: ReturnType<typeof useRouter>): void {
 }
 
 type RestoredDraft = Readonly<{
-  metadata: MetadataValues | null;
   form: Readonly<{ mode: WaypointFormMode; values: WaypointValues }> | null;
 }>;
 
-const NO_DRAFT: RestoredDraft = { metadata: null, form: null };
+const NO_DRAFT: RestoredDraft = { form: null };
 
 /**
  * Bản nháp form đã lưu khi phiên hết hạn (D-36): mở lại đúng form kèm nội dung. Khóa của điểm không còn tồn tại hoặc
  * ngày không còn trong dải thì bị xóa, không mở gì. `findFirst`/`load` đã tự dọn bản quá hạn hoặc sai schema.
  */
 function readRestoredDraft(viewerId: string, itinerary: Itinerary): RestoredDraft {
-  const metadataKey = draftKey({ viewerId, itineraryId: itinerary.id, kind: "metadata" });
-  const found = draftStorage.findFirst(metadataKey.slice(0, -"metadata".length));
+  // Form metadata tự lưu nên không còn bản nháp (D-101, D-107); khóa `metadata` cũ trong storage được `findFirst` tự dọn.
+  const found = draftStorage.findFirst(draftPrefix({ viewerId, itineraryId: itinerary.id }));
   if (found === null) return NO_DRAFT;
 
-  if (found.kind === "metadata") {
-    const metadata = draftStorage.load(found.key, metadataSchema);
-    return metadata === null ? NO_DRAFT : { metadata, form: null };
-  }
   if (found.kind.startsWith("add:")) {
     const dayNumber = Number(found.kind.slice("add:".length));
     if (!buildDayRange(itinerary).some((day) => day.dayNumber === dayNumber)) {
@@ -87,7 +83,7 @@ function readRestoredDraft(viewerId: string, itinerary: Itinerary): RestoredDraf
       return NO_DRAFT;
     }
     const values = draftStorage.load(found.key, waypointSchema);
-    return values === null ? NO_DRAFT : { metadata: null, form: { mode: { kind: "add", dayNumber }, values } };
+    return values === null ? NO_DRAFT : { form: { mode: { kind: "add", dayNumber }, values } };
   }
   const waypointId = found.kind.slice("edit:".length);
   const waypoint = itinerary.waypoints.find((candidate) => candidate.id === waypointId);
@@ -96,7 +92,7 @@ function readRestoredDraft(viewerId: string, itinerary: Itinerary): RestoredDraf
     return NO_DRAFT;
   }
   const values = draftStorage.load(found.key, waypointSchema);
-  return values === null ? NO_DRAFT : { metadata: null, form: { mode: { kind: "edit", waypoint }, values } };
+  return values === null ? NO_DRAFT : { form: { mode: { kind: "edit", waypoint }, values } };
 }
 
 type StatusShellProps = Readonly<{
@@ -204,12 +200,10 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
   );
   const [formMode, setFormMode] = useState<WaypointFormMode | null>(restored.form?.mode ?? null);
   const [formRestored, setFormRestored] = useState<WaypointValues | null>(restored.form?.values ?? null);
-  const [tripInfoOpen, setTripInfoOpen] = useState(restored.metadata !== null);
-  const [tripInfoRestored, setTripInfoRestored] = useState<MetadataValues | null>(restored.metadata);
+  const [tripInfoOpen, setTripInfoOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [formDirty, setFormDirty] = useState(false);
-  const [tripInfoDirty, setTripInfoDirty] = useState(false);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [focusRequest, setFocusRequest] = useState<WaypointFocusRequest | null>(null);
   const [liveMessage, setLiveMessage] = useState("");
@@ -219,7 +213,9 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
   const tripInfoButtonRef = useRef<HTMLButtonElement | null>(null);
   const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const leave = useEditorLeaveGuard({ itineraryId, formDirty: formDirty || tripInfoDirty });
+  // Tự lưu "Thông tin chuyến đi" sống ở cấp editor (dialog có thể unmount khi còn lệnh chờ); chưa lưu hết thì cảnh báo rời trang.
+  const autosave = useMetadataAutosave(itineraryId);
+  const leave = useEditorLeaveGuard({ itineraryId, formDirty: formDirty || autosave.state.dirty });
   const pending = usePendingDelete({
     itineraryId,
     onUndone: (waypointId) => setFocusRequest({ waypointId, target: "main" }),
@@ -262,7 +258,6 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
 
   const handleTripInfoOpenChange = (open: boolean): void => {
     setTripInfoOpen(open);
-    if (!open) setTripInfoRestored(null);
   };
 
   const closeForm = (): void => {
@@ -362,12 +357,10 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
         viewerId={viewer.id}
       />
       <TripInfoDialog
+        autosave={autosave}
         itinerary={itinerary}
-        onDirtyChange={setTripInfoDirty}
         onOpenChange={handleTripInfoOpenChange}
         open={tripInfoOpen}
-        restored={tripInfoRestored}
-        viewerId={viewer.id}
       />
       <PublishDialog
         itineraryId={itineraryId}

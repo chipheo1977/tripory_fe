@@ -153,7 +153,7 @@ Plans:
 - [x] 04-24-PLAN.md — Tài liệu hợp đồng BE (không code, không ca kiểm thử, 5W1H) cho form tạo 4 khối, danh sách ảnh bìa, `PUT` giữ nguyên trường thiếu; cập nhật `04-BE-DEPENDENCIES.md`
 - [x] 04-25-PLAN.md — Checkpoint: user duyệt tài liệu, tự sửa và deploy `tripory_be`, xác nhận bằng một lần tạo thật (mọi plan FE phụ thuộc plan này)
 - [x] 04-26-PLAN.md — Domain thuần: `Destination`, tìm không dấu + alias, tên mặc định, số ngày 1-30, 7 sở thích
-- [ ] 04-27-PLAN.md — `ui-web`: `Accordion`, `ToggleChipGroup`, `NumberStepper`, `RadioGroup`/`Radio`; sửa phần `NumberStepper` của UI-SPEC (D-109)
+- [x] 04-27-PLAN.md — `ui-web`: `Accordion`, `ToggleChipGroup`, `NumberStepper`, `RadioGroup`/`Radio`; sửa phần `NumberStepper` của UI-SPEC (D-109)
 - [ ] 04-28-PLAN.md — `ui-web`: `InlineAlert action`, `DialogContent showCloseButton`/`closeDisabled`, `Sheet fixedSnap`
 - [ ] 04-29-PLAN.md — Port `DestinationCatalog`, adapter tĩnh 34 điểm đến, composition `destination-catalog.ts` (file riêng, không động `itinerary.client.ts`)
 - [ ] 04-30-PLAN.md — Read model: điểm đến, sở thích, danh sách ảnh bìa (domain, DTO, mapper, fixture package) + fixture BE của app và 2 test literal (wave 17)

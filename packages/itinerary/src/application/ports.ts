@@ -1,5 +1,5 @@
 import type { ItineraryId, Wgs84Coordinate } from '@tripory/shared-kernel';
-import type { CalendarDate, Itinerary, ItinerarySummary, Page, StatusFilter, Waypoint } from '../domain';
+import type { CalendarDate, Destination, Itinerary, ItinerarySummary, Page, StatusFilter, Waypoint } from '../domain';
 
 // Hợp đồng giữa application và adapter. Chỉ có type: cài đặt HTTP nằm ở `infrastructure` (subpath `./http`),
 // composition của app lắp vào. Hook React gọi thẳng port; chỉ luật thật (xem `use-cases.ts`) mới có hàm riêng.
@@ -43,3 +43,11 @@ export type ItineraryRepository = Readonly<{
 
 /** Đổi link Google Maps rút gọn thành URL đầy đủ qua route của app (server-side, tránh CORS và SSRF). */
 export type ShortLinkResolver = Readonly<{ resolve(url: string, signal?: AbortSignal): Promise<string> }>;
+
+/** Danh mục điểm đến của form tạo. Dữ liệu tĩnh nên đồng bộ; nếu sau này lấy từ BE (D-61) thì đổi sang async. */
+export type DestinationCatalog = Readonly<{
+  /** Đủ 34 điểm đến theo thứ tự chữ cái đã khai báo (nhóm "Tất cả"). */
+  list(): readonly Destination[];
+  /** Mã lạ hoặc `null` trả `null`; không ném lỗi (dữ liệu cũ, mã BE thêm trước FE). */
+  findBySlug(slug: string | null): Destination | null;
+}>;

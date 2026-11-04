@@ -15,6 +15,7 @@ import { MoreHorizontal, SquarePen, Trash2 } from "lucide-react";
 import Link from "next/link";
 import type { Ref } from "react";
 import { CoverImage } from "./cover-image";
+import { defaultCoverFor } from "./destination-cover";
 import { markEnteredFromList } from "./entry-flag";
 import { formatKm, formatStartDate } from "./format";
 
@@ -32,7 +33,11 @@ export function ItineraryCard({ summary, onDelete, titleLinkRef }: ItineraryCard
     .join(" · ");
   return (
     <article className="group relative isolate w-full overflow-hidden rounded-container border border-border bg-surface text-left text-text transition-[border-color,box-shadow] duration-(--semantic-motion-duration-fast) ease-standard has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-focus-ring has-[a:hover]:border-border-strong has-[a:hover]:shadow-sm">
-      <CoverImage className="rounded-t-container" src={summary.coverImageUrl} />
+      <CoverImage
+        className="rounded-t-container"
+        fallbackSrc={defaultCoverFor(summary.destinationCode)}
+        src={summary.coverImageUrl}
+      />
       <div className="flex flex-col gap-stack-sm p-stack-md">
         <div className="flex items-center justify-between gap-inline-sm">
           <Badge variant={summary.isPublic ? "success" : "neutral"}>

@@ -126,3 +126,27 @@ it("does not clamp the description in the canvas variant", () => {
   setup({}, "canvas");
   expect(screen.getByText(/Dòng một/).className).not.toContain("line-clamp");
 });
+
+it("uses the destination default image instead of the add-cover prompt when there is a destination", () => {
+  const { container } = setup({ coverImageUrl: null, coverImages: [], destinationCode: "vn-da-nang" });
+  expect(container.querySelector("img")?.getAttribute("src")).toBe(
+    "https://triporyv1.vercel.app/destinations/vn-da-nang.jpg",
+  );
+  expect(screen.queryByRole("button", { name: "Thêm ảnh bìa" })).toBeNull();
+});
+
+it("still offers the add-cover prompt with neither a cover nor a destination", () => {
+  setup({ coverImageUrl: null, coverImages: [], destinationCode: null });
+  expect(screen.getByRole("button", { name: "Thêm ảnh bìa" })).toBeTruthy();
+});
+
+it("prefers the displayed cover over the destination default", () => {
+  const { container } = setup({ destinationCode: "vn-da-nang" });
+  expect(container.querySelector("img")?.getAttribute("src")).toBe(COVER);
+});
+
+it("does not show the destination name or interest labels (D-76)", () => {
+  const { container } = setup({ destinationCode: "vn-da-nang", interests: ["nature"] });
+  expect(container.textContent).not.toContain("Đà Nẵng");
+  expect(container.textContent).not.toContain("Thiên nhiên");
+});

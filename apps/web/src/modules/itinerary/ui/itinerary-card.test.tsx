@@ -1,6 +1,6 @@
 import { parseCalendarDate, type ItinerarySummary } from "@tripory/itinerary";
 import { parseItineraryId } from "@tripory/shared-kernel";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { beforeEach, expect, it, vi } from "vitest";
@@ -136,4 +136,40 @@ it("forwards the title link ref", () => {
   const ref = { current: null as HTMLAnchorElement | null };
   render(<ItineraryCard onDelete={vi.fn()} summary={summary()} titleLinkRef={ref} />);
   expect(ref.current).toBe(screen.getByRole("link", { name: "Sài Gòn 3 ngày" }));
+});
+
+const DA_NANG_COVER = "https://triporyv1.vercel.app/destinations/vn-da-nang.jpg";
+
+it("falls back to the destination default image when there is no cover", () => {
+  const { container } = render(<ItineraryCard onDelete={vi.fn()} summary={summary({ destinationCode: "vn-da-nang" })} />);
+  expect(container.querySelector("img")?.getAttribute("src")).toBe(DA_NANG_COVER);
+});
+
+it("prefers the displayed cover over the destination default", () => {
+  const { container } = render(
+    <ItineraryCard
+      onDelete={vi.fn()}
+      summary={summary({ coverImageUrl: "https://images.example.com/own.jpg", destinationCode: "vn-da-nang" })}
+    />,
+  );
+  expect(container.querySelector("img")?.getAttribute("src")).toBe("https://images.example.com/own.jpg");
+});
+
+it("shows the fallback surface when the destination default image fails (404)", () => {
+  const { container } = render(<ItineraryCard onDelete={vi.fn()} summary={summary({ destinationCode: "vn-da-nang" })} />);
+  fireEvent.error(container.querySelector("img") as HTMLImageElement);
+  expect(container.querySelector("img")).toBeNull();
+  expect(container.querySelector(".bg-surface-muted")).not.toBeNull();
+});
+
+it("does not show the destination name on the card (D-78)", () => {
+  const { container } = render(
+    <ItineraryCard onDelete={vi.fn()} summary={summary({ title: "Chuyến đi riêng", destinationCode: "vn-da-nang" })} />,
+  );
+  expect(container.textContent).not.toContain("Đà Nẵng");
+});
+
+it("does not throw for an unknown destination code", () => {
+  const { container } = render(<ItineraryCard onDelete={vi.fn()} summary={summary({ destinationCode: "vn-khong-co" })} />);
+  expect(container.querySelector("img")).toBeNull();
 });

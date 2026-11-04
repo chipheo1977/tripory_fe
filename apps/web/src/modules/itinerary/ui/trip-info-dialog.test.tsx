@@ -188,7 +188,8 @@ it("saves the trimmed metadata, marks saved, closes without any toast", async ()
     title: "Đà Lạt 3N",
     description: null,
     startDate: START,
-    coverImageUrl: COVER,
+    coverImages: [COVER],
+    selectedCoverIndex: 0,
   });
   expect(store.getSnapshot().hasSaved).toBe(true);
   expect(window.sessionStorage.getItem(DRAFT_KEY)).toBeNull();
@@ -281,7 +282,7 @@ it("falls back with the load-error copy but still saves the cover URL", async ()
   vi.useRealTimers();
   await user.click(save());
   await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
-  expect(h.update).toHaveBeenCalledWith(expect.objectContaining({ coverImageUrl: "https://img.test/broken.jpg" }));
+  expect(h.update).toHaveBeenCalledWith(expect.objectContaining({ coverImages: ["https://img.test/broken.jpg"], selectedCoverIndex: 0 }));
 });
 
 it("clears the date and the cover with the input's built-in X and sends null", async () => {
@@ -298,7 +299,13 @@ it("clears the date and the cover with the input's built-in X and sends null", a
   expect(screen.queryByAltText("Xem trước ảnh bìa")).toBeNull();
   await user.click(save());
   await waitFor(() => expect(h.update).toHaveBeenCalledTimes(1));
-  expect(h.update).toHaveBeenCalledWith({ title: "Đà Lạt", description: "Săn mây", startDate: null, coverImageUrl: null });
+  expect(h.update).toHaveBeenCalledWith({
+    title: "Đà Lạt",
+    description: "Săn mây",
+    startDate: null,
+    coverImages: [],
+    selectedCoverIndex: null,
+  });
 });
 
 it("attaches ItineraryTitle.Empty from the server under the title and stays open without a toast", async () => {

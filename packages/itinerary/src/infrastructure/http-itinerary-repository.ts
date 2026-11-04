@@ -46,11 +46,11 @@ export function createHttpItineraryRepository(
       return toItinerary(itineraryDetailDto.parse(data));
     },
 
-    async updateMetadata(id, { title, description, startDate, coverImageUrl }) {
+    async updateMetadata(id, { title, description, startDate, coverImages, selectedCoverIndex }) {
       await http.send({
         method: 'PUT',
         path: itineraryPath(id),
-        body: { title, description, startDate, coverImageUrl },
+        body: { title, description, startDate, coverImages: [...coverImages], selectedCoverIndex },
       });
     },
 

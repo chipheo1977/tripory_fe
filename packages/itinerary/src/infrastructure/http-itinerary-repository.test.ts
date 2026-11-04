@@ -146,14 +146,18 @@ describe('createHttpItineraryRepository.create', () => {
 });
 
 describe('createHttpItineraryRepository: lệnh metadata', () => {
-  it('updateMetadata PUT đúng 4 khóa, bỏ trường thừa, resolve undefined', async () => {
+  it('updateMetadata PUT đúng 5 khóa, bỏ trường thừa, resolve undefined', async () => {
     const { http, send } = fakeHttp(null);
     const input = {
       title: 'Đà Lạt',
       description: null,
       startDate,
-      coverImageUrl: 'https://cdn.tripory.vn/a.jpg',
+      coverImages: ['https://cdn.tripory.vn/a.jpg', 'https://cdn.tripory.vn/b.jpg'],
+      selectedCoverIndex: 1,
       isPublic: true,
+      destinationCode: 'vn-lam-dong',
+      interests: ['nature'],
+      coverImageUrl: 'https://cdn.tripory.vn/a.jpg',
     };
 
     await expect(createHttpItineraryRepository(http).updateMetadata(itineraryId, input)).resolves.toBeUndefined();
@@ -165,14 +169,33 @@ describe('createHttpItineraryRepository: lệnh metadata', () => {
       title: 'Đà Lạt',
       description: null,
       startDate: '2026-10-12',
-      coverImageUrl: 'https://cdn.tripory.vn/a.jpg',
+      coverImages: ['https://cdn.tripory.vn/a.jpg', 'https://cdn.tripory.vn/b.jpg'],
+      selectedCoverIndex: 1,
     });
     expect(Object.keys(request.body as object).toSorted()).toEqual([
-      'coverImageUrl',
+      'coverImages',
       'description',
+      'selectedCoverIndex',
       'startDate',
       'title',
     ]);
+    expect(request.body).not.toHaveProperty('coverImageUrl');
+    expect(request.body).not.toHaveProperty('destinationCode');
+    expect(request.body).not.toHaveProperty('interests');
+  });
+
+  it('updateMetadata với danh sách ảnh rỗng gửi coverImages [] và selectedCoverIndex null', async () => {
+    const { http, send } = fakeHttp(null);
+
+    await createHttpItineraryRepository(http).updateMetadata(itineraryId, {
+      title: 'A',
+      description: null,
+      startDate: null,
+      coverImages: [],
+      selectedCoverIndex: null,
+    });
+
+    expect(firstRequest(send).body).toMatchObject({ coverImages: [], selectedCoverIndex: null });
   });
 
   it('publish PUT /publish và remove DELETE, không body', async () => {
@@ -345,7 +368,13 @@ describe('createHttpItineraryRepository: lỗi và cô lập', () => {
     await expect(repo.getById(itineraryId)).rejects.toBe(error);
     await expect(repo.create({ title: 'A' })).rejects.toBe(error);
     await expect(
-      repo.updateMetadata(itineraryId, { title: 'A', description: null, startDate: null, coverImageUrl: null }),
+      repo.updateMetadata(itineraryId, {
+        title: 'A',
+        description: null,
+        startDate: null,
+        coverImages: [],
+        selectedCoverIndex: null,
+      }),
     ).rejects.toBe(error);
     await expect(repo.publish(itineraryId)).rejects.toBe(error);
     await expect(repo.remove(itineraryId)).rejects.toBe(error);

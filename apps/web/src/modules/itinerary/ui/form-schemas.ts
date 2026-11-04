@@ -98,10 +98,13 @@ const emptyToNull = (value: string): string | null => {
 export function toMetadataInput(values: MetadataValues): MetadataInput {
   const startDate = emptyToNull(values.startDate);
   const parsed: CalendarDate | null = startDate === null ? null : parseCalendarDate(startDate);
+  const cover = emptyToNull(values.coverImageUrl);
+  // Ánh xạ TẠM của ô URL ảnh bìa đơn thành danh sách một phần tử; plan 04-38 thay bằng lưới ảnh và xóa hàm này.
   return {
     title: values.title.trim(),
     description: emptyToNull(values.description),
     startDate: parsed,
-    coverImageUrl: emptyToNull(values.coverImageUrl),
+    coverImages: cover === null ? [] : [cover],
+    selectedCoverIndex: cover === null ? null : 0,
   };
 }

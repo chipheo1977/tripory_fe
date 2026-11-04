@@ -168,13 +168,15 @@ describe("toMetadataInput", () => {
       title: "Sài Gòn",
       description: "mô tả",
       startDate: "2026-10-12",
-      coverImageUrl: "https://example.com/a.jpg",
+      coverImages: ["https://example.com/a.jpg"],
+      selectedCoverIndex: 0,
     });
     expect(toMetadataInput(metadata({ description: "   ", startDate: "", coverImageUrl: " " }))).toEqual({
       title: "Sài Gòn 3 ngày",
       description: null,
       startDate: null,
-      coverImageUrl: null,
+      coverImages: [],
+      selectedCoverIndex: null,
     });
   });
 });

@@ -1,18 +1,24 @@
 import type { ItineraryId, Wgs84Coordinate } from '@tripory/shared-kernel';
-import type { CalendarDate, Destination, Itinerary, ItinerarySummary, Page, StatusFilter, Waypoint } from '../domain';
+import type {
+  Destination,
+  Itinerary,
+  ItineraryMetadata,
+  ItinerarySummary,
+  Page,
+  StatusFilter,
+  Waypoint,
+} from '../domain';
 
 // Hợp đồng giữa application và adapter. Chỉ có type: cài đặt HTTP nằm ở `infrastructure` (subpath `./http`),
 // composition của app lắp vào. Hook React gọi thẳng port; chỉ luật thật (xem `use-cases.ts`) mới có hàm riêng.
 
 export type ListMineQuery = Readonly<{ pageIndex: number; pageSize: number; status: StatusFilter }>;
 
-/** Bốn trường `PUT /itineraries/{id}`; `null` là xóa giá trị. */
-export type MetadataInput = Readonly<{
-  title: string;
-  description: string | null;
-  startDate: CalendarDate | null;
-  coverImageUrl: string | null;
-}>;
+/**
+ * Payload `PUT /itineraries/{id}`: bốn trường + danh sách ảnh bìa và chỉ số ảnh hiển thị; `null` là xóa giá trị.
+ * Điểm đến và sở thích không nằm ở đây, BE giữ nguyên khi thiếu (D-54, D-77).
+ */
+export type MetadataInput = ItineraryMetadata;
 
 export type WaypointFields = Readonly<{
   name: string;

@@ -384,3 +384,49 @@ describe("itinerary hooks: danh sách và xóa lịch trình", () => {
     expect(result.current.pending).toBe(0);
   });
 });
+
+describe("itinerary hooks: useUpdateMetadata optimistic (04-32)", () => {
+  const INPUT = {
+    title: "Tên mới",
+    description: "Mô tả mới",
+    startDate: null,
+    coverImages: ["https://img.example/a.jpg", "https://img.example/b.jpg"],
+    selectedCoverIndex: 1,
+  } as const;
+
+  const detail = (queryClient: ReturnType<typeof makeQueryClient>) =>
+    queryClient.getQueryData<Itinerary>(itineraryKeys.detail(ID!));
+
+  it("đổi tên, danh sách ảnh và ảnh hiển thị trong cache trước khi repository trả lời", async () => {
+    const gate = deferred();
+    const { queryClient, hooks, repository, wrapper } = setup({ updateMetadata: vi.fn(() => gate.promise) });
+    const { result } = renderHook(() => hooks.useUpdateMetadata(ID!), { wrapper });
+
+    act(() => result.current.mutate(INPUT));
+
+    await waitFor(() => expect(detail(queryClient)?.title).toBe("Tên mới"));
+    expect(detail(queryClient)?.coverImages).toEqual(INPUT.coverImages);
+    expect(detail(queryClient)?.coverImageUrl).toBe("https://img.example/b.jpg");
+    expect(repository.updateMetadata).toHaveBeenCalledWith(ID, INPUT);
+
+    await act(async () => gate.resolve());
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+  });
+
+  it("repository lỗi thì cache về giá trị cũ và làm tươi chi tiết khi lệnh cuối settle", async () => {
+    const gate = deferred();
+    const { queryClient, hooks, wrapper } = setup({ updateMetadata: vi.fn(() => gate.promise) });
+    const invalidate = vi.spyOn(queryClient, "invalidateQueries");
+    const { result } = renderHook(() => hooks.useUpdateMetadata(ID!), { wrapper });
+
+    act(() => result.current.mutate(INPUT));
+    await waitFor(() => expect(detail(queryClient)?.title).toBe("Tên mới"));
+
+    await act(async () => gate.reject(new Error("boom")));
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(detail(queryClient)?.title).toBe("Đà Nẵng 3 ngày");
+    expect(detail(queryClient)?.coverImages).toEqual([]);
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: itineraryKeys.detail(ID!) });
+  });
+});

@@ -14,6 +14,7 @@ import {
   applyDayOrder,
   withDay,
   withDaySubtitle,
+  withMetadata,
   withoutWaypoint,
 } from '../domain';
 import type { Itinerary, ItinerarySummary, Page, StatusFilter, Waypoint } from '../domain';
@@ -160,7 +161,10 @@ export function createItineraryHooks(deps: ItineraryHooksDeps) {
     useUpdateMetadata: (id: ItineraryId, options?: MutationOptions<void, MetadataInput>) =>
       useWriteMutation<void, MetadataInput>(
         id,
-        { mutationFn: (input) => repository.updateMetadata(id, input) },
+        {
+          mutationFn: (input) => repository.updateMetadata(id, input),
+          optimistic: (itinerary, input) => withMetadata(itinerary, input),
+        },
         options,
       ),
 

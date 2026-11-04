@@ -162,7 +162,7 @@ Plans:
 - [x] 04-32-PLAN.md — `MetadataInput` phương án A (`coverImages` + `selectedCoverIndex`), `withMetadata` optimistic (sửa LW-02) (wave 19)
 - [x] 04-33-PLAN.md — Nền chung: schema tạo + khối + map lỗi/`ERROR_MESSAGES` + `ResponsiveFormSurface` mở rộng (wave 20)
 - [x] 04-34-PLAN.md — Khối UI form tạo: Điểm đến, Tên, Thời gian, Sở thích, chân form dính đáy (wave 21)
-- [ ] 04-35-PLAN.md — Cơ chế tự lưu: payload, bộ điều khiển (debounce 800 ms, single-flight + trailing), hook (wave 21)
+- [x] 04-35-PLAN.md — Cơ chế tự lưu: payload, bộ điều khiển (debounce 800 ms, single-flight + trailing), hook (wave 21)
 - [ ] 04-36-PLAN.md — Lưới 5 ảnh bìa: domain `cover-images`, `CoverImageField`, khung "Link ảnh", khung trống bấm được bằng chuột/chạm (wave 21)
 - [ ] 04-37-PLAN.md — Hợp đồng tạo một request + `CreateItineraryDialog` 4 khối accordion (wave 22)
 - [ ] 04-38-PLAN.md — `TripInfoDialog` tự lưu + lưới ảnh, editor host tự lưu, bỏ bản nháp metadata, dọn export cũ của hộp tạo nhanh (wave 23)

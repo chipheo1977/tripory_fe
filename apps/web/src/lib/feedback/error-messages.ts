@@ -46,6 +46,19 @@ export const ERROR_MESSAGES: ReadonlyMap<string, string> = new Map<string, strin
   ["Itinerary.InvalidDayNumber", "Ngày không hợp lệ."],
   ["Itinerary.InvalidUserId", GENERIC_ERROR_MESSAGE],
   ["ItineraryTitle.Empty", "Vui lòng nhập tiêu đề."],
+  // Form tạo lịch trình và ảnh bìa (04-BE-CONTRACT.md mục 9). Không mã nào chứa NotFound/Conflict/Forbidden...
+  ["Itinerary.DestinationRequired", "Vui lòng chọn điểm đến."],
+  ["Itinerary.DestinationUnknown", "Điểm đến không hợp lệ. Vui lòng chọn lại."],
+  ["Itinerary.DayCountOutOfRange", "Số ngày từ 1 đến 30."],
+  ["Itinerary.InterestUnknown", "Có sở thích không hợp lệ. Vui lòng chọn lại."],
+  ["Itinerary.InterestDuplicated", "Sở thích bị trùng. Vui lòng chọn lại."],
+  ["Itinerary.TooManyInterests", "Chọn tối đa 7 sở thích."],
+  ["Itinerary.TooManyCoverImages", "Chỉ lưu được tối đa 5 ảnh bìa."],
+  ["Itinerary.CoverImageInvalidUrl", "Link ảnh phải bắt đầu bằng https://."],
+  ["Itinerary.CoverImageTooLong", "Link ảnh tối đa 500 ký tự."],
+  ["Itinerary.CoverImageDuplicated", "Ảnh này đã có trong danh sách."],
+  // Không có câu riêng (UI-SPEC): refetch rồi dùng câu chung.
+  ["Itinerary.CoverSelectionInvalid", GENERIC_ERROR_MESSAGE],
   ["WaypointName.Empty", "Vui lòng nhập tên điểm đến."],
   ["Waypoint.NotFound", "Điểm đến không còn tồn tại."],
   // Do FE sinh (route resolve link rút gọn), không phải mã của BE.

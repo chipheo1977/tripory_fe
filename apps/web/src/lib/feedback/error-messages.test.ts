@@ -22,10 +22,36 @@ describe("mã lỗi itinerary theo copy UI-SPEC Phase 4", () => {
     expect(ERROR_MESSAGES.has("Coordinate.InvalidLongitude")).toBe(true);
   });
 
-  it("không có mã TooLong (giới hạn động dùng message BE) và không dùng từ 'điểm dừng'", () => {
+  it("không có mã TooLong có giới hạn động (dùng message BE), trừ CoverImageTooLong có giới hạn cố định 500, và không dùng từ 'điểm dừng'", () => {
     for (const [code, message] of ERROR_MESSAGES) {
-      expect(code).not.toContain("TooLong");
+      if (code !== "Itinerary.CoverImageTooLong") expect(code).not.toContain("TooLong");
       expect(message).not.toContain("điểm dừng");
+    }
+  });
+});
+
+describe("mã lỗi form tạo và ảnh bìa (04-BE-CONTRACT.md mục 9)", () => {
+  const NEW_CODES = [
+    ["Itinerary.DestinationRequired", "Vui lòng chọn điểm đến."],
+    ["Itinerary.DestinationUnknown", "Điểm đến không hợp lệ. Vui lòng chọn lại."],
+    ["Itinerary.DayCountOutOfRange", "Số ngày từ 1 đến 30."],
+    ["Itinerary.InterestUnknown", "Có sở thích không hợp lệ. Vui lòng chọn lại."],
+    ["Itinerary.InterestDuplicated", "Sở thích bị trùng. Vui lòng chọn lại."],
+    ["Itinerary.TooManyInterests", "Chọn tối đa 7 sở thích."],
+    ["Itinerary.TooManyCoverImages", "Chỉ lưu được tối đa 5 ảnh bìa."],
+    ["Itinerary.CoverImageInvalidUrl", "Link ảnh phải bắt đầu bằng https://."],
+    ["Itinerary.CoverImageTooLong", "Link ảnh tối đa 500 ký tự."],
+    ["Itinerary.CoverImageDuplicated", "Ảnh này đã có trong danh sách."],
+    ["Itinerary.CoverSelectionInvalid", "Đã có lỗi xảy ra, vui lòng thử lại"],
+  ] as const;
+
+  it.each(NEW_CODES)("%s → đúng câu", (code, message) => {
+    expect(ERROR_MESSAGES.get(code)).toBe(message);
+  });
+
+  it("không mã mới nào chứa chuỗi đổi HTTP status của ApiController", () => {
+    for (const [code] of NEW_CODES) {
+      expect(code).not.toMatch(/NotFound|Conflict|AlreadyExists|Unauthorized|Forbidden/);
     }
   });
 });
@@ -45,8 +71,8 @@ describe("SESSION_EXPIRED_TOAST (D-20)", () => {
     expect(ERROR_MESSAGES.get("Token.Expired")).toBe(SESSION_EXPIRED_MESSAGE);
   });
 
-  it("bảng map có đúng 40 khóa (thêm Maps.UnresolvableLink)", () => {
-    expect(ERROR_MESSAGES.size).toBe(40);
+  it("bảng map có đúng 51 khóa (40 cũ + 11 mã form tạo và ảnh bìa)", () => {
+    expect(ERROR_MESSAGES.size).toBe(51);
   });
 
   it("đi ra qua barrel lib/feedback", () => {

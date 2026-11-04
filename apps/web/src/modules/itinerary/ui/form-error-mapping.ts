@@ -9,10 +9,11 @@
 // React, không bao giờ qua HTML (T-04-29).
 import { isApiError, makeApiError, type ApiError, type FieldErrors } from "@tripory/api-client";
 import { mapFormError, FORM_ALERT as ALERT, type FormErrorMapping, type FormErrorTarget as Target } from "@/lib/feedback";
-import { CREATE_ITINERARY_FIELDS, METADATA_FIELDS, WAYPOINT_FIELDS } from "./form-schemas";
+import { CREATE_ITINERARY_FIELDS, CREATE_TRIP_FIELDS, METADATA_FIELDS, WAYPOINT_FIELDS } from "./form-schemas";
 
 export type { FormErrorMapping };
 type CreateField = (typeof CREATE_ITINERARY_FIELDS)[number];
+type CreateTripField = (typeof CREATE_TRIP_FIELDS)[number];
 type MetadataField = (typeof METADATA_FIELDS)[number];
 type WaypointField = (typeof WAYPOINT_FIELDS)[number];
 /** Publish và xóa không có ô: mọi lỗi là alert. */
@@ -37,6 +38,19 @@ function normalizeFieldKeys(error: unknown, alias: Readonly<Record<string, strin
 const CREATE_TARGETS: ReadonlyMap<string, Target<CreateField>> = new Map<string, Target<CreateField>>([
   ["ItineraryTitle.Empty", "title"],
   ["ItineraryTitle.TooLong", "title"],
+  ["Itinerary.NotFound", ALERT],
+  ["Itinerary.Forbidden", ALERT],
+]);
+
+const CREATE_TRIP_TARGETS: ReadonlyMap<string, Target<CreateTripField>> = new Map<string, Target<CreateTripField>>([
+  ["Itinerary.DestinationRequired", "destinationCode"],
+  ["Itinerary.DestinationUnknown", "destinationCode"],
+  ["ItineraryTitle.Empty", "title"],
+  ["ItineraryTitle.TooLong", "title"],
+  ["Itinerary.DayCountOutOfRange", "dayCount"],
+  ["Itinerary.InterestUnknown", "interests"],
+  ["Itinerary.InterestDuplicated", "interests"],
+  ["Itinerary.TooManyInterests", "interests"],
   ["Itinerary.NotFound", ALERT],
   ["Itinerary.Forbidden", ALERT],
 ]);
@@ -71,6 +85,9 @@ const WAYPOINT_ALIASES = { latitude: "location", longitude: "location" } as cons
 
 export const mapCreateItineraryError = (error: unknown): FormErrorMapping<CreateField> | null =>
   mapFormError(normalizeFieldKeys(error), CREATE_ITINERARY_FIELDS, CREATE_TARGETS);
+
+export const mapCreateTripError = (error: unknown): FormErrorMapping<CreateTripField> | null =>
+  mapFormError(normalizeFieldKeys(error), CREATE_TRIP_FIELDS, CREATE_TRIP_TARGETS);
 
 export const mapMetadataError = (error: unknown): FormErrorMapping<MetadataField> | null =>
   mapFormError(normalizeFieldKeys(error), METADATA_FIELDS, METADATA_TARGETS);

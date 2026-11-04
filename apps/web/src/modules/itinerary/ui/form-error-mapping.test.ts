@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { FIELD_INVALID_MESSAGE, GENERIC_ERROR_MESSAGE } from "@/lib/feedback";
 import {
   mapCreateItineraryError,
+  mapCreateTripError,
   mapDeleteItineraryError,
   mapMetadataError,
   mapPublishError,
@@ -17,6 +18,7 @@ const validation = (fieldErrors: FieldErrors) =>
 
 const forms = [
   ["mapCreateItineraryError", mapCreateItineraryError, "title"],
+  ["mapCreateTripError", mapCreateTripError, "destinationCode"],
   ["mapMetadataError", mapMetadataError, "description"],
   ["mapWaypointError", mapWaypointError, "name"],
   ["mapPublishError", mapPublishError, null],
@@ -69,6 +71,33 @@ describe("mapCreateItineraryError", () => {
     const mapped = mapCreateItineraryError(http(400, "ItineraryTitle.TooLong", "Tiêu đề quá dài."));
     expect(mapped?.fieldErrors.title).toBe("Tiêu đề quá dài.");
     expect(mapped?.alert).toBeNull();
+  });
+});
+
+describe("mapCreateTripError", () => {
+  it.each([
+    ["Itinerary.DestinationRequired", "destinationCode", "Vui lòng chọn điểm đến."],
+    ["Itinerary.DestinationUnknown", "destinationCode", "Điểm đến không hợp lệ. Vui lòng chọn lại."],
+    ["ItineraryTitle.Empty", "title", "Vui lòng nhập tiêu đề."],
+    ["Itinerary.DayCountOutOfRange", "dayCount", "Số ngày từ 1 đến 30."],
+    ["Itinerary.InterestUnknown", "interests", "Có sở thích không hợp lệ. Vui lòng chọn lại."],
+    ["Itinerary.InterestDuplicated", "interests", "Sở thích bị trùng. Vui lòng chọn lại."],
+    ["Itinerary.TooManyInterests", "interests", "Chọn tối đa 7 sở thích."],
+  ] as const)("%s → ô %s", (code, field, message) => {
+    expect(mapCreateTripError(http(400, code, "x"))).toEqual({ fieldErrors: { [field]: message }, alert: null });
+  });
+
+  it("ItineraryTitle.TooLong → ô title với message BE", () => {
+    expect(mapCreateTripError(http(400, "ItineraryTitle.TooLong", "Quá dài."))?.fieldErrors).toEqual({ title: "Quá dài." });
+  });
+
+  it.each(["Validation.Error", "NotEmptyValidator"])("mã lạ %s không kèm message → alert câu chung", (code) => {
+    expect(mapCreateTripError(http(400, code, null))).toEqual({ fieldErrors: {}, alert: GENERIC_ERROR_MESSAGE });
+  });
+
+  it("key PascalCase của ASP.NET được chuẩn hóa về tên ô", () => {
+    const mapped = mapCreateTripError(validation({ DestinationCode: ["x"], StartDate: ["y"] }));
+    expect(mapped?.fieldErrors).toEqual({ destinationCode: FIELD_INVALID_MESSAGE, startDate: FIELD_INVALID_MESSAGE });
   });
 });
 

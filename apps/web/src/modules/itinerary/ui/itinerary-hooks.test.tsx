@@ -358,7 +358,13 @@ describe("itinerary hooks: danh sách và xóa lịch trình", () => {
     const { result } = renderHook(() => hooks.useCreateItinerary(), { wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ title: "Đà Nẵng 3 ngày" });
+      await result.current.mutateAsync({
+      title: "Đà Nẵng 3 ngày",
+      destinationCode: "vn-da-nang",
+      dayCount: 3,
+      startDate: null,
+      interests: [],
+    });
     });
 
     expect(queryClient.getQueryData(itineraryKeys.detail(ID!))).toEqual(created);

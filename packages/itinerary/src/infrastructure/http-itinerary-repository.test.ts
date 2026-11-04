@@ -127,21 +127,47 @@ describe('createHttpItineraryRepository.getById', () => {
 });
 
 describe('createHttpItineraryRepository.create', () => {
-  it('POST /itineraries chỉ với { title }, bỏ trường thừa của input, trả Itinerary', async () => {
+  const input = {
+    title: 'Đà Lạt',
+    destinationCode: 'vn-lam-dong',
+    dayCount: 3,
+    startDate: null,
+    interests: ['nature', 'food-drink'] as const,
+  };
+
+  it('POST /itineraries với đúng 5 khóa, bỏ trường thừa của input, trả Itinerary', async () => {
     const { http, send } = fakeHttp(itineraryDetailJsonFixture);
-    const withExtra = { title: 'Đà Lạt', isPublic: true, ownerId: 'x' };
+    const withExtra = { ...input, isPublic: true, ownerId: 'x' };
 
     const itinerary = await createHttpItineraryRepository(http).create(withExtra);
 
-    expect(send).toHaveBeenCalledWith({ method: 'POST', path: '/itineraries', body: { title: 'Đà Lạt' } });
-    expect(Object.keys(firstRequest(send).body as object)).toEqual(['title']);
+    expect(send).toHaveBeenCalledWith({
+      method: 'POST',
+      path: '/itineraries',
+      body: { title: 'Đà Lạt', destinationCode: 'vn-lam-dong', dayCount: 3, startDate: null, interests: ['nature', 'food-drink'] },
+    });
+    expect(Object.keys(firstRequest(send).body as object).toSorted()).toEqual([
+      'dayCount',
+      'destinationCode',
+      'interests',
+      'startDate',
+      'title',
+    ]);
     expect(itinerary.id).toBe(itineraryIdFixture);
+  });
+
+  it('startDate null được gửi là null và interests là bản sao mảng', async () => {
+    const { http, send } = fakeHttp(itineraryDetailJsonFixture);
+    await createHttpItineraryRepository(http).create(input);
+    const body = firstRequest(send).body as { startDate: unknown; interests: unknown };
+    expect(body.startDate).toBeNull();
+    expect(body.interests).not.toBe(input.interests);
   });
 
   it('body sai hình dạng thì ném lỗi', async () => {
     const { http } = fakeHttp({ id: 'x' });
 
-    await expect(createHttpItineraryRepository(http).create({ title: 'A' })).rejects.toThrow();
+    await expect(createHttpItineraryRepository(http).create(input)).rejects.toThrow();
   });
 });
 
@@ -366,7 +392,9 @@ describe('createHttpItineraryRepository: lỗi và cô lập', () => {
 
     await expect(repo.listMine({ pageIndex: 1, pageSize: 12, status: 'all' })).rejects.toBe(error);
     await expect(repo.getById(itineraryId)).rejects.toBe(error);
-    await expect(repo.create({ title: 'A' })).rejects.toBe(error);
+    await expect(
+      repo.create({ title: 'A', destinationCode: 'vn-da-nang', dayCount: 3, startDate: null, interests: [] }),
+    ).rejects.toBe(error);
     await expect(
       repo.updateMetadata(itineraryId, {
         title: 'A',

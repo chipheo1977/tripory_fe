@@ -1,6 +1,8 @@
 import type { ItineraryId, Wgs84Coordinate } from '@tripory/shared-kernel';
 import type {
+  CalendarDate,
   Destination,
+  InterestCode,
   Itinerary,
   ItineraryMetadata,
   ItinerarySummary,
@@ -13,6 +15,15 @@ import type {
 // composition của app lắp vào. Hook React gọi thẳng port; chỉ luật thật (xem `use-cases.ts`) mới có hàm riêng.
 
 export type ListMineQuery = Readonly<{ pageIndex: number; pageSize: number; status: StatusFilter }>;
+
+/** Một request tạo lịch trình (D-96): điểm đến bắt buộc với lịch trình mới (D-102), số ngày 1-30, ngày khởi hành tùy chọn. */
+export type CreateItineraryInput = Readonly<{
+  title: string;
+  destinationCode: string;
+  dayCount: number;
+  startDate: CalendarDate | null;
+  interests: readonly InterestCode[];
+}>;
 
 /**
  * Payload `PUT /itineraries/{id}`: bốn trường + danh sách ảnh bìa và chỉ số ảnh hiển thị; `null` là xóa giá trị.
@@ -35,7 +46,7 @@ export type ReorderInput = Readonly<{ dayNumber: number; orderedIds: readonly st
 export type ItineraryRepository = Readonly<{
   listMine(query: ListMineQuery, signal?: AbortSignal): Promise<Page<ItinerarySummary>>;
   getById(id: ItineraryId, signal?: AbortSignal): Promise<Itinerary>;
-  create(input: Readonly<{ title: string }>): Promise<Itinerary>;
+  create(input: CreateItineraryInput): Promise<Itinerary>;
   updateMetadata(id: ItineraryId, input: MetadataInput): Promise<void>;
   publish(id: ItineraryId): Promise<void>;
   remove(id: ItineraryId): Promise<void>;

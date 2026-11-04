@@ -3,6 +3,7 @@ import type { DefaultError, QueryClient, UseMutationOptions } from '@tanstack/re
 import type { ItineraryId } from '@tripory/shared-kernel';
 import type {
   AddWaypointInput,
+  CreateItineraryInput,
   ItineraryRepository,
   MetadataInput,
   ReorderInput,
@@ -145,9 +146,9 @@ export function createItineraryHooks(deps: ItineraryHooksDeps) {
       });
     },
 
-    useCreateItinerary: (options?: MutationOptions<Itinerary, Readonly<{ title: string }>>) => {
+    useCreateItinerary: (options?: MutationOptions<Itinerary, CreateItineraryInput>) => {
       const qc = useQueryClient();
-      return useMutation<Itinerary, DefaultError, Readonly<{ title: string }>, unknown>({
+      return useMutation<Itinerary, DefaultError, CreateItineraryInput, unknown>({
         ...options,
         mutationFn: (input) => repository.create(input),
         onSuccess: async (data, variables, onMutateResult, context) => {

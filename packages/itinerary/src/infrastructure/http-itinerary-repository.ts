@@ -40,8 +40,12 @@ export function createHttpItineraryRepository(
       return toItinerary(itineraryDetailDto.parse(data));
     },
 
-    async create({ title }) {
-      const data = await http.send({ method: 'POST', path: '/itineraries', body: { title } });
+    async create({ title, destinationCode, dayCount, startDate, interests }) {
+      const data = await http.send({
+        method: 'POST',
+        path: '/itineraries',
+        body: { title, destinationCode, dayCount, startDate, interests: [...interests] },
+      });
 
       return toItinerary(itineraryDetailDto.parse(data));
     },

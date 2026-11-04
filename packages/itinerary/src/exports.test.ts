@@ -33,6 +33,14 @@ const DOMAIN_NAMES = [
   'metadataOf',
   'withMetadata',
   'isSameMetadata',
+  'COVER_IMAGE_LIMIT',
+  'galleryOf',
+  'canAddCoverImage',
+  'addCoverImage',
+  'removeCoverImage',
+  'selectCoverImage',
+  'coverSlots',
+  'focusTargetAfterRemove',
 ] as const;
 
 const INFRASTRUCTURE_NAMES = [

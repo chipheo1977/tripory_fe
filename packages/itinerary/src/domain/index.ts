@@ -1,4 +1,5 @@
 export * from './calendar-date';
+export * from './cover-images';
 export * from './day-count';
 export * from './day-range';
 export * from './destination';

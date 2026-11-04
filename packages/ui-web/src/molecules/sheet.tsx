@@ -6,7 +6,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Icon } from '../atoms/icon';
 import { cn } from '../lib/cn';
-import { isTopSnap, resolveSnapPoints } from './sheet-snap';
+import { isTopSnap, snapPointsFor } from './sheet-snap';
 
 export type SheetPosition = 'bottom' | 'left' | 'right';
 type SheetSnapPoint = number | string;
@@ -40,6 +40,8 @@ export type SheetProps = Omit<
   dismissible?: boolean;
   disablePointerDismissal?: boolean;
   defaultSnap?: SheetDefaultSnap;
+  /** Sheet bottom chỉ có một mức (mức mở rộng), chỉ số snap luôn 0 (D-66, D-67). Mặc định `false`. */
+  fixedSnap?: boolean;
   insetTop?: number;
   modal?: boolean;
   position?: SheetPosition;
@@ -57,6 +59,7 @@ export function Sheet({
   defaultSnap = 'medium',
   dismissible = true,
   disablePointerDismissal = false,
+  fixedSnap = false,
   insetTop = 0,
   modal = true,
   onOpenChange,
@@ -67,11 +70,17 @@ export function Sheet({
 }: SheetProps) {
   const [viewportHeight, setViewportHeight] = useState(640);
   const snapPoints = useMemo<readonly SheetSnapPoint[]>(
-    () => position === 'bottom' ? resolveSnapPoints(viewportHeight, insetTop) : [],
-    [insetTop, position, viewportHeight],
+    () => snapPointsFor(position, fixedSnap, viewportHeight, insetTop),
+    [fixedSnap, insetTop, position, viewportHeight],
   );
+  const initialIndex = fixedSnap ? 0 : snapIndexes[defaultSnap];
   // Lưu mức theo chỉ số để mức đang mở vẫn đúng sau khi `resize` tính lại giá trị px.
-  const [snapIndex, setSnapIndex] = useState(snapIndexes[defaultSnap]);
+  const [snapIndex, setSnapIndex] = useState(initialIndex);
+  const [prevFixedSnap, setPrevFixedSnap] = useState(fixedSnap);
+  if (prevFixedSnap !== fixedSnap) {
+    setPrevFixedSnap(fixedSnap);
+    setSnapIndex(initialIndex);
+  }
   const snapPoint: SheetSnapPoint | null = snapPoints[snapIndex] ?? null;
   const closingRef = useRef(false);
 
@@ -116,7 +125,7 @@ export function Sheet({
             return;
           }
           closingRef.current = !open;
-          if (!open && position === 'bottom') setSnapIndex(snapIndexes[defaultSnap]);
+          if (!open && position === 'bottom') setSnapIndex(initialIndex);
           onOpenChange?.(open, details);
         }}
         onOpenChangeComplete={(open) => {

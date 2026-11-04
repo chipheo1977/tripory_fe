@@ -1,6 +1,6 @@
 import { sheetPeekMinPx, sheetSnapPoints } from '@tripory/design-tokens';
 import { describe, expect, it } from 'vitest';
-import { isTopSnap, resolveSnapPoints } from './sheet-snap';
+import { isTopSnap, resolveFixedSnapPoints, resolveSnapPoints, snapPointsFor } from './sheet-snap';
 
 describe('Sheet snap adapter', () => {
   it('giữ các hằng snap đã khóa trong design tokens', () => {
@@ -38,5 +38,38 @@ describe('isTopSnap', () => {
     ['left', 0, 3, true],
   ] as const)('isTopSnap(%s, %i, %i) = %s', (position, snapIndex, length, expected) => {
     expect(isTopSnap(position, snapIndex, length)).toBe(expected);
+  });
+});
+
+describe('resolveFixedSnapPoints', () => {
+  it('chỉ một phần tử bằng mức expanded', () => {
+    expect(resolveFixedSnapPoints(844, 0)).toHaveLength(1);
+    expect(resolveFixedSnapPoints(844, 0)[0]).toBe(resolveSnapPoints(844, 0)[2]);
+  });
+
+  it('kẹp theo insetTop như mức expanded', () => {
+    expect(resolveFixedSnapPoints(844, 64)[0]).toBe(resolveSnapPoints(844, 64)[2]);
+    expect(resolveFixedSnapPoints(400, 300)[0]).toBe('100px');
+  });
+
+  it('một mức duy nhất là mức trên cùng', () => {
+    expect(isTopSnap('bottom', 0, 1)).toBe(true);
+  });
+});
+
+describe('snapPointsFor', () => {
+  it('sheet cạnh không có snap', () => {
+    expect(snapPointsFor('left', false, 844)).toEqual([]);
+    expect(snapPointsFor('right', true, 844)).toEqual([]);
+  });
+
+  it('bottom thường có ba mức', () => {
+    expect(snapPointsFor('bottom', false, 844, 0)).toEqual(resolveSnapPoints(844, 0));
+    expect(snapPointsFor('bottom', false, 844, 0)).toHaveLength(3);
+  });
+
+  it('bottom fixedSnap có một mức', () => {
+    expect(snapPointsFor('bottom', true, 844, 0)).toEqual(resolveFixedSnapPoints(844, 0));
+    expect(snapPointsFor('bottom', true, 844, 0)).toHaveLength(1);
   });
 });

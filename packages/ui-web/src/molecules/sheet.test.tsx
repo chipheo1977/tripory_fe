@@ -398,3 +398,66 @@ describe('V�ng cu?n c?a Sheet theo m?c snap', () => {
     expect(handle?.className.split(/\s+/)).toContain('touch-none');
   });
 });
+
+describe('Sheet fixedSnap', () => {
+  type FixedProps = {
+    fixedSnap?: boolean;
+    open?: boolean;
+    position?: Position;
+    onOpenChange?: (open: boolean) => void;
+  };
+
+  function FixedSheet({ fixedSnap = true, open = true, position = 'bottom', onOpenChange }: FixedProps) {
+    return (
+      <Sheet defaultSnap="expanded" fixedSnap={fixedSnap} modal onOpenChange={onOpenChange} open={open} position={position}>
+        <SheetContent fillSnap>
+          <SheetTitle>Tạo lịch trình</SheetTitle>
+          <button type="button">Nội dung form</button>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  it('render popup có nội dung', async () => {
+    render(<FixedSheet />);
+    const sheet = await screen.findByRole('dialog', { name: 'Tạo lịch trình' });
+    expect(sheet.textContent).toContain('Nội dung form');
+  });
+
+  it('chỉ có một mức nên popup cuộn được', async () => {
+    render(<FixedSheet />);
+    const sheet = await screen.findByRole('dialog');
+    expect(sheet.className).toContain('overflow-y-auto');
+    expect(sheet.className).not.toContain('overflow-y-hidden');
+  });
+
+  it('nút Đóng gọi onOpenChange(false)', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    render(<FixedSheet onOpenChange={onOpenChange} />);
+    await user.click(await screen.findByRole('button', { name: 'Đóng' }));
+    expect(onOpenChange.mock.calls.at(-1)?.[0]).toBe(false);
+  });
+
+  it('đóng rồi mở lại vẫn render popup', async () => {
+    const { rerender } = render(<FixedSheet open />);
+    await screen.findByRole('dialog');
+    rerender(<FixedSheet open={false} />);
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    rerender(<FixedSheet open />);
+    expect(await screen.findByRole('dialog', { name: 'Tạo lịch trình' })).toBeTruthy();
+  });
+
+  it('không có fixedSnap thì giữ hành vi cũ (ba mức, mức expanded cuộn được)', async () => {
+    render(<FixedSheet fixedSnap={false} />);
+    const sheet = await screen.findByRole('dialog');
+    expect(sheet.className).toContain('overflow-y-auto');
+  });
+
+  it('fixedSnap với position left không ảnh hưởng', async () => {
+    render(<FixedSheet position="left" />);
+    const sheet = await screen.findByRole('dialog');
+    expect(sheet.getAttribute('data-sheet-position')).toBe('left');
+    expect(sheet.className).toContain('--sheet-side-width');
+  });
+});

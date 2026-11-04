@@ -116,4 +116,64 @@ describe("itinerary security/scope invariants (static)", () => {
     expect(page?.text).not.toContain("@tripory/itinerary/http");
     expect(page?.text).not.toContain("fetch(");
   });
+
+  // D-107 (T-04-143): form "Thông tin chuyến đi" tự lưu nên không có bản nháp; kind `metadata` không được quay lại.
+  it('has no "metadata" draft kind in modules/itinerary/ui', () => {
+    const draftStorage = webSources.find((file) => file.rel === "modules/itinerary/ui/draft-storage.ts");
+    expect(draftStorage).toBeDefined();
+    expect(draftStorage?.text).not.toMatch(/["']metadata["']|`metadata:/);
+    const offenders = inWeb("modules/itinerary/ui/")
+      .filter((file) => /kind:\s*["']metadata["']|draftKey\([^)]*metadata/.test(file.text))
+      .map((file) => file.rel);
+    expect(offenders).toEqual([]);
+  });
+
+  // T-04-145: package itinerary thuần; URL ảnh đi vào qua tham số `imageBaseUrl`, không đọc env hay global của trình duyệt.
+  it("keeps packages/itinerary free of env and browser globals", () => {
+    const sources = packagesSrc.filter((file) => file.rel.startsWith("packages/itinerary/src/"));
+    expect(sources.length).toBeGreaterThan(20);
+    const banned = ["process.env", "NEXT_PUBLIC", "window.", "document.", "localStorage", "sessionStorage"];
+    const offenders = sources
+      .filter((file) => banned.some((word) => file.text.includes(word)))
+      .map((file) => file.rel);
+    expect(offenders).toEqual([]);
+  });
+
+  // D-54, D-77 (T-04-144): PUT metadata không gửi điểm đến/sở thích/ảnh đơn; POST create gửi đủ 5 khóa.
+  it("sends destination and interests only in create, never in updateMetadata", () => {
+    const repo = packagesSrc.find((file) => file.rel === "packages/itinerary/src/infrastructure/http-itinerary-repository.ts");
+    expect(repo).toBeDefined();
+    const text = repo?.text ?? "";
+    const updateStart = text.indexOf("async updateMetadata");
+    const publishStart = text.indexOf("async publish");
+    expect(updateStart).toBeGreaterThan(-1);
+    expect(publishStart).toBeGreaterThan(updateStart);
+    const updateBody = text.slice(updateStart, publishStart);
+    for (const key of ["destinationCode", "interests", "coverImageUrl"]) expect(updateBody).not.toContain(key);
+
+    const createStart = text.indexOf("async create");
+    expect(createStart).toBeGreaterThan(-1);
+    expect(createStart).toBeLessThan(updateStart);
+    const createBody = text.slice(createStart, updateStart);
+    for (const key of ["title", "destinationCode", "dayCount", "startDate", "interests"]) expect(createBody).toContain(key);
+  });
+
+  // D-79, D-106: gốc URL ảnh là hằng https ở tầng composition; chỉ vài file UI được chạm vào danh mục.
+  it("keeps the destination image base URL a https constant and the catalog off most UI files", () => {
+    const catalog = webSources.find((file) => file.rel === "composition/destination-catalog.ts");
+    expect(catalog).toBeDefined();
+    const code = (catalog?.text ?? "").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(code).toMatch(/const DESTINATION_IMAGE_BASE_URL\s*=\s*"https:\/\//);
+    for (const banned of ["NEXT_PUBLIC", "process.env", "use client", "http.client"]) expect(code).not.toContain(banned);
+
+    const allowed = new Set([
+      "modules/itinerary/ui/destination-cover.ts",
+      "modules/itinerary/ui/create-itinerary-dialog.tsx",
+      "modules/itinerary/ui/use-create-itinerary-form.ts",
+    ]);
+    const offenders = inWeb("modules/itinerary/ui/")
+      .filter((file) => file.text.includes("destinationCatalog") && !allowed.has(file.rel))
+      .map((file) => file.rel);
+    expect(offenders).toEqual([]);
+  });
 });

@@ -41,6 +41,7 @@ const summary = (overrides: Partial<ItinerarySummary> = {}): ItinerarySummary =>
   id: ID,
   title: "Sài Gòn 3 ngày",
   coverImageUrl: null,
+  destinationCode: null,
   startDate: DATE,
   isPublic: false,
   totalDistanceKm: 12.4,

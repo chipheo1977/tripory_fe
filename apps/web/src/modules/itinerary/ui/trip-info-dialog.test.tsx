@@ -59,13 +59,16 @@ const base: Itinerary = {
   title: "Đà Lạt",
   description: "Săn mây",
   coverImageUrl: COVER,
+  coverImages: [COVER],
+  destinationCode: null,
+  interests: [],
   startDate: START,
   isPublic: false,
   totalDistanceKm: 0,
   days: [{ dayNumber: 1, subtitle: null, distanceKm: null }],
   waypoints: [],
 };
-const bare: Itinerary = { ...base, description: null, coverImageUrl: null, startDate: null };
+const bare: Itinerary = { ...base, description: null, coverImageUrl: null, coverImages: [], startDate: null };
 
 const http = (status: number, code: string | null, message: string | null) =>
   makeApiError({ kind: "http", status, code, message });

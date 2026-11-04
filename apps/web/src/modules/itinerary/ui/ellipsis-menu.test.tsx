@@ -103,7 +103,7 @@ it("itinerary card: click ⋯ mở menu", async () => {
   render(
     <ItineraryCard
       onDelete={vi.fn()}
-      summary={{ id: ID, title: "Sài Gòn", coverImageUrl: null, startDate: null, isPublic: false, totalDistanceKm: 0 }}
+      summary={{ id: ID, title: "Sài Gòn", coverImageUrl: null, destinationCode: null, startDate: null, isPublic: false, totalDistanceKm: 0 }}
     />,
   );
   await user.click(screen.getByRole("button", { name: 'Thao tác cho "Sài Gòn"' }));
@@ -114,7 +114,7 @@ it("itinerary card: nút ⋯ không bị lớp phủ của link tiêu đề (aft
   render(
     <ItineraryCard
       onDelete={vi.fn()}
-      summary={{ id: ID, title: "Sài Gòn", coverImageUrl: null, startDate: null, isPublic: false, totalDistanceKm: 0 }}
+      summary={{ id: ID, title: "Sài Gòn", coverImageUrl: null, destinationCode: null, startDate: null, isPublic: false, totalDistanceKm: 0 }}
     />,
   );
   const trigger = screen.getByRole("button", { name: 'Thao tác cho "Sài Gòn"' });

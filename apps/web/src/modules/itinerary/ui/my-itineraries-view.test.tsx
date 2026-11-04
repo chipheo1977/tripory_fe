@@ -79,7 +79,7 @@ if (DATE === null) throw new Error("ngày mẫu phải hợp lệ");
 const item = (n: number, overrides: Partial<ItinerarySummary> = {}): ItinerarySummary => {
   const id = parseItineraryId(`3f2a6c1e-8b7d-4e21-9c55-${String(n).padStart(12, "0")}`);
   if (id === null) throw new Error("id mẫu phải hợp lệ");
-  return { id, title: `Lịch trình ${n}`, coverImageUrl: null, startDate: DATE, isPublic: false, totalDistanceKm: 10, ...overrides };
+  return { id, title: `Lịch trình ${n}`, coverImageUrl: null, destinationCode: null, startDate: DATE, isPublic: false, totalDistanceKm: 10, ...overrides };
 };
 
 const page = (items: ItinerarySummary[], pageIndex: number, hasNextPage: boolean): Page<ItinerarySummary> => ({

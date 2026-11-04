@@ -35,6 +35,10 @@ const molecules = [
   'Card',
   'EmptyState',
   'ErrorState',
+  'Accordion',
+  'ToggleChipGroup',
+  'NumberStepper',
+  'RadioGroup',
 ] as const;
 
 const compoundParts = [
@@ -98,6 +102,11 @@ const compoundParts = [
   'SheetClose',
   'SheetPortal',
   'SheetViewport',
+  'AccordionItem',
+  'AccordionTrigger',
+  'AccordionPanel',
+  'ToggleChip',
+  'Radio',
 ] as const;
 
 const hasEveryExport = (names: readonly string[]) => names.filter((name) => !(name in publicUi));
@@ -140,5 +149,6 @@ describe('ui-web public entry', () => {
     expect('Panel' in publicUi.Tabs).toBe(false);
     expect('Title' in publicUi.Dialog).toBe(false);
     expect('Title' in publicUi.Sheet).toBe(false);
+    expect('Item' in publicUi.Accordion).toBe(false);
   });
 });

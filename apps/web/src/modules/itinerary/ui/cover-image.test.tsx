@@ -52,3 +52,42 @@ it("resets the error state when src changes", () => {
   rerender(<CoverImage src="https://images.example.com/b.jpg" />);
   expect(image(container)?.getAttribute("src")).toBe("https://images.example.com/b.jpg");
 });
+
+const FALLBACK = "https://images.example.com/default.jpg";
+
+it("uses fallbackSrc when src is null", () => {
+  const { container } = render(<CoverImage fallbackSrc={FALLBACK} src={null} />);
+  expect(image(container)?.getAttribute("src")).toBe(FALLBACK);
+});
+
+it("prefers src over fallbackSrc", () => {
+  const { container } = render(<CoverImage fallbackSrc={FALLBACK} src={SRC} />);
+  expect(image(container)?.getAttribute("src")).toBe(SRC);
+});
+
+it("moves to fallbackSrc when src fails, then to the surface when fallbackSrc fails too", () => {
+  const { container } = render(<CoverImage fallbackSrc={FALLBACK} src={SRC} />);
+  fireEvent.error(image(container) as HTMLImageElement);
+  expect(image(container)?.getAttribute("src")).toBe(FALLBACK);
+  fireEvent.error(image(container) as HTMLImageElement);
+  expect(image(container)).toBeNull();
+  expect(container.querySelector(".bg-surface-muted")).not.toBeNull();
+});
+
+it("ignores a non-https fallbackSrc", () => {
+  const { container } = render(<CoverImage fallbackSrc="http://x" src={null} />);
+  expect(image(container)).toBeNull();
+});
+
+it("retries a new src after an earlier failure", () => {
+  const { container, rerender } = render(<CoverImage fallbackSrc={FALLBACK} src={SRC} />);
+  fireEvent.error(image(container) as HTMLImageElement);
+  rerender(<CoverImage fallbackSrc={FALLBACK} src="https://images.example.com/c.jpg" />);
+  expect(image(container)?.getAttribute("src")).toBe("https://images.example.com/c.jpg");
+});
+
+it("renders the surface when both src and fallbackSrc are null", () => {
+  const { container } = render(<CoverImage fallbackSrc={null} src={null} />);
+  expect(image(container)).toBeNull();
+  expect(container.querySelector(".bg-surface-muted")).not.toBeNull();
+});

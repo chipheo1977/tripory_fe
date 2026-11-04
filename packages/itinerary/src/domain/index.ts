@@ -6,6 +6,7 @@ export * from './destination-search';
 export * from './interests';
 export * from './itinerary';
 export * from './location-input';
+export * from './metadata';
 export * from './permissions';
 export * from './trip-title';
 export * from './updates';

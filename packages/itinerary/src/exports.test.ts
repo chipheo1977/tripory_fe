@@ -30,6 +30,9 @@ const DOMAIN_NAMES = [
   'normalizeInterests',
   'INTERESTS',
   'POPULAR_GROUP_SIZE',
+  'metadataOf',
+  'withMetadata',
+  'isSameMetadata',
 ] as const;
 
 const INFRASTRUCTURE_NAMES = [

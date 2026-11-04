@@ -3,7 +3,7 @@
 //
 // Độ dài đếm trên giá trị THÔ (kể cả khoảng trắng đầu/cuối): BE kiểm độ dài trước khi trim (Pitfall 10),
 // nên chuỗi 99 ký tự + 2 khoảng trắng phải bị chặn ở client thay vì chờ 400/5xx. Mỗi ô chỉ phát một lỗi.
-import { parseCalendarDate, type CalendarDate, type MetadataInput } from "@tripory/itinerary";
+import { isValidDayCount, parseCalendarDate, type CalendarDate, type MetadataInput } from "@tripory/itinerary";
 import { z } from "zod";
 
 export const TITLE_REQUIRED = "Vui lòng nhập tiêu đề.";
@@ -18,6 +18,11 @@ export const WAYPOINT_NAME_TOO_LONG = "Tên điểm đến tối đa 200 ký t�
 export const LOCATION_REQUIRED = "Vui lòng dán tọa độ hoặc link Google Maps.";
 export const ADDRESS_TOO_LONG = "Địa chỉ tối đa 500 ký tự.";
 export const NOTES_TOO_LONG = "Ghi chú tối đa 2000 ký tự.";
+export const DESTINATION_REQUIRED = "Vui lòng chọn điểm đến.";
+export const TRIP_NAME_REQUIRED = "Vui lòng nhập tên chuyến đi.";
+export const TRIP_NAME_TOO_LONG = "Tên chuyến đi tối đa 100 ký tự.";
+export const DAY_COUNT_INVALID = "Số ngày từ 1 đến 30.";
+export const COVER_DUPLICATE = "Ảnh này đã có trong danh sách.";
 
 const TITLE_MAX = 100;
 const DESCRIPTION_MAX = 1000;
@@ -75,6 +80,30 @@ export const metadataSchema = z.object({
   coverImageUrl: coverImageField,
 });
 
+export const CREATE_TRIP_FIELDS = ["destinationCode", "title", "startDate", "dayCount", "interests"] as const;
+
+/** Form tạo lịch trình 4 khối (D-69). Mỗi ô một lỗi; BE vẫn là nguồn sự thật. */
+export const createTripSchema = z.object({
+  destinationCode: z.string().nullable().superRefine((value, ctx) => {
+    if (value === null || value.trim() === "") ctx.addIssue({ code: "custom", message: DESTINATION_REQUIRED });
+  }),
+  title: requiredText(TRIP_NAME_REQUIRED, TRIP_NAME_TOO_LONG, TITLE_MAX),
+  startDate: startDateField,
+  dayCount: z.number({ error: DAY_COUNT_INVALID }).superRefine((value, ctx) => {
+    if (!isValidDayCount(value)) ctx.addIssue({ code: "custom", message: DAY_COUNT_INVALID });
+  }),
+  interests: z.array(z.string()),
+});
+
+export const METADATA_TEXT_FIELDS = ["title", "description", "startDate"] as const;
+
+/** Metadata chữ của "Thông tin chuyến đi": không còn ô ảnh (ảnh bìa đi qua lưới ảnh). */
+export const metadataFieldsSchema = z.object({
+  title: titleField,
+  description: optionalText(DESCRIPTION_TOO_LONG, DESCRIPTION_MAX),
+  startDate: startDateField,
+});
+
 export const waypointSchema = z.object({
   name: requiredText(WAYPOINT_NAME_REQUIRED, WAYPOINT_NAME_TOO_LONG, WAYPOINT_NAME_MAX),
   location: locationField,
@@ -85,6 +114,17 @@ export const waypointSchema = z.object({
 export type CreateItineraryValues = z.infer<typeof createItinerarySchema>;
 export type MetadataValues = z.infer<typeof metadataSchema>;
 export type WaypointValues = z.infer<typeof waypointSchema>;
+export type CreateTripValues = z.infer<typeof createTripSchema>;
+export type MetadataFieldsValues = z.infer<typeof metadataFieldsSchema>;
+
+/** Kiểm một link ảnh bìa trước khi thêm vào danh sách (https, ≤ 500 ký tự, không trùng): copy lỗi hoặc `null`. */
+export function validateCoverUrl(raw: string, existing: readonly string[]): string | null {
+  const trimmed = raw.trim();
+  if (trimmed === "" || !isHttpsUrl(trimmed)) return COVER_NOT_HTTPS;
+  if (raw.length > COVER_MAX) return COVER_TOO_LONG;
+  if (existing.includes(trimmed)) return COVER_DUPLICATE;
+  return null;
+}
 
 /** Phụ đề ngày không có form riêng (sửa tại chỗ): trả copy lỗi hoặc `null` khi hợp lệ. */
 export const validateSubtitle = (raw: string): string | null => (raw.length > SUBTITLE_MAX ? SUBTITLE_TOO_LONG : null);

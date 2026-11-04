@@ -135,3 +135,14 @@ Quy ước: fake `HttpClient` (object có `send`), không MSW; fake timers cho 5
 - [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** green (gate tự động 04-22; UAT thủ công ở 04-23)
+
+## Ghi chú mở lại 2026-10-30 (dòng lỗi thời)
+
+- `04-08-02`: DTO/mapper thiếu điểm đến, sở thích, danh sách ảnh.
+- `04-11-01`: "https-only" cho một ô ảnh bìa; nay là ô "Link ảnh" của lưới.
+- `04-11-02`: hộp tạo nhanh (Enter gửi, một ô); nay là form 4 khối, Enter không gửi.
+- `04-14-01`: bản nháp gồm kind `metadata`; nay chỉ còn form waypoint.
+- `04-14-03`: "ảnh lỗi vẫn lưu" cho dialog có nút Lưu; nay tự lưu và lưới 5 ảnh.
+- Dòng Manual-Only "Hết phiên khi form mở": không còn áp cho form metadata.
+
+Nyquist tắt: phần mở lại được phủ bởi test của các plan 04-26..04-38 và UAT mục D của `04-UAT-CHECKLIST.md`; không thêm hàng VALIDATION mới.

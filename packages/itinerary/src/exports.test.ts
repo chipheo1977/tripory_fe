@@ -35,6 +35,7 @@ const DOMAIN_NAMES = [
 const INFRASTRUCTURE_NAMES = [
   'createHttpItineraryRepository',
   'createHttpShortLinkResolver',
+  'createStaticDestinationCatalog',
   'toItinerary',
   'itineraryDetailDto',
 ] as const;

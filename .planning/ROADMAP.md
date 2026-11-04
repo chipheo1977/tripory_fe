@@ -159,7 +159,7 @@ Plans:
 - [x] 04-30-PLAN.md — Read model: điểm đến, sở thích, danh sách ảnh bìa (domain, DTO, mapper, fixture package) + fixture BE của app và 2 test literal (wave 17)
 - [x] 04-41-PLAN.md — Đồng bộ 12 test còn lại của app với read model mới, typecheck/lint/test toàn gói app xanh (tách từ 04-30; wave 18)
 - [x] 04-31-PLAN.md — Chuỗi ảnh dự phòng (ảnh hiển thị, ảnh mặc định của điểm đến, nền token) cho thẻ và tóm tắt (wave 19)
-- [ ] 04-32-PLAN.md — `MetadataInput` phương án A (`coverImages` + `selectedCoverIndex`), `withMetadata` optimistic (sửa LW-02) (wave 19)
+- [x] 04-32-PLAN.md — `MetadataInput` phương án A (`coverImages` + `selectedCoverIndex`), `withMetadata` optimistic (sửa LW-02) (wave 19)
 - [ ] 04-33-PLAN.md — Nền chung: schema tạo + khối + map lỗi/`ERROR_MESSAGES` + `ResponsiveFormSurface` mở rộng (wave 20)
 - [ ] 04-34-PLAN.md — Khối UI form tạo: Điểm đến, Tên, Thời gian, Sở thích, chân form dính đáy (wave 21)
 - [ ] 04-35-PLAN.md — Cơ chế tự lưu: payload, bộ điều khiển (debounce 800 ms, single-flight + trailing), hook (wave 21)

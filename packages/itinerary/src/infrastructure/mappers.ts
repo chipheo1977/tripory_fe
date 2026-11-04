@@ -1,5 +1,5 @@
 import { createWgs84Coordinate, parseItineraryId, parseUserId } from '@tripory/shared-kernel';
-import { parseCalendarDate } from '../domain';
+import { normalizeInterests, parseCalendarDate } from '../domain';
 import type { Itinerary, ItineraryDay, ItinerarySummary, Page, Waypoint } from '../domain';
 import type { ItineraryDetailDto, SummaryPageDto, ItinerarySummaryDto, WaypointDto } from './dto';
 
@@ -12,6 +12,38 @@ const blankToNull = (value: string | null | undefined): string | null => {
 
   return trimmed === '' ? null : trimmed;
 };
+
+type CoverFields = Pick<ItinerarySummaryDto, 'coverImageUrl' | 'coverImages' | 'selectedCoverIndex'>;
+
+/** Phần tử tại chỉ số; chỉ số thiếu, âm hoặc vượt khoảng cho `null`. */
+const coverAt = (list: readonly string[], index: number | null | undefined): string | null => {
+  if (index === null || index === undefined) return null;
+  return list[index] ?? null;
+};
+
+const legacyCovers = (legacy: string | null): string[] => {
+  if (legacy === null) return [];
+  return [legacy];
+};
+
+/** BE cũ chưa có `coverImages` thì suy ra từ `coverImageUrl`. Bỏ chuỗi rỗng và trùng, giữ thứ tự. */
+const coverList = (dto: CoverFields): readonly string[] => {
+  const source = dto.coverImages ?? legacyCovers(blankToNull(dto.coverImageUrl));
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const raw of source) {
+    const url = raw.trim();
+    if (url !== '' && !seen.has(url)) {
+      seen.add(url);
+      result.push(url);
+    }
+  }
+  return Object.freeze(result);
+};
+
+/** Ảnh đang hiển thị: `coverImageUrl` của BE, nếu thiếu thì ảnh tại `selectedCoverIndex`. Không lọc scheme (UI chặn khi hiển thị). */
+const displayedCover = (dto: CoverFields): string | null =>
+  blankToNull(dto.coverImageUrl) ?? coverAt(coverList(dto), dto.selectedCoverIndex);
 
 const byDayThenOrder = (a: WaypointDto, b: WaypointDto): number => a.dayNumber - b.dayNumber || a.orderIndex - b.orderIndex;
 
@@ -58,7 +90,10 @@ export function toItinerary(dto: ItineraryDetailDto): Itinerary {
     ownerId,
     title: dto.title,
     description: blankToNull(dto.description),
-    coverImageUrl: blankToNull(dto.coverImageUrl),
+    coverImageUrl: displayedCover(dto),
+    coverImages: coverList(dto),
+    destinationCode: blankToNull(dto.destinationCode),
+    interests: Object.freeze(normalizeInterests(dto.interests ?? [])),
     startDate: dto.startDate === null || dto.startDate === undefined ? null : parseCalendarDate(dto.startDate),
     isPublic: dto.isPublic,
     totalDistanceKm: dto.totalDistanceKm,
@@ -75,7 +110,8 @@ export function toSummary(dto: ItinerarySummaryDto): ItinerarySummary {
   return Object.freeze({
     id,
     title: dto.title,
-    coverImageUrl: blankToNull(dto.coverImageUrl),
+    coverImageUrl: displayedCover(dto),
+    destinationCode: blankToNull(dto.destinationCode),
     startDate: dto.startDate === null || dto.startDate === undefined ? null : parseCalendarDate(dto.startDate),
     isPublic: dto.isPublic,
     totalDistanceKm: dto.totalDistanceKm,

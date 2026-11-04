@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { itineraryDetailDto, itinerarySummaryDto, pagedDto, waypointDto } from './dto';
 import {
   itineraryDetailJsonFixture,
+  itineraryDetailWithDestinationFixture,
   itineraryIdFixture,
   itinerarySummaryJsonFixture,
+  legacyDetailFixture,
   ownerIdFixture,
   summaryPageJsonFixture,
   waypointIdsFixture,
@@ -149,9 +151,12 @@ describe('toItinerary', () => {
 
     expect(Object.keys(itinerary).toSorted()).toEqual([
       'coverImageUrl',
+      'coverImages',
       'days',
       'description',
+      'destinationCode',
       'id',
+      'interests',
       'isPublic',
       'ownerId',
       'startDate',
@@ -159,6 +164,61 @@ describe('toItinerary', () => {
       'totalDistanceKm',
       'waypoints',
     ]);
+  });
+});
+
+describe('toItinerary trường mới', () => {
+  it('BE cũ chỉ có coverImageUrl thì coverImages = [coverImageUrl]', () => {
+    const itinerary = toItinerary(itineraryDetailDto.parse(legacyDetailFixture));
+
+    expect(itinerary.coverImages).toEqual(['https://cdn.tripory.vn/c.jpg']);
+    expect(itinerary.coverImageUrl).toBe('https://cdn.tripory.vn/c.jpg');
+    expect(itinerary.destinationCode).toBeNull();
+    expect(itinerary.interests).toEqual([]);
+  });
+
+  it('BE mới giữ coverImageUrl của BE và đủ danh sách', () => {
+    const itinerary = toItinerary(itineraryDetailDto.parse(itineraryDetailWithDestinationFixture));
+
+    expect(itinerary.coverImageUrl).toBe('https://img.example/b.jpg');
+    expect(itinerary.coverImages).toHaveLength(2);
+    expect(itinerary.destinationCode).toBe('vn-da-nang');
+    expect(itinerary.interests).toEqual(['nature', 'food-drink']);
+  });
+
+  it('coverImageUrl null thì lấy ảnh theo selectedCoverIndex', () => {
+    const itinerary = toItinerary(
+      detail({ coverImageUrl: null, coverImages: ['https://a.example/1.jpg', 'https://a.example/2.jpg'], selectedCoverIndex: 1 }),
+    );
+
+    expect(itinerary.coverImageUrl).toBe('https://a.example/2.jpg');
+  });
+
+  it.each([-1, 5])('selectedCoverIndex %i ngoài khoảng thì coverImageUrl null', (selectedCoverIndex) => {
+    const itinerary = toItinerary(
+      detail({ coverImageUrl: null, coverImages: ['https://a.example/1.jpg', 'https://a.example/2.jpg'], selectedCoverIndex }),
+    );
+
+    expect(itinerary.coverImageUrl).toBeNull();
+  });
+
+  it('lọc ảnh rỗng, khoảng trắng và trùng, giữ thứ tự', () => {
+    const itinerary = toItinerary(
+      detail({ coverImages: ['https://a.example/1.jpg', '', '  ', ' https://a.example/1.jpg ', 'https://a.example/2.jpg'] }),
+    );
+
+    expect(itinerary.coverImages).toEqual(['https://a.example/1.jpg', 'https://a.example/2.jpg']);
+  });
+
+  it('interests bỏ mã lạ, trùng và sắp theo danh mục', () => {
+    const itinerary = toItinerary(detail({ interests: ['shopping', 'nature', 'zzz', 'nature'] }));
+
+    expect(itinerary.interests).toEqual(['nature', 'shopping']);
+  });
+
+  it('destinationCode khoảng trắng thành null, mã lạ giữ nguyên', () => {
+    expect(toItinerary(detail({ destinationCode: '  ' })).destinationCode).toBeNull();
+    expect(toItinerary(detail({ destinationCode: 'vn-khong-co' })).destinationCode).toBe('vn-khong-co');
   });
 });
 
@@ -203,11 +263,26 @@ describe('toSummary và toSummaryPage', () => {
       id: itineraryIdFixture,
       title: 'Sài Gòn 3 ngày',
       coverImageUrl: null,
+      destinationCode: null,
       startDate: '2026-10-12',
       isPublic: false,
       totalDistanceKm: 12.4,
     });
     expect(Object.isFrozen(summary)).toBe(true);
+  });
+
+  it('toSummary lấy điểm đến và ảnh đang chọn theo chỉ số khi coverImageUrl thiếu', () => {
+    const summary = toSummary(
+      itinerarySummaryDto.parse({
+        ...itinerarySummaryJsonFixture,
+        destinationCode: 'vn-da-nang',
+        coverImages: ['https://img.example/a.jpg', 'https://img.example/b.jpg'],
+        selectedCoverIndex: 1,
+      }),
+    );
+
+    expect(summary.destinationCode).toBe('vn-da-nang');
+    expect(summary.coverImageUrl).toBe('https://img.example/b.jpg');
   });
 
   it('toSummary ném khi id sai GUID', () => {

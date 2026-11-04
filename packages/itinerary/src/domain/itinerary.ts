@@ -2,6 +2,7 @@
 // để dùng được cả trên React Native. Dữ liệu vào đây đã qua ACL (mapper ở infrastructure).
 import type { ItineraryId, UserId, Wgs84Coordinate } from '@tripory/shared-kernel';
 import type { CalendarDate } from './calendar-date';
+import type { InterestCode } from './interests';
 
 export type StatusFilter = 'all' | 'draft' | 'published';
 
@@ -34,7 +35,13 @@ export type Itinerary = Readonly<{
   ownerId: UserId;
   title: string;
   description: string | null;
+  /** Ảnh đang hiển thị (D-99); là một phần tử của `coverImages` khi danh sách không rỗng. */
   coverImageUrl: string | null;
+  /** Danh sách ảnh bìa (tối đa 5), theo thứ tự lưu; có thể rỗng. */
+  coverImages: readonly string[];
+  /** Mã điểm đến (slug); `null` với lịch trình cũ. Có thể là mã FE chưa biết. */
+  destinationCode: string | null;
+  interests: readonly InterestCode[];
   startDate: CalendarDate | null;
   isPublic: boolean;
   totalDistanceKm: number;
@@ -45,7 +52,9 @@ export type Itinerary = Readonly<{
 export type ItinerarySummary = Readonly<{
   id: ItineraryId;
   title: string;
+  /** Ảnh đang hiển thị (D-99). */
   coverImageUrl: string | null;
+  destinationCode: string | null;
   startDate: CalendarDate | null;
   isPublic: boolean;
   totalDistanceKm: number;

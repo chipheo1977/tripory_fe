@@ -3,7 +3,9 @@ import { itineraryDayDto, itineraryDetailDto, itinerarySummaryDto, pagedDto, res
 import {
   forbiddenEnvelope,
   itineraryDetailJsonFixture,
+  itineraryDetailWithDestinationFixture,
   itinerarySummaryJsonFixture,
+  legacyDetailFixture,
   summaryPageJsonFixture,
   waypointJsonFixture,
 } from './fixtures';
@@ -64,6 +66,41 @@ describe('itineraryDetailDto', () => {
   });
 });
 
+describe('itineraryDetailDto trường mới (04-BE-CONTRACT.md §8)', () => {
+  it('nhận DTO của BE cũ không có khóa mới', () => {
+    expect(itineraryDetailDto.safeParse(legacyDetailFixture).success).toBe(true);
+  });
+
+  it('nhận DTO của BE mới và giữ các trường mới', () => {
+    const parsed = itineraryDetailDto.parse(itineraryDetailWithDestinationFixture);
+
+    expect(parsed.coverImages).toHaveLength(2);
+    expect(parsed.selectedCoverIndex).toBe(1);
+    expect(parsed.destinationCode).toBe('vn-da-nang');
+    expect(parsed.interests).toEqual(['nature', 'food-drink']);
+  });
+
+  it('chấp nhận coverImages và interests là null', () => {
+    const parsed = itineraryDetailDto.safeParse({
+      ...itineraryDetailJsonFixture,
+      coverImages: null,
+      interests: null,
+      selectedCoverIndex: null,
+      destinationCode: null,
+    });
+
+    expect(parsed.success).toBe(true);
+  });
+
+  it('từ chối selectedCoverIndex thập phân', () => {
+    expect(itineraryDetailDto.safeParse({ ...itineraryDetailJsonFixture, selectedCoverIndex: 1.5 }).success).toBe(false);
+  });
+
+  it('không giới hạn mã điểm đến (BE có thể thêm mã trước FE)', () => {
+    expect(itineraryDetailDto.safeParse({ ...itineraryDetailJsonFixture, destinationCode: 'vn-khong-co' }).success).toBe(true);
+  });
+});
+
 describe('waypointDto và itineraryDayDto', () => {
   it('waypointDto nhận WaypointDto thật, address và notes có thể null', () => {
     const parsed = waypointDto.parse(waypointJsonFixture);
@@ -106,10 +143,13 @@ describe('itinerarySummaryDto', () => {
 
     expect(Object.keys(parsed).toSorted()).toEqual([
       'coverImageUrl',
+      'coverImages',
       'createdAt',
       'description',
+      'destinationCode',
       'id',
       'isPublic',
+      'selectedCoverIndex',
       'startDate',
       'title',
       'totalDistanceKm',

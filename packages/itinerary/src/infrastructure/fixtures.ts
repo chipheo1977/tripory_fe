@@ -22,6 +22,10 @@ export const itineraryDetailJsonFixture = {
   title: 'Sài Gòn 3 ngày',
   description: null,
   coverImageUrl: null,
+  coverImages: [] as string[],
+  selectedCoverIndex: null,
+  destinationCode: null,
+  interests: [] as string[],
   startDate: '2026-10-12',
   isPublic: false,
   totalDistanceKm: 12.4,
@@ -65,6 +69,26 @@ export const itineraryDetailJsonFixture = {
   ],
 };
 
+/** BE mới (04-BE-CONTRACT.md §8): có điểm đến, 2 ảnh bìa, ảnh thứ hai đang chọn, 2 sở thích. */
+export const itineraryDetailWithDestinationFixture = {
+  ...itineraryDetailJsonFixture,
+  coverImageUrl: 'https://img.example/b.jpg',
+  coverImages: ['https://triporyv1.vercel.app/destinations/vn-da-nang.jpg', 'https://img.example/b.jpg'],
+  selectedCoverIndex: 1,
+  destinationCode: 'vn-da-nang',
+  interests: ['nature', 'food-drink'],
+};
+
+/** BE cũ chưa deploy: KHÔNG có bốn khóa mới, chỉ có `coverImageUrl`. */
+export const legacyDetailFixture = (() => {
+  const { coverImages, selectedCoverIndex, destinationCode, interests, ...legacy } = itineraryDetailJsonFixture;
+  void coverImages;
+  void selectedCoverIndex;
+  void destinationCode;
+  void interests;
+  return { ...legacy, coverImageUrl: 'https://cdn.tripory.vn/c.jpg' };
+})();
+
 /** Một dòng của `GET /itineraries/mine`: không có `updatedAt`; hai bộ đếm của BE luôn 0 nên FE bỏ qua. */
 export const itinerarySummaryJsonFixture = {
   id: itineraryIdFixture,
@@ -72,6 +96,9 @@ export const itinerarySummaryJsonFixture = {
   title: 'Sài Gòn 3 ngày',
   description: null,
   coverImageUrl: null,
+  coverImages: [] as string[],
+  selectedCoverIndex: null,
+  destinationCode: null,
   startDate: '2026-10-12',
   isPublic: false,
   totalDistanceKm: 12.4,

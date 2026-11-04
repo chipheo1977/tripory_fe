@@ -24,10 +24,14 @@ Chi tiết ở [`04-BE-CONTRACT.md`](./04-BE-CONTRACT.md); user tự sửa `trip
 
 | # | Vấn đề | Ảnh hưởng FE | Đề xuất BE | Trạng thái |
 |---|--------|--------------|------------|------------|
-| 12 | `POST /itineraries` chỉ nhận `title` và tạo đúng Ngày 1; thiếu điểm đến, số ngày, ngày khởi hành, sở thích. | FE form 4 khối gửi một request duy nhất (D-96); không chạy được nếu BE thiếu. | Làm C1-C5 của `04-BE-CONTRACT.md`: danh mục 34 điểm đến và 7 sở thích, `POST` mở rộng, tạo Ngày 1..N, ghi ảnh mặc định theo slug. | Chờ user sửa BE (04-25) |
-| 13 | `PUT /itineraries/{id}` ghi đè 4 trường, chưa có danh sách ảnh và không giữ trường thiếu. | Tự lưu "Thông tin chuyến đi" và lưới 5 ảnh bìa (D-87, D-99) cần `coverImages` + `selectedCoverIndex` và `PUT` giữ nguyên `destinationCode`/`interests`. | Làm C6, C7 của `04-BE-CONTRACT.md`: cột `CoverImageUrls`, migration, `PUT` mới có nhánh dự phòng `coverImageUrl`. | Chờ user sửa BE (04-25) |
-| 14 | Validator trả lỗi đầu tiên với mã mặc định của FluentValidation, không có tên field (`ValidationPipelineBehavior.cs:33-41`). | FE không gắn được lỗi vào đúng khối/ô của form. | Mọi rule có `WithErrorCode` và dùng 14 mã `Itinerary.*` của `04-BE-CONTRACT.md` mục 9 (C9). | Chờ user sửa BE (04-25) |
+| 12 | `POST /itineraries` chỉ nhận `title` và tạo đúng Ngày 1; thiếu điểm đến, số ngày, ngày khởi hành, sở thích. | FE form 4 khối gửi một request duy nhất (D-96); không chạy được nếu BE thiếu. | Làm C1-C5 của `04-BE-CONTRACT.md`: danh mục 34 điểm đến và 7 sở thích, `POST` mở rộng, tạo Ngày 1..N, ghi ảnh mặc định theo slug. | Đã xong theo user ("BE xong", 04-25); BE CHƯA deploy (migration mới chạy trên DB phát triển `tripory_db`, mục nghiệm thu 6-11 của `04-BE-CONTRACT.md` hoãn đến khi ghép với FE) |
+| 13 | `PUT /itineraries/{id}` ghi đè 4 trường, chưa có danh sách ảnh và không giữ trường thiếu. | Tự lưu "Thông tin chuyến đi" và lưới 5 ảnh bìa (D-87, D-99) cần `coverImages` + `selectedCoverIndex` và `PUT` giữ nguyên `destinationCode`/`interests`. | Làm C6, C7 của `04-BE-CONTRACT.md`: cột `CoverImageUrls`, migration, `PUT` mới có nhánh dự phòng `coverImageUrl`. | Đã xong theo user ("BE xong", 04-25); BE CHƯA deploy (migration mới chạy trên DB phát triển `tripory_db`, mục nghiệm thu 6-11 của `04-BE-CONTRACT.md` hoãn đến khi ghép với FE) |
+| 14 | Validator trả lỗi đầu tiên với mã mặc định của FluentValidation, không có tên field (`ValidationPipelineBehavior.cs:33-41`). | FE không gắn được lỗi vào đúng khối/ô của form. | Mọi rule có `WithErrorCode` và dùng 14 mã `Itinerary.*` của `04-BE-CONTRACT.md` mục 9 (C9). | Đã xong theo user ("BE xong", 04-25); BE CHƯA deploy (migration mới chạy trên DB phát triển `tripory_db`, mục nghiệm thu 6-11 của `04-BE-CONTRACT.md` hoãn đến khi ghép với FE) |
 | 15 | Ảnh mặc định theo điểm đến là URL cố định `https://triporyv1.vercel.app/destinations/<slug>.jpg`; file ảnh chưa tồn tại. | Mọi ảnh mặc định trả 404; FE rơi về nền dự phòng theo token (D-106). | Cung cấp 34 ảnh thật kèm bản ghi giấy phép (D-105); xem `04-BE-CONTRACT.md` Phụ lục C. | Hoãn (Deferred), không thuộc Phase 4 |
+
+Nhánh dự phòng `coverImageUrl` trong request `PUT` có thể gỡ khỏi BE sau khi FE phần mở lại đã deploy (04-BE-CONTRACT.md C7).
+
+Ghi chú lệch kế hoạch (04-39): kế hoạch yêu cầu ghi "Đã xong (BE deploy ngày …)", nhưng `04-BE-CONTRACT.md` mục 13 chỉ tick 1/12 và mục 14 không có ngày deploy; nên trạng thái ghi đúng thực tế (user xác nhận xong, chưa deploy, chưa kiểm với BE thật).
 
 ## Ghi chú chuyển sang DEPL-02 (Phase 8)
 

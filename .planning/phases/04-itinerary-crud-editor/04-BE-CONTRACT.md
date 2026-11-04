@@ -31,20 +31,34 @@
 
 ## 2. Tóm tắt thay đổi
 
-| Mã | Thay đổi | Quyết định | Chi tiết |
-|----|----------|------------|----------|
-| C1 | Danh mục điểm đến: 34 slug và phép kiểm thuộc danh mục | D-53, D-92 | mục 3, mục 4 |
-| C2 | Danh mục sở thích: 7 mã theo thứ tự | D-55, D-70 | mục 3, mục 5 |
-| C3 | Mở rộng `POST /itineraries` nhận `title`, `destinationCode`, `dayCount`, `startDate`, `interests` | D-56, D-96, D-102, D-103 | mục 3, mục 6 |
-| C4 | Tạo đủ bản ghi Ngày 1..N trong một lần lưu | D-56 | mục 3 |
-| C5 | Ghi ảnh mặc định theo slug làm ảnh 1 và chọn nó lúc tạo | D-79, D-80, D-106 | mục 3 |
-| C6 | Danh sách ảnh bìa tối đa 5 (cột mảng mới) và giữ cột cũ là ảnh đang hiển thị | D-99 | mục 3, mục 7 |
-| C7 | `PUT /itineraries/{id}`: giữ nguyên trường thiếu, thêm `coverImages` và `selectedCoverIndex`, nhánh dự phòng `coverImageUrl` | D-54, D-87, D-99 | mục 3, mục 7 |
-| C8 | Trường mới của `ItineraryDetailDto` và `ItinerarySummaryDto` | D-99, D-78 | mục 3, mục 8 |
-| C9 | 14 mã lỗi và yêu cầu `WithErrorCode` cho mọi rule | D-57 | mục 3, mục 9 |
-| C10 | Migration: ba cột mới và chuyển dữ liệu ảnh bìa cũ | D-99, D-104 | mục 3, mục 10 |
-| C11 | Cấu hình `DestinationCatalog:CoverImageBaseUrl` | D-79, D-80, D-106 | mục 3, mục 11 |
-| C12 | Cập nhật `API_ENDPOINTS.md` | D-57 | mục 3, mục 12 |
+| Mã | Thay đổi | Quyết định | Chi tiết | Trạng thái |
+|----|----------|------------|----------|----------|
+| C1 | Danh mục điểm đến: 34 slug và phép kiểm thuộc danh mục | D-53, D-92 | mục 3, mục 4 | Xong |
+| C2 | Danh mục sở thích: 7 mã theo thứ tự | D-55, D-70 | mục 3, mục 5 | Xong |
+| C3 | Mở rộng `POST /itineraries` nhận `title`, `destinationCode`, `dayCount`, `startDate`, `interests` | D-56, D-96, D-102, D-103 | mục 3, mục 6 | Xong |
+| C4 | Tạo đủ bản ghi Ngày 1..N trong một lần lưu | D-56 | mục 3 | Xong |
+| C5 | Ghi ảnh mặc định theo slug làm ảnh 1 và chọn nó lúc tạo | D-79, D-80, D-106 | mục 3 | Xong |
+| C6 | Danh sách ảnh bìa tối đa 5 (cột mảng mới) và giữ cột cũ là ảnh đang hiển thị | D-99 | mục 3, mục 7 | Xong |
+| C7 | `PUT /itineraries/{id}`: giữ nguyên trường thiếu, thêm `coverImages` và `selectedCoverIndex`, bỏ `coverImageUrl` | D-54, D-87, D-99 | mục 3, mục 7 | Xong |
+| C8 | Trường mới của `ItineraryDetailDto` và `ItinerarySummaryDto` | D-99, D-78 | mục 3, mục 8 | Xong |
+| C9 | 14 mã lỗi và yêu cầu `WithErrorCode` cho mọi rule | D-57 | mục 3, mục 9 | Xong |
+| C10 | Migration: ba cột mới và chuyển dữ liệu ảnh bìa cũ | D-99, D-104 | mục 3, mục 10 | Xong |
+| C11 | Cấu hình `DestinationCatalog:CoverImageBaseUrl` | D-79, D-80, D-106 | mục 3, mục 11 | Xong |
+| C12 | Cập nhật `API_ENDPOINTS.md` | D-57 | mục 3, mục 12 | Xong |
+
+**Trạng thái làm BE** (cập nhật 2026-11-03, theo review code trong `tripory_be`; "Xong" nghĩa là phần C đó đã có trong code và `Tripory.Domain` biên dịch được, chưa tính nghiệm thu ở mục 13):
+
+- **C1, C2 Xong:** `DestinationCatalog` (34 slug, khớp mục 4) và `InterestCatalog` (7 mã), kiểu `IReadOnlyList<string>` kèm `IsKnown`.
+- **C3 Xong:** request, command, controller, validator (điểm đến, tên, số ngày, sở thích) và handler đã có; solution biên dịch được. Chưa kiểm bằng `POST` thật.
+- **C4 Xong:** domain tạo Ngày 1..N qua `CreateInitialDays`. Chưa kiểm khi lưu thật (`POST` với `dayCount:3` rồi `GET`).
+- **C6 Xong:** domain có `SetCoverImages` và `SelectedCoverIndex`. Ánh xạ EF và migration đã có (C10); `UpdateMetadata` đã đi qua `SetCoverImages` (C7). Chưa kiểm bằng `PUT` thật.
+- **C9 Xong:** mọi rule của hai validator có `WithErrorCode` (kể cả `Itinerary.InvalidId` cho `ItineraryId` rỗng ở `PUT`, mã mới ngoài 14 mã của mục 9, FE chưa cần ánh xạ). `title` thiếu hoặc `null` giờ ra `ItineraryTitle.Empty` (`Title` là `string?` ở request và command). Mã của `POST` ở `CreateQuickDraftItineraryCommandValidator`; mã của `PUT` (`ItineraryTitle.*`, `ItineraryDescription.TooLong`, `Itinerary.DestinationUnknown`, sở thích, `TooManyCoverImages`, `CoverImageInvalidUrl`, `CoverImageTooLong`, `CoverImageDuplicated`, `CoverSelectionInvalid`) ở `UpdateItineraryMetadataCommandValidator`. Rule sở thích và ảnh bìa dùng chung qua `ItineraryRuleBuilderExtensions`. Chưa kiểm từng mã bằng request thật.
+- **C7 Xong:** `PUT` nhận `destinationCode`, `interests`, `coverImages`, `selectedCoverIndex`; `destinationCode`/`interests` null thì giữ nguyên; `coverImages` null thì giữ nguyên ảnh bìa hiện có. Request không còn `coverImageUrl` và đã bỏ nhánh dự phòng cho FE cũ (quyết định của bạn, xem mục 7): FE cũ đổi ảnh bìa sẽ không được lưu cho tới khi FE mới deploy. Chưa kiểm bằng `PUT` thật.
+- **C11 Xong:** khóa `DestinationCatalog:CoverImageBaseUrl` có ở `appsettings.json` và `appsettings.Development.json`; `DestinationCatalogOptions` được kiểm lúc khởi động (URL tuyệt đối, `https`, kết thúc bằng `/`). Chưa thử bằng tay trường hợp cấu hình sai.
+- **C5 Xong:** `IDestinationCoverProvider` (Application) và `DestinationCoverProvider` (Infrastructure) ghép `{CoverImageBaseUrl}{slug}.jpg`, mã lạ thì trả `null`; handler truyền ảnh đó vào `CreateQuickDraft`, domain chọn nó làm ảnh 1. Cả solution biên dịch được; chưa kiểm bằng `POST` thật vì còn thiếu migration (C10) và DTO (C8).
+- **C10 Xong:** migration `20261103085252_Add_Itinerary_Destination_Interests_CoverImages` thêm ba cột (`DestinationCode`, `Interests`, `CoverImageUrls`) và chuyển ảnh bìa cũ sang danh sách mới; đã chạy trên DB phát triển, bước kiểm sau khi chạy đạt. Dữ liệu thử không có dòng nào có ảnh bìa nên phần chuyển ảnh chưa được thử trên dữ liệu thật. Migration thứ hai `20261104034058_Clean_Itinerary_Cover_Images` (chỉ SQL, không đổi cấu trúc) loại khỏi danh sách các URL mà validator từ chối (có khoảng trắng, không host, quá 500 ký tự...) và chỉnh lại `CoverImageUrl` cho khớp danh sách; đã thử SQL trên một DB tạm với 8 dòng mẫu, đúng như mong đợi, và đã áp dụng lên DB phát triển `tripory_db` (sao lưu mới `C:\Users\OS\Backups\tripory\2026-11-04\tripory_db.dump`, 16 dòng, không dòng nào có ảnh bìa nên chỉ xác nhận không lỗi). Chạy cả hai migration theo thứ tự trên DB thật, sau khi sao lưu. Chưa chạy trên DB thật.
+- **C8 Xong:** `ItineraryDetailDto` có `CoverImages`, `SelectedCoverIndex` (`int?`), `DestinationCode`, `Interests`; `ItinerarySummaryDto` có ba trường đầu, không có `Interests`. `ToDetailDto` và `ToSummaryDto` đã ánh xạ từ entity. Solution biên dịch được; chưa kiểm JSON thật qua `GET`.
+- **C12 Xong:** `API_ENDPOINTS.md` đã sửa dòng `POST /`, `PUT /{id}` và ghi chú ảnh bìa ở mục 6. Chưa thêm liên kết danh sách mã lỗi vào mục 7 của tài liệu đó (tùy chọn).
 
 **Thứ tự làm đề xuất cho người sửa BE** (mỗi bước dựa vào bước trước):
 
@@ -116,12 +130,12 @@
 
 ### C7 PUT /itineraries/{id}
 
-- **What**: Request `PUT` thêm `coverImages` (danh sách URL) và `selectedCoverIndex` (chỉ số ảnh đang chọn). `destinationCode` và `interests` nếu thiếu hoặc `null` thì giữ nguyên giá trị đã lưu. `coverImageUrl` cũ chỉ còn được đọc khi `coverImages` là `null` (nhánh dự phòng cho FE cũ, đánh dấu deprecated). Bảng đầy đủ ở mục 7.
+- **What**: Request `PUT` thêm `coverImages` (danh sách URL) và `selectedCoverIndex` (chỉ số ảnh đang chọn). `destinationCode` và `interests` nếu thiếu hoặc `null` thì giữ nguyên giá trị đã lưu. `coverImageUrl` cũ bị bỏ khỏi request (không còn nhánh dự phòng cho FE cũ). Bảng đầy đủ ở mục 7.
 - **Why**: D-54: sửa "Thông tin chuyến đi" không được xóa điểm đến hay sở thích. D-87 và D-99: FE tự lưu và mỗi lần gửi cả danh sách ảnh cùng chỉ số chọn trong một lệnh `PUT`, nên "ảnh chọn thuộc danh sách" luôn nhất quán (so với việc làm ba endpoint thêm, xóa, chọn riêng, vốn không giải được ghi chồng giữa hai tab).
 - **Who**: Contracts, Application (command, validator, handler), Domain (phương thức cập nhật metadata). FE gửi payload dựng từ trạng thái form mới nhất.
-- **When**: Sau C6 và C9. Nhánh dự phòng `coverImageUrl` được giữ cho tới khi FE mới đã deploy, sau đó có thể xóa.
+- **When**: Sau C6 và C9. Nhánh dự phòng `coverImageUrl` đã bị xóa, nên deploy BE và FE mới cùng lúc.
 - **Where**: `UpdateItineraryMetadataRequest.cs:3-8`, `ItinerariesController.cs:78-97` (dòng 90-91 dựng command), `UpdateItineraryMetadataCommand.cs:6-12`, `Validators/UpdateItineraryMetadataCommandValidator.cs:10-19`, `Handlers/UpdateItineraryMetadataCommandHandler.cs:31-53` (dòng 48 gọi `UpdateMetadata`), `Itinerary.cs:68-81`.
-- **How**: `title` bắt buộc như hiện nay. `description` và `startDate`: `null` nghĩa là xóa (FE luôn gửi cả hai). `coverImages`: `null` hoặc thiếu thì dùng nhánh dự phòng; `[]` thì xóa hết ảnh; có phần tử thì thay toàn bộ danh sách. Không có cách phân biệt "thiếu khóa" với "gửi `null`" vì BE dùng cấu hình JSON mặc định (tìm `AddJsonOptions|JsonSerializerOptions|UnmappedMemberHandling` không có kết quả), nên với `destinationCode` và `interests`, `null` cũng là giữ nguyên; đợt này chưa có cách xóa (D-77).
+- **How**: `title` bắt buộc như hiện nay. `description` và `startDate`: `null` nghĩa là xóa (FE luôn gửi cả hai). `coverImages`: `null` hoặc thiếu thì giữ nguyên ảnh bìa hiện có; `[]` thì xóa hết ảnh; có phần tử thì thay toàn bộ danh sách. Không có cách phân biệt "thiếu khóa" với "gửi `null`" vì BE dùng cấu hình JSON mặc định (tìm `AddJsonOptions|JsonSerializerOptions|UnmappedMemberHandling` không có kết quả), nên với `destinationCode` và `interests`, `null` cũng là giữ nguyên; đợt này chưa có cách xóa (D-77).
 
 ### C8 Trường mới của DTO
 
@@ -326,13 +340,13 @@ Response thành công giữ nguyên: HTTP 200, `data` là `{}` (`ApiResponse.cs:
 | `startDate` | `null` nghĩa là xóa ngày khởi hành (FE luôn gửi). | Ghi. |
 | `destinationCode` | GIỮ NGUYÊN giá trị đã lưu (D-54). Lịch trình cũ chưa có điểm đến vẫn để `null`, và `PUT` không báo lỗi vì thiếu nó. | Đợt này FE không gửi. Nếu có gửi thì phải thuộc 34 slug (`Itinerary.DestinationUnknown`, kể cả chuỗi rỗng) rồi ghi đè. |
 | `interests` | GIỮ NGUYÊN giá trị đã lưu (D-54). | Đợt này FE không gửi. Nếu có gửi thì kiểm như mục 6 rồi ghi đè; mảng rỗng `[]` nghĩa là xóa hết sở thích. |
-| `coverImages` | Dùng nhánh dự phòng `coverImageUrl` (xem dưới). | `[]` xóa hết ảnh bìa (khác `null` nên phân biệt được); có phần tử thì thay TOÀN BỘ danh sách. |
+| `coverImages` | GIỮ NGUYÊN ảnh bìa hiện có. | `[]` xóa hết ảnh bìa (khác `null` nên phân biệt được); có phần tử thì thay TOÀN BỘ danh sách. |
 | `selectedCoverIndex` | Bắt buộc khi `coverImages` không rỗng (thiếu thì `Itinerary.CoverSelectionInvalid`). Phải là `null` khi `coverImages` rỗng. | Nằm trong khoảng từ 0 đến số ảnh trừ 1; ngoài khoảng thì `Itinerary.CoverSelectionInvalid`. Có giá trị khi `coverImages` rỗng cũng là `Itinerary.CoverSelectionInvalid`. |
-| `coverImageUrl` (cũ, deprecated) | Không dùng. | Chỉ được đọc khi `coverImages` là `null`: có giá trị thì danh sách thành `[coverImageUrl]` và chọn phần tử 0 (URL phải qua cùng luật https và 500 ký tự); chuỗi rỗng hoặc khoảng trắng thì coi như không có ảnh. Bị bỏ qua hoàn toàn khi `coverImages` khác `null`. |
+| `coverImageUrl` (cũ) | Đã xóa khỏi request. | Nếu client cũ vẫn gửi, BE bỏ qua khóa này (cấu hình JSON mặc định không báo lỗi khóa lạ). |
 
 Vì BE dùng cấu hình JSON mặc định nên không phân biệt "thiếu khóa" với "gửi `null`": hai trường hợp đó xử lý giống nhau trong toàn bộ bảng trên. Riêng `coverImages` thì `null` và `[]` khác nhau, đó là chỗ duy nhất cần phân biệt.
 
-**Nhánh dự phòng `coverImageUrl`:** FE đang chạy gửi đúng 4 khóa `title`, `description`, `startDate`, `coverImageUrl`. Nếu BE đã lên bản mới mà bỏ qua `coverImageUrl`, người dùng đổi ảnh bìa trên FE cũ sẽ mất thay đổi trong im lặng. Vì vậy giữ nhánh này cho tới khi FE mới đã deploy, rồi xóa nó và ghi vào mục 14.
+**Đã bỏ nhánh dự phòng `coverImageUrl`:** FE đang chạy gửi 4 khóa `title`, `description`, `startDate`, `coverImageUrl`. Khi BE bản mới lên mà FE cũ chưa được thay, người dùng đổi ảnh bìa trên FE cũ sẽ mất thay đổi trong im lặng (BE bỏ qua khóa). Chấp nhận rủi ro này và deploy BE cùng FE mới; thứ tự BE trước, FE sau (D-58) vẫn đúng, nhưng khoảng giữa hai lần deploy nên ngắn.
 
 **Luật danh sách ảnh** (mỗi rule phải có mã lỗi, mục 9):
 
@@ -450,7 +464,7 @@ Cả ba giống nhau, và đều là https production, vì ảnh là file công 
 Sửa `tripory_be/API_ENDPOINTS.md` ở ba chỗ:
 
 - **Dòng 97 (POST):** cột Body/Query đổi thành `CreateItineraryRequest { title, destinationCode, dayCount?, startDate?, interests? }`. Cột Response giữ `ItineraryDetailDto` (201 Created kèm header `Location`), thêm ghi chú rằng DTO có `coverImages`, `selectedCoverIndex`, `destinationCode`, `interests`.
-- **Dòng 100 (PUT):** cột Body/Query đổi thành `UpdateItineraryMetadataRequest { title, description?, startDate?, coverImages?, selectedCoverIndex?, destinationCode?, interests?, coverImageUrl? }`, ghi rõ `coverImageUrl` là deprecated (chỉ đọc khi `coverImages` là `null`) và `destinationCode`, `interests` thiếu thì giữ nguyên.
+- **Dòng 100 (PUT):** cột Body/Query đổi thành `UpdateItineraryMetadataRequest { title, description?, startDate?, coverImages?, selectedCoverIndex?, destinationCode?, interests? }`, ghi rõ `coverImageUrl` đã bị xóa khỏi request, và `destinationCode`, `interests`, `coverImages` thiếu thì giữ nguyên.
 - **Dòng 109 (ghi chú):** thay câu "Ảnh bìa hiện gửi dạng URL string qua `coverImageUrl`" bằng: ảnh bìa là danh sách tối đa 5 URL `https` (mỗi URL tối đa 500 ký tự, không trùng) qua `coverImages` cùng `selectedCoverIndex`; `coverImageUrl` trong response là ảnh đang hiển thị; vẫn chưa có endpoint upload ảnh bìa.
 
 Thêm vào mục 7 của tài liệu (bảng mã lỗi) liên kết tới danh sách 14 mã ở mục 9 của hợp đồng này nếu muốn.
@@ -470,7 +484,16 @@ Quyết định D-57 nói: "Không có ca kiểm thử, không có code." Các d
 - [ ] 9. `PUT` với 6 ảnh `https` trả 400 với `errorCode` là `Itinerary.TooManyCoverImages`.
 - [ ] 10. `PUT` với một ảnh `http://` trả 400 với `errorCode` là `Itinerary.CoverImageInvalidUrl`.
 - [ ] 11. `PUT` với `coverImages` là `[]` và `selectedCoverIndex` là `null`, rồi `GET` lại thì `coverImageUrl` là `null` và `coverImages` là `[]`.
-- [ ] 12. Đã xóa lịch trình thử đã tạo ở các bước trên (và không để token hay mật khẩu trong file nào).
+- [x] 12. Đã xóa lịch trình thử đã tạo ở các bước trên (và không để token hay mật khẩu trong file nào).
+
+**Ghi chú trạng thái nghiệm thu (cập nhật 2026-11-04):**
+
+- Mục 12 được tick vì chưa tạo lịch trình thử nào trong `tripory_db` (vẫn 16 dòng như trước) và khóa JWT, mật khẩu không còn trong file cấu hình đã commit (đặt bằng user-secrets). Mục 12 phải kiểm lại sau khi mục 6 đến 11 được chạy.
+- Mục 3: đã làm trên DB phát triển `tripory_db` (sao lưu, chạy cả hai migration, kiểm sau khi chạy đạt). Chưa làm trên DB thật nên chưa tick.
+- Mục 4: giá trị `CoverImageBaseUrl` có trong cấu hình và BE khởi động được ở Development; chưa đặt ở các môi trường khác, chưa tick.
+- Mục 6 đến 11: hoãn đến khi ghép với FE rồi test cùng lúc (quyết định của bạn); chưa tick.
+- Mục 1, 2 (đối chiếu Nghị quyết 202/2025/QH15, duyệt slug và alias) là việc của bạn; mục 5 (deploy) chưa làm. Chưa tick.
+- Đã commit `tripory_be` (`bca0577`, nhánh `be/phase_4`).
 
 ## 14. Quyết định đã chốt và câu hỏi còn lại
 

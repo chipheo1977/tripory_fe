@@ -166,7 +166,7 @@ Plans:
 - [x] 04-36-PLAN.md — Lưới 5 ảnh bìa: domain `cover-images`, `CoverImageField`, khung "Link ảnh", khung trống bấm được bằng chuột/chạm (wave 21)
 - [x] 04-37-PLAN.md — Hợp đồng tạo một request + `CreateItineraryDialog` 4 khối accordion (wave 22)
 - [x] 04-38-PLAN.md — `TripInfoDialog` tự lưu + lưới ảnh, editor host tự lưu, bỏ bản nháp metadata, dọn export cũ của hộp tạo nhanh (wave 23)
-- [ ] 04-39-PLAN.md — UAT bổ sung, ghi chú VALIDATION, BE-DEPENDENCIES, PT-01 (repo `tripory`, không commit), bất biến tĩnh, full suite + build (wave 24)
+- [x] 04-39-PLAN.md — UAT bổ sung, ghi chú VALIDATION, BE-DEPENDENCIES, PT-01 (repo `tripory`, không commit), bất biến tĩnh, full suite + build (wave 24)
 - [ ] 04-40-PLAN.md — UAT thủ công cuối phần mở lại (BE thật; desktop, iPhone Safari, Android Chrome; checkpoint; wave 25)
 
 ### Phase 5: SVG Map & Public View

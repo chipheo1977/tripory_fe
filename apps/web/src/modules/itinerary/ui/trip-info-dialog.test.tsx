@@ -371,6 +371,20 @@ describe("TripInfoDialog: lỗi", () => {
     await waitFor(() => expect(failureToasts()).toHaveLength(0));
   });
 
+  it("bấm Thử lại mà lần gửi lại lỗi ngay: vẫn còn đúng một toast và một nút Thử lại sau 500 ms", async () => {
+    h.update.mockRejectedValue(http(500, null, null));
+    const { user } = await setup();
+    fireEvent.change(title(), { target: { value: "Đà Lạt!" } });
+    fireEvent.blur(title());
+    await screen.findByText(FAILURE_SENTENCE);
+    await user.click(screen.getByRole("button", { name: "Thử lại" }));
+    await waitFor(() => expect(h.update).toHaveBeenCalledTimes(2));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    });
+    expect(failureToasts()).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Thử lại" })).toHaveLength(1);
+  });
   it("đóng khi còn lỗi chung: markFailed ở header, vẫn đúng một toast (mọi lần báo dùng cùng id)", async () => {
     const error = vi.spyOn(notify, "error");
     h.update.mockRejectedValue(http(500, null, null));

@@ -1,6 +1,8 @@
 // Toast lỗi chung của tự lưu "Thông tin chuyến đi" (D-90). Một toast duy nhất (id cố định): lỗi lặp lại cập nhật tại chỗ,
-// không chồng. Không tự hết hạn và có "Thử lại" (thay InlineAlert trong form); tắt khi lưu thành công, khi bấm "Thử lại"
-// hoặc khi lỗi mới không còn là lỗi chung. Lỗi field vẫn gắn vào ô, không đi qua đây.
+// không chồng. Không tự hết hạn và có "Thử lại" (thay InlineAlert trong form); tắt khi lưu thành công hoặc khi lỗi mới
+// không còn là lỗi chung. Lỗi field vẫn gắn vào ô, không đi qua đây.
+// "Thử lại" gọi `preventDefault()`: Sonner mặc định xóa toast sau 200 ms khi bấm action, và lần gửi lại lỗi nhanh hơn 200 ms
+// sẽ bị xóa cùng toast cũ (cùng id). Giữ toast để lỗi lặp lại cập nhật tại chỗ; `onSuccess` mới tắt toast.
 import { notify } from "@tripory/ui-web";
 import type { AutosaveFailure } from "./metadata-autosave";
 
@@ -26,6 +28,12 @@ export function showAutosaveFailureToast(failure: AutosaveFailure, retry: () => 
   notify.error(text, {
     id: AUTOSAVE_FAILURE_TOAST_ID,
     persistent: true,
-    action: { label: "Thử lại", onClick: retry },
+    action: {
+      label: "Thử lại",
+      onClick: (event) => {
+        event.preventDefault();
+        retry();
+      },
+    },
   });
 }

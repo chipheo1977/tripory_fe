@@ -2,7 +2,7 @@ import { makeApiError } from "@tripory/api-client";
 import type { MetadataInput } from "@tripory/itinerary";
 import { parseItineraryId } from "@tripory/shared-kernel";
 import { notify } from "@tripory/ui-web";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { onlineManager, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { StrictMode, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -95,6 +95,22 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+describe("useMetadataAutosave khi trình duyệt offline", () => {
+  it("vẫn gọi repository và đi vào luồng lỗi, không bị tạm dừng", async () => {
+    onlineManager.setOnline(false);
+    h.updateMetadata.mockRejectedValueOnce(makeApiError({ kind: "network" }));
+    const { result, snap, open } = setup();
+    open();
+    snap.title = "Offline";
+    act(() => result.current.request());
+    try {
+      await waitFor(() => expect(h.updateMetadata).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(result.current.state.failure).not.toBeNull());
+    } finally {
+      onlineManager.setOnline(true);
+    }
+  });
+});
 describe("useMetadataAutosave", () => {
   it("request gửi payload 5 khóa, markSaved khi xong và hết dirty", async () => {
     const { result, store, snap, open } = setup();

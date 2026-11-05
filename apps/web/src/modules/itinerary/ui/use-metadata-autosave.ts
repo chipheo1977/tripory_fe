@@ -47,6 +47,8 @@ export function useMetadataAutosave(itineraryId: ItineraryId): MetadataAutosaveH
 
   const update = itineraryHooks.useUpdateMetadata(itineraryId, {
     meta: { feedback: { errorToast: false } },
+    // Offline: mặc định 'online' làm lệnh bị tạm dừng, không ra "Lỗi – Thử lại" (D-30, D-90). Chỉ áp cho tự lưu metadata.
+    networkMode: "always",
     onSuccess: () => {
       store.markSaved();
       controller.settled({ ok: true });

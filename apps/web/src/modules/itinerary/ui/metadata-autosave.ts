@@ -6,7 +6,8 @@
 //   đã lưu, nên không bao giờ gửi giá trị sai (D-89).
 // - Single-flight + trailing: tối đa một lệnh đang chạy và một lệnh chờ (lệnh cuối thắng). Lệnh thật đi qua
 //   `useUpdateMetadata`, nên còn xếp hàng trong scope `itinerary:{id}` cùng mọi lệnh ghi khác (D-88).
-// - Lỗi field của BE gắn vào ô (`failure.alert === null`, không có "Thử lại"); lỗi chung giữ `failure.alert` kèm `retry()`.
+// - Lỗi field của BE gắn vào ô (`failure.alert === null`, không có "Thử lại"); lỗi chung giữ `failure.alert` kèm `retry()`
+//   (UI hiện lỗi chung bằng một toast có "Thử lại", xem `autosave-failure-toast.ts`).
 //   Form đóng khi còn lỗi, hoặc lỗi đến sau khi đã đóng, thì thành lỗi nền qua `onBackgroundFailure` (D-90, D-30).
 import { isSameMetadata, type MetadataInput } from "@tripory/itinerary";
 import { buildAutosavePayload, type AutosaveSnapshot } from "./metadata-autosave-payload";
@@ -28,7 +29,7 @@ export type AutosaveOutcome = Readonly<{ ok: true }> | Readonly<{ ok: false; fai
 export type AutosaveDeps = Readonly<{
   /** Gửi một lệnh (= `mutation.mutate`). */
   send(payload: MetadataInput): void;
-  /** Lỗi chung khi form đã đóng: chỉ báo header "Lỗi – Thử lại" + toast. */
+  /** Lỗi chung khi form đã đóng: chỉ báo header "Lỗi – Thử lại" (toast lỗi chung do tầng hook lo, đã hiện từ lúc lỗi đến). */
   onBackgroundFailure(failure: AutosaveFailure, retry: () => void): void;
   debounceMs?: number;
   setTimer?(callback: () => void, ms: number): unknown;

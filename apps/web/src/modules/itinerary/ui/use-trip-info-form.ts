@@ -8,7 +8,6 @@ import { galleryOf, metadataOf, type CoverGallery, type Itinerary } from "@tripo
 import { useEffect, useState, type ChangeEvent, type FocusEvent } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { metadataFieldsSchema, type MetadataFieldsValues } from "./form-schemas";
-import type { AutosaveFailure } from "./metadata-autosave";
 import type { MetadataAutosaveHandle } from "./use-metadata-autosave";
 
 type Latest = { gallery: CoverGallery; itinerary: Itinerary };
@@ -24,12 +23,6 @@ export const toValues = (source: Itinerary): MetadataFieldsValues => ({
   startDate: source.startDate ?? "",
 });
 
-/** Câu cảnh báo lỗi chung của tự lưu; `null` khi không có lỗi chung (lỗi field gắn vào ô). */
-export function autosaveAlertText(failure: AutosaveFailure | null): string | null {
-  if (failure === null || failure.alert === null) return null;
-  return `Chưa lưu được thay đổi. ${failure.alert}`;
-}
-
 const TEXT_FIELDS = ["title", "description", "startDate"] as const;
 const isTextField = (name: string): name is (typeof TEXT_FIELDS)[number] =>
   (TEXT_FIELDS as readonly string[]).includes(name);
@@ -39,8 +32,6 @@ export type TripInfoForm = Readonly<{
   gallery: CoverGallery;
   onCoverChange(next: CoverGallery): void;
   coverError: string | undefined;
-  alert: string | null;
-  retry(): void;
   /** Ô `type="date"` trả "" khi mới gõ dở: không gửi `startDate: null` trung gian. */
   onStartDateChange(event: ChangeEvent<HTMLInputElement>): void;
   onStartDateBlur(event: FocusEvent<HTMLInputElement>): void;
@@ -81,7 +72,7 @@ export function useTripInfoForm({
   }
 
   const { reset, getValues, setError } = form;
-  const { attach, detach, openForm, request, retry } = autosave;
+  const { attach, detach, openForm, request } = autosave;
 
   useEffect(() => {
     if (!open) return undefined;
@@ -120,8 +111,6 @@ export function useTripInfoForm({
     gallery,
     onCoverChange,
     coverError,
-    alert: autosaveAlertText(failure),
-    retry,
     onStartDateChange,
     onStartDateBlur,
   };

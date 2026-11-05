@@ -2,10 +2,10 @@
 
 // "Thông tin chuyến đi" tự lưu (ITIN-03; D-87..D-91, D-100): không nút Lưu/Hủy, không chân form. Ô chữ lưu sau 800 ms ngừng gõ
 // hoặc khi blur; ngày khởi hành và thao tác ảnh lưu ngay. Trong form chỉ hiện lỗi khi lưu (field gắn vào ô, lỗi ảnh dưới lưới,
-// lỗi chung ở InlineAlert kèm "Thử lại"); đóng form khi còn lỗi thì thành lỗi nền ở header (bộ điều khiển lo). Đóng bằng X, Esc
-// hoặc vuốt xuống. Chỉ có 4 trường: không điểm đến và sở thích (D-77).
+// lỗi chung là toast kèm "Thử lại" do `useMetadataAutosave` bật, xem `autosave-failure-toast.ts`); đóng form khi còn lỗi thì thêm
+// lỗi nền ở header (bộ điều khiển lo). Đóng bằng X, Esc hoặc vuốt xuống. Chỉ có 4 trường: không điểm đến và sở thích (D-77).
 import type { Itinerary } from "@tripory/itinerary";
-import { Button, InlineAlert, Input, Textarea } from "@tripory/ui-web";
+import { Input, Textarea } from "@tripory/ui-web";
 import { useId, useRef } from "react";
 import { CoverImageField } from "./cover-image-field";
 import { defaultCoverFor } from "./destination-cover";
@@ -49,15 +49,6 @@ export function TripInfoDialog({ itinerary, autosave, open, onOpenChange }: Trip
       title="Thông tin chuyến đi"
       titleId={titleId}
     >
-      <InlineAlert
-        action={
-          <Button onClick={info.retry} size="sm" type="button" variant="ghost">
-            Thử lại
-          </Button>
-        }
-      >
-        {info.alert}
-      </InlineAlert>
       <form
         aria-labelledby={titleId}
         className="flex flex-col gap-stack-md"

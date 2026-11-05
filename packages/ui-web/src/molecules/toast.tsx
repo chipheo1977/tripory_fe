@@ -7,7 +7,8 @@ import type { ReactNode } from 'react';
 export const toastDurations = { default: 5_000, extended: 8_000 } as const;
 
 type ToastVariant = 'success' | 'error' | 'info' | 'warning';
-type NotifyOptions = Omit<ExternalToast, 'duration'>;
+/** `persistent`: không tự hết hạn (người dùng đóng hoặc app gọi `dismiss(id)`). Mặc định `false`. */
+type NotifyOptions = Omit<ExternalToast, 'duration'> & { persistent?: boolean };
 
 function ToastAnnouncement({ children, variant }: { children: ReactNode; variant: ToastVariant }) {
   const urgent = variant === 'error';
@@ -19,8 +20,10 @@ function ToastAnnouncement({ children, variant }: { children: ReactNode; variant
 }
 
 function showToast(variant: ToastVariant, title: ReactNode, options: NotifyOptions = {}) {
-  const duration = variant === 'error' || options.action ? toastDurations.extended : toastDurations.default;
-  return sonnerToast[variant](<ToastAnnouncement variant={variant}>{title}</ToastAnnouncement>, { ...options, duration });
+  const { persistent = false, ...sonnerOptions } = options;
+  const timed = variant === 'error' || options.action ? toastDurations.extended : toastDurations.default;
+  const duration = persistent ? Infinity : timed;
+  return sonnerToast[variant](<ToastAnnouncement variant={variant}>{title}</ToastAnnouncement>, { ...sonnerOptions, duration });
 }
 
 export const notify = {

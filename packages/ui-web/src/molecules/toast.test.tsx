@@ -48,6 +48,38 @@ it('action và dismiss vận hành bằng bàn phím', async () => {
   await waitFor(() => expect(screen.queryByText('Đã lưu')).toBeNull());
 });
 
+describe('notify persistent', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('error persistent không tự đóng sau 20 giây, id cố định không chồng toast', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    render(<Toast />);
+    const options = { id: 'fixed', persistent: true, action: { label: 'Thử lại', onClick: vi.fn() } };
+    notify.error('Chưa lưu được', options);
+    notify.error('Chưa lưu được', options);
+
+    await screen.findByRole('alert');
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(20_000);
+    });
+    expect(screen.getAllByText('Chưa lưu được')).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: 'Thử lại' })).toHaveLength(1);
+  });
+
+  it('error không persistent vẫn tự đóng theo thời lượng extended', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    render(<Toast />);
+    notify.error('Lỗi tạm');
+    await screen.findByText('Lỗi tạm');
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(toastDurations.extended + 1_000);
+    });
+    await waitFor(() => expect(screen.queryByText('Lỗi tạm')).toBeNull());
+  });
+});
+
 describe('notify.undoable', () => {
   // jsdom không có Pointer Capture; Sonner gọi nó ở pointerdown của toast khi bấm bằng chuột.
   beforeAll(() => {

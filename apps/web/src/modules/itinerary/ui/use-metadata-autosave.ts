@@ -1,6 +1,7 @@
 "use client";
 
-// Nối bộ điều khiển tự lưu (`metadata-autosave.ts`) với mutation `useUpdateMetadata`, store chỉ báo lưu và toast.
+// Nối bộ điều khiển tự lưu (`metadata-autosave.ts`) với mutation `useUpdateMetadata`, store chỉ báo lưu và toast lỗi chung
+// (`autosave-failure-toast.ts`: một toast kèm "Thử lại", tắt khi lưu thành công).
 // Sống ở cấp editor (không ở dialog): dialog có thể unmount khi còn lệnh chờ, mà lệnh chờ vẫn phải gửi sau lệnh trước.
 //
 // - Callback `onSuccess/onError` đặt ở CẤP HOOK (bài học 03-11): callback cấp `mutate()` bị bỏ khi component unmount.
@@ -8,9 +9,9 @@
 //   khi dọn (không có việc chờ thì không làm gì nên vòng mount-unmount-mount không gửi oan).
 // - Không dùng storage: metadata không có bản nháp (D-107).
 import type { ItineraryId } from "@tripory/shared-kernel";
-import { notify } from "@tripory/ui-web";
 import { useEffect, useLayoutEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { itinerary as itineraryHooks } from "@/composition/itinerary.client";
+import { dismissAutosaveFailureToast, showAutosaveFailureToast } from "./autosave-failure-toast";
 import { mapMetadataError } from "./form-error-mapping";
 import {
   createMetadataAutosave,
@@ -38,10 +39,8 @@ export function useMetadataAutosave(itineraryId: ItineraryId): MetadataAutosaveH
   const [controller] = useState(() =>
     createMetadataAutosave({
       send: (payload) => latest.mutate(payload),
-      onBackgroundFailure: (failure, retry) => {
-        store.markFailed(retry);
-        if (failure.alert !== null) notify.error(failure.alert);
-      },
+      // Toast lỗi chung đã hiện ở `onError` (cùng một toast cho lúc form mở và đã đóng); ở đây chỉ báo header.
+      onBackgroundFailure: (_failure, retry) => store.markFailed(retry),
     }),
   );
 
@@ -52,9 +51,12 @@ export function useMetadataAutosave(itineraryId: ItineraryId): MetadataAutosaveH
     onSuccess: () => {
       store.markSaved();
       controller.settled({ ok: true });
+      dismissAutosaveFailureToast();
     },
     onError: (error) => {
-      controller.settled({ ok: false, failure: toFailure(error) });
+      const failure = toFailure(error);
+      controller.settled({ ok: false, failure });
+      showAutosaveFailureToast(failure, controller.retry);
     },
   });
 

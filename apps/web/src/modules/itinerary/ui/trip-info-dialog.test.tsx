@@ -1,13 +1,14 @@
 import { makeApiError } from "@tripory/api-client";
 import { parseCalendarDate, type Itinerary, type MetadataInput } from "@tripory/itinerary";
 import { parseItineraryId, parseUserId } from "@tripory/shared-kernel";
-import { notify } from "@tripory/ui-web";
+import { notify, Toast } from "@tripory/ui-web";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { makeQueryClient } from "@/composition/query-client";
+import { AUTOSAVE_FAILURE_TOAST_ID } from "./autosave-failure-toast";
 import { createSaveStatusStore, SaveStatusProvider, type SaveStatusStore } from "./save-status";
 import { TripInfoDialog } from "./trip-info-dialog";
 import { useMetadataAutosave } from "./use-metadata-autosave";
@@ -122,6 +123,7 @@ async function setup(options: { itinerary?: Itinerary; store?: SaveStatusStore; 
       <SaveStatusProvider store={store}>
         <Harness itinerary={itinerary} onOpenChange={onOpenChange} />
       </SaveStatusProvider>
+      <Toast />
     </QueryClientProvider>
   );
   const client = makeQueryClient();
@@ -143,6 +145,12 @@ async function settleMicrotasks() {
   });
 }
 
+// jsdom không có Pointer Capture; Sonner gọi nó ở pointerdown của toast khi bấm "Thử lại" bằng chuột.
+beforeAll(() => {
+  Element.prototype.setPointerCapture ??= () => undefined;
+  Element.prototype.releasePointerCapture ??= () => undefined;
+});
+
 beforeEach(() => {
   vi.clearAllMocks();
   setWide(true);
@@ -150,6 +158,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  notify.dismiss();
   vi.useRealTimers();
   vi.restoreAllMocks();
   window.matchMedia = originalMatchMedia;
@@ -323,30 +332,57 @@ describe("TripInfoDialog: ảnh bìa", () => {
 });
 
 describe("TripInfoDialog: lỗi", () => {
-  it("lỗi 500: InlineAlert kèm Thử lại; giá trị vẫn trong ô; Thử lại gửi payload mới nhất", async () => {
+  const FAILURE_SENTENCE = "Chưa lưu được thay đổi. Đã có lỗi xảy ra, vui lòng thử lại";
+  const failureToasts = () => screen.queryAllByText(FAILURE_SENTENCE);
+
+  it("lỗi 500: toast đúng câu kèm Thử lại, không còn InlineAlert trong form; Thử lại gửi payload mới nhất", async () => {
     h.update.mockRejectedValueOnce(http(500, null, null));
     const { user } = await setup();
     fireEvent.change(title(), { target: { value: "Đà Lạt!" } });
     fireEvent.blur(title());
-    expect(await screen.findByText(/Chưa lưu được thay đổi\./)).toBeTruthy();
+    const toast = await screen.findByText(FAILURE_SENTENCE);
+    expect(toast.getAttribute("role")).toBe("alert");
+    expect(screen.getByRole("dialog").textContent).not.toContain("Chưa lưu được thay đổi");
     expect(title().value).toBe("Đà Lạt!");
     fireEvent.change(title(), { target: { value: "Đà Lạt!?" } });
     await user.click(screen.getByRole("button", { name: "Thử lại" }));
     await waitFor(() => expect(h.update.mock.calls.length).toBeGreaterThanOrEqual(2));
     expect(lastPayload().title).toBe("Đà Lạt!?");
-    await waitFor(() => expect(screen.queryByText(/Chưa lưu được thay đổi\./)).toBeNull());
+    await waitFor(() => expect(failureToasts()).toHaveLength(0));
   });
 
-  it("đóng khi còn lỗi chung: markFailed và toast lỗi", async () => {
-    const error = vi.spyOn(notify, "error").mockReturnValue("t");
+  it("lỗi lặp lại chỉ giữ một toast; lưu thành công sau đó tắt toast", async () => {
+    h.update.mockRejectedValueOnce(http(500, null, null)).mockRejectedValueOnce(http(500, null, null));
+    await setup();
+    fireEvent.change(title(), { target: { value: "Đà Lạt!" } });
+    fireEvent.blur(title());
+    await screen.findByText(FAILURE_SENTENCE);
+    fireEvent.change(title(), { target: { value: "Đà Lạt!?" } });
+    fireEvent.blur(title());
+    await waitFor(() => expect(h.update).toHaveBeenCalledTimes(2));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+    expect(failureToasts()).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Thử lại" })).toHaveLength(1);
+    fireEvent.change(title(), { target: { value: "Đà Lạt!?!" } });
+    fireEvent.blur(title());
+    await waitFor(() => expect(h.update).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(failureToasts()).toHaveLength(0));
+  });
+
+  it("đóng khi còn lỗi chung: markFailed ở header, vẫn đúng một toast (mọi lần báo dùng cùng id)", async () => {
+    const error = vi.spyOn(notify, "error");
     h.update.mockRejectedValue(http(500, null, null));
     const { user, store } = await setup();
     fireEvent.change(title(), { target: { value: "Đà Lạt!" } });
     fireEvent.blur(title());
-    await screen.findByText(/Chưa lưu được thay đổi\./);
+    await screen.findByText(FAILURE_SENTENCE);
     await user.click(screen.getByRole("button", { name: "Đóng" }));
     await waitFor(() => expect(store.getSnapshot().failure).not.toBeNull());
-    expect(error).toHaveBeenCalledTimes(1);
+    expect(error).toHaveBeenCalled();
+    for (const call of error.mock.calls) expect(call[1]).toMatchObject({ id: AUTOSAVE_FAILURE_TOAST_ID });
+    expect(failureToasts()).toHaveLength(1);
   });
 
   it("lỗi field BE gắn vào ô Tiêu đề, không có nút Thử lại", async () => {
@@ -356,6 +392,7 @@ describe("TripInfoDialog: lỗi", () => {
     await user.tab();
     expect(await screen.findByText("Tiêu đề quá dài.")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Thử lại" })).toBeNull();
+    expect(failureToasts()).toHaveLength(0);
   });
 
   it("lỗi Itinerary.TooManyCoverImages hiện dưới lưới ảnh và lưới quay về danh sách đã lưu", async () => {

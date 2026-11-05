@@ -165,7 +165,7 @@ Nằm ngoài phase:
 - **D-87:** "Thông tin chuyến đi" **tự lưu khi có thay đổi**, **không có nút "Lưu"**. Áp cho mọi trường: tiêu đề, mô tả, ngày khởi hành, ảnh bìa.
 - **D-88:** Ô chữ (tiêu đề, mô tả) lưu **khi rời ô (blur) và khi ngừng gõ khoảng 800 ms**. Ngày khởi hành và thao tác ảnh (thêm, xóa, chọn) **lưu ngay**. Lệnh ghi **xếp hàng tuần tự** như các lệnh ghi khác của editor (cùng scope `itinerary:{id}`), vì `PUT` ghi đè toàn bộ và BE không có ETag.
 - **D-89:** Giá trị không hợp lệ (tiêu đề trống, quá 100 ký tự, URL không phải https...) **không gửi lên BE**, chỉ hiện lỗi dưới ô. Đóng form khi còn lỗi thì **bỏ giá trị lỗi, giữ giá trị đã lưu gần nhất**.
-- **D-90:** Trong form **chỉ báo khi lưu lỗi** (lỗi kèm "Thử lại", giá trị vẫn còn trong ô). Không hiện "Đang lưu" hay "Đã lưu" trong form. Chỉ báo trên header editor vẫn như D-30.
+- **D-90:** Trong form **chỉ báo khi lưu lỗi** (lỗi field gắn vào ô, lỗi ảnh dưới lưới, giá trị vẫn còn trong ô). **[Cập nhật 2026-11: lỗi chung không còn là `InlineAlert` trong form mà là một toast error "Chưa lưu được thay đổi. …" kèm action "Thử lại", chỉ một toast, tắt khi lưu thành công; xem 04-UI-SPEC §Lỗi lưu.]** Không hiện "Đang lưu" hay "Đã lưu" trong form. Chỉ báo trên header editor vẫn như D-30.
 - **D-91:** Chân form **không có nút nào**. Đóng bằng nút X hoặc vuốt xuống (sheet), Esc hoặc nút đóng (dialog).
 - **D-101:** Thay thế D-24 (Lưu/Hủy) và phần "Lưu" của D-25. Bản nháp `sessionStorage` của form metadata (D-36) còn cần hay không do planner quyết theo cơ chế tự lưu (Claude's Discretion). **[Chốt 2026-11-02: bỏ, xem D-107.]**
 

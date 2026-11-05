@@ -402,7 +402,7 @@ describe("handleRefresh: APP_ORIGIN (WR-04)", () => {
   const PUBLIC_ORIGIN = "https://www.example.com";
   const originDeps = (fetch: (...args: FetchArgs) => Promise<Response>): ServerDeps => ({
     ...depsWith(fetch),
-    env: { apiOrigin: "http://be.test", appOrigin: PUBLIC_ORIGIN },
+    env: { apiOrigin: "http://be.test", appOrigins: [PUBLIC_ORIGIN] },
   });
 
   it("appOrigin đặt: Origin công khai được qua, Origin nội bộ bị 403", async () => {

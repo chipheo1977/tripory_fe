@@ -24,7 +24,7 @@ export async function handleMapsResolve(request: NextRequest, deps: ServerDeps):
   const nowMs = deps.nowMs();
 
   if (request.method !== "POST") return errorEnvelope(405, "Bff.MethodNotAllowed", nowMs);
-  if (!checkSameOrigin(request, deps.env.appOrigin)) return errorEnvelope(403, "Bff.CrossOrigin", nowMs);
+  if (!checkSameOrigin(request, deps.env.appOrigins)) return errorEnvelope(403, "Bff.CrossOrigin", nowMs);
 
   const session = readSession(
     (name) => request.cookies.get(name)?.value,

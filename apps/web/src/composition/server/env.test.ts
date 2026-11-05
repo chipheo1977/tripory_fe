@@ -104,19 +104,61 @@ describe("parseServerEnv: API_ORIGIN ở production (WR-03)", () => {
 describe("parseServerEnv: APP_ORIGIN (WR-04)", () => {
   const base = { API_ORIGIN: "https://be.test" };
 
-  it("thiếu hoặc rỗng = chưa đặt (không có key appOrigin)", () => {
-    expect(parseServerEnv(base)).not.toHaveProperty("appOrigin");
-    expect(parseServerEnv({ ...base, APP_ORIGIN: "" })).not.toHaveProperty("appOrigin");
-    expect(parseServerEnv({ ...base, APP_ORIGIN: "  " })).not.toHaveProperty("appOrigin");
+  it("thiếu hoặc rỗng = chưa đặt (không có key appOrigins)", () => {
+    expect(parseServerEnv(base)).not.toHaveProperty("appOrigins");
+    expect(parseServerEnv({ ...base, APP_ORIGIN: "" })).not.toHaveProperty("appOrigins");
+    expect(parseServerEnv({ ...base, APP_ORIGIN: "  " })).not.toHaveProperty("appOrigins");
+    expect(parseServerEnv({ ...base, APP_ORIGIN: " , ," })).not.toHaveProperty("appOrigins");
   });
 
-  it("có giá trị → chuẩn hóa về origin (bỏ dấu / cuối)", () => {
-    expect(parseServerEnv({ ...base, APP_ORIGIN: "https://app.example.com/" }).appOrigin).toBe(
+  it("một origin → danh sách một phần tử, chuẩn hóa về origin (bỏ dấu / cuối)", () => {
+    expect(parseServerEnv({ ...base, APP_ORIGIN: "https://app.example.com/" }).appOrigins).toEqual([
       "https://app.example.com",
-    );
-    expect(parseServerEnv({ ...base, APP_ORIGIN: "https://app.example.com:8443" }).appOrigin).toBe(
+    ]);
+    expect(parseServerEnv({ ...base, APP_ORIGIN: "https://app.example.com:8443" }).appOrigins).toEqual([
       "https://app.example.com:8443",
-    );
+    ]);
+  });
+
+  it("nhiều origin: cắt khoảng trắng, bỏ mục rỗng, bỏ trùng, giữ thứ tự", () => {
+    const value = " http://localhost:3000 , ,http://192.168.30.44:3000/,, http://localhost:3000,";
+
+    expect(parseServerEnv({ ...base, APP_ORIGIN: value }).appOrigins).toEqual([
+      "http://localhost:3000",
+      "http://192.168.30.44:3000",
+    ]);
+  });
+
+  it("một mục không hợp lệ làm cả danh sách bị từ chối, dù mục kia hợp lệ", () => {
+    expect(() =>
+      parseServerEnv({ ...base, APP_ORIGIN: "http://localhost:3000,http://192.168.30.44:3000/login" }),
+    ).toThrowError(/APP_ORIGIN/);
+    expect(() =>
+      parseServerEnv({ ...base, APP_ORIGIN: "http://localhost:3000,ftp://192.168.30.44" }),
+    ).toThrowError(/APP_ORIGIN/);
+    expect(() =>
+      parseServerEnv({ ...base, APP_ORIGIN: "http://localhost:3000,https://u:pw@192.168.30.44" }),
+    ).toThrowError(/APP_ORIGIN/);
+  });
+
+  it("production: mục http không loopback bị từ chối dù mục kia hợp lệ, không kèm giá trị", () => {
+    const prod = { ...base, NODE_ENV: "production" };
+    const value = "https://app.example.com,http://192.168.30.44:3000";
+    const error = (() => {
+      try {
+        parseServerEnv({ ...prod, APP_ORIGIN: value });
+      } catch (caught) {
+        return caught as Error;
+      }
+
+      return undefined;
+    })();
+
+    expect(error?.message).toMatch(/APP_ORIGIN/);
+    expect(error?.message).not.toContain("192.168.30.44");
+    expect(
+      parseServerEnv({ ...prod, APP_ORIGIN: "https://app.example.com,http://localhost:3000" }).appOrigins,
+    ).toEqual(["https://app.example.com", "http://localhost:3000"]);
   });
 
   it.each([
@@ -145,24 +187,24 @@ describe("parseServerEnv: APP_ORIGIN (WR-04)", () => {
     const prod = { ...base, NODE_ENV: "production" };
 
     expect(() => parseServerEnv({ ...prod, APP_ORIGIN: "http://app.example.com" })).toThrowError(/APP_ORIGIN/);
-    expect(parseServerEnv({ ...prod, APP_ORIGIN: "https://app.example.com" }).appOrigin).toBe(
+    expect(parseServerEnv({ ...prod, APP_ORIGIN: "https://app.example.com" }).appOrigins).toEqual([
       "https://app.example.com",
-    );
-    expect(parseServerEnv({ ...prod, APP_ORIGIN: "http://localhost:3000" }).appOrigin).toBe(
+    ]);
+    expect(parseServerEnv({ ...prod, APP_ORIGIN: "http://localhost:3000" }).appOrigins).toEqual([
       "http://localhost:3000",
-    );
+    ]);
   });
 
   it("development: http công khai vẫn được", () => {
-    expect(parseServerEnv({ ...base, APP_ORIGIN: "http://app.example.com" }).appOrigin).toBe(
+    expect(parseServerEnv({ ...base, APP_ORIGIN: "http://app.example.com" }).appOrigins).toEqual([
       "http://app.example.com",
-    );
+    ]);
   });
 
   it("serverDeps đọc APP_ORIGIN từ process.env lúc gọi", () => {
     vi.stubEnv("API_ORIGIN", "https://be.test");
     vi.stubEnv("APP_ORIGIN", "https://app.example.com");
-    expect(serverDeps().env).toEqual({ apiOrigin: "https://be.test", appOrigin: "https://app.example.com" });
+    expect(serverDeps().env).toEqual({ apiOrigin: "https://be.test", appOrigins: ["https://app.example.com"] });
   });
 });
 

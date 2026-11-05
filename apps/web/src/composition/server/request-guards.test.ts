@@ -87,7 +87,7 @@ describe("checkSameOrigin: APP_ORIGIN (WR-04)", () => {
   // nextUrl.origin của makeRequest là https://app.test: giả lập origin nội bộ sau proxy ghi lại Host.
   const PUBLIC_ORIGIN = "https://www.example.com";
 
-  it("không đặt appOrigin → vẫn so với nextUrl.origin (hành vi cũ)", () => {
+  it("không đặt appOrigins → vẫn so với nextUrl.origin (hành vi cũ)", () => {
     const ok = makeRequest("/api/auth/login", { method: "POST", origin: APP_ORIGIN });
     const wrong = makeRequest("/api/auth/login", { method: "POST", headers: { origin: PUBLIC_ORIGIN } });
 
@@ -95,27 +95,62 @@ describe("checkSameOrigin: APP_ORIGIN (WR-04)", () => {
     expect(checkSameOrigin(wrong, undefined)).toBe(false);
   });
 
-  it("đặt appOrigin → Origin phải bằng appOrigin, kể cả khi nextUrl.origin là địa chỉ nội bộ", () => {
-    const publicOrigin = makeRequest("/api/auth/login", { method: "POST", headers: { origin: PUBLIC_ORIGIN } });
+  const post = (origin: string) => makeRequest("/api/auth/login", { method: "POST", headers: { origin } });
 
-    expect(checkSameOrigin(publicOrigin, PUBLIC_ORIGIN)).toBe(true);
+  it("một origin trong danh sách: Origin phải bằng nó, kể cả khi nextUrl.origin là địa chỉ nội bộ", () => {
+    expect(checkSameOrigin(post(PUBLIC_ORIGIN), [PUBLIC_ORIGIN])).toBe(true);
   });
 
-  it("đặt appOrigin → origin nội bộ (nextUrl.origin) và origin lạ bị từ chối", () => {
+  it("một origin: origin nội bộ (nextUrl.origin) và origin lạ bị từ chối", () => {
     for (const origin of [APP_ORIGIN, "https://evil.test", "null"]) {
-      const request = makeRequest("/api/auth/login", { method: "POST", headers: { origin } });
-
-      expect(checkSameOrigin(request, PUBLIC_ORIGIN), origin).toBe(false);
+      expect(checkSameOrigin(post(origin), [PUBLIC_ORIGIN]), origin).toBe(false);
     }
   });
 
-  it("đặt appOrigin không đổi luật khi thiếu Origin (Sec-Fetch-Site)", () => {
-    const same = makeRequest("/api/auth/login", { method: "POST", headers: { "sec-fetch-site": "same-origin" } });
-    const none = makeRequest("/api/auth/login", { method: "POST" });
+  describe("nhiều origin (dev: localhost và IP LAN)", () => {
+    const LOCAL = "http://localhost:3000";
+    const LAN = "http://192.168.30.44:3000";
+    const allowed = [LOCAL, LAN];
 
-    expect(checkSameOrigin(same, PUBLIC_ORIGIN)).toBe(true);
-    expect(checkSameOrigin(none, PUBLIC_ORIGIN)).toBe(false);
-    expect(checkSameOrigin(makeRequest("/api/bff/users/me"), PUBLIC_ORIGIN)).toBe(true);
+    it("cả hai origin khai báo được phép", () => {
+      expect(checkSameOrigin(post(LOCAL), allowed)).toBe(true);
+      expect(checkSameOrigin(post(LAN), allowed)).toBe(true);
+    });
+
+    it("origin thứ ba, 'null' và nextUrl.origin (không khai báo) bị từ chối", () => {
+      for (const origin of ["http://192.168.30.45:3000", "https://evil.test", "null", APP_ORIGIN]) {
+        expect(checkSameOrigin(post(origin), allowed), origin).toBe(false);
+      }
+    });
+
+    it("không so khớp tiền tố và không nhận hậu tố lạ", () => {
+      const lookalikes = [
+        "http://192.168.30.4",
+        "http://192.168.30.4:3000",
+        "http://192.168.30.44",
+        "http://192.168.30.44:30000",
+        "http://localhost:3000.evil.com",
+        "http://localhost",
+        "http://localhost:3000/",
+        "HTTP://LOCALHOST:3000",
+      ];
+
+      for (const origin of lookalikes) {
+        expect(checkSameOrigin(post(origin), allowed), origin).toBe(false);
+      }
+    });
+
+    it("thiếu Origin: luật cũ (GET/HEAD qua, ghi cần Sec-Fetch-Site: same-origin)", () => {
+      const same = makeRequest("/api/auth/login", { method: "POST", headers: { "sec-fetch-site": "same-origin" } });
+      const cross = makeRequest("/api/auth/login", { method: "POST", headers: { "sec-fetch-site": "cross-site" } });
+      const none = makeRequest("/api/auth/login", { method: "POST" });
+
+      expect(checkSameOrigin(same, allowed)).toBe(true);
+      expect(checkSameOrigin(cross, allowed)).toBe(false);
+      expect(checkSameOrigin(none, allowed)).toBe(false);
+      expect(checkSameOrigin(makeRequest("/api/bff/users/me"), allowed)).toBe(true);
+      expect(checkSameOrigin(makeRequest("/api/bff/users/me", { method: "HEAD" }), allowed)).toBe(true);
+    });
   });
 });
 

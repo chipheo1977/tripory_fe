@@ -14,12 +14,16 @@ import { NextResponse, type NextRequest } from "next/server";
  * Ràng buộc hosting (cùng tinh thần `client-ip.ts`): mặc định so với `request.nextUrl.origin`, đúng khi nền
  * tảng (Vercel) đặt Host/origin công khai. Self-host sau reverse proxy không chuyển `Host`/`X-Forwarded-Host`
  * thì `nextUrl.origin` là địa chỉ nội bộ và MỌI request ghi bị 403 `Bff.CrossOrigin` (fail closed, khó chẩn
- * đoán). Khi đó đặt `APP_ORIGIN` (origin công khai của app) và truyền vào `appOrigin`; trên Vercel để trống.
+ * đoán). Khi đó đặt `APP_ORIGIN` (origin công khai của app) và truyền vào `appOrigins`; trên Vercel để trống.
+ *
+ * `appOrigins` là danh sách origin do người vận hành khai báo (đã chuẩn hóa `url.origin`). Có danh sách thì CHỈ
+ * các origin đó được phép (không tự thêm `nextUrl.origin`); so khớp chuỗi chính xác, không tiền tố, không
+ * wildcard, không phản chiếu header `Origin`.
  */
-export function checkSameOrigin(request: NextRequest, appOrigin?: string): boolean {
+export function checkSameOrigin(request: NextRequest, appOrigins?: ReadonlyArray<string>): boolean {
   const origin = request.headers.get("origin");
 
-  if (origin !== null) return origin === (appOrigin ?? request.nextUrl.origin);
+  if (origin !== null) return (appOrigins ?? [request.nextUrl.origin]).includes(origin);
   if (request.method === "GET" || request.method === "HEAD") return true;
 
   return request.headers.get("sec-fetch-site") === "same-origin";

@@ -13,11 +13,12 @@ export type ServerEnv = Readonly<{
    */
   bffSharedSecret?: string;
   /**
-   * Origin công khai của chính web app, dùng cho kiểm Origin chống CSRF (`checkSameOrigin`). VẮNG KEY khi chưa
-   * đặt (mặc định, đúng trên Vercel): khi đó so với `request.nextUrl.origin`. Chỉ cần khi self-host sau proxy
-   * ghi lại Host. Không phải bí mật nhưng chỉ server đọc.
+   * Các origin của chính web app mà người vận hành khai báo, dùng cho kiểm Origin chống CSRF
+   * (`checkSameOrigin`). VẮNG KEY khi chưa đặt (mặc định, đúng trên Vercel): khi đó so với
+   * `request.nextUrl.origin`. Có giá trị thì CHỈ các origin này được phép. Cần khi self-host sau proxy ghi lại
+   * Host, hoặc dev truy cập qua nhiều địa chỉ (localhost và IP LAN). Không phải bí mật nhưng chỉ server đọc.
    */
-  appOrigin?: string;
+  appOrigins?: ReadonlyArray<string>;
 }>;
 
 export type ServerDeps = Readonly<{
@@ -77,39 +78,58 @@ export function parseServerEnv(raw: Readonly<Record<string, string | undefined>>
     throw new Error("BFF_SHARED_SECRET không hợp lệ: không được chứa ký tự điều khiển");
   }
 
-  const appOrigin = parseAppOrigin(raw.APP_ORIGIN, raw.NODE_ENV === "production");
+  const appOrigins = parseAppOrigins(raw.APP_ORIGIN, raw.NODE_ENV === "production");
 
   return {
     apiOrigin: apiUrl.origin,
     ...(secret.data === undefined || secret.data === "" ? {} : { bffSharedSecret: secret.data }),
-    ...(appOrigin === undefined ? {} : { appOrigin }),
+    ...(appOrigins === undefined ? {} : { appOrigins }),
   };
 }
 
-/**
- * `APP_ORIGIN` tùy chọn: rỗng hoặc vắng = chưa đặt. Có giá trị thì phải là ĐÚNG một origin http(s) (không path,
- * query, hash, userinfo) vì nó được so bằng `===` với header `Origin`. Production cùng luật https-hoặc-loopback
- * như `API_ORIGIN`. Thông điệp lỗi không kèm giá trị.
- */
-function parseAppOrigin(value: string | undefined, production: boolean): string | undefined {
-  if (value === undefined || value.trim() === "") return undefined;
+const isHttpProtocol = (url: URL): boolean => url.protocol === "http:" || url.protocol === "https:";
 
+const hasOnlyOrigin = (url: URL): boolean => {
+  const noExtras = url.search === "" && url.hash === "";
+  const noCredentials = url.username === "" && url.password === "";
+
+  return url.pathname === "/" && noExtras && noCredentials;
+};
+
+/** Một mục của `APP_ORIGIN`: đúng một origin http(s), production https hoặc loopback. Lỗi không kèm giá trị. */
+function parseOneAppOrigin(entry: string, production: boolean): string {
   const invalid = new Error(
-    "APP_ORIGIN không hợp lệ: cần đúng một origin http(s) của web app, không kèm path, ví dụ https://app.example.com",
+    "APP_ORIGIN không hợp lệ: mỗi mục cần đúng một origin http(s) của web app, không kèm path, ví dụ https://app.example.com",
   );
 
-  if (!URL.canParse(value)) throw invalid;
+  if (!URL.canParse(entry)) throw invalid;
 
-  const url = new URL(value.trim());
-  const originOnly = url.pathname === "/" && url.search === "" && url.hash === "" && url.username === "" && url.password === "";
+  const url = new URL(entry);
 
-  if ((url.protocol !== "http:" && url.protocol !== "https:") || !originOnly) throw invalid;
+  if (!isHttpProtocol(url) || !hasOnlyOrigin(url)) throw invalid;
 
   if (production && url.protocol !== "https:" && !isLoopbackOrigin(url)) {
     throw new Error("APP_ORIGIN phải dùng https ở production (chỉ cho phép http với localhost, 127.0.0.1, [::1])");
   }
 
   return url.origin;
+}
+
+/**
+ * `APP_ORIGIN` tùy chọn: một hoặc nhiều origin phân tách bằng dấu phẩy (cắt khoảng trắng, bỏ mục rỗng, bỏ
+ * trùng). Rỗng hoặc vắng = chưa đặt. Mỗi mục phải là ĐÚNG một origin http(s) (không path, query, hash, userinfo)
+ * vì được so bằng `===` với header `Origin`; production áp luật https-hoặc-loopback riêng cho từng mục. Thông
+ * điệp lỗi không kèm giá trị.
+ */
+function parseAppOrigins(value: string | undefined, production: boolean): ReadonlyArray<string> | undefined {
+  const entries = (value ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry !== "");
+
+  if (entries.length === 0) return undefined;
+
+  return [...new Set(entries.map((entry) => parseOneAppOrigin(entry, production)))];
 }
 
 /**

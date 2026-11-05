@@ -108,7 +108,7 @@ export async function forwardToBackend(
       : errorEnvelope(400, "Bff.BadPath", nowMs);
   }
 
-  if (!checkSameOrigin(request, deps.env.appOrigin)) return errorEnvelope(403, "Bff.CrossOrigin", nowMs);
+  if (!checkSameOrigin(request, deps.env.appOrigins)) return errorEnvelope(403, "Bff.CrossOrigin", nowMs);
 
   const session = readSession(
     (name) => request.cookies.get(name)?.value,

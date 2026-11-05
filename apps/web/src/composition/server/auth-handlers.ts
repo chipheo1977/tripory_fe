@@ -106,7 +106,7 @@ async function credentialsHandler(
   spec: CredentialsSpec,
 ): Promise<NextResponse> {
   // Origin là bước đầu của mọi handler: không có nó, site lạ đăng nhập nạn nhân vào tài khoản của kẻ tấn công.
-  if (!checkSameOrigin(request, deps.env.appOrigin)) return crossOrigin(deps);
+  if (!checkSameOrigin(request, deps.env.appOrigins)) return crossOrigin(deps);
 
   const picked = pickStrings(await readJsonObject(request), spec.fields);
 
@@ -178,7 +178,7 @@ async function revokeRefreshTokenBestEffort(request: NextRequest, deps: ServerDe
  * một response thành công, bất kể BE trả gì.
  */
 export async function handleLogout(request: NextRequest, deps: ServerDeps): Promise<NextResponse> {
-  if (!checkSameOrigin(request, deps.env.appOrigin)) return crossOrigin(deps);
+  if (!checkSameOrigin(request, deps.env.appOrigins)) return crossOrigin(deps);
 
   await revokeRefreshTokenBestEffort(request, deps);
 
@@ -234,7 +234,7 @@ const isSessionEndedStatus = (status: number): boolean => status === 400 || stat
  * và trả 503 để client thử lại, không đăng xuất oan người dùng đang có phiên hợp lệ.
  */
 export async function handleRefresh(request: NextRequest, deps: ServerDeps): Promise<NextResponse> {
-  if (!checkSameOrigin(request, deps.env.appOrigin)) return crossOrigin(deps);
+  if (!checkSameOrigin(request, deps.env.appOrigins)) return crossOrigin(deps);
 
   const tokens = readRawTokens((name) => request.cookies.get(name)?.value, deps.secure);
   const claims = tokens === null ? null : parseAccessTokenClaims(decodeJwtPayload(tokens.accessToken));
@@ -302,7 +302,7 @@ function rotateSession(body: string, deps: ServerDeps): NextResponse {
  * Mật khẩu chỉ đi từ body request sang body request BE, không vào log, không vào response.
  */
 export async function handleChangePassword(request: NextRequest, deps: ServerDeps): Promise<NextResponse> {
-  if (!checkSameOrigin(request, deps.env.appOrigin)) return crossOrigin(deps);
+  if (!checkSameOrigin(request, deps.env.appOrigins)) return crossOrigin(deps);
 
   const session = readSession(
     (name) => request.cookies.get(name)?.value,

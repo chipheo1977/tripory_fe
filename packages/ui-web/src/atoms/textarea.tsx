@@ -25,7 +25,7 @@ type ClearableTextareaProps = Omit<TextareaProps, 'allowClear'>;
 
 function ClearableTextarea({ className, clearLabel, size, wrapperClassName, ...props }: ClearableTextareaProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const hasValue = useControlHasValue(wrapperRef, String(props.value ?? props.defaultValue ?? '') !== '');
+  const hasValue = useControlHasValue(wrapperRef, String(props.value ?? props.defaultValue ?? '') !== '', props.value !== undefined);
   const showClear = canShowClear(true, hasValue, props.disabled, props.readOnly);
 
   return (

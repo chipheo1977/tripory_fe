@@ -27,7 +27,7 @@ type AdornedInputProps = Omit<InputProps, 'allowClear'> & { clearable: boolean }
 function AdornedInput({ className, clearable, clearLabel, size, wrapperClassName, ...props }: AdornedInputProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const isDate = props.type === 'date';
-  const hasValue = useControlHasValue(wrapperRef, String(props.value ?? props.defaultValue ?? '') !== '');
+  const hasValue = useControlHasValue(wrapperRef, String(props.value ?? props.defaultValue ?? '') !== '', props.value !== undefined);
   const showClear = canShowClear(clearable, hasValue, props.disabled, props.readOnly);
 
   return (

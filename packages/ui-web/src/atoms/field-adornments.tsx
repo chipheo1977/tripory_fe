@@ -25,19 +25,22 @@ export function canShowClear(enabled: boolean, hasValue: boolean, disabled: bool
 }
 
 /** Ô có nội dung hay không, đọc từ DOM để theo kịp cả React Hook Form `register` (ghi `ref.value`, không qua state). */
-export function useControlHasValue(wrapperRef: RefObject<HTMLElement | null>, initial: boolean) {
+export function useControlHasValue(wrapperRef: RefObject<HTMLElement | null>, initial: boolean, controlled = false) {
   const subscribe = useCallback(
     (notify: () => void) => {
       const wrapper = wrapperRef.current;
-      if (wrapper === null) return () => undefined;
+      // Ô controlled: `initial` đã là giá trị prop hiện tại. Không nghe sự kiện DOM, vì listener gốc chạy trước listener
+      // của React sẽ render lại ô khi `value` prop còn cũ, làm React ghi đè chữ vừa gõ/dán và nuốt `onChange`.
+      if (controlled || wrapper === null) return () => undefined;
       // `focusin`: React Hook Form `reset()`/`setValue()` ghi `ref.value` không phát sự kiện; focus là lúc đọc lại cho chắc.
       const events = ['input', 'change', 'focusin'] as const;
       events.forEach((name) => wrapper.addEventListener(name, notify));
       return () => events.forEach((name) => wrapper.removeEventListener(name, notify));
     },
-    [wrapperRef],
+    [controlled, wrapperRef],
   );
   const getSnapshot = () => {
+    if (controlled) return initial;
     const control = findControl(wrapperRef.current);
     if (control === null) return initial;
     return control.value !== '';

@@ -366,6 +366,12 @@ describe('fillSnap', () => {
     render(<Filled fillSnap={false} />);
     expect((await screen.findByRole('dialog')).style.height).toBe('');
   });
+
+  it('không fillSnap: trần chiều cao bằng mức expanded để đáy popup không trôi ra ngoài màn hình', async () => {
+    render(<Filled fillSnap={false} />);
+    const sheet = await screen.findByRole('dialog');
+    expect(sheet.style.maxHeight).toBe(`${0.92 * window.innerHeight}px`);
+  });
 });
 
 describe('V�ng cu?n c?a Sheet theo m?c snap', () => {

@@ -186,9 +186,19 @@ export type SheetContentProps = ComponentProps<typeof BaseDrawer.Popup> & {
   closeDisabled?: boolean;
 };
 
+/**
+ * Base UI dịch popup xuống `chiều cao popup − chiều cao mức snap`. Popup cao hơn mức cao nhất (nội dung dài, trần mặc định
+ * là 100dvh) thì phần đáy trôi ra ngoài màn hình và không cuộn tới được, nên trần chiều cao bằng đúng mức cao nhất.
+ */
+function popupHeightStyle(position: SheetPosition, topSnapHeight: string | null, fillSnap: boolean) {
+  if (position !== 'bottom' || topSnapHeight === null) return undefined;
+  if (fillSnap) return { height: topSnapHeight };
+  return { maxHeight: topSnapHeight };
+}
+
 export function SheetContent({ children, className, closeDisabled = false, fillSnap = false, style, ...props }: SheetContentProps) {
   const { modal, position, atTopSnap, topSnapHeight } = useSheetContext();
-  const fixedHeight = fillSnap && position === 'bottom' && topSnapHeight !== null ? { height: topSnapHeight } : undefined;
+  const fixedHeight = popupHeightStyle(position, topSnapHeight, fillSnap);
 
   return (
     <BaseDrawer.Portal>

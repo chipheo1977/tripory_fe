@@ -73,7 +73,21 @@ function CoverUrlPanelBody({ panelId, existing, onAdd, onCancel }: PanelProps) {
       id={panelId}
       ref={panelRef}
     >
-      <FormFieldRow description="Dán link ảnh bắt đầu bằng https://" error={error ?? undefined} label="Link ảnh">
+      <FormFieldRow
+        description="Dán link ảnh bắt đầu bằng https://"
+        error={error ?? undefined}
+        label="Link ảnh"
+        labelAction={
+          <>
+            <Button onClick={onCancel} size="sm" type="button" variant="secondary">
+              Hủy
+            </Button>
+            <Button className="min-w-touch" onClick={submit} size="sm" type="button">
+              Thêm
+            </Button>
+          </>
+        }
+      >
         <Input
           allowClear
           autoComplete="off"
@@ -91,14 +105,6 @@ function CoverUrlPanelBody({ panelId, existing, onAdd, onCancel }: PanelProps) {
         />
       </FormFieldRow>
       <PreviewSlot url={previewUrl} />
-      <div className="flex justify-end gap-inline-sm">
-        <Button onClick={onCancel} size="sm" type="button" variant="secondary">
-          Hủy
-        </Button>
-        <Button className="min-w-touch" onClick={submit} size="sm" type="button">
-          Thêm
-        </Button>
-      </div>
     </div>
   );
 }

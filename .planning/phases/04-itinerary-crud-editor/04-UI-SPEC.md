@@ -681,7 +681,7 @@ CoverUrlPanel                                visible khi đang thêm, ngay dư�
 1. `RadioGroup`: một điểm dừng ở ô đang hiển thị.
 2. Nút "Xóa ảnh bìa 1" … "Xóa ảnh bìa {n}" theo thứ tự ô.
 3. Nút "Thêm ảnh bìa" (chỉ khi `n < 5`).
-4. Khi `CoverUrlPanel` mở: ô "Link ảnh" → nút "Xóa link ảnh" (chỉ khi ô có chữ, của `allowClear`) → "Hủy" → "Thêm". Thứ tự DOM của hai nút trùng thứ tự nhìn thấy (secondary trước, primary sau), như các footer khác của Phase 4.
+4. Khi `CoverUrlPanel` mở: ô "Link ảnh" → nút "Xóa link ảnh" (chỉ khi ô có chữ, của `allowClear`) → "Hủy" → "Thêm". Hai nút nằm trên hàng nhãn nhưng đứng SAU ô nhập trong DOM (bố cục bằng CSS grid), nên Tab vẫn đi ô nhập trước; "Hủy" trước "Thêm".
 
 Ghi chú, thông báo sr-only và `FormFieldError` không nhận focus. Shift+Tab đi ngược đúng thứ tự trên.
 
@@ -703,7 +703,7 @@ Lưu lỗi: lưới trả về danh sách đã lưu và xử lý theo bảng L�
 |------|----------|
 | Ô "Link ảnh" | `FormFieldRow` nhãn "Link ảnh", mô tả "Dán link ảnh bắt đầu bằng https://", `Input lg type="url" inputMode="url" autoComplete="off" allowClear clearLabel="Xóa link ảnh"`. Focus vào ô khi khung mở |
 | Preview | Như preview cũ: chỉ khi link hợp lệ, debounce 400ms, `aspect-(--itinerary-cover-ratio) rounded-container`; đang tải `Skeleton block`; tải được `<img alt="Xem trước ảnh bìa" referrerPolicy="no-referrer">`; lỗi tải → nền `surface-muted` + icon `ImageOff` + "Không tải được ảnh từ link này", **vẫn cho thêm** (D-84, D-25) |
-| Nút | Hàng `flex justify-end gap-inline-sm`: "Hủy" (`Button secondary size="sm"`) rồi "Thêm" (`Button primary size="sm"`, `min-w-touch`). Không có `loading` (thêm là thao tác cục bộ, lưu đi qua tự lưu) |
+| Nút | Nằm CÙNG HÀNG với nhãn "Link ảnh" (nhãn bên trái, nút căn phải) qua slot `labelAction` của `FormFieldRow` (grid `grid-cols-[minmax(0,1fr)_auto]`, nút ở cột 2 hàng 1): "Hủy" (`Button secondary size="sm"`) rồi "Thêm" (`Button primary size="sm"`, `min-w-touch`). Không có `loading` (thêm là thao tác cục bộ, lưu đi qua tự lưu) |
 
 - "Thêm" hoặc Enter trong ô: validate (https, ≤ 500 ký tự, chưa có trong danh sách). Sai thì lỗi dưới ô, khung vẫn mở. Đúng thì thêm vào cuối lưới, lưu ngay, đóng khung, focus vào `Radio` của ô mới (gọi `focus()` trên phần tử `role="radio"`; Base UI 1.8.0 chỉ chọn khi focus đến từ phím mũi tên, nên focus bằng code không đổi ảnh đang chọn). Nếu trước đó danh sách rỗng thì ảnh mới tự được chọn làm ảnh hiển thị; còn lại giữ ảnh đang chọn. Thêm ảnh thứ 5 thì nút "Thêm ảnh bìa" biến mất (`visible={false}`), focus vẫn ở `Radio` ảnh mới. Thông báo sr "Đã thêm ảnh bìa {N}".
 - "Hủy" hoặc Esc trong ô: đóng khung, bỏ link đang gõ, focus về nút "Thêm ảnh bìa". Esc này chỉ đóng khung, không đóng dialog (chặn lan truyền).

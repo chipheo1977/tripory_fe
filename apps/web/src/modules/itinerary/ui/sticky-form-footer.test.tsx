@@ -57,7 +57,7 @@ describe("StickyFormFooter", () => {
     const { container } = render(<StickyFormFooter onCancel={() => undefined} pending={false} />);
     const root = container.firstElementChild as HTMLElement;
     expect(root.className).toContain("sticky");
-    expect(root.className).toContain("bottom-0");
+    expect(root.className).toContain("-bottom-(--footer-bleed)");
     expect(container.innerHTML).not.toContain("flex-col");
   });
 

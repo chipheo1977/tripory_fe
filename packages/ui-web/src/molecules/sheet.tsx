@@ -218,7 +218,7 @@ export function SheetContent({ children, className, closeDisabled = false, fillS
         >
           <SheetCloseButton disabled={closeDisabled} />
           {position === 'bottom' ? <SheetHandle /> : null}
-          <BaseDrawer.Content className="mx-auto flex w-full max-w-content-sm flex-col gap-stack-md">
+          <BaseDrawer.Content className={cn('mx-auto flex w-full max-w-content-sm flex-col gap-stack-md', fillSnap && 'flex-1')}>
             {children}
           </BaseDrawer.Content>
         </BaseDrawer.Popup>

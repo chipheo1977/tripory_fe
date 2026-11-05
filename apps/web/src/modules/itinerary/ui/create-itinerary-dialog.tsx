@@ -149,7 +149,7 @@ export function CreateItineraryDialog({ open, onOpenChange }: CreateItineraryDia
       <div ref={alertRef}>
         <InlineAlert>{created.alert}</InlineAlert>
       </div>
-      <form aria-labelledby={titleId} className="flex flex-col gap-stack-md" noValidate onKeyDown={blockEnterSubmit} onSubmit={created.submit}>
+      <form aria-labelledby={titleId} className="flex flex-1 flex-col gap-stack-md" noValidate onKeyDown={blockEnterSubmit} onSubmit={created.submit}>
         <CreateItineraryAccordion
           model={model}
           refs={{

@@ -170,3 +170,40 @@ it('công khai Toast và notify qua package entry', () => {
   expect('Toast' in publicUi).toBe(true);
   expect('notify' in publicUi).toBe(true);
 });
+
+describe('bố cục toast', () => {
+  it('neo ở trên cùng, toast mới xếp trên toast cũ', async () => {
+    render(<Toast />);
+    notify.info('Toast cũ');
+    notify.info('Toast mới');
+    await screen.findByText('Toast mới');
+    const toaster = document.querySelector('[data-sonner-toaster]');
+    expect(toaster?.getAttribute('data-y-position')).toBe('top');
+    const titles = Array.from(document.querySelectorAll('[data-sonner-toast]')).map((item) => item.textContent);
+    expect(titles[0]).toContain('Toast mới');
+  });
+
+  it('chỉ toast error bỏ icon trạng thái và dùng màu danger cho chữ', async () => {
+    render(<Toast />);
+    notify.error('Không lưu được', { description: 'Thử lại sau' });
+    notify.success('Đã lưu');
+    await screen.findByText('Đã lưu');
+    const error = screen.getByText('Không lưu được').closest('[data-sonner-toast]');
+    const success = screen.getByText('Đã lưu').closest('[data-sonner-toast]');
+    expect(error?.getAttribute('data-type')).toBe('error');
+    expect(error?.querySelector('[data-icon]')).toBeNull();
+    expect(success?.querySelector('[data-icon]')).not.toBeNull();
+    expect(error?.querySelector('[data-title]')?.className).toContain('group-data-[type=error]:text-danger');
+    expect(error?.querySelector('[data-description]')?.className).toContain('group-data-[type=error]:text-danger');
+  });
+
+  it('nút đóng gọn 24px, ghim góc phải và giữ tên truy cập', async () => {
+    render(<Toast />);
+    notify.error('Lỗi', { action: { label: 'Thử lại', onClick: vi.fn() } });
+    const close = await screen.findByRole('button', { name: 'Đóng thông báo' });
+    expect(close.className).toContain('absolute');
+    expect(close.className).toContain('size-stack-lg');
+    expect(close.className).toContain('after:size-touch');
+    expect(screen.getByRole('button', { name: 'Thử lại' })).toBeTruthy();
+  });
+});

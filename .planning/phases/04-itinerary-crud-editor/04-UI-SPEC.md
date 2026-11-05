@@ -34,7 +34,7 @@ reviewed_at: 2026-10-30
 | Icon library | `lucide-react` qua atom `Icon` (app import glyph, truyền vào `Icon`) |
 | Font | Inter qua `next/font` (`latin`, `vietnamese`), không đổi |
 | Styling | Tailwind CSS 4.3 + semantic token của `@tripory/design-tokens`, không đổi |
-| Feedback | `Toast`/`notify` (Sonner) của `ui-web`, đã mount ở root layout |
+| Feedback | `Toast`/`notify` (Sonner) của `ui-web`, đã mount ở root layout. Toast hiện ở đầu màn hình (`top-right`), error không icon và chữ `text-danger` |
 | Kéo thả | dnd-kit (planner thêm vào `catalog:`, pin cứng). Spec này chỉ khóa hành vi, không khóa API |
 
 Nguồn: `01-UI-SPEC.md`, `03-UI-SPEC.md`, đọc trực tiếp `packages/design-tokens/src/*`, `packages/ui-web/src/*`. Không có màu, cỡ chữ hay weight mới.

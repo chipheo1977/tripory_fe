@@ -21,7 +21,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình du lịch thật trên bản triển khai công khai, rồi trao đổi về chuyến đi với người khác.
-**Current focus:** Phase 4 mở lại: 18 plan mới 04-24..04-41 đã lập; bắt đầu bằng tài liệu hợp đồng BE (04-24) rồi checkpoint 04-25 chờ user sửa tripory_be; PUB-02 hoãn
+**Current focus:** Phase 4 mở lại đã xong 41/41 plan (ITIN-02, ITIN-03; UAT mục D 8/8 PASS trên BE local 2026-11-05); BE đã merge vào dev, chưa kiểm BE đã deploy và test thật mục 6-11 của 04-BE-CONTRACT; PUB-02 chưa có plan; Phase 5 sẵn sàng lập kế hoạch
 
 ## Current Position
 

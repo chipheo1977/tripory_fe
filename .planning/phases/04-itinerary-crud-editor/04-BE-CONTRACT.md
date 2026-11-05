@@ -1,6 +1,7 @@
 # Phase 4: Hợp đồng BE cho form tạo lịch trình, nhiều ảnh bìa và tự lưu
 
 **Ngày viết:** 2026-11-03 (phần mở lại 2026-10-30)
+**Trạng thái (cập nhật 2026-11-05): HOÀN THÀNH theo xác nhận của người dùng.** C1 đến C12 đã làm xong ở `tripory_be` và đã merge vào nhánh `dev` (`origin/dev` tại `5dc4c7b`, chứa commit `bca0577`). Những gì CHƯA được kiểm: BE đã deploy lên môi trường thật, hai migration trên DB thật, và các lần gọi `POST`/`PUT`/`GET` thật (mục 13: 6 đến 11); ghi chú chi tiết ở cuối mục 13.
 **Người sửa BE:** user (D-52). Tài liệu này là đặc tả, không kèm code và không kèm ca kiểm thử (D-57).
 **Repo BE đã đọc để trích dẫn:** `tripory_be`, nhánh `feat/be-fe-integration-group-a`, đọc ở chế độ chỉ đọc. Mọi đường dẫn `file:dòng` dưới đây tính từ `tripory_be/src/Services/Tripory/` và đúng với nhánh đó; nếu bạn đã sửa các file này thì số dòng có thể lệch.
 
@@ -494,6 +495,7 @@ Quyết định D-57 nói: "Không có ca kiểm thử, không có code." Các d
 - Mục 6 đến 11: hoãn đến khi ghép với FE rồi test cùng lúc (quyết định của bạn); chưa tick.
 - Mục 1, 2 (đối chiếu Nghị quyết 202/2025/QH15, duyệt slug và alias) là việc của bạn; mục 5 (deploy) chưa làm. Chưa tick.
 - Đã commit `tripory_be` (`bca0577`, nhánh `be/phase_4`).
+- 2026-11-05: người dùng xác nhận đã merge `be/phase_4` vào `dev` (`origin/dev` tại `5dc4c7b`, gồm `bca0577` và thêm fix `Token.UnauthorizedAccessToken` ở `5dc4c7b`). Merge vào `dev` không đồng nghĩa BE đã deploy: mục 5 vẫn chưa tick và các mục khác ở trên giữ nguyên trạng thái.
 
 ## 14. Quyết định đã chốt và câu hỏi còn lại
 

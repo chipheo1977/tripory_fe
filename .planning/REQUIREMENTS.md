@@ -188,8 +188,8 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | AUTH-07 | Phase 3 | Complete |
 | AUTH-08 | Phase 3 | Complete |
 | ITIN-01 | Phase 4 | Complete |
-| ITIN-02 | Phase 4 | Pending (mở lại: form tạo 4 khối) |
-| ITIN-03 | Phase 4 | Pending (mở lại: tự lưu, nhiều ảnh bìa) |
+| ITIN-02 | Phase 4 | Complete (mở lại 2026-10-30: form tạo 4 khối; UAT mục D 8/8 PASS trên BE local 2026-11-05) |
+| ITIN-03 | Phase 4 | Complete (mở lại 2026-10-30: tự lưu, nhiều ảnh bìa; UAT mục D 8/8 PASS trên BE local 2026-11-05) |
 | ITIN-04 | Phase 4 | Complete |
 | ITIN-05 | Phase 4 | Complete |
 | ITIN-06 | Phase 4 | Complete |

@@ -353,8 +353,8 @@ describe('guard: utility trong component có CSS và không trỏ biến mồ c�
   // --tw-: biến nội bộ Tailwind; --default-: preflight Tailwind, luôn kèm fallback;
   // --drawer-: Base UI Drawer gán lúc runtime.
   const ignoredPrefixes = ['--tw-', '--default-', '--drawer-'];
-  // Gán lúc runtime: Base UI Popup (--anchor-width, --transform-origin), Base UI Tabs (--active-tab-*), Base UI Accordion (--accordion-panel-height), next/font (--font-inter).
-  const runtimeVariables = new Set(['--anchor-width', '--transform-origin', '--active-tab-width', '--active-tab-left', '--accordion-panel-height', '--font-inter']);
+  // Gán lúc runtime: Base UI Popup (--anchor-width, --transform-origin), Base UI Tabs (--active-tab-*), Base UI Accordion (--accordion-panel-height), next/font (--font-inter), và biến cục bộ khai báo ngay trên phần tử bằng thuộc tính tùy ý của Tailwind (--footer-bleed ở StickyFormFooter).
+  const runtimeVariables = new Set(['--anchor-width', '--transform-origin', '--active-tab-width', '--active-tab-left', '--accordion-panel-height', '--font-inter', '--footer-bleed']);
 
   // Dựng lại index.css nội tuyến để có thể đột biến theme.css trong bộ nhớ.
   const inlineStylesheet = (theme: string) =>

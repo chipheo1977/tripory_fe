@@ -62,7 +62,7 @@ describe("InterestsBlock", () => {
 
   it("mô tả được aria-describedby trỏ tới", () => {
     render(<Harness />);
-    const description = screen.getByText("Chọn một hoặc nhiều. Không bắt buộc.");
+    const description = screen.getByText("Chọn một hoặc nhiều.");
     expect(group().getAttribute("aria-describedby")).toBe(description.id);
   });
 

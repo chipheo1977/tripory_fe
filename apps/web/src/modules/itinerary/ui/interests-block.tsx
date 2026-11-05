@@ -1,6 +1,6 @@
 "use client";
 
-// Khối Sở thích (D-70, D-71, D-94): 7 chip chọn nhiều, không bắt buộc. Nhãn và thứ tự đọc từ `INTERESTS` của domain.
+// Khối Sở thích (D-70, D-71, D-94): 7 chip chọn nhiều, không bắt buộc (không có dấu * là đủ, không ghi chữ). Nhãn và thứ tự đọc từ `INTERESTS` của domain.
 import { INTERESTS, normalizeInterests, type InterestCode } from "@tripory/itinerary";
 import { ToggleChip, ToggleChipGroup } from "@tripory/ui-web";
 import { useId, type Ref } from "react";
@@ -20,7 +20,7 @@ export function InterestsBlock({ value, onChange, error, disabled, firstChipRef 
   return (
     <div className="flex flex-col gap-stack-sm">
       <p className="text-label text-muted" id={descId}>
-        Chọn một hoặc nhiều. Không bắt buộc.
+        Chọn một hoặc nhiều.
       </p>
       <ToggleChipGroup
         aria-describedby={descId}

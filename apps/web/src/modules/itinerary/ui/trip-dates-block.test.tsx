@@ -45,7 +45,7 @@ describe("TripDatesBlock", () => {
   it("ô ngày khởi hành là type=date, tùy chọn, không có ngày kết thúc", () => {
     render(<Harness />);
     expect(dateInput().type).toBe("date");
-    expect(screen.getAllByText("Không bắt buộc.").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Không bắt buộc.")).toBeNull();
     expect(screen.queryByText(/kết thúc/i)).toBeNull();
     expect(dateInput().hasAttribute("min")).toBe(false);
   });

@@ -31,7 +31,7 @@ const DAY_LABELS = { decrement: "Giảm số ngày", increment: "Tăng số ngà
 export function TripDatesBlock({ start, days, disabled, startRef, daysRef }: TripDatesBlockProps) {
   return (
     <div className="flex flex-col gap-stack-md" onKeyDown={preventEnter}>
-      <FormFieldRow description="Không bắt buộc." error={start.error} label="Ngày khởi hành">
+      <FormFieldRow error={start.error} label="Ngày khởi hành">
         <Input
           clearLabel="Xóa Ngày khởi hành"
           onValueChange={start.onChange}

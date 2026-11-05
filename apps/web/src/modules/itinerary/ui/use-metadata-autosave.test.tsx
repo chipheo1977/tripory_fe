@@ -98,7 +98,7 @@ afterEach(() => {
 describe("useMetadataAutosave khi trình duyệt offline", () => {
   it("vẫn gọi repository và đi vào luồng lỗi, không bị tạm dừng", async () => {
     onlineManager.setOnline(false);
-    h.updateMetadata.mockRejectedValueOnce(makeApiError({ kind: "network" }));
+    h.updateMetadata.mockRejectedValueOnce(makeApiError({ kind: "network", status: null, code: null, message: null }));
     const { result, snap, open } = setup();
     open();
     snap.title = "Offline";

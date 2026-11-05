@@ -189,3 +189,57 @@ No gaps. Warning-level items for the finalize step:
 
 _Verified: 2026-10-29T04:41:54Z_
 _Verifier: Claude (gsd-verifier)_
+
+---
+
+## Xác minh lại phần mở lại 2026-10-30 (plans 04-26..04-41)
+
+**Ngày:** 2026-11-05 · **Nhánh:** `phase_4` · **Phương pháp:** đọc kế hoạch, SUMMARY, kết quả gate tự động và UAT; không dùng agent verifier riêng (không có công cụ sinh agent trong môi trường này). Phần xác minh ban đầu ở trên (ITIN-01..14, 2026-10-29) giữ nguyên.
+
+**Trạng thái phần mở lại:** `passed` cho ITIN-02 và ITIN-03 ở mức tự động và UAT local; còn tồn đọng ghi ở "Chưa kiểm / tồn đọng".
+
+### Sự thật cần đạt (từ 04-40 và 04-CONTEXT D-59..D-107)
+
+| # | Sự thật | Bằng chứng | Trạng thái |
+|---|---------|------------|------------|
+| 1 | Modal tạo 4 khối (điểm đến 34 mục, tên mặc định, 1-30 ngày, sở thích), gửi một request, vào editor đủ Ngày 1..N, không toast | 04-26 (domain), 04-29 (danh mục), 04-33..04-37 (schema, khối, accordion, dialog); test `create-itinerary-dialog`, `use-create-itinerary-form`, `destination-block`, `trip-dates-block`; UAT 2', 2a, 2b PASS | ✓ |
+| 2 | "Thông tin chuyến đi" tự lưu, không nút Lưu; lưới 5 ảnh lưu ngay; lỗi hiện kèm "Thử lại"; đóng khi còn lỗi thì chỉ báo header | 04-35, 04-36, 04-38; test `metadata-autosave`, `use-metadata-autosave`, `trip-info-dialog`, `cover-*`; UAT 5a, 5b, 5c PASS | ✓ |
+| 3 | Điểm đến và sở thích không hiện ở thẻ và editor; ảnh mặc định rơi về nền dự phòng | 04-30, 04-31; test `cover-image`, `destination-cover`; UAT 4a PASS | ✓ |
+| 4 | Không bản nháp metadata; `PUT` không gửi điểm đến, sở thích, `coverImageUrl` | `itinerary-invariants.test.ts` (case 8, 10); UAT 5a, 16a PASS | ✓ |
+| 5 | Mọi lời gọi BE qua BFF, không token ở client, ranh giới ESLint nguyên vẹn | `auth-invariants`, `itinerary-invariants` (case 9, 11), `packages/config` không đổi | ✓ |
+
+### Bằng chứng tự động (chạy lại 2026-11-05 trên HEAD `723f08f` cộng working tree của người dùng)
+
+`turbo.exe run lint typecheck test --force --continue`: 23/24 task xanh.
+
+| Gói | Test |
+|-----|------|
+| shared-kernel | 32 |
+| design-tokens | 20 |
+| api-client | 98 |
+| itinerary | 21 file, 427 |
+| identity | 244 |
+| config | 114 |
+| web | 114 file, 1741 |
+| ui-web | 341 đạt, **1 đỏ** (`token-guard.test.ts` cho `packages/ui-web/src/molecules/toast.tsx`) |
+
+- Test đỏ của ui-web do thay đổi CHƯA COMMIT của người dùng trong `toast.tsx` (lớp `pr-8`, `size-6` là spacing số, vi phạm guard token). Bản `toast.tsx` đã commit (`f29f66e`) không có hai lớp này. Tôi không sửa vì đó là việc đang làm dở của người dùng (đi kèm `apps/web/src/app/zz-toast-harness/` chưa theo dõi).
+- Hồi quy thật đã sửa: `549902a` (chân form modal) thêm biến `--footer-bleed` trên phần tử làm đỏ guard `design-tokens`. Đã khai báo trong `runtimeVariables` ở `tokens.test.ts` (commit `723f08f`).
+- `turbo.exe run build`: exit 0 ở 04-39 (commit `e8a5ce5`). Chưa chạy lại sau các commit của người dùng và harness chưa commit.
+
+### Review
+
+- `04-REVIEW-REOPENED-FIX.md` (người dùng): WR-01..WR-04 đã sửa (`fb92fea`, `09780af`, `fcfe3ee`, `3c87732`); Info IN-01..IN-11 chưa sửa. File `04-REVIEW-REOPENED.md` mà báo cáo tham chiếu không có trong thư mục phase.
+- Tôi không chạy `gsd-code-review` mới cho phần mở lại (đã có review của người dùng; cổng này chỉ khuyến nghị). `04-REVIEW.md` và `04-REVIEW-GATE.json` vẫn là của lượt 2026-10-29.
+
+### UAT
+
+Mục D của `04-UAT-CHECKLIST.md`: 8/8 bước (2', 2a, 2b, 4a, 5a, 5b, 5c, 16a) PASS do người dùng xác nhận (`approved`). Chạy trên BE local. Mục C (kết luận, thiết bị) của phần mở lại do người dùng tự điền. `04-UAT-CHECKLIST.md` còn thay đổi chưa commit.
+
+### Chưa kiểm / tồn đọng
+
+1. **BE thật đã deploy:** chưa. `04-BE-CONTRACT.md` mục 13 chỉ tick 1/12; mục 6-11 (gọi API thật) chưa chạy. UAT dùng BE local.
+2. **Ảnh điểm đến thật:** D-106/D-105 ngoài phạm vi (Deferred). Trong lúc làm, người dùng đã thêm ảnh (`39a9ab9`), chưa kiểm ở đây.
+3. **PUB-02** (chuyển từ Phase 5 vào Phase 4 ngày 2026-10-30): chưa có plan. `REQUIREMENTS.md` vẫn ghi Pending. Phase 4 chưa đủ theo yêu cầu cho tới khi PUB-02 được lập kế hoạch hoặc chuyển lại Phase 5.
+4. `REQUIREMENTS.md` vẫn ghi ITIN-02, ITIN-03 là Pending dù đã đạt.
+5. Cảnh báo cũ MD-01, LW-01..LW-06 còn mở.

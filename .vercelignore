@@ -1,0 +1,13 @@
+# Vercel CLI tải cả thư mục làm việc lên. Bỏ cache build và thư mục không cần cho build,
+# nếu không sẽ gặp "File size limit exceeded (100 MB)" (cache Turbo và Turbopack hàng trăm MB).
+.turbo
+**/.next
+**/node_modules
+.git
+.vercel
+
+# Tài liệu và công cụ làm việc, không cần cho build
+.planning
+.agents
+.claude
+.kiro

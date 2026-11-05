@@ -1,8 +1,8 @@
 "use client";
 
 // Khối đang mở của form tạo (D-62..D-65, D-69, D-72): chỉ một khối mở, mở được khối bất kỳ. Mở khối rồi focus phải xảy ra
-// trong cùng một lượt: `flushSync` cho panel bỏ `hidden` trước khi `focus()` (RESEARCH R3.1).
-import { useState } from "react";
+// sau khi panel đã render: `openAndFocus` chỉ mở khối bằng state và lưu yêu cầu focus; effect chạy `focus()` sau commit.
+import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 import type { CreateBlockId } from "./create-itinerary-blocks";
 
@@ -39,9 +39,14 @@ export function useCreateBlocks(): CreateBlocks {
     return callback;
   };
 
+  // Mỗi yêu cầu là một đối tượng mới nên effect chạy lại kể cả khi khối đã mở sẵn.
+  const [focusRequest, setFocusRequest] = useState<Readonly<{ focus: () => void }> | null>(null);
+  useEffect(() => {
+    focusRequest?.focus();
+  }, [focusRequest]);
   const openAndFocus = (block: CreateBlockId, focus: () => void): void => {
-    flushSync(() => setOpenBlocks([block]));
-    focus();
+    setOpenBlocks([block]);
+    setFocusRequest({ focus });
   };
 
   const advanceFromDestination = (): void => {

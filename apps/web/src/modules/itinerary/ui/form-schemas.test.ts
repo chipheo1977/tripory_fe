@@ -117,6 +117,8 @@ describe("isHttpsUrl", () => {
     expect(isHttpsUrl("http://example.com")).toBe(false);
     expect(isHttpsUrl("javascript:alert(1)")).toBe(false);
     expect(isHttpsUrl("https://")).toBe(false);
+    expect(isHttpsUrl("https://?")).toBe(false);
+    expect(isHttpsUrl("https://a\u0007b")).toBe(false);
     expect(isHttpsUrl("https://a b")).toBe(false);
   });
 });

@@ -72,10 +72,11 @@ export function useTripInfoForm({
 
   // Lỗi danh sách ảnh: cache đã rollback nên `itinerary` là danh sách đã lưu, đưa lưới về đó.
   const { failure } = autosave.state;
+  // So theo tham chiếu `failure` (mỗi lần lỗi là một đối tượng mới) để cùng một chuỗi lỗi lặp lại vẫn đặt lại lưới.
   const coverError = failure?.fieldErrors.coverImages;
-  const [prevCoverError, setPrevCoverError] = useState(coverError);
-  if (coverError !== prevCoverError) {
-    setPrevCoverError(coverError);
+  const [prevFailure, setPrevFailure] = useState(failure);
+  if (failure !== prevFailure) {
+    setPrevFailure(failure);
     if (coverError !== undefined) setGallery(galleryOf(itinerary));
   }
 

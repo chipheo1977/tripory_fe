@@ -2,14 +2,14 @@
 
 // Khung "Link ảnh" mở ngay dưới lưới ảnh bìa (D-81, D-84): chỉ https, ≤ 500 ký tự, không trùng; preview không tải được
 // vẫn cho thêm. Không modal chồng. Khung mang `data-escape-scope` và dừng Esc để Esc chỉ đóng khung, không đóng dialog.
+import { previewableCoverUrl } from "@tripory/itinerary";
 import { Button, Input } from "@tripory/ui-web";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { CoverPreview } from "./cover-preview";
 import { FormFieldRow } from "./form-field-row";
-import { isHttpsUrl, validateCoverUrl } from "./form-schemas";
+import { validateCoverUrl } from "./form-schemas";
 
 const PREVIEW_DEBOUNCE_MS = 400;
-const COVER_MAX = 500;
 
 type PanelProps = Readonly<{
   panelId: string;
@@ -31,7 +31,7 @@ function CoverUrlPanelBody({ panelId, existing, onAdd, onCancel }: PanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   const trimmed = raw.trim();
-  const valid = isHttpsUrl(trimmed) && raw.length <= COVER_MAX ? trimmed : "";
+  const valid = previewableCoverUrl(raw);
 
   useEffect(() => {
     const timer = setTimeout(() => setPreviewUrl(valid), PREVIEW_DEBOUNCE_MS);

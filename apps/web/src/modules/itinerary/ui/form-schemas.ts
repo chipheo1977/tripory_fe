@@ -3,7 +3,7 @@
 //
 // Độ dài đếm trên giá trị THÔ (kể cả khoảng trắng đầu/cuối): BE kiểm độ dài trước khi trim (Pitfall 10),
 // nên chuỗi 99 ký tự + 2 khoảng trắng phải bị chặn ở client thay vì chờ 400/5xx. Mỗi ô chỉ phát một lỗi.
-import { isValidDayCount, parseCalendarDate } from "@tripory/itinerary";
+import { COVER_URL_MAX_LENGTH, isHttpsUrl, isValidDayCount, parseCalendarDate } from "@tripory/itinerary";
 import { z } from "zod";
 
 export const TITLE_REQUIRED = "Vui lòng nhập tiêu đề.";
@@ -26,14 +26,13 @@ export const COVER_DUPLICATE = "Ảnh này đã có trong danh sách.";
 
 const TITLE_MAX = 100;
 const DESCRIPTION_MAX = 1000;
-const COVER_MAX = 500;
 const SUBTITLE_MAX = 100;
 const WAYPOINT_NAME_MAX = 200;
 const ADDRESS_MAX = 500;
 const NOTES_MAX = 2000;
 
-/** Chỉ `https://` và không có khoảng trắng: chặn `javascript:`, `http:`, `data:` (T-04-30). */
-export const isHttpsUrl = (value: string): boolean => /^https:\/\/[^\s]+$/i.test(value);
+/** Luật link https dùng chung nằm ở domain (khớp BE); giữ tên cũ cho chỗ gọi hiện có (T-04-30). */
+export { isHttpsUrl };
 
 const requiredText = (required: string, tooLong: string, max: number) =>
   z.string().superRefine((value, ctx) => {
@@ -102,7 +101,7 @@ export type MetadataFieldsValues = z.infer<typeof metadataFieldsSchema>;
 export function validateCoverUrl(raw: string, existing: readonly string[]): string | null {
   const trimmed = raw.trim();
   if (trimmed === "" || !isHttpsUrl(trimmed)) return COVER_NOT_HTTPS;
-  if (raw.length > COVER_MAX) return COVER_TOO_LONG;
+  if (trimmed.length > COVER_URL_MAX_LENGTH) return COVER_TOO_LONG;
   if (existing.includes(trimmed)) return COVER_DUPLICATE;
   return null;
 }

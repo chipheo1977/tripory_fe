@@ -92,6 +92,16 @@ describe("itinerary security/scope invariants (static)", () => {
     expect(route?.text).not.toMatch(/export\s+(const|let)\s+(GET|PUT|DELETE|PATCH|HEAD|OPTIONS)\b/);
   });
 
+  // D-143: tìm địa điểm chỉ đọc nên chỉ GET; GET cùng origin không có Origin vẫn qua, Origin lạ bị chặn trong handler.
+  it.each(["search", "suggestions", "reverse"])("exports only GET from the api/places/%s route", (name) => {
+    const route = webSources.find((file) => file.rel === `app/api/places/${name}/route.ts`);
+    expect(route).toBeDefined();
+    expect(route?.text).toMatch(/export\s+(async\s+)?function\s+GET\b/);
+    expect(route?.text).not.toMatch(/export\s+(async\s+)?function\s+(POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\b/);
+    expect(route?.text).not.toMatch(/export\s+(const|let)\s+(POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\b/);
+    expect(route?.text).not.toMatch(/export\s*\{/);
+  });
+
   // D-02 (cuộn vô hạn, không nút "Tải thêm") và D-40 (không chia sẻ, thuộc Phase 5). So khớp phân biệt hoa thường:
   // "Đang tải thêm lịch trình…" và "Link chia sẻ sẽ không còn mở được." là hợp lệ.
   it('has no "Tải thêm" or "Chia sẻ" text in modules/itinerary/ui', () => {

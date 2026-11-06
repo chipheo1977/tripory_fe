@@ -19,7 +19,20 @@ export type ServerEnv = Readonly<{
    * Host, hoặc dev truy cập qua nhiều địa chỉ (localhost và IP LAN). Không phải bí mật nhưng chỉ server đọc.
    */
   appOrigins?: ReadonlyArray<string>;
+  /**
+   * Origin Photon cho tìm địa điểm (D-142), từ `PHOTON_BASE_URL`. VẮNG KEY khi chưa đặt: `places-runtime.ts` dùng
+   * `DEFAULT_PHOTON_BASE_URL`. Đổi được nhà cung cấp mà không cần sửa code.
+   */
+  photonBaseUrl?: string;
+  /**
+   * Origin Nominatim (chỉ tra ngược dự phòng), từ `NOMINATIM_BASE_URL`. VẮNG KEY khi chưa đặt: dùng
+   * `DEFAULT_NOMINATIM_BASE_URL`; `null` khi đặt `off` (tắt hẳn, theo yêu cầu của OSMF nếu có).
+   */
+  nominatimBaseUrl?: string | null;
 }>;
+
+export const DEFAULT_PHOTON_BASE_URL = "https://photon.komoot.io";
+export const DEFAULT_NOMINATIM_BASE_URL = "https://nominatim.openstreetmap.org";
 
 export type ServerDeps = Readonly<{
   env: ServerEnv;
@@ -79,12 +92,46 @@ export function parseServerEnv(raw: Readonly<Record<string, string | undefined>>
   }
 
   const appOrigins = parseAppOrigins(raw.APP_ORIGIN, raw.NODE_ENV === "production");
+  const photonBaseUrl = parseProviderOrigin(raw.PHOTON_BASE_URL, "PHOTON_BASE_URL");
+  const nominatimBaseUrl = parseNominatimOrigin(raw.NOMINATIM_BASE_URL);
 
   return {
     apiOrigin: apiUrl.origin,
     ...(secret.data === undefined || secret.data === "" ? {} : { bffSharedSecret: secret.data }),
     ...(appOrigins === undefined ? {} : { appOrigins }),
+    ...(photonBaseUrl === undefined ? {} : { photonBaseUrl }),
+    ...(nominatimBaseUrl === undefined ? {} : { nominatimBaseUrl }),
   };
+}
+
+/**
+ * Origin nhà cung cấp địa điểm: đúng một origin, https (http chỉ với loopback, để chạy instance tự host ở máy).
+ * Rỗng hoặc vắng = chưa đặt. Thông điệp lỗi không kèm giá trị.
+ */
+function parseProviderOrigin(value: string | undefined, name: string): string | undefined {
+  const text = value?.trim() ?? "";
+
+  if (text === "") return undefined;
+
+  const invalid = new Error(
+    `${name} không hợp lệ: cần đúng một origin https, không kèm path (http chỉ với localhost, 127.0.0.1, [::1])`,
+  );
+
+  if (!URL.canParse(text)) throw invalid;
+
+  const url = new URL(text);
+  const allowedProtocol = url.protocol === "https:" || (url.protocol === "http:" && isLoopbackOrigin(url));
+
+  if (!allowedProtocol || !hasOnlyOrigin(url)) throw invalid;
+
+  return url.origin;
+}
+
+/** `off` (không phân biệt hoa thường) tắt Nominatim: `null`. */
+function parseNominatimOrigin(value: string | undefined): string | null | undefined {
+  if (value?.trim().toLowerCase() === "off") return null;
+
+  return parseProviderOrigin(value, "NOMINATIM_BASE_URL");
 }
 
 const isHttpProtocol = (url: URL): boolean => url.protocol === "http:" || url.protocol === "https:";

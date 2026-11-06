@@ -77,6 +77,9 @@ const DOMAIN_NAMES = [
 const INFRASTRUCTURE_NAMES = [
   'createHttpItineraryRepository',
   'createHttpShortLinkResolver',
+  'createHttpPlaceLookup',
+  'createNominatimReverseProvider',
+  'createPhotonPlaceSearchProvider',
   'createStaticDestinationCatalog',
   'toItinerary',
   'itineraryDetailDto',

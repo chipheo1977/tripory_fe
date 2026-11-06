@@ -63,6 +63,10 @@ export const ERROR_MESSAGES: ReadonlyMap<string, string> = new Map<string, strin
   ["Waypoint.NotFound", "Điểm đến không còn tồn tại."],
   // Do FE sinh (route resolve link rút gọn), không phải mã của BE.
   ["Maps.UnresolvableLink", "Không mở được link rút gọn này. Thử dán link đầy đủ hoặc tọa độ."],
+  // Do FE sinh (BFF `/api/places/*`, D-153).
+  ["Places.RateLimited", "Bạn tìm hơi nhanh. Đợi vài giây rồi thử lại."],
+  ["Places.Unavailable", "Chưa tìm được địa điểm lúc này. Thử lại hoặc nhập tọa độ thủ công."],
+  ["Bff.InvalidQuery", "Từ khóa tìm kiếm không hợp lệ."],
   ["Coordinate.InvalidLatitude", "Vĩ độ phải nằm trong khoảng -90 đến 90."],
   ["Coordinate.InvalidLongitude", "Kinh độ phải nằm trong khoảng -180 đến 180."],
   // Chat

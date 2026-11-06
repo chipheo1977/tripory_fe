@@ -242,3 +242,74 @@ describe("serverDeps", () => {
     expect(serverDeps().secure).toBe(false);
   });
 });
+
+describe("parseServerEnv: PHOTON_BASE_URL, NOMINATIM_BASE_URL (D-142)", () => {
+  const base = { API_ORIGIN: "https://be.test" };
+
+  const errorOf = (raw: Record<string, string>) => {
+    try {
+      parseServerEnv({ ...base, ...raw });
+    } catch (caught) {
+      return caught as Error;
+    }
+
+    return undefined;
+  };
+
+  it("thiếu hoặc rỗng = chưa đặt (không có key, runtime dùng mặc định)", () => {
+    const env = parseServerEnv({ ...base, PHOTON_BASE_URL: " ", NOMINATIM_BASE_URL: "" });
+
+    expect(env).not.toHaveProperty("photonBaseUrl");
+    expect(env).not.toHaveProperty("nominatimBaseUrl");
+    expect(parseServerEnv(base)).not.toHaveProperty("photonBaseUrl");
+  });
+
+  it("chuẩn hóa về origin, bỏ dấu / cuối", () => {
+    expect(
+      parseServerEnv({
+        ...base,
+        PHOTON_BASE_URL: "https://photon.example.com/",
+        NOMINATIM_BASE_URL: "https://nominatim.example.com",
+      }),
+    ).toMatchObject({ photonBaseUrl: "https://photon.example.com", nominatimBaseUrl: "https://nominatim.example.com" });
+  });
+
+  it("NOMINATIM_BASE_URL=off → null (tắt dự phòng)", () => {
+    expect(parseServerEnv({ ...base, NOMINATIM_BASE_URL: "OFF" }).nominatimBaseUrl).toBeNull();
+  });
+
+  it("http chỉ được với loopback", () => {
+    expect(parseServerEnv({ ...base, PHOTON_BASE_URL: "http://localhost:2322" }).photonBaseUrl).toBe(
+      "http://localhost:2322",
+    );
+    expect(errorOf({ PHOTON_BASE_URL: "http://photon.example.com" })?.message).toMatch(/PHOTON_BASE_URL/);
+  });
+
+  it.each([
+    ["có path", "https://photon.example.com/api"],
+    ["có query", "https://photon.example.com/?a=1"],
+    ["có userinfo", "https://user:pw@photon.example.com"],
+    ["scheme ftp", "ftp://photon.example.com"],
+    ["không phải URL", "not a url"],
+  ])("%s → ném Error nhắc tên biến, không kèm giá trị", (_label, value) => {
+    const photon = errorOf({ PHOTON_BASE_URL: value });
+    const nominatim = errorOf({ NOMINATIM_BASE_URL: value });
+
+    expect(photon?.message).toMatch(/PHOTON_BASE_URL/);
+    expect(nominatim?.message).toMatch(/NOMINATIM_BASE_URL/);
+    expect(photon?.message).not.toContain("photon.example.com");
+    expect(photon?.message).not.toContain("user:pw");
+  });
+
+  it("serverDeps đọc hai biến lúc gọi", () => {
+    vi.stubEnv("API_ORIGIN", "https://be.test");
+    vi.stubEnv("PHOTON_BASE_URL", "https://photon.example.com");
+    vi.stubEnv("NOMINATIM_BASE_URL", "off");
+
+    expect(serverDeps().env).toEqual({
+      apiOrigin: "https://be.test",
+      photonBaseUrl: "https://photon.example.com",
+      nominatimBaseUrl: null,
+    });
+  });
+});

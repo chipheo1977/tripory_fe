@@ -56,6 +56,16 @@ describe("mã lỗi form tạo và ảnh bìa (04-BE-CONTRACT.md mục 9)", () =
   });
 });
 
+describe("mã lỗi tìm địa điểm do BFF sinh (D-153)", () => {
+  it.each([
+    ["Places.RateLimited", "Bạn tìm hơi nhanh. Đợi vài giây rồi thử lại."],
+    ["Places.Unavailable", "Chưa tìm được địa điểm lúc này. Thử lại hoặc nhập tọa độ thủ công."],
+    ["Bff.InvalidQuery", "Từ khóa tìm kiếm không hợp lệ."],
+  ])("%s → đúng câu", (code, message) => {
+    expect(ERROR_MESSAGES.get(code)).toBe(message);
+  });
+});
+
 describe("SESSION_EXPIRED_TOAST (D-20)", () => {
   it("đúng câu đã khóa, không có dấu chấm", () => {
     expect(SESSION_EXPIRED_TOAST).toBe("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
@@ -71,8 +81,8 @@ describe("SESSION_EXPIRED_TOAST (D-20)", () => {
     expect(ERROR_MESSAGES.get("Token.Expired")).toBe(SESSION_EXPIRED_MESSAGE);
   });
 
-  it("bảng map có đúng 51 khóa (40 cũ + 11 mã form tạo và ảnh bìa)", () => {
-    expect(ERROR_MESSAGES.size).toBe(51);
+  it("bảng map có đúng 54 khóa (40 cũ + 11 mã form tạo và ảnh bìa + 3 mã tìm địa điểm)", () => {
+    expect(ERROR_MESSAGES.size).toBe(54);
   });
 
   it("đi ra qua barrel lib/feedback", () => {

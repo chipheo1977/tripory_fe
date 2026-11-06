@@ -14,6 +14,7 @@ import { AddButton } from "./add-button";
 import { formatKm } from "./format";
 import { overviewTabAccessibleName, parseTabValue, tabValue } from "./overview-format";
 import { useSaveStatusStore } from "./save-status";
+import { useTabStrip } from "./use-tab-strip";
 
 export type DayTabsProps = Readonly<{
   itinerary: Itinerary;
@@ -23,7 +24,13 @@ export type DayTabsProps = Readonly<{
   focusRequest?: Readonly<{ tab: EditorTab; seq: number }> | null;
 }>;
 
-const prefersReducedMotion = (): boolean => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Mờ dần ở mép còn tab bị cắt (gợi ý có thể vuốt/kéo); không nhận chuột.
+const FADE_CLASS = { start: "left-0 bg-linear-to-r", end: "right-0 bg-linear-to-l" } as const;
+
+function EdgeFade({ visible, side }: Readonly<{ visible: boolean; side: keyof typeof FADE_CLASS }>) {
+  if (!visible) return null;
+  return <span aria-hidden="true" className={`pointer-events-none absolute inset-y-0 w-stack-lg from-surface to-transparent ${FADE_CLASS[side]}`} />;
+}
 
 function trackTab(tabs: Map<EditorTab, HTMLElement>, tab: EditorTab, element: HTMLElement | null): void {
   if (element === null) tabs.delete(tab);
@@ -66,6 +73,7 @@ export function DayTabs({ itinerary, selectedTab, onSelectTab, focusRequest = nu
     addDay.mutate({ dayNumber });
   };
 
+  const { stripProps, edges, scrollTabIntoView } = useTabStrip();
   const dayCount = days.length;
   const appliedFocusSeq = useRef<number | null>(null);
   useEffect(() => {
@@ -78,20 +86,21 @@ export function DayTabs({ itinerary, selectedTab, onSelectTab, focusRequest = nu
   useEffect(() => {
     const selected = tabRefs.current.get(selectedTab);
     if (selected === undefined) return;
-    selected.scrollIntoView({
-      inline: "nearest",
-      block: "nearest",
-      behavior: prefersReducedMotion() ? "auto" : "smooth",
-    });
+    scrollTabIntoView(selected);
     if (focusDayRef.current === selectedTab) {
       focusDayRef.current = null;
       selected.focus();
     }
-  }, [selectedTab, dayCount]);
+  }, [selectedTab, dayCount, scrollTabIntoView]);
 
   return (
     <Tabs onValueChange={(value) => onSelectTab(parseTabValue(value))} value={tabValue(selectedTab)} variant="line">
-      <div className="flex items-center overflow-x-auto">
+      <div className="relative">
+      {/* Cuộn ngang bằng vuốt (cảm ứng) hoặc kéo chuột, không thanh cuộn; `scroll-px` chừa lề khi cuộn tab vào khung. */}
+      <div
+        {...stripProps}
+        className="flex scroll-px-stack-lg items-center overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         <TabsList aria-label="Các ngày" className="shrink-0">
           <TabsTrigger
             aria-label={overviewTabAccessibleName(itinerary.totalDistanceKm)}
@@ -122,6 +131,9 @@ export function DayTabs({ itinerary, selectedTab, onSelectTab, focusRequest = nu
           })}
         </TabsList>
         <AddButton className="shrink-0" label="Thêm ngày" onClick={handleAdd} ref={addButtonRef} size="sm" variant="ghost" />
+      </div>
+      <EdgeFade side="start" visible={edges.start} />
+      <EdgeFade side="end" visible={edges.end} />
       </div>
     </Tabs>
   );

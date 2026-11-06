@@ -27,7 +27,9 @@ export function PinMarkers({ pins, onPinSelect }: PinMarkersProps) {
           event.originalEvent.stopPropagation();
           if (!dimmed) onPinSelect(pin.waypointId);
         }}
-        style={{ zIndex: pin.stackOrder, pointerEvents: dimmed ? "none" : undefined }}
+        // Luôn truyền giá trị tường minh: react-map-gl chỉ GÁN từng khóa lên phần tử marker và không xóa khóa đã bỏ, nên
+        // `undefined` để lại `none` của lần mờ trước và pin không bao giờ chọn được nữa (con trỏ rơi về "grab" của bản đồ).
+        style={{ zIndex: pin.stackOrder, pointerEvents: dimmed ? "none" : "auto" }}
       >
         <MapPin label={{ title: pin.name, detail: pin.labelDetail }} number={pin.position} state={pin.state} tone={pin.colorIndex} />
       </Marker>

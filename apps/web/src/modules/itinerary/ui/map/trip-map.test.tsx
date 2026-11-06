@@ -137,6 +137,17 @@ describe("pin", () => {
     expect(onPinSelect).not.toHaveBeenCalled();
   });
 
+  it("pin từng bị mờ rồi thường lại thì nhận chuột lại (react-map-gl không xóa style cũ của marker)", async () => {
+    const { user, onPinSelect, rerender } = setup({ pins: [pin({ waypointId: "w-1", state: "dimmed" })] });
+    expect(screen.getByTestId("fake-marker").style.pointerEvents).toBe("none");
+
+    rerender({ pins: [pin({ waypointId: "w-1", state: "normal" })] });
+    expect(screen.getByTestId("fake-marker").style.pointerEvents).toBe("auto");
+    await user.click(screen.getByTestId("fake-marker"));
+
+    expect(onPinSelect).toHaveBeenCalledWith("w-1");
+  });
+
   it("bấm nền bản đồ gọi onBackgroundClick", async () => {
     const { user, onBackgroundClick } = setup();
 

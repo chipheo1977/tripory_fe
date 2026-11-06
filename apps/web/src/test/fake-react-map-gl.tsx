@@ -1,7 +1,7 @@
 // Chỉ dùng cho test jsdom (không có WebGL): thay `react-map-gl/maplibre` bằng bản giả, theo thiết kế ở 04-RESEARCH R9.4.
 // Dùng: `vi.mock("react-map-gl/maplibre", () => import("@/test/fake-react-map-gl"))`, rồi đọc `fakeMapState.props`
 // (props cuối của Map) và gọi `props.onLoad({ target: fakeMapInstance })` để giả lập sự kiện.
-import { forwardRef, useImperativeHandle, type CSSProperties, type ReactNode } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, type CSSProperties, type ReactNode } from "react";
 import { vi } from "vitest";
 
 type AnyProps = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -86,15 +86,33 @@ export const Map = forwardRef<unknown, AnyProps>(function FakeMap(props, ref) {
   );
 });
 
+/**
+ * Giống `applyReactStyle` của react-map-gl 8: gán từng khóa lên `element.style`, KHÔNG bao giờ xóa khóa đã bỏ khỏi `style`.
+ * Gán `undefined` vào thuộc tính CSS là không đổi gì, nên giá trị cũ (ví dụ `pointerEvents: "none"`) dính mãi. Nếu fake để
+ * React tự cập nhật `style` thì lỗi này không bao giờ lộ ra trong test.
+ */
+function applyReactStyle(element: HTMLElement | null, style: CSSProperties | undefined): void {
+  if (element === null || style === undefined) return;
+  const target = element.style as unknown as Record<string, unknown>;
+  for (const [key, value] of Object.entries(style)) {
+    if (value === undefined) continue;
+    target[key] = value;
+  }
+}
+
 export function Marker(props: AnyProps) {
   const style = props.style as CSSProperties | undefined;
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    applyReactStyle(ref.current, style);
+  }, [style]);
   return (
     <div
       data-latitude={props.latitude}
       data-longitude={props.longitude}
       data-testid="fake-marker"
       onClick={(event) => props.onClick?.({ originalEvent: { stopPropagation: () => event.stopPropagation() } })}
-      style={style}
+      ref={ref}
     >
       {props.children as ReactNode}
     </div>

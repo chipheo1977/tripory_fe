@@ -11,7 +11,7 @@ import {
   type SheetSnapName,
   type SheetSnapRequest,
 } from "./editor-map-viewport";
-import { TimelineHiddenBottomProvider } from "./timeline-add-bar";
+import { TimelineHostProvider } from "./timeline-panel";
 import { useMediaQuery } from "./use-media-query";
 
 /** Trùng breakpoint `lg` của Tailwind (1024px). */
@@ -99,6 +99,7 @@ function NarrowBody({ timeline, map, headerHeight, sheetSnapRequest }: NarrowBod
   }, []);
   const sheetInput = { open: timelineOpen, snap, viewportHeight, headerHeight };
   const viewport = narrowViewport(sheetInput);
+  const timelineHost = { hiddenBottom: sheetHiddenBottomPx(sheetInput), scrollable: snap !== "peek" };
 
   return (
     <>
@@ -115,10 +116,11 @@ function NarrowBody({ timeline, map, headerHeight, sheetSnapRequest }: NarrowBod
         open={timelineOpen}
         snap={snap}
       >
-        {/* `pb-0`: đáy popup không đệm để thanh "Thêm điểm đến" dính sát đáy màn hình; vùng an toàn nằm trong thanh. */}
-        <SheetContent className="pb-0" fillSnap>
+        {/* `pb-0`: đáy popup không đệm để thanh "Thêm điểm đến" dính sát đáy màn hình; vùng an toàn nằm trong thanh.
+            `overflow-y-hidden`: popup không cuộn; vùng cuộn duy nhất là thân tab trong `TimelinePanel` (tay cầm và hàng tab đứng yên). */}
+        <SheetContent className="overflow-y-hidden pb-0" fillSnap>
           <SheetTitle className="sr-only">{TIMELINE_HEADING}</SheetTitle>
-          <TimelineHiddenBottomProvider value={sheetHiddenBottomPx(sheetInput)}>{timeline}</TimelineHiddenBottomProvider>
+          <TimelineHostProvider value={timelineHost}>{timeline}</TimelineHostProvider>
         </SheetContent>
       </Sheet>
       <ReopenChip onReopen={reopen} timelineOpen={timelineOpen} />

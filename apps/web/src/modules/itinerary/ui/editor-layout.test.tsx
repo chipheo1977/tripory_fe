@@ -5,7 +5,7 @@ import { installFakeResizeObserver, type FakeResizeObserverHandle } from "@/test
 import { EditorLayout, type EditorLayoutProps } from "./editor-layout";
 import { snapHeightPx } from "@tripory/ui-web";
 import type { MapFrame } from "./editor-map-viewport";
-import { TimelineAddBar } from "./timeline-add-bar";
+import { TimelinePanel } from "./timeline-panel";
 
 const h = vi.hoisted(() => ({ sheetProps: vi.fn(), frames: [] as unknown[] }));
 
@@ -150,7 +150,7 @@ it("below lg shows the map as a fixed background behind a non-modal timeline she
   expect(screen.queryByRole("button", { name: "Lịch trình" })).toBeNull();
 });
 
-it("below lg the sheet popup has no bottom padding so the add bar sits flush with the screen bottom", async () => {
+it("below lg the sheet popup has no bottom padding and does not scroll itself (the timeline body is the only scroller)", async () => {
   installMatchMedia(false);
   setup();
 
@@ -158,47 +158,56 @@ it("below lg the sheet popup has no bottom padding so the add bar sits flush wit
   const classes = sheet.className.split(/\s+/);
   expect(classes).toContain("pb-0");
   expect(classes.some((name) => name.startsWith("pb-[calc("))).toBe(false);
+  expect(classes).toContain("overflow-y-hidden");
+  expect(classes).not.toContain("overflow-y-auto");
 });
 
-it("below lg lifts the timeline add bar above the hidden part of the sheet, and not at expanded or from lg", async () => {
-  const timeline = (
-    <TimelineAddBar>
-      <button type="button">Thêm điểm đến</button>
-    </TimelineAddBar>
-  );
-  const barBottom = () => (screen.getByRole("button", { name: "Thêm điểm đến" }).parentElement as HTMLElement).style.bottom;
+const scrollerOf = () => document.querySelector<HTMLElement>("[data-timeline-scroller]");
+const panel = (
+  <TimelinePanel tabs={<div role="tablist">tab</div>}>
+    <p>nội dung</p>
+  </TimelinePanel>
+);
 
+it("below lg a TimelinePanel scrolls only its body: the scroller ends at the visible bottom and scrolls at medium, not at peek", async () => {
   installMatchMedia(false);
-  const { rerender } = setup({ timeline });
+  const { rerender } = setup({ timeline: panel });
   await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
-  // Mức vừa (mặc định): đáy popup bị dịch xuống, thanh phải nâng lên (mức thấp/vừa: nút luôn thấy, không cần kéo lên expanded).
-  expect(barBottom()).toContain("px");
-  expect(barBottom()).not.toBe("0px");
+
+  // Mức vừa (mặc định): thân cuộn được, đáy vùng cuộn nâng lên đúng phần đáy popup bị che.
+  expect(scrollerOf()?.className.split(/\s+/)).toContain("overflow-y-auto");
+  expect(scrollerOf()?.style.bottom).toMatch(/^\d+(\.\d+)?px$/);
+  expect(scrollerOf()?.style.bottom).not.toBe("0px");
 
   rerender(
     <EditorLayout
       header={<div data-testid="header">header</div>}
       map={renderMap}
       sheetSnapRequest={{ seq: 1, snap: "expanded" }}
-      timeline={timeline}
+      timeline={panel}
     />,
   );
-  await waitFor(() => expect(barBottom()).toBe("0px"));
+  await waitFor(() => expect(scrollerOf()?.style.bottom).toBe("0px"));
+  expect(scrollerOf()?.className.split(/\s+/)).toContain("overflow-y-auto");
+
+  rerender(
+    <EditorLayout
+      header={<div data-testid="header">header</div>}
+      map={renderMap}
+      sheetSnapRequest={{ seq: 2, snap: "peek" }}
+      timeline={panel}
+    />,
+  );
+  await waitFor(() => expect(scrollerOf()?.className.split(/\s+/)).toContain("overflow-y-hidden"));
 });
 
-it("from lg the timeline add bar stays at bottom 0 (no sheet)", () => {
+it("from lg a TimelinePanel has no sheet scroller (the left column scrolls and the tab strip is sticky)", () => {
   installMatchMedia(true);
-  setup({
-    timeline: (
-      <TimelineAddBar>
-        <button type="button">Thêm điểm đến</button>
-      </TimelineAddBar>
-    ),
-  });
+  setup({ timeline: panel });
 
-  expect((screen.getByRole("button", { name: "Thêm điểm đến" }).parentElement as HTMLElement).style.bottom).toBe("0px");
+  expect(scrollerOf()).toBeNull();
+  expect(screen.getByRole("tablist").parentElement?.className.split(/\s+/)).toEqual(expect.arrayContaining(["sticky", "top-0"]));
 });
-
 it("closing the timeline sheet shows a chip that reopens it", async () => {
   installMatchMedia(false);
   setup();

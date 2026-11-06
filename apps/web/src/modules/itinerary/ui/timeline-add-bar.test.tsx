@@ -1,37 +1,21 @@
 import { render, screen } from "@testing-library/react";
 import { expect, it } from "vitest";
-import { TimelineAddBar, TimelineHiddenBottomProvider } from "./timeline-add-bar";
+import { TimelineAddBar } from "./timeline-add-bar";
 
-const bar = () => screen.getByRole("button", { name: "Thêm điểm đến" }).parentElement as HTMLElement;
-
-it("ngoài Sheet (không có provider): dính đáy `bottom: 0`", () => {
+it("dính đáy vùng cuộn gần nhất và chứa nút bên trong", () => {
   render(
     <TimelineAddBar>
       <button type="button">Thêm điểm đến</button>
     </TimelineAddBar>,
   );
 
-  expect(bar().style.bottom).toBe("0px");
-});
-
-it("trong Sheet bị dịch xuống: nâng `bottom` đúng phần đáy popup bị che (trừ đệm đáy của popup)", () => {
-  render(
-    <TimelineHiddenBottomProvider value={270}>
-      <TimelineAddBar>
-        <button type="button">Thêm điểm đến</button>
-      </TimelineAddBar>
-    </TimelineHiddenBottomProvider>,
-  );
-
-  expect(bar().style.bottom).toBe("270px");
+  const bar = screen.getByRole("button", { name: "Thêm điểm đến" }).parentElement as HTMLElement;
+  expect(bar.className.split(/\s+/)).toEqual(expect.arrayContaining(["sticky", "bottom-0", "border-t"]));
 });
 
 it("không có nút bên trong thì thanh trống để `empty:hidden` ẩn đi", () => {
-  const { container } = render(
-    <TimelineHiddenBottomProvider value={270}>
-      <TimelineAddBar>{null}</TimelineAddBar>
-    </TimelineHiddenBottomProvider>,
-  );
+  const { container } = render(<TimelineAddBar>{null}</TimelineAddBar>);
 
   expect(container.firstElementChild?.innerHTML).toBe("");
+  expect(container.firstElementChild?.className.split(/\s+/)).toContain("empty:hidden");
 });

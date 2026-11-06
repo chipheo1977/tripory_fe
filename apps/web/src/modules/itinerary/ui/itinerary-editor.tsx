@@ -478,6 +478,7 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
         sheetSnapRequest={sheetRequest}
         timeline={
           <TimelinePanel
+            scrollResetKey={activeTab}
             tabs={
               <DayTabs
                 focusRequest={tabFocus}

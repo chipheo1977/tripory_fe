@@ -39,7 +39,7 @@ function trackTab(tabs: Map<EditorTab, HTMLElement>, tab: EditorTab, element: HT
 
 function TabKmLine({ km }: Readonly<{ km: string | null }>) {
   if (km === null) return null;
-  return <span className="text-label text-muted tabular-nums">{km}</span>;
+  return <span className="text-label font-regular text-muted tabular-nums">{km}</span>;
 }
 
 export function DayTabs({ itinerary, selectedTab, onSelectTab, focusRequest = null }: DayTabsProps) {

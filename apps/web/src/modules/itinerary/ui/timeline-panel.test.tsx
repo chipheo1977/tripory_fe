@@ -4,12 +4,12 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
-import { beforeEach, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { makeQueryClient } from "@/composition/query-client";
 import { createSaveStatusStore, SaveStatusProvider } from "./save-status";
 import { DayPanel, type DayPanelProps } from "./day-panel";
 import { DayTabs } from "./day-tabs";
-import { TimelinePanel } from "./timeline-panel";
+import { TimelineHostProvider, TimelinePanel, type TimelineHost } from "./timeline-panel";
 
 vi.mock("@/composition/itinerary.client", async () => {
   const { createItineraryHooks: factory } = await import("@tripory/itinerary/react");
@@ -183,4 +183,74 @@ it("without a selection the main button edits", async () => {
   const { user, props } = setup();
   await user.click(screen.getByRole("button", { name: "1 Chợ Bến Thành" }));
   expect(props.onEdit).toHaveBeenCalledWith(itinerary.waypoints[0]);
+});
+
+describe("trong Sheet (TimelineHostProvider)", () => {
+  const renderInSheet = (host: TimelineHost, scrollResetKey: string | number = 0) =>
+    render(
+      <TimelineHostProvider value={host}>
+        <TimelinePanel scrollResetKey={scrollResetKey} tabs={<div role="tablist">tab</div>}>
+          <p>nội dung</p>
+        </TimelinePanel>
+      </TimelineHostProvider>,
+    );
+  const scroller = () => document.querySelector<HTMLElement>("[data-timeline-scroller]") as HTMLElement;
+
+  it("hàng tab nằm ngoài vùng cuộn (đứng yên), thân nằm trong vùng cuộn duy nhất", () => {
+    renderInSheet({ hiddenBottom: 270, scrollable: true });
+
+    expect(scroller().contains(screen.getByRole("tablist"))).toBe(false);
+    expect(scroller().contains(screen.getByText("nội dung"))).toBe(true);
+    expect(document.querySelectorAll("[data-timeline-scroller]")).toHaveLength(1);
+  });
+
+  it("vùng cuộn: cao đúng phần nhìn thấy (bottom = phần bị che), chỉ cuộn dọc, không kéo sheet khi vuốt, không lan cuộn", () => {
+    renderInSheet({ hiddenBottom: 270, scrollable: true });
+
+    expect(scroller().style.bottom).toBe("270px");
+    expect(scroller().className.split(/\s+/)).toEqual(expect.arrayContaining(["overflow-y-auto", "overscroll-contain", "touch-pan-y"]));
+    expect(scroller().hasAttribute("data-base-ui-swipe-ignore")).toBe(true);
+  });
+
+  it("peek (scrollable=false): không cuộn và về đầu", () => {
+    const { rerender } = renderInSheet({ hiddenBottom: 270, scrollable: true });
+    scroller().scrollTop = 80;
+
+    rerender(
+      <TimelineHostProvider value={{ hiddenBottom: 270, scrollable: false }}>
+        <TimelinePanel tabs={<div role="tablist">tab</div>}>
+          <p>nội dung</p>
+        </TimelinePanel>
+      </TimelineHostProvider>,
+    );
+
+    expect(scroller().className.split(/\s+/)).toContain("overflow-y-hidden");
+    expect(scroller().className.split(/\s+/)).not.toContain("overflow-y-auto");
+    expect(scroller().scrollTop).toBe(0);
+  });
+
+  it("đổi scrollResetKey (đổi tab) thì về đầu", () => {
+    const { rerender } = renderInSheet({ hiddenBottom: 0, scrollable: true }, "overview");
+    scroller().scrollTop = 80;
+
+    rerender(
+      <TimelineHostProvider value={{ hiddenBottom: 0, scrollable: true }}>
+        <TimelinePanel scrollResetKey={1} tabs={<div role="tablist">tab</div>}>
+          <p>nội dung</p>
+        </TimelinePanel>
+      </TimelineHostProvider>,
+    );
+
+    expect(scroller().scrollTop).toBe(0);
+  });
+
+  it("ngoài Sheet không có vùng cuộn riêng", () => {
+    render(
+      <TimelinePanel tabs={<div role="tablist">tab</div>}>
+        <p>nội dung</p>
+      </TimelinePanel>,
+    );
+
+    expect(document.querySelector("[data-timeline-scroller]")).toBeNull();
+  });
 });

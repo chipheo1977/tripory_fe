@@ -2,9 +2,11 @@ import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { installFakeResizeObserver, type FakeResizeObserverHandle } from "@/test/fake-resize-observer";
-import { EditorLayout } from "./editor-layout";
+import { EditorLayout, type EditorLayoutProps } from "./editor-layout";
+import { snapHeightPx } from "@tripory/ui-web";
+import type { MapFrame } from "./editor-map-viewport";
 
-const h = vi.hoisted(() => ({ sheetProps: vi.fn() }));
+const h = vi.hoisted(() => ({ sheetProps: vi.fn(), frames: [] as unknown[] }));
 
 // Ghi lại props mà EditorLayout truyền cho Sheet, vẫn render Sheet thật.
 vi.mock("@tripory/ui-web", async (importOriginal) => {
@@ -48,6 +50,7 @@ let disconnects = 0;
 
 beforeEach(() => {
   h.sheetProps.mockClear();
+  h.frames.length = 0;
   ro = installFakeResizeObserver();
   disconnects = 0;
   const Fake = (globalThis as { ResizeObserver: new (callback: ResizeObserverCallback) => ResizeObserver }).ResizeObserver;
@@ -65,36 +68,45 @@ afterEach(() => {
   window.matchMedia = originalMatchMedia;
 });
 
-function setup() {
+const renderMap = (frame: MapFrame) => {
+  h.frames.push(frame);
+  return <div data-testid="map" data-wide={String(frame.wide)}>bản đồ</div>;
+};
+const lastFrame = () => h.frames.at(-1) as MapFrame;
+
+function setup(props: Partial<EditorLayoutProps> = {}) {
   return render(
     <EditorLayout
-      canvas={<div data-testid="canvas">bản đồ hoặc tóm tắt</div>}
       header={<div data-testid="header">header</div>}
-      summary={<div data-testid="summary">tóm tắt gọn</div>}
+      map={renderMap}
       timeline={<div data-testid="timeline">timeline</div>}
+      {...props}
     />,
   );
 }
 
 const headerBox = () => screen.getByTestId("header").parentElement as HTMLElement;
 
-it("from lg renders the two-column grid with timeline on the left and the canvas on the right, without a sheet", () => {
+it("from lg renders the two-column grid with timeline on the left and the map on the right, without a sheet", () => {
   installMatchMedia(true);
   setup();
 
   const timeline = screen.getByTestId("timeline");
-  const canvas = screen.getByTestId("canvas");
+  const canvas = screen.getByTestId("map");
   const grid = timeline.closest(".lg\\:grid-cols-\\[var\\(--editor-timeline-width\\)_1fr\\]");
   expect(grid).not.toBeNull();
   expect(grid?.contains(canvas)).toBe(true);
-  expect(canvas.parentElement?.className).toContain("p-section");
+  expect(canvas.parentElement?.className).not.toContain("p-section");
+  expect(canvas.parentElement?.className.split(/\s+/)).toEqual(expect.arrayContaining(["relative", "isolate", "overflow-hidden"]));
+  expect(canvas.getAttribute("data-wide")).toBe("true");
+  expect(lastFrame().viewport).toEqual({ padding: { top: 64, right: 64, bottom: 64, left: 64 }, coveredBottom: 0 });
+  expect(h.frames).toHaveLength(1);
 
   const heading = screen.getByRole("heading", { level: 2, name: "Lịch trình theo ngày" });
   expect(heading.className).toContain("sr-only");
   expect(heading.parentElement?.contains(timeline)).toBe(true);
   expect(heading.parentElement?.contains(canvas)).toBe(false);
 
-  expect(screen.queryByTestId("summary")).toBeNull();
   expect(screen.queryByRole("dialog")).toBeNull();
   expect(screen.queryByRole("button", { name: "Thu gọn bảng" })).toBeNull();
   expect(screen.queryByRole("button", { name: "Đóng" })).toBeNull();
@@ -110,13 +122,13 @@ it("from lg the grid height is the viewport minus the measured header", () => {
   expect(grid.style.height).toBe("calc(100dvh - 64px)");
 });
 
-it("below lg shows the summary behind a non-modal, non-dismissible timeline sheet", async () => {
+it("below lg shows the map as a fixed background behind a non-modal timeline sheet", async () => {
   installMatchMedia(false);
   setup();
 
-  const summary = screen.getByTestId("summary");
-  expect(summary.parentElement?.className).toContain("pb-(--sheet-snap-peek)");
-  expect(screen.queryByTestId("canvas")).toBeNull();
+  const summary = screen.getByTestId("map");
+  expect(summary.getAttribute("data-wide")).toBe("false");
+  expect(summary.parentElement?.className.split(/\s+/)).toEqual(expect.arrayContaining(["fixed", "inset-x-0", "bottom-0"]));
 
   const sheet = await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
   expect(within(sheet).getByTestId("timeline")).toBeTruthy();
@@ -196,10 +208,96 @@ it("swaps between the grid and the sheet when the viewport crosses lg", async ()
 
   act(() => media.set(true));
   expect(screen.queryByRole("dialog")).toBeNull();
-  expect(screen.getByTestId("canvas")).toBeTruthy();
-  expect(screen.queryByTestId("summary")).toBeNull();
+  expect(screen.getByTestId("map").getAttribute("data-wide")).toBe("true");
+  expect(screen.getByTestId("map")).toBeTruthy();
 
   act(() => media.set(false));
   expect(await screen.findByRole("dialog", { name: "Lịch trình theo ngày" })).toBeTruthy();
-  expect(screen.getByTestId("summary")).toBeTruthy();
+  expect(screen.getByTestId("map").getAttribute("data-wide")).toBe("false");
+});
+
+it("below lg the map top follows the measured header and the viewport follows the sheet snap (medium by default)", () => {
+  installMatchMedia(false);
+  Object.defineProperty(window, "innerHeight", { configurable: true, value: 844 });
+  setup();
+  act(() => ro.resize(headerBox(), 64));
+
+  const background = screen.getByTestId("map").parentElement as HTMLElement;
+  expect(background.style.top).toBe("64px");
+  const covered = snapHeightPx(844, 64, "medium");
+  expect(lastFrame().viewport).toEqual({
+    padding: { top: 64, left: 32, right: 32, bottom: covered + 32 },
+    coveredBottom: covered,
+  });
+  expect((h.sheetProps.mock.calls.at(-1)?.[0] as { snap: string }).snap).toBe("medium");
+});
+
+it("reports a new viewport when the sheet snap changes", () => {
+  installMatchMedia(false);
+  Object.defineProperty(window, "innerHeight", { configurable: true, value: 844 });
+  setup();
+  act(() => ro.resize(headerBox(), 64));
+
+  act(() => (h.sheetProps.mock.calls.at(-1)?.[0] as { onSnapChange(snap: string): void }).onSnapChange("peek"));
+
+  expect(lastFrame().viewport.coveredBottom).toBe(snapHeightPx(844, 64, "peek"));
+  expect((h.sheetProps.mock.calls.at(-1)?.[0] as { snap: string }).snap).toBe("peek");
+});
+
+it("closing the sheet makes the viewport reserve the reopen chip area", async () => {
+  installMatchMedia(false);
+  setup();
+  const sheet = await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
+
+  await userEvent.click(within(sheet).getByRole("button", { name: "Đóng" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+
+  expect(lastFrame().viewport.coveredBottom).toBe(76);
+  expect(lastFrame().viewport.padding.bottom).toBe(108);
+});
+
+it("a sheet snap request moves the sheet to that snap, and reopens it when closed; the same seq is not re-applied", async () => {
+  installMatchMedia(false);
+  const view = setup();
+  const sheet = await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
+  act(() => (h.sheetProps.mock.calls.at(-1)?.[0] as { onSnapChange(snap: string): void }).onSnapChange("peek"));
+  expect((h.sheetProps.mock.calls.at(-1)?.[0] as { snap: string }).snap).toBe("peek");
+
+  const request = (seq: number) => ({ seq, snap: "medium" as const });
+  const rerenderWith = (seq: number) =>
+    view.rerender(
+      <EditorLayout
+        header={<div data-testid="header">header</div>}
+        map={renderMap}
+        sheetSnapRequest={request(seq)}
+        timeline={<div data-testid="timeline">timeline</div>}
+      />,
+    );
+  rerenderWith(1);
+  expect((h.sheetProps.mock.calls.at(-1)?.[0] as { snap: string }).snap).toBe("medium");
+
+  // Cùng seq: không áp lại dù người dùng đã kéo sheet xuống mức khác.
+  act(() => (h.sheetProps.mock.calls.at(-1)?.[0] as { onSnapChange(snap: string): void }).onSnapChange("expanded"));
+  rerenderWith(1);
+  expect((h.sheetProps.mock.calls.at(-1)?.[0] as { snap: string }).snap).toBe("expanded");
+
+  // Đóng sheet rồi yêu cầu mới: mở lại ở mức vừa.
+  await userEvent.click(within(sheet).getByRole("button", { name: "Đóng" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  rerenderWith(2);
+  expect(await screen.findByRole("dialog", { name: "Lịch trình theo ngày" })).toBeTruthy();
+  expect((h.sheetProps.mock.calls.at(-1)?.[0] as { snap: string; open: boolean })).toMatchObject({ snap: "medium", open: true });
+});
+
+it("reopening with the chip goes back to the medium snap", async () => {
+  installMatchMedia(false);
+  setup();
+  const sheet = await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
+  act(() => (h.sheetProps.mock.calls.at(-1)?.[0] as { onSnapChange(snap: string): void }).onSnapChange("expanded"));
+
+  await userEvent.click(within(sheet).getByRole("button", { name: "Đóng" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  await userEvent.click(screen.getByRole("button", { name: "Lịch trình" }));
+
+  expect((h.sheetProps.mock.calls.at(-1)?.[0] as { snap: string }).snap).toBe("medium");
 });

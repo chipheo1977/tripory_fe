@@ -81,14 +81,14 @@ it("sortable item: click ⋯ mở menu", async () => {
 
 it("sortable item trong timeline sheet: click ⋯ mở menu", async () => {
   const user = userEvent.setup();
-  render(<EditorLayout canvas={null} header={<div>header</div>} summary={<div>tóm tắt</div>} timeline={<SortableRow />} />);
+  render(<EditorLayout header={<div>header</div>} map={() => null} timeline={<SortableRow />} />);
   await user.click(screen.getByRole("button", { name: 'Thao tác cho "Hồ Xuân Hương"' }));
   expect(await screen.findByRole("menuitem", { name: "Sửa" })).toBeTruthy();
 });
 
 it("sortable item trong timeline sheet: menu nằm trên popup của sheet (z-index)", async () => {
   const user = userEvent.setup();
-  render(<EditorLayout canvas={null} header={<div>header</div>} summary={<div>tóm tắt</div>} timeline={<SortableRow />} />);
+  render(<EditorLayout header={<div>header</div>} map={() => null} timeline={<SortableRow />} />);
   await user.click(screen.getByRole("button", { name: 'Thao tác cho "Hồ Xuân Hương"' }));
   await screen.findByRole("menu");
   const positioner = document.querySelector("[data-align]") as HTMLElement;

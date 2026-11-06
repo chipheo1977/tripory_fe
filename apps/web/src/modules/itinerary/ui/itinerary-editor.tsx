@@ -311,7 +311,6 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
     <NavigationGuardProvider value={leave.guard}>
       <title>{`${itinerary.title} · Tripory`}</title>
       <EditorLayout
-        canvas={<TripSummary itinerary={itinerary} onEdit={openTripInfo} variant="canvas" />}
         header={
           <EditorHeader
             itinerary={itinerary}
@@ -323,7 +322,7 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
             tripInfoButtonRef={tripInfoButtonRef}
           />
         }
-        summary={<TripSummary itinerary={itinerary} onEdit={openTripInfo} variant="compact" />}
+        map={(frame) => <TripSummary itinerary={itinerary} onEdit={openTripInfo} variant={frame.wide ? "canvas" : "compact"} />}
         timeline={
           <TimelinePanel
             addButtonRef={addButtonRef}

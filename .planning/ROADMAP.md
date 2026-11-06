@@ -180,7 +180,7 @@ Mở lại lần 2 (2026-11-05, bản đồ trong editor + tab Tổng quan, PUB-
 - [x] 04-47-PLAN.md — Tab "Tổng quan" trong `DayTabs`, `OverviewSummary`, `DayOverviewRow`, `OverviewPanel`, chuỗi dòng ngày (wave 28)
 - [x] 04-49-PLAN.md — `EditorLayout` slot bản đồ dùng chung desktop/mobile, vùng an toàn theo mức sheet; `EditorMapArea` tải/rỗng/lỗi → TripSummary (wave 29)
 - [x] 04-50-PLAN.md — Danh sách chọn điểm khi bản đồ sẵn sàng (D-126), tách `DayPanel`, điểm nối cho editor (wave 30)
-- [ ] 04-51-PLAN.md — Nối bản đồ + Tổng quan vào editor: tab mặc định, đồng bộ chọn pin↔danh sách, canh khung, thêm từ Tổng quan (wave 31)
+- [x] 04-51-PLAN.md — Nối bản đồ + Tổng quan vào editor: tab mặc định, đồng bộ chọn pin↔danh sách, canh khung, thêm từ Tổng quan (wave 31)
 - [ ] 04-52-PLAN.md — Cổng lint/typecheck/test từng gói + `next build` (worker, tách bundle) + mục E checklist UAT (wave 32)
 - [ ] 04-53-PLAN.md — UAT thủ công bản đồ, gồm kiểm bằng mắt Hoàng Sa/Trường Sa (checkpoint; wave 33)
 

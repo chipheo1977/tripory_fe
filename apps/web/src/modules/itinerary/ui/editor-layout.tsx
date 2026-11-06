@@ -115,7 +115,8 @@ function NarrowBody({ timeline, map, headerHeight, sheetSnapRequest }: NarrowBod
         open={timelineOpen}
         snap={snap}
       >
-        <SheetContent fillSnap>
+        {/* `pb-0`: đáy popup không đệm để thanh "Thêm điểm đến" dính sát đáy màn hình; vùng an toàn nằm trong thanh. */}
+        <SheetContent className="pb-0" fillSnap>
           <SheetTitle className="sr-only">{TIMELINE_HEADING}</SheetTitle>
           <TimelineHiddenBottomProvider value={sheetHiddenBottomPx(sheetInput)}>{timeline}</TimelineHiddenBottomProvider>
         </SheetContent>

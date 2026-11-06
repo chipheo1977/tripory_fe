@@ -23,7 +23,7 @@ it("trong Sheet bị dịch xuống: nâng `bottom` đúng phần đáy popup b�
     </TimelineHiddenBottomProvider>,
   );
 
-  expect(bar().style.bottom).toContain("270px");
+  expect(bar().style.bottom).toBe("270px");
 });
 
 it("không có nút bên trong thì thanh trống để `empty:hidden` ẩn đi", () => {

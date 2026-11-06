@@ -150,6 +150,16 @@ it("below lg shows the map as a fixed background behind a non-modal timeline she
   expect(screen.queryByRole("button", { name: "Lịch trình" })).toBeNull();
 });
 
+it("below lg the sheet popup has no bottom padding so the add bar sits flush with the screen bottom", async () => {
+  installMatchMedia(false);
+  setup();
+
+  const sheet = await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
+  const classes = sheet.className.split(/\s+/);
+  expect(classes).toContain("pb-0");
+  expect(classes.some((name) => name.startsWith("pb-[calc("))).toBe(false);
+});
+
 it("below lg lifts the timeline add bar above the hidden part of the sheet, and not at expanded or from lg", async () => {
   const timeline = (
     <TimelineAddBar>

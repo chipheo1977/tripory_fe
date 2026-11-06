@@ -1,18 +1,22 @@
 import { makeApiError } from "@tripory/api-client";
 import type { Viewer } from "@tripory/identity";
-import type { Itinerary, Waypoint } from "@tripory/itinerary";
+import { VIETNAM_VIEW_BOUNDS, type Itinerary, type Waypoint } from "@tripory/itinerary";
 import { createWgs84Coordinate, parseItineraryId, parseUserId } from "@tripory/shared-kernel";
 import { notify } from "@tripory/ui-web";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { destinationCatalog } from "@/composition/destination-catalog";
 import { makeQueryClient } from "@/composition/query-client";
 import { installFakeResizeObserver, type FakeResizeObserverHandle } from "@/test/fake-resize-observer";
 import { ItineraryEditor } from "./itinerary-editor";
 import { clearEnteredFromList, markEnteredFromList } from "./entry-flag";
 
 const h = vi.hoisted(() => ({
+  // Props cuối của bản đồ giả và của EditorLayout, để test đọc pin, camera và yêu cầu mức sheet.
+  map: { props: null as Record<string, any> | null }, // eslint-disable-line @typescript-eslint/no-explicit-any
+  layout: { props: null as Record<string, any> | null }, // eslint-disable-line @typescript-eslint/no-explicit-any
   getById: vi.fn(),
   addWaypoint: vi.fn(),
   deleteWaypoint: vi.fn(),
@@ -44,6 +48,23 @@ vi.mock("@/composition/itinerary.client", async () => {
       shortLinks: { resolve: unused },
     }),
     itineraryUnload: { deleteWaypoint: unused },
+  };
+});
+// Bản đồ thật cần WebGL: thay bằng bản giả lưu props; test gọi `onStatusChange`, `onPinSelect`, `onBackgroundClick` bằng tay.
+vi.mock("./map/trip-map.lazy", () => ({
+  LazyTripMap: function FakeTripMap(props: Record<string, unknown>) {
+    h.map.props = props;
+    return <div data-testid="fake-trip-map" />;
+  },
+}));
+vi.mock("./editor-layout", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./editor-layout")>();
+  return {
+    ...actual,
+    EditorLayout: function RecordingLayout(props: React.ComponentProps<typeof actual.EditorLayout>) {
+      h.layout.props = props;
+      return <actual.EditorLayout {...props} />;
+    },
   };
 });
 vi.mock("@/composition/session-events.client", async (importOriginal) => {
@@ -213,17 +234,30 @@ it("shows the forbidden body without edit actions when the owner is somebody els
   expect(screen.queryByRole("button", { name: "Xóa lịch trình" })).toBeNull();
 });
 
-it("opens the owner's editor on Day 1 with the itinerary title in the document title", async () => {
+const openDayTab = (user: ReturnType<typeof userEvent.setup>, day: number) =>
+  user.click(screen.getByRole("tab", { name: new RegExp(`^Ngày ${day}`) }));
+
+it("opens the owner's editor on the Overview tab (it has waypoints) with the itinerary title in the document title", async () => {
   setup();
   await loaded();
-  expect(screen.getByRole("tab", { name: "Ngày 1" }).getAttribute("aria-selected")).toBe("true");
-  expect(screen.getByRole("list", { name: "Điểm đến Ngày 1" })).toBeTruthy();
+  expect(screen.getByRole("tab", { name: /^Tổng quan/ }).getAttribute("aria-selected")).toBe("true");
+  expect(screen.getByRole("heading", { level: 3, name: "Các ngày" })).toBeTruthy();
+  expect(screen.queryByRole("list", { name: "Điểm đến Ngày 1" })).toBeNull();
   await waitFor(() => expect(document.title).toBe("Sài Gòn 3 ngày · Tripory"));
+});
+
+it("opens on Ngày 1 when the itinerary has no waypoint yet", async () => {
+  server = makeItinerary({ waypoints: [] });
+  setup();
+  await loaded();
+  expect(screen.getByRole("tab", { name: /^Ngày 1/ }).getAttribute("aria-selected")).toBe("true");
+  expect(screen.getByText("Chưa có điểm đến nào trong Ngày 1")).toBeTruthy();
 });
 
 it("adds a waypoint at the end of the day, highlights it for 1500 ms and announces it", async () => {
   const { user } = setup();
   await loaded();
+  await openDayTab(user, 1);
   await user.click(screen.getByRole("button", { name: "Thêm điểm đến" }));
   const dialog = await screen.findByRole("dialog", { name: "Thêm điểm đến vào Ngày 1" });
   await user.type(within(dialog).getByLabelText(/^Tên/), "Chợ");
@@ -260,6 +294,7 @@ it("opens 'Thông tin chuyến đi' from the header 'i' button and from the summ
 it("deletes a waypoint with an undo toast, moves focus to the next card and restores focus on undo", async () => {
   const { user } = setup();
   await loaded();
+  await openDayTab(user, 1);
   await user.click(screen.getByRole("button", { name: 'Thao tác cho "Chợ Bến Thành"' }));
   await user.click(await screen.findByRole("menuitem", { name: "Xóa" }));
 
@@ -318,6 +353,7 @@ it("asks before leaving while a write is still pending", async () => {
   h.setDaySubtitle.mockImplementation(() => new Promise(() => undefined));
   const { user } = setup();
   await loaded();
+  await openDayTab(user, 1);
   await user.click(screen.getByRole("button", { name: "Thêm phụ đề cho Ngày 1" }));
   await user.type(screen.getByLabelText("Phụ đề Ngày 1"), "Trung tâm{Enter}");
   await user.click(screen.getByRole("button", { name: "Về Lịch trình của tôi" }));
@@ -428,4 +464,216 @@ it("warns before leaving the tab while an auto-save is still pending", async () 
   const event = new Event("beforeunload", { cancelable: true });
   window.dispatchEvent(event);
   expect(event.defaultPrevented).toBe(true);
+});
+
+// ---- Bản đồ và tab Tổng quan (PUB-06) ----
+type FakePin = { waypointId: string; state: string; labelDetail?: string };
+type FakeCamera = { seq: number; kind: string; target?: { kind: string; bounds?: unknown; center?: number[] }; center?: number[] };
+const mapProps = () => h.map.props ?? {};
+const pins = () => (mapProps().pins ?? []) as FakePin[];
+const pinOf = (id: string) => pins().find((pin) => pin.waypointId === id);
+const cameraCommand = () => mapProps().camera as FakeCamera;
+const reportMap = (status: "loading" | "ready" | "error") => act(() => mapProps().onStatusChange(status));
+const selectPin = (id: string) => act(() => mapProps().onPinSelect(id));
+const setMobile = () => {
+  window.matchMedia = ((query: string) =>
+    ({ matches: false, media: query, addEventListener: () => undefined, removeEventListener: () => undefined }) as unknown as MediaQueryList) as typeof window.matchMedia;
+};
+const dayRow = (day: number) => screen.getByRole("button", { name: new RegExp(`^Xem Ngày ${day}`) });
+
+it("starts with a fit command over all waypoints when it opens on the Overview tab", async () => {
+  setup();
+  await loaded();
+  expect(cameraCommand()).toMatchObject({ seq: 1, kind: "fit" });
+  expect(pins()).toHaveLength(3);
+});
+
+it("fits the bounding box of the destination province when there is no waypoint yet, and shows the hint chip once ready", async () => {
+  server = makeItinerary({ waypoints: [], destinationCode: "vn-da-nang" });
+  setup();
+  await loaded();
+  expect(cameraCommand()).toMatchObject({ kind: "fit", target: { kind: "bounds", bounds: destinationCatalog.findBySlug("vn-da-nang")?.view.bounds } });
+  expect(screen.queryByText("Thêm điểm đến để thấy trên bản đồ")).toBeNull();
+  reportMap("ready");
+  expect(screen.getByText("Thêm điểm đến để thấy trên bản đồ")).toBeTruthy();
+});
+
+it("fits Vietnam when there is no waypoint and no destination", async () => {
+  server = makeItinerary({ waypoints: [], destinationCode: null });
+  setup();
+  await loaded();
+  expect(cameraCommand()).toMatchObject({ kind: "fit", target: { kind: "bounds", bounds: VIETNAM_VIEW_BOUNDS } });
+});
+
+it("opens the day tab of a stored add draft", async () => {
+  sessionStorage.setItem(
+    `tripory:draft:v1:${OWNER}:${ID}:add:2`,
+    JSON.stringify({ savedAt: Date.now(), values: { name: "Quán", location: "10.77, 106.70", address: "", notes: "" } }),
+  );
+  setup();
+  expect(await screen.findByRole("dialog", { name: "Thêm điểm đến vào Ngày 2" })).toBeTruthy();
+  // Hộp thoại modal đặt phần còn lại là aria-hidden nên phải tìm tab với `hidden`.
+  expect(screen.getByRole("tab", { name: /^Ngày 2/, hidden: true }).getAttribute("aria-selected")).toBe("true");
+});
+
+it("changing tab clears the selection, dims the other days and fits the new tab", async () => {
+  const { user } = setup();
+  await loaded();
+  const before = cameraCommand().seq;
+
+  await openDayTab(user, 1);
+
+  expect(pinOf("w-a")?.state).toBe("normal");
+  expect(pinOf("w-c")?.state).toBe("dimmed");
+  expect(cameraCommand()).toMatchObject({ kind: "fit" });
+  expect(cameraCommand().seq).toBeGreaterThan(before);
+});
+
+it("on a day tab a pin selects its card, keeps the form closed, reveals the pin and asks the sheet for the medium snap", async () => {
+  const { user } = setup();
+  await loaded();
+  await openDayTab(user, 1);
+  reportMap("ready");
+
+  selectPin("w-a");
+
+  expect(pinOf("w-a")?.state).toBe("selected");
+  expect(mainButton("w-a")?.getAttribute("aria-current")).toBe("true");
+  expect(screen.queryByRole("dialog")).toBeNull();
+  expect(cameraCommand()).toMatchObject({ kind: "reveal" });
+  expect(h.layout.props?.sheetSnapRequest).toEqual({ seq: 1, snap: "medium" });
+  selectPin("w-b");
+  expect(h.layout.props?.sheetSnapRequest).toEqual({ seq: 2, snap: "medium" });
+});
+
+it("on the Overview tab a pin highlights its day row with a two-line label and does not change the tab", async () => {
+  setup();
+  await loaded();
+  reportMap("ready");
+
+  selectPin("w-c");
+
+  expect(screen.getByRole("tab", { name: /^Tổng quan/ }).getAttribute("aria-selected")).toBe("true");
+  expect(dayRow(2).className.split(/\s+/)).toContain("ring-text");
+  expect(dayRow(1).className.split(/\s+/)).not.toContain("ring-text");
+  expect(pins().find((pin) => pin.waypointId === "w-c")?.labelDetail).toBe("Ngày 2");
+});
+
+it("before the map is ready the main button opens the edit form; after it is ready it selects and moves the map keeping the zoom", async () => {
+  const { user } = setup();
+  await loaded();
+  await openDayTab(user, 1);
+
+  await user.click(mainButton("w-a")!);
+  const dialog = await screen.findByRole("dialog", { name: "Sửa điểm đến" });
+  await user.click(within(dialog).getByRole("button", { name: "Hủy" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+
+  reportMap("ready");
+  await user.click(mainButton("w-a")!);
+
+  expect(screen.queryByRole("dialog")).toBeNull();
+  expect(cameraCommand()).toMatchObject({ kind: "focus", center: [106.7009, 10.7769] });
+  expect(mainButton("w-a")?.getAttribute("aria-current")).toBe("true");
+});
+
+it("clicking a day row on the Overview tab opens that day and focuses its tab", async () => {
+  const { user } = setup();
+  await loaded();
+
+  await user.click(dayRow(2));
+
+  const tab = screen.getByRole("tab", { name: /^Ngày 2/ });
+  expect(tab.getAttribute("aria-selected")).toBe("true");
+  await waitFor(() => expect(document.activeElement).toBe(tab));
+  expect(cameraCommand()).toMatchObject({ kind: "fit" });
+});
+
+it("from lg, hovering a day row emphasises that day on the map and leaving restores it", async () => {
+  const { user } = setup();
+  await loaded();
+
+  await user.hover(dayRow(2));
+  expect(pinOf("w-a")?.state).toBe("dimmed");
+  expect(pinOf("w-c")?.state).toBe("normal");
+
+  await user.unhover(dayRow(2));
+  expect(pins().map((pin) => pin.state)).toEqual(["normal", "normal", "normal"]);
+});
+
+it("below lg, hovering a day row does not change the pins", async () => {
+  setMobile();
+  const { user } = setup();
+  await loaded();
+
+  await user.hover(dayRow(2));
+
+  expect(pins().map((pin) => pin.state)).toEqual(["normal", "normal", "normal"]);
+});
+
+it("adds a waypoint from the Overview tab: day field defaults to the last day, the tab stays, the map moves without selecting, the day row flashes", async () => {
+  const { user } = setup();
+  await loaded();
+
+  await user.click(screen.getByRole("button", { name: "Thêm điểm đến" }));
+  const dialog = await screen.findByRole("dialog", { name: "Thêm điểm đến" });
+  expect(within(dialog).getByRole("combobox", { name: "Ngày" }).textContent).toContain("Ngày 2");
+  await user.type(within(dialog).getByLabelText(/^Tên/), "Chợ");
+  await user.type(within(dialog).getByLabelText(/^Vị trí/), "10.7725, 106.7009");
+  await user.click(within(dialog).getByRole("button", { name: "Thêm điểm đến" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+
+  expect(screen.getByRole("tab", { name: /^Tổng quan/ }).getAttribute("aria-selected")).toBe("true");
+  expect(screen.getByText("Đã thêm Chợ vào Ngày 2")).toBeTruthy();
+  // Bản thêm giả của BE luôn trả tọa độ COORD, nên bản đồ di chuyển tới đó.
+  expect(cameraCommand()).toMatchObject({ kind: "focus", center: [106.7009, 10.7769] });
+  expect(pins().some((pin) => pin.state === "selected")).toBe(false);
+  expect(dayRow(2).className).toContain("bg-primary-subtle");
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "Thêm điểm đến" })));
+  await waitFor(() => expect(dayRow(2).className).not.toContain("bg-primary-subtle"), { timeout: 2500 });
+});
+
+it("deleting the selected waypoint clears the selection and does not move the map", async () => {
+  const { user } = setup();
+  await loaded();
+  await openDayTab(user, 1);
+  reportMap("ready");
+  await user.click(mainButton("w-a")!);
+  const seq = cameraCommand().seq;
+
+  await user.click(screen.getByRole("button", { name: 'Thao tác cho "Chợ Bến Thành"' }));
+  await user.click(await screen.findByRole("menuitem", { name: "Xóa" }));
+
+  await waitFor(() => expect(mainButton("w-a")).toBeNull());
+  expect(pinOf("w-a")).toBeUndefined();
+  expect(pins().some((pin) => pin.state === "selected")).toBe(false);
+  expect(cameraCommand().seq).toBe(seq);
+});
+
+it("clicking the map background clears the selection", async () => {
+  const { user } = setup();
+  await loaded();
+  await openDayTab(user, 1);
+  reportMap("ready");
+  selectPin("w-a");
+  expect(pinOf("w-a")?.state).toBe("selected");
+
+  act(() => mapProps().onBackgroundClick());
+
+  expect(pinOf("w-a")?.state).toBe("normal");
+  expect(mainButton("w-a")?.getAttribute("aria-current")).toBeNull();
+});
+
+it("when the map fails it shows the notice and the summary, and the main button edits again", async () => {
+  const { user } = setup();
+  await loaded();
+  await openDayTab(user, 1);
+  reportMap("ready");
+
+  reportMap("error");
+
+  expect(screen.getByText("Không tải được bản đồ")).toBeTruthy();
+  expect(screen.getByRole("region", { name: "Thông tin chuyến đi" })).toBeTruthy();
+  await user.click(mainButton("w-a")!);
+  expect(await screen.findByRole("dialog", { name: "Sửa điểm đến" })).toBeTruthy();
 });

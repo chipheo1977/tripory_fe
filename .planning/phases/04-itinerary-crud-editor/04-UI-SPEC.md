@@ -1362,3 +1362,80 @@ Checker đã duyệt (APPROVED, không có BLOCK). Orchestrator đã kiểm lạ
 - Spec này viết `text-muted`, `text-subtle`, `text-disabled`, `z-(--z-*)` theo ngữ nghĩa. Khi triển khai thì dùng đúng tên class sau khi đã sửa.
 
 - (2026-10-30) Hai lỗi trên đã được sửa trong `theme.css` (có `--z-index-*` và `--text-color-muted|subtle|disabled`). Các mục mới của đợt mở lại dùng class thật: `z-sticky`, `z-modal`, `text-muted`, `text-subtle`, `text-disabled`. Các mục cũ còn ghi `z-(--z-*)` đọc theo nghĩa `z-sticky`/`z-modal`/`z-overlay`.
+
+---
+
+## Bổ sung 2026-11-06: tìm địa điểm
+
+Phạm vi: ô "Vị trí" trong form thêm/sửa điểm (`WaypointFormDialog`), MAP-01, `04-CONTEXT.md` D-141..D-153. Không đổi các ô Tên, Địa chỉ, Ghi chú, Ngày; không thêm trường mới (D-149).
+
+### Hai chế độ của ô "Vị trí" (D-150)
+
+- **Tìm** (mặc định khi `location` trống lúc mở form, tức thêm mới không có bản nháp): ô `SearchInput` vai trò combobox, danh sách kết quả hiện **inline ngay dưới ô** (không popup nổi, vì form là bottom sheet trên mobile). Dưới danh sách là dòng ghi công. Dưới cùng là link phụ "Nhập tọa độ thủ công" (`Button variant="ghost"`).
+- **Đã chọn** (chế độ Tìm sau khi chọn một mục): ô tìm và danh sách ẩn, thay bằng thẻ tóm tắt "Đã chọn · {tên} · {địa chỉ} · {lat, lng 4 số}" kèm nút "Đổi địa điểm" (bấm thì quay lại ô tìm, focus vào ô).
+- **Thủ công** (mặc định khi form mở với vị trí có sẵn: chế độ sửa hoặc khôi phục bản nháp): `LocationField` hiện có giữ nguyên (tọa độ "lat, lng" hoặc link Google Maps, dòng "Đã nhận: …", lỗi parse sẵn có). Dưới ô là dòng trạng thái reverse (xem bảng copy) và link "Tìm địa điểm" để quay lại chế độ Tìm.
+- Chỉ một input nhận `field.ref` của RHF tại một thời điểm (input đang hiện), để lỗi `LOCATION_REQUIRED` focus đúng ô.
+- Đổi chế độ không xóa giá trị `location` đã có; nhãn "Vị trí" (bắt buộc) giữ nguyên ở cả hai chế độ.
+
+### Copy (tiếng Việt, dùng nguyên văn)
+
+| Key | Text |
+|---|---|
+| search label (aria-label) | Tìm địa điểm |
+| placeholder | Tìm tên địa điểm, ví dụ Hồ Xuân Hương |
+| suggestions heading | Gợi ý ở {tên điểm đến} |
+| results heading | Kết quả tìm kiếm |
+| loading | Đang tìm… |
+| empty search | Không tìm thấy "{từ khóa}". Thử tên khác hoặc nhập tọa độ thủ công. |
+| hint (no destination / no suggestions) | Gõ tên địa điểm để tìm. |
+| error | Chưa tìm được địa điểm lúc này. Thử lại hoặc nhập tọa độ thủ công. |
+| rate limited | Bạn tìm hơi nhanh. Đợi vài giây rồi thử lại. |
+| retry button | Thử lại |
+| SR status | {n} kết quả / Không có kết quả |
+| manual link / back link | Nhập tọa độ thủ công / Tìm địa điểm |
+| picked summary | Đã chọn · {tên} · {địa chỉ} · {lat, lng 4 số} ; button "Đổi địa điểm" |
+| reverse loading / filled / none / failed | Đang tìm địa chỉ cho tọa độ này… / Đã điền địa chỉ từ OpenStreetMap, bạn có thể sửa. / Không tìm thấy địa chỉ cho tọa độ này. Bạn có thể tự nhập. / Chưa lấy được địa chỉ lúc này. Bạn có thể tự nhập. |
+| name description | Đã lấy tên từ địa điểm đã chọn, bạn có thể sửa. |
+| attribution | Dữ liệu địa điểm © OpenStreetMap (link https://www.openstreetmap.org/copyright, tab mới, `rel="noopener noreferrer"`) |
+| category labels | Tham quan · Ăn uống · Lưu trú · Địa điểm |
+| location required | Vui lòng chọn địa điểm hoặc nhập tọa độ. |
+
+Mã lỗi mới trong `ERROR_MESSAGES`: `Places.RateLimited` → copy "rate limited"; `Places.Unavailable` → copy "error"; `Bff.InvalidQuery` → "Từ khóa tìm kiếm không hợp lệ." (D-153). Dòng mô tả dưới Tên sẵn có "Đã lấy tên từ link, bạn có thể sửa." giữ nguyên cho nguồn link (D-149).
+
+### Trạng thái danh sách (D-146, D-150, D-153)
+
+| Trạng thái | Khi nào | Hiển thị |
+|---|---|---|
+| hint | Từ khóa < 2 ký tự và lịch trình không có điểm đến, hoặc gợi ý trả rỗng | Text "Gõ tên địa điểm để tìm.", không heading, không gửi request khi không có điểm đến |
+| loading | Đang tải gợi ý hoặc kết quả (lần đầu cho truy vấn đó) | Spinner của `SearchInput` + dòng "Đang tìm…"; giữ kết quả cũ nếu có (`keepPreviousData`) |
+| ready (gợi ý) | Từ khóa < 2 ký tự, có điểm đến, có gợi ý | Heading "Gợi ý ở {tên điểm đến}", tối đa 15 mục theo thứ tự Tham quan → Ăn uống → Lưu trú |
+| ready (kết quả) | Từ khóa ≥ 2 ký tự, có kết quả | Heading "Kết quả tìm kiếm", tối đa 10 mục |
+| empty | Từ khóa ≥ 2 ký tự, không có kết quả | "Không tìm thấy "{từ khóa}". Thử tên khác hoặc nhập tọa độ thủ công." |
+| error | 502, lỗi mạng, lỗi khác | Copy "error" + nút "Thử lại" (gọi lại đúng truy vấn đang hiện) |
+| rate limited | 429 `Places.RateLimited` | Copy "rate limited" + nút "Thử lại" |
+
+Mỗi dòng kết quả: dòng 1 là tên (không có tên thì dùng địa chỉ); dòng 2 là nhãn loại (Tham quan / Ăn uống / Lưu trú / Địa điểm) và địa chỉ, cắt "…" một dòng. Vùng chạm mỗi dòng ≥ 44px. Lỗi tìm kiếm không bao giờ chặn gửi form (D-153).
+
+### Bàn phím và ARIA (D-150)
+
+- Input: `role="combobox"`, `aria-label="Tìm địa điểm"`, `aria-expanded` (true khi danh sách có mục), `aria-controls` = id của listbox, `aria-autocomplete="list"`, `aria-activedescendant` = id của mục đang chọn (bỏ khi không có), `aria-invalid`/`aria-describedby` nối với lỗi của ô Vị trí.
+- Danh sách: `<ul role="listbox" aria-label={heading}>`, mỗi mục `<li role="option" id aria-selected>`; focus luôn ở input (mẫu activedescendant), mục không nhận Tab.
+- ↓/↑: đổi mục đang chọn, vòng lại ở hai đầu; chưa có mục nào thì ↓ chọn mục đầu, ↑ chọn mục cuối.
+- Enter: có mục đang chọn thì chọn mục đó; không có thì không làm gì. Enter trong ô tìm **không bao giờ gửi form** (`preventDefault`).
+- Esc theo thứ tự: (1) có mục đang chọn thì bỏ chọn; (2) còn chữ thì xóa chữ; hai bước này `stopPropagation` và dùng `data-escape-scope` để không đóng dialog (giống `destination-block.tsx`); (3) ô đã trống thì để Esc đi tiếp, dialog đóng như bình thường.
+- Tab: rời ô theo thứ tự tự nhiên (input → nút "Thử lại" nếu có → link ghi công → "Nhập tọa độ thủ công").
+- Chuột/chạm: `onMouseDown` trên mục gọi `preventDefault` để input không mất focus trước khi click chọn.
+- Vùng `role="status"` (ẩn trực quan) đọc "{n} kết quả" hoặc "Không có kết quả" sau mỗi lần danh sách đổi; trạng thái lỗi đọc copy lỗi.
+- Mục đọc tên + nhãn loại + địa chỉ. Thẻ "Đã chọn" là text thường; nút "Đổi địa điểm" focus được.
+- Chọn xong: focus chuyển tới nút "Đổi địa điểm"; bấm "Đổi địa điểm" thì focus về ô tìm. Chuyển chế độ bằng link thì focus vào input của chế độ mới.
+
+### Ghi công (D-142, chính sách Nominatim/Photon)
+
+- Dòng "Dữ liệu địa điểm © OpenStreetMap" đặt **ngay dưới danh sách kết quả** trong chế độ Tìm, chữ `text-xs text-muted`, link tới https://www.openstreetmap.org/copyright, mở tab mới, `rel="noopener noreferrer"`. Luôn hiện ở chế độ Tìm (kể cả trạng thái hint/lỗi). Ở chế độ Thủ công, dòng "Đã điền địa chỉ từ OpenStreetMap, bạn có thể sửa." đã nêu nguồn.
+
+### Hành vi ở 320px
+
+- Form là bottom sheet modal mức expanded (`ResponsiveFormSurface`); danh sách inline nằm trong luồng cuộn của sheet nên không bị bàn phím ảo che (cuộn mục đang chọn vào khung bằng `scrollIntoView({ block: 'nearest' })`).
+- Danh sách tối đa khoảng 5 dòng thấy được trước khi cuộn trong sheet; không có thanh cuộn lồng riêng.
+- Không tràn ngang: tên và địa chỉ cắt "…", nhãn loại không xuống dòng; thẻ "Đã chọn" xuống dòng tự nhiên, nút "Đổi địa điểm" xuống dòng riêng nếu thiếu chỗ.
+- Link ghi công và link "Nhập tọa độ thủ công" có vùng chạm ≥ 44px.

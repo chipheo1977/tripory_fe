@@ -3,7 +3,8 @@
 **Gathered:** 2026-10-23
 **Updated:** 2026-10-30 (mở lại: form tạo lịch trình 4 khối, nhiều ảnh bìa, tự lưu "Thông tin chuyến đi"; D-52..D-101)
 **Updated:** 2026-11-05 (mở lại lần 2: bản đồ MapLibre + OpenFreeMap trong editor, tab Tổng quan; PUB-06; D-111..D-140)
-**Status:** Ready for planning (phần mở lại lần 2: bản đồ trong editor; phần mở lại ITIN-02/ITIN-03 đã xong 41/41 plan)
+**Updated:** 2026-11-06 (mở lại lần 3: tìm địa điểm, MAP-01; D-141..D-153)
+**Status:** Ready for execution (phần mở lại lần 3: tìm địa điểm MAP-01, plan 04-55..04-58; mở lại lần 2 bản đồ đã xong 04-42..04-53; phần mở lại ITIN-02/ITIN-03 đã xong 41/41 plan)
 
 <domain>
 ## Phase Boundary
@@ -31,10 +32,14 @@ Phase này giao, cho người dùng đã đăng nhập và bằng API BE thật:
 13. Cập nhật yêu cầu: PUB-06 vào Phase 4; PUB-02 về Phase 5 chỉ còn nút chuyển Bài viết/Bản đồ; bỏ chữ "SVG" (D-129, D-130).
 Không cần thay đổi BE cho phần này: bản đồ chỉ đọc tọa độ waypoint đã có.
 
+**Mở lại lần 3, 2026-11-06 (tìm địa điểm, MAP-01):**
+
+14. Làm lại ô "Vị trí" của form thêm/sửa điểm: tìm địa điểm theo tên trong phạm vi Việt Nam (Photon, dự phòng Nominatim chỉ cho reverse) qua BFF `/api/places/*` sau port `PlaceSearchProvider`; danh sách gợi ý mặc định theo điểm đến của lịch trình; chọn kết quả thì tự điền vị trí, địa chỉ, tên; dán tọa độ/link Google Maps giữ ở lối phụ "Nhập tọa độ thủ công" và tọa độ nhập tay được tra địa chỉ để tự điền; bỏ mọi kết quả ở Hoàng Sa, Trường Sa hoặc ngoài Việt Nam (D-141..D-153). Không cần thay đổi BE: vẫn chỉ lưu tên, địa chỉ, tọa độ (D-152).
+
 Nằm ngoài phase:
 - ~~Bản đồ SVG trong editor và trang công khai (PUB-02, PUB-06 → Phase 5).~~ Đã đổi 2026-11-05: bản đồ trong editor (PUB-06) làm ở phần mở lại lần 2 dưới đây (mục 11). Phần còn lại ngoài phase: nút chuyển Bài viết/Bản đồ trên trang công khai (PUB-02 → Phase 5) và ảnh Open Graph (PUB-05 → Phase 5).
 - Trang công khai `/itineraries/[id]`, copy link / Web Share / QR, **hộp chia sẻ sau khi xuất bản** (D-40 → Phase 5, cùng PUB-04).
-- Tìm địa điểm theo tên (MAP-01), bấm lên bản đồ để chọn vị trí (MAP-02): v2.
+- ~~Tìm địa điểm theo tên (MAP-01)~~, bấm lên bản đồ để chọn vị trí (MAP-02): v2. **[Lệch 2026-11-06: tìm địa điểm theo tên (MAP-01) làm trong Phase 4 ở phần mở lại lần 3 (mục 14, D-141). Bấm lên bản đồ để chọn vị trí (phần còn lại của MAP-02) vẫn ở v2.]**
 - Kéo waypoint giữa các ngày, xóa/đổi thứ tự ngày, hủy xuất bản: BE không có endpoint.
 - Ngày thực theo `startDate` (UX-03), khoảng cách từng chặng (UX-04), "Chuyển sang ngày…" (UX-07): v2.
 
@@ -74,6 +79,7 @@ Nằm ngoài phase:
   - Link Google Maps đầy đủ: các mẫu `@lat,lng`, `?q=lat,lng`, `!3d<lat>!4d<lng>`, `ll=`. Researcher liệt kê mẫu thật và thứ tự ưu tiên khi một link có nhiều mẫu (ví dụ ưu tiên `!3d!4d` của địa điểm hơn `@` của tâm khung nhìn).
   - **Link rút gọn `maps.app.goo.gl`** (và `goo.gl/maps`) được resolve qua **route handler server-side** của app. Route chỉ theo redirect (không tải hay trả nội dung trang), có allowlist host nguồn và host đích (`google.com/maps`, `maps.google.com`…), giới hạn số bước redirect, timeout ngắn. Route **bắt buộc có phiên** và **kiểm Origin** như BFF, trả `Cache-Control: no-store`, chỉ trả URL đích hoặc tọa độ đã parse. Như vậy nó không thành dịch vụ mở link/SSRF cho người lạ.
   - Logic parse là hàm thuần (domain hoặc application của `itinerary`, có test bảng mẫu). Route handler chỉ resolve redirect.
+  - **[Lệch 2026-11-06: ô Vị trí kiểu dán ở trên không còn là lối chính; nó thành chế độ "Nhập tọa độ thủ công" bên cạnh ô tìm địa điểm (D-150). Đường link Google Maps giữ nguyên, vẫn không geocoding. Tọa độ nhập tay nay được tra địa chỉ (reverse geocoding qua BFF, D-149). Văn bản gốc giữ làm lịch sử.]**
 - **D-21:** Dán hợp lệ thì ngay dưới ô hiện "Đã nhận: 10.7769, 106.7009" kèm icon thành công. Nếu link có tên địa điểm (`/place/<tên>/`) mà ô Tên đang trống thì **tự điền Tên** (decode URL, `+` thành khoảng trắng) để người dùng sửa. Không parse được thì hiện lỗi dưới ô kèm ví dụ đúng.
 - **D-22:** Thêm xong thì đóng form. Waypoint mới nằm cuối ngày đang chọn; danh sách cuộn tới điểm đó và làm nổi nó trong chốc lát (tôn trọng `prefers-reduced-motion`). Không toast. Lỗi BE hiện inline trong form, form vẫn mở.
 - **D-23:** Bấm vào thẻ waypoint thì mở form sửa. "Xóa" nằm trong menu ⋯ của thẻ và trong form sửa. **Tay cầm kéo tách riêng** và có `aria-label` (ví dụ "Kéo để sắp xếp {tên}"). `UpdateWaypoint` không đổi được ngày, nên form sửa không có ô ngày.
@@ -115,7 +121,7 @@ Nằm ngoài phase:
 - **D-47:** Nút back của editor: vào từ danh sách thì quay lại đúng trang danh sách cũ (giữ tab lọc trên URL và vị trí cuộn nhờ cache infinite query). Mở thẳng từ URL thì về `/itineraries/mine`.
 
 ### Bổ sung sau research (2026-10-24)
-- **D-48:** Link rút gọn của địa điểm (POI) resolve ra `/maps/place/<tên>/data=…` không có tọa độ (`04-RESEARCH.md` Pitfall 1, đã gọi thật). Giữ D-20 (chỉ theo redirect, không geocoding). Kết quả `no-coordinate` thì vẫn tự điền Tên/Địa chỉ theo D-49 và hiện lỗi dưới ô Vị trí: **"Link này chỉ có tên địa điểm, không có tọa độ. Trong Google Maps, nhấn giữ vào địa điểm để lấy tọa độ rồi dán vào đây."** UAT phải có ca link chia sẻ từ app điện thoại thật và ghi rủi ro UX này.
+- **D-48:** Link rút gọn của địa điểm (POI) resolve ra `/maps/place/<tên>/data=…` không có tọa độ (`04-RESEARCH.md` Pitfall 1, đã gọi thật). Giữ D-20 (chỉ theo redirect, không geocoding). Kết quả `no-coordinate` thì vẫn tự điền Tên/Địa chỉ theo D-49 và hiện lỗi dưới ô Vị trí: **"Link này chỉ có tên địa điểm, không có tọa độ. Trong Google Maps, nhấn giữ vào địa điểm để lấy tọa độ rồi dán vào đây."** UAT phải có ca link chia sẻ từ app điện thoại thật và ghi rủi ro UX này. **[Lệch 2026-11-06: "không geocoding" nay chỉ áp cho đường link Google Maps (link `no-coordinate` vẫn không được tra tên ra tọa độ). Tọa độ nhập tay được reverse geocoding để điền địa chỉ (D-141, D-149); người dùng gặp link không có tọa độ có thể tìm địa điểm bằng ô tìm (D-150).]**
 - **D-49:** Tách `/place/<…>/`: phần **trước dấu phẩy đầu tiên** là Tên, phần **sau** (trim) là Địa chỉ. Chỉ điền ô đang trống; không có dấu phẩy thì chỉ điền Tên. Mở rộng D-21 (trước chỉ điền Tên).
 - **D-50:** Lệnh xóa đang chờ được gửi ngay cả khi tab bị ẩn (`visibilitychange` → `hidden`), không chỉ khi `pagehide`. Lý do: trình duyệt mobile có thể kill tab ở nền. Mở rộng D-32.
 - **D-51:** Route resolve link rút gọn **không có rate limit** ở Phase 4 (chỉ cần phiên + Origin + allowlist host + giới hạn hop/timeout). Rủi ro chấp nhận ghi vào threat model: người đã đăng nhập có thể dùng server gọi `maps.app.goo.gl`.
@@ -193,7 +199,7 @@ Nằm ngoài phase:
 - **D-112:** Dùng **style riêng** (JSON do repo giữ, không trỏ thẳng style mặc định của OpenFreeMap), trỏ nguồn tile OpenFreeMap. Đổi nguồn tile sau này (Goong, Vietmap, MapTiler, PMTiles tự host) chỉ đổi URL trong style, không viết lại component.
 - **D-113 (Hoàng Sa, Trường Sa, bắt buộc):** dữ liệu OSM ghi quần đảo Hoàng Sa thuộc Trung Quốc. Style riêng phải: (1) nhãn lấy `name:vi` (dự phòng `name`); (2) ẩn ranh giới quốc gia tranh chấp trên biển; (3) ẩn nhãn quần đảo gốc của OSM ở hai vùng này; (4) thêm lớp nhãn riêng "Quần đảo Hoàng Sa (Việt Nam)" và "Quần đảo Trường Sa (Việt Nam)". Trước khi phát hành phải **kiểm bằng mắt** ở mức zoom thấy cả Biển Đông và ghi vào UAT. Căn cứ: Luật Đo đạc và bản đồ 2018 cấm phát hành bản đồ sai chủ quyền (mới đối chiếu qua bản tóm tắt, chưa đọc nguyên văn điều luật).
 - **D-114:** Ghi công "© OpenStreetMap" (kèm OpenFreeMap) ở góc dưới phải, luôn hiện (ODbL). **[Lệch 2026-11-06 theo yêu cầu user: ghi công thu gọn thành nút biểu tượng "i" (`aria-label` "Ghi công bản đồ") ở góc dưới phải, bấm mới mở dòng ghi công đầy đủ "© OpenStreetMap · OpenFreeMap · OpenMapTiles" (3 link, tab mới). Nút "i" vẫn luôn thấy khi bản đồ sẵn sàng (không bị sheet hay chip che ở mức thấp, vừa, sheet đóng), nên nội dung ghi công vẫn ở một thao tác bấm, không bị bỏ. Lý do: user muốn giao diện gọn; đã được báo ràng buộc giấy phép OSM (ODbL) và OpenMapTiles (CC BY 4.0) đòi ghi công nhìn thấy được, nên nút phải luôn hiện và nội dung giữ đủ ba link. Văn bản gốc giữ làm lịch sử.]**
-- **D-115:** Bản đồ chỉ hiển thị, **không** bấm lên bản đồ để chọn vị trí và **không** tìm POI (MAP-01, MAP-02 vẫn v2). Không gửi dữ liệu lịch trình cho OpenFreeMap; chỉ tải tile.
+- **D-115:** Bản đồ chỉ hiển thị, **không** bấm lên bản đồ để chọn vị trí và **không** tìm POI (MAP-01, MAP-02 vẫn v2). Không gửi dữ liệu lịch trình cho OpenFreeMap; chỉ tải tile. **[Lệch 2026-11-06: tìm POI (MAP-01) làm ở mở lại lần 3 trong form thêm/sửa điểm, không trên bản đồ (D-141..D-153). Bản đồ vẫn chỉ hiển thị, bấm bản đồ để chọn vị trí vẫn v2; vẫn không gửi dữ liệu lịch trình cho OpenFreeMap. Từ khóa tìm và tọa độ tra địa chỉ đi tới Photon/Nominatim qua BFF, không kèm id hay dữ liệu khác của lịch trình (D-143).]**
 - **D-116:** Kiểu nền **sáng, nhạt màu** để pin nổi bật, nhãn tiếng Việt.
 - **D-117:** Không khóa cứng biên; **mức thu nhỏ tối đa** chỉ vừa đủ thấy cả Việt Nam và Biển Đông.
 
@@ -229,6 +235,38 @@ Nằm ngoài phase:
 - **D-138 (thêm điểm từ Tổng quan):** form thêm điểm có **thêm ô chọn ngày**, mặc định **ngày cuối cùng**. Ô chọn ngày chỉ có khi mở từ Tổng quan; form **sửa** điểm giữ nguyên không có ô chọn ngày (BE không chuyển điểm giữa ngày, UAT bước 9). Thêm vào ngày chưa có bản ghi vẫn theo cơ chế ngày thưa hiện có.
 - **D-139 (sau khi thêm từ Tổng quan):** ở lại tab Tổng quan, bản đồ di chuyển tới điểm mới (D-127).
 - **D-140:** Tab Tổng quan ghi **tổng km** dưới nhãn giống tab ngày, dùng `TotalDistanceKm` của BE.
+
+### Mở lại lần 3 (2026-11-06): tìm địa điểm (MAP-01)
+
+Yêu cầu của user: ô "Vị trí" trong "Thêm địa điểm" tìm địa điểm thay vì dán tọa độ, phạm vi Việt Nam; có danh sách gợi ý mặc định theo điểm đến (điểm đến là tỉnh/thành bắt buộc khi tạo lịch trình, chọn phương án B); vẫn dán được lat, lng cho điểm chưa có trên bản đồ nhưng không phải lối chính; biết tọa độ (chọn địa điểm hoặc nhập tay) thì gọi API bên thứ ba để tự điền các trường; nhà cung cấp Photon/Nominatim; BE chỉ lưu địa chỉ và tọa độ, ghi chú có thể chuyển sang `place_id`; bỏ các điểm thuộc Hoàng Sa/Trường Sa.
+
+**Chính sách sử dụng bên thứ ba (đối chiếu 2026-11-06):**
+- **Photon công khai (`photon.komoot.io`):** được dùng cho dự án nếu số request ở mức hợp lý; dùng quá nhiều thì bị bóp băng thông hoặc chặn, không cam kết sẵn sàng, API có thể đổi không báo trước ([komoot/photon README](https://github.com/komoot/photon/blob/master/README.md)). Không có định nghĩa cứng cho "quá nhiều", người dùng nhiều nên tự chạy instance ([discussion #598](https://github.com/komoot/photon/discussions/598)). Tham số API: `q`, `limit`, `lang`, `bbox=minLon,minLat,maxLon,maxLat`, `countrycode`, `lat`/`lon`/`zoom` (ưu tiên vùng), `include`/`exclude` theo nhóm `osm.<key>.<value>`, `/reverse?lat&lon` ([docs/api-v1.md](https://raw.githubusercontent.com/komoot/photon/master/docs/api-v1.md)).
+- **Thử thật Photon 2026-11-06:** `lang=vi` trả 400 (chỉ nhận `default, de, en, fr`), nên dùng `lang=default` (tên OSM gốc, ở Việt Nam là tiếng Việt); `/api` không có `q` mà có `include` thì 200, nên gợi ý mặc định dùng `include` (nhiều giá trị cách bằng dấu phẩy); `countrycode=VN` và `bbox` hoạt động; một số kết quả không có `name`; `/reverse?lat=16.83&lon=112.34` (Phú Lâm, Hoàng Sa) trả `countrycode: CN`, `city: 三沙市`, `state: 海南省`, nên bộ lọc chủ quyền là bắt buộc; trường địa chỉ không đồng nhất ("Đà Lạt"/"Da Lat City"/"Thành phố Đà Lạt", `state` có khi không dấu, kết quả TP.HCM có `state` rỗng); khách sạn hay được gắn `tourism=chalet`/`guest_house`; đối tượng đường (`osm_key=highway`) ghi tên đường ở `name`, không ở `street`.
+- **Nominatim công khai (`nominatim.openstreetmap.org`)** ([OSMF Nominatim Usage Policy](https://operations.osmfoundation.org/policies/nominatim/)): tối đa tuyệt đối 1 request/giây, cộng cho mọi người dùng của ứng dụng; phải có HTTP Referer hoặc User-Agent hợp lệ định danh ứng dụng (UA mặc định của thư viện bị từ chối); ghi công nhìn thấy được; dữ liệu theo ODbL; **cấm tìm kiếm autocomplete** và truy vấn có hệ thống (reverse theo lưới, tải toàn bộ POI); ứng dụng phải đổi được dịch vụ theo yêu cầu của OSMF mà không cần cập nhật phần mềm; khuyến nghị proxy có cache, client lặp cùng truy vấn có thể bị chặn; code do LLM sinh cũng phải theo chính sách. API reverse ([Nominatim Reverse docs](https://nominatim.org/release-docs/latest/api/Reverse/)): `format=jsonv2`, `lat`, `lon`, `zoom` 0-18 (18 = tòa nhà), `addressdetails`, `accept-language`.
+- **Cách tuân thủ:** Nominatim chỉ là dự phòng reverse (không bao giờ autocomplete), chỉ gọi từ BFF, tối đa một lần mỗi 1100 ms mỗi tiến trình server (bị chặn thì bỏ qua, không xếp hàng), cache 24 giờ theo tọa độ làm tròn, gửi `User-Agent: Tripory/0.1 (+https://triporyv1.vercel.app)`, base URL lấy từ env server `NOMINATIM_BASE_URL` (`off` để tắt) nên đổi được không cần sửa code. Photon dùng cùng UA, cache và giới hạn theo user, base URL từ `PHOTON_BASE_URL`. UI ghi "Dữ liệu địa điểm © OpenStreetMap" có link https://www.openstreetmap.org/copyright.
+
+- **D-141 (phạm vi):** MAP-01 (tìm địa điểm) chuyển vào Phase 4. MAP-02 được tách: nền bản đồ MapLibre đã làm ở PUB-06; "bấm lên bản đồ để chọn vị trí" vẫn v2 vì user không yêu cầu. Quyết định này thay phần "không tìm POI" của D-115 và thu hẹp "không geocoding" của D-20/D-48 về riêng đường link Google Maps (tọa độ nhập tay nay được reverse geocoding).
+- **D-142 (nhà cung cấp):** Photon cho tìm kiếm, gợi ý và reverse; Nominatim reverse chỉ khi Photon không trả địa chỉ. Cả hai nằm sau port `PlaceSearchProvider`; base URL lấy từ env server (`PHOTON_BASE_URL` mặc định `https://photon.komoot.io`, `NOMINATIM_BASE_URL` mặc định `https://nominatim.openstreetmap.org`, giá trị `off` để tắt).
+- **D-143 (BFF):** `GET /api/places/search?q=&destination=`, `GET /api/places/suggestions?destination=`, `GET /api/places/reverse?lat=&lng=`. Thứ tự: method → Origin (`checkSameOrigin`) → phiên còn hạn (`readSession`) → giới hạn theo user (30 request / 60 giây gộp cả ba route; vượt thì 429 `Places.RateLimited` kèm `Retry-After`) → validate (400 `Bff.InvalidQuery`) → cache TTL trong bộ nhớ (search 10 phút, suggestions 24 giờ, reverse 24 giờ; LRU 500 mục) → nhà cung cấp (timeout 5 giây; lỗi thì 502 `Places.Unavailable`, không cache). Không chuyển tiếp cookie/header của user, không log từ khóa hay tọa độ. Chọn GET vì là thao tác đọc; `checkSameOrigin` cho GET cùng origin không có `Origin` đi qua và chặn `Origin` lạ. Cache và bộ giới hạn tính theo từng instance server (chấp nhận; ghi chú cho môi trường serverless).
+- **D-144 (chỉ Việt Nam):** tìm kiếm dùng `countrycode=VN`, `bbox` = `VIETNAM_SEARCH_BOUNDS` [[102.1, 8.1], [109.7, 23.4]] (đất liền và đảo ven bờ, gồm Phú Quốc, Côn Đảo, Thổ Chu, Bạch Long Vĩ), ưu tiên (`lat`/`lon`/`zoom=10`) tâm điểm đến khi lịch trình có điểm đến. Gợi ý dùng `bbox` = `view.bounds` của điểm đến trong danh mục.
+- **D-145 (chủ quyền):** application service bỏ mọi địa điểm có `countryCode !== 'VN'`, nằm ngoài `VIETNAM_SEARCH_BOUNDS`, hoặc nằm trong `HOANG_SA_BOUNDS` [[110.9, 15.4], [113.2, 17.4]] hay `TRUONG_SA_BOUNDS` [[111.0, 5.5], [118.0, 12.2]]. Reverse cho tọa độ ngoài khung Việt Nam hoặc trong hai khung trên trả `null` mà không gọi nhà cung cấp nào; user vẫn lưu được tọa độ đó (BE không đổi, D-48). Không lọc theo từ khóa tên: TP.HCM có đường thật tên "Hoàng Sa" và "Trường Sa".
+- **D-146 (gợi ý mặc định, phương án B):** ba lần gọi Photon cho mỗi điểm đến (mỗi lần `limit` 6) với danh sách `include`: Tham quan `osm.tourism.{attraction,museum,viewpoint,artwork,gallery,theme_park,zoo,aquarium}`; Ăn uống `osm.amenity.{restaurant,cafe,fast_food,food_court,bar,pub,ice_cream}`; Lưu trú `osm.tourism.{hotel,guest_house,hostel,motel,chalet,apartment}`. Bỏ mục không có tên, gộp theo đúng thứ tự trên, tối đa 15. Không có gợi ý, hoặc lịch trình không có điểm đến, thì hiện gợi ý "Gõ tên địa điểm để tìm." và không gửi request.
+- **D-147 (phân loại, chỉ để hiển thị và lọc gợi ý):** form và BE không có trường loại, nên loại chỉ hiện thành nhãn trên dòng kết quả và không bao giờ được lưu. `tourism` thuộc nhóm lưu trú → Lưu trú; `tourism=*` khác → Tham quan; `amenity` thuộc nhóm ăn uống → Ăn uống; còn lại "Địa điểm". Nhóm lưu trú rộng hơn `tourism=hotel` đã duyệt vì Photon gắn nhiều khách sạn ở Việt Nam là `chalet`/`guest_house` (thử thật: "Khách Sạn Vinh Hoa" = `tourism=chalet`).
+- **D-148 (ghép địa chỉ):** các đoạn `[housenumber + " " + street, district, city ?? county, state]`, bỏ đoạn rỗng, bỏ đoạn trùng theo `normalizeSearchText`, nối bằng ", ", cắt tối đa 500 ký tự; không còn gì thì `null`. Với `osm_key=highway` thì `name` của đối tượng là tên đường. Nominatim: `house_number`, `road`, `suburb ?? quarter ?? city_district`, `city ?? town ?? village ?? county`, `state`.
+- **D-149 (tự điền theo form thật):** các trường thật (`form-schemas.ts` `waypointSchema`): `name` (Tên, ≤ 200), `location` (Vị trí, chuỗi parse bằng `parseLocationInput`), `address` (Địa chỉ, ≤ 500), `notes` (Ghi chú). Không có trường loại, giờ hay chi phí.
+
+  | Nguồn | `location` | `address` | `name` | `notes` |
+  |---|---|---|---|---|
+  | Chọn kết quả tìm/gợi ý | luôn là `"lat.toFixed(6), lng.toFixed(6)"` | luôn ghi đè khi địa điểm có địa chỉ; giữ nguyên khi không có | chỉ khi Tên trống hoặc vẫn bằng giá trị tự điền gần nhất | không bao giờ |
+  | Tọa độ nhập tay (giá trị hợp lệ mới, không phải giá trị ban đầu ở chế độ sửa) → reverse | giữ nguyên giá trị user nhập | cùng quy tắc như trên | cùng quy tắc, và chỉ khi kết quả reverse là POI (`osm_key` không thuộc highway/place/boundary/landuse/building/railway/waterway) | không bao giờ |
+  | Link Google Maps (D-49, không đổi) | giá trị user nhập | chỉ khi trống | chỉ khi trống | không bao giờ |
+
+  "Giá trị tự điền gần nhất" tính cho cả link, địa điểm đã chọn và reverse; user gõ vào ô Tên thì xóa giá trị này. Dòng mô tả dưới Tên: "Đã lấy tên từ link, bạn có thể sửa." (sẵn có) hoặc mới "Đã lấy tên từ địa điểm đã chọn, bạn có thể sửa."
+- **D-150 (UI):** "Vị trí" có hai chế độ. **Tìm** (mặc định khi `location` trống lúc mở, tức thêm mới không có bản nháp): combobox ARIA 1.2 inline (danh sách hiện ngay dưới ô, không phải popup nổi, vì form là bottom sheet trên mobile), debounce 300 ms, từ 2 ký tự thì tìm, dưới 2 ký tự thì hiện gợi ý; chọn xong hiện thẻ tóm tắt kèm "Đổi địa điểm". **Thủ công** (mặc định khi form mở với vị trí có sẵn: chế độ sửa hoặc khôi phục bản nháp): `LocationField` hiện có giữ nguyên (tọa độ hoặc link Google Maps), vào bằng link phụ "Nhập tọa độ thủ công", quay lại bằng "Tìm địa điểm". Bàn phím: ↓/↑ đổi mục đang chọn có vòng lại, Enter chọn mục đang chọn và không bao giờ gửi form, Esc lần lượt bỏ mục đang chọn, rồi xóa chữ (không đóng dialog), rồi đóng dialog khi ô đã trống (giống `destination-block.tsx`), Tab rời ô. Copy ở `04-UI-SPEC.md` mục "Bổ sung 2026-11-06: tìm địa điểm".
+- **D-151 (vị trí code):** nằm trong `@tripory/itinerary` theo tiền lệ `ShortLinkResolver`, không tạo gói `maps` mới (tách khi có context thứ hai cần). `domain/place.ts` (luật thuần); `application`: `PlaceSearchProvider` (phía server, đổi được: Photon bây giờ, Goong sau này), `PlaceLookup` (client → BFF) và `createPlaceSearchService`; `infrastructure`: Photon, Nominatim, HTTP lookup; `react`: factory riêng `createPlaceHooks(lookup)` để 17 mock test của `createItineraryHooks` không phải sửa; composition ở app `places.client.ts` và `composition/server/places-*.ts`. UI không bao giờ import nhà cung cấp.
+- **D-152 (BE không đổi):** chỉ lưu tên/địa chỉ/tọa độ. `Place.id` = chữ cái loại OSM + id (ví dụ `N5661583321`) chỉ dùng ở client; muốn lưu `place_id` (osm_type + osm_id) sau này thì cần thêm trường ở BE (Deferred).
+- **D-153 (lỗi):** 429 → "Bạn tìm hơi nhanh. Đợi vài giây rồi thử lại."; 502/lỗi mạng → "Chưa tìm được địa điểm lúc này. Thử lại hoặc nhập tọa độ thủ công." kèm "Thử lại". Lỗi tìm kiếm không bao giờ chặn gửi form; chế độ thủ công vẫn dùng được khi nhà cung cấp lỗi. `LOCATION_REQUIRED` đổi thành "Vui lòng chọn địa điểm hoặc nhập tọa độ."
 
 ### Claude's Discretion
 - (Mở lại lần 2) Thư viện React cho MapLibre (`react-map-gl/maplibre` hay dùng `maplibre-gl` trực tiếp), cách nạp client-only (dynamic import, không SSR), cấu hình worker cho Turbopack; tách gói (bản đồ không nằm trong bundle của trang không cần); vị trí code (component trình bày ở `ui-web` nhận dữ liệu qua props, phép biến đổi lịch trình thành điểm/đường ở `packages/itinerary` domain, style JSON ở app) theo luật tầng; cách hiện tên điểm cạnh pin (tooltip hay popup); độ mờ của ngày không chọn; bảng màu ngày cụ thể trong token; tọa độ tâm/bbox 34 tỉnh (nguồn và cách lưu); cách kiểm Hoàng Sa/Trường Sa tự động được tới đâu (test style JSON) bên cạnh kiểm bằng mắt; CSP nếu có.
@@ -294,6 +332,14 @@ Nằm ngoài phase:
 - `apps/web/src/modules/itinerary/ui/editor-layout.tsx` (slot `canvas`, `summary`, `timeline`), `trip-summary.tsx` (biến thể `canvas`/`compact`, sẽ là dự phòng khi bản đồ lỗi, D-120), `day-tabs.tsx`, `waypoint-list.tsx`, `waypoint-form-dialog.tsx`.
 - `packages/itinerary/src/infrastructure/static-destination-catalog.ts`: thêm tọa độ tâm/bbox 34 tỉnh (D-121).
 - `.planning/REQUIREMENTS.md` PUB-02, PUB-06; `.planning/ROADMAP.md` §Phase 4, §Phase 5: sửa theo D-129, D-130.
+
+### Mở lại lần 3 (2026-11-06): tìm địa điểm
+- Photon README (chính sách dùng server công khai): https://github.com/komoot/photon/blob/master/README.md; thảo luận giới hạn: https://github.com/komoot/photon/discussions/598.
+- Photon API: https://raw.githubusercontent.com/komoot/photon/master/docs/api-v1.md (`q`, `limit`, `lang`, `bbox`, `countrycode`, `lat`/`lon`/`zoom`, `include`/`exclude`, `/reverse`).
+- OSMF Nominatim Usage Policy: https://operations.osmfoundation.org/policies/nominatim/ (1 request/giây, UA định danh, cấm autocomplete, đổi dịch vụ không cần cập nhật phần mềm).
+- Nominatim Reverse: https://nominatim.org/release-docs/latest/api/Reverse/ (`format=jsonv2`, `zoom`, `addressdetails`, `accept-language`).
+- `.agents/tasks/map-providers-comparison.md`: so sánh nhà cung cấp (Goong, Vietmap, Photon/Nominatim…), rủi ro Hoàng Sa/Trường Sa.
+- Code liên quan: `packages/itinerary/src/domain/{geo-bounds,destination,destination-search,location-input}.ts`, `application/ports.ts` (`ShortLinkResolver`, `DestinationCatalog`), `infrastructure/http-short-link-resolver.ts`; `apps/web/src/composition/server/{maps-handlers,maps-resolve,env,request-guards,session-store}.ts`, `app/api/maps/resolve/route.ts`; `apps/web/src/modules/itinerary/ui/{waypoint-form-dialog,location-field,destination-block,destination-cover,form-schemas}.tsx|ts`; `packages/ui-web/src/molecules/search-input.tsx`.
 
 ### FE cũ (tham khảo UX, không port code mock)
 - Bản đồ SVG cũ (tham khảo hành vi zoom 0,5–3, tự căn giữa khi chọn điểm, không port): `C:\Users\OS\Documents\personal\tripory\src\components\itinerary\{MapCanvas,MapPin,MapControls}.tsx`, `src\components\public-itinerary\PublicMapView.tsx`, `src\lib\projection.ts`.
@@ -369,7 +415,7 @@ Nằm ngoài phase:
 - Bấm thẻ đã xuất bản trong danh sách mở trang công khai → Phase 5 cân nhắc (D-07).
 - Hiện số ngày/số điểm trên thẻ → khi BE sửa `Include` ở `/mine`.
 - Ngày thực theo `startDate` (UX-03), khoảng cách từng chặng (UX-04), "Chuyển sang ngày…" (UX-07) → v2.
-- Tìm địa điểm theo tên (MAP-01), chọn vị trí trên bản đồ (MAP-02) → v2.
+- ~~Tìm địa điểm theo tên (MAP-01)~~, chọn vị trí trên bản đồ (MAP-02) → v2. **[Lệch 2026-11-06: MAP-01 làm ở mở lại lần 3, D-141.]**
 - Đề xuất BE: endpoint xóa ngày, hủy xuất bản, chuyển waypoint sang ngày khác, `UpdatedAt` trong `ItinerarySummaryDto`, ETag/version.
 - (Mở lại 2026-11-02) Cung cấp 34 ảnh bìa thật + bản ghi giấy phép (D-105, D-106) và thay ảnh giữ chỗ.
 - (Mở lại 2026-10-30) Hiện điểm đến và sở thích trong editor/tóm tắt (D-76) và trên thẻ danh sách (D-78).
@@ -381,7 +427,11 @@ Nằm ngoài phase:
 - ~~PUB-02 (chuyển từ Phase 5) và câu hỏi PUB-06: lập kế hoạch sau phần mở lại này.~~ Đã chốt 2026-11-05 (D-129): PUB-06 làm ở mở lại lần 2; PUB-02 về Phase 5.
 - (Mở lại lần 2) Nút chuyển Bài viết/Bản đồ trên trang công khai → Phase 5 (PUB-02), dùng lại component bản đồ.
 - (Mở lại lần 2) Ảnh Open Graph vẽ đường đi bằng `ImageResponse`/SVG, không dùng tile để tránh rủi ro biển đảo → Phase 5 (PUB-05).
-- (Mở lại lần 2) Tìm POI theo tên qua Goong gọi từ BFF (cần đọc điều khoản lưu dữ liệu), dự phòng Photon/Nominatim; bấm bản đồ chọn vị trí → v2 (MAP-01, MAP-02).
+- (Mở lại lần 2) Tìm POI theo tên qua Goong gọi từ BFF (cần đọc điều khoản lưu dữ liệu), dự phòng Photon/Nominatim; bấm bản đồ chọn vị trí → v2 (MAP-01, MAP-02). **[Lệch 2026-11-06: tìm POI làm ở mở lại lần 3 bằng Photon/Nominatim (D-142); Goong để sau nếu cần (xem mục Mở lại lần 3 ở trên).]**
+- (Mở lại lần 3) Lưu `place_id` (osm_type + osm_id) của địa điểm đã chọn: cần thêm trường ở BE (D-152).
+- (Mở lại lần 3) Tự chạy Photon hoặc chuyển sang nhà cung cấp trả phí (Goong, Vietmap…) nếu server công khai bóp băng thông hay chặn; chỉ đổi adapter sau port `PlaceSearchProvider` (D-142, D-151).
+- (Mở lại lần 3) Cache dùng chung giữa các instance server (KV) thay cache trong bộ nhớ từng instance (D-143).
+- (Mở lại lần 3) Bấm lên bản đồ để chọn vị trí (phần còn lại của MAP-02) → v2.
 - (Mở lại lần 2) Nét đứt nối điểm cuối ngày N sang điểm đầu ngày N+1; chuyển sang tab Danh sách/Bản đồ trên mobile thay sheet; sửa ngay ở tab Tổng quan (đã chọn chỉ xem); hiện điểm đến, sở thích, ngày kết thúc ở thông tin chung.
 
 ### Reviewed Todos (not folded)
@@ -395,3 +445,4 @@ Không có todo nào khớp với Phase 4.
 *Context gathered: 2026-10-23*
 *Context updated: 2026-10-30 (mở lại ITIN-02, ITIN-03)*
 *Context updated: 2026-11-05 (mở lại lần 2: bản đồ MapLibre + OpenFreeMap trong editor, tab Tổng quan, PUB-06; D-111..D-140)*
+*Context updated: 2026-11-06 (mở lại lần 3: tìm địa điểm, MAP-01; D-141..D-153)*

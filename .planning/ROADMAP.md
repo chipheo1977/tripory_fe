@@ -115,15 +115,16 @@ Plans:
 ### Phase 4: Itinerary CRUD & Editor
 **Goal**: Người dùng đã đăng nhập tạo, sửa, sắp xếp và xuất bản một lịch trình thật bằng API BE, trên cả desktop và mobile
 **Depends on**: Phase 3
-**Requirements**: ITIN-01, ITIN-02, ITIN-03, ITIN-04, ITIN-05, ITIN-06, ITIN-07, ITIN-08, ITIN-09, ITIN-10, ITIN-11, ITIN-12, ITIN-13, ITIN-14, PUB-06
+**Requirements**: ITIN-01, ITIN-02, ITIN-03, ITIN-04, ITIN-05, ITIN-06, ITIN-07, ITIN-08, ITIN-09, ITIN-10, ITIN-11, ITIN-12, ITIN-13, ITIN-14, PUB-06, MAP-01 (MAP-01 chuyển từ v2 vào Phase 4 ngày 2026-11-06, mở lại lần 3)
 **Success Criteria** (what must be TRUE):
   0. (PUB-06, mở lại lần 2 2026-11-05, đã lập kế hoạch 04-42..04-53) Editor hiển thị bản đồ dùng chung (MapLibre + OpenFreeMap, style riêng thể hiện Hoàng Sa, Trường Sa thuộc Việt Nam): pin màu theo ngày có số thứ tự, đường nối trong ngày, zoom/pan, chọn điểm đồng bộ với danh sách; dải tab ngày có tab "Tổng quan" hiện mọi ngày
   1. Người dùng thấy "Lịch trình của tôi" có phân trang và lọc Tất cả/Nháp/Đã xuất bản, tạo lịch trình trong một modal 4 khối accordion (điểm đến trong 34 tỉnh/thành, tên mặc định theo điểm đến, ngày khởi hành và số ngày, sở thích) rồi vào thẳng editor với đủ số ngày đã chọn và ảnh bìa mặc định theo điểm đến, và xóa được lịch trình sau khi xác nhận (thay tạo nhanh bằng tiêu đề, mở lại 2026-10-30; BE lưu điểm đến, sở thích, ngày khởi hành, số ngày và ảnh bìa mặc định trong một request)
-  2. Trong editor, người dùng sửa metadata (tiêu đề, mô tả, ngày khởi hành, ảnh bìa URL có preview; mở lại 2026-10-30: tự lưu không có nút Lưu, tối đa 5 ảnh bìa dạng lưới và chọn một ảnh hiển thị), chuyển/thêm ngày, sửa phụ đề ngày inline, thêm/sửa waypoint bằng cách dán tọa độ "lat, lng" hoặc link Google Maps, và thấy quãng đường theo ngày cùng tổng do BE tính
+  2. Trong editor, người dùng sửa metadata (tiêu đề, mô tả, ngày khởi hành, ảnh bìa URL có preview; mở lại 2026-10-30: tự lưu không có nút Lưu, tối đa 5 ảnh bìa dạng lưới và chọn một ảnh hiển thị), chuyển/thêm ngày, sửa phụ đề ngày inline, thêm/sửa waypoint bằng tìm địa điểm, hoặc dán tọa độ "lat, lng"/link Google Maps (mở lại lần 3 2026-11-06: tìm địa điểm là lối chính, xem tiêu chí 6), và thấy quãng đường theo ngày cùng tổng do BE tính
   3. Người dùng xóa waypoint và hoàn tác được trong 5 giây; kéo thả sắp xếp waypoint trong ngày bằng chuột, cảm ứng hoặc bàn phím, thấy rollback khi BE lỗi
   4. Người dùng luôn thấy trạng thái Đang lưu / Đã lưu / Lỗi – thử lại, được cảnh báo khi rời trang lúc còn request; xuất bản được khi có ≥ 1 waypoint sau khi xác nhận không thể hủy, rồi thấy lịch trình chuyển sang "Đã xuất bản" (hộp chia sẻ sau khi xuất bản chuyển sang Phase 5 theo `04-CONTEXT.md` D-40)
   5. Người không phải chủ không thấy thao tác sửa; trên mobile, timeline nằm trong bottom sheet nhiều mức và vẫn thao tác đủ các bước trên
-**Plans**: 41 plans, đã xong cả 41 (23 plan đầu + 18 plan mở lại 04-24..04-41 cho ITIN-02, ITIN-03: tài liệu hợp đồng BE, checkpoint BE 04-25, rồi FE và UAT; 04-41 tách từ 04-30 nên xếp ở wave 18, trước 04-31; UAT mục D 8/8 PASS trên BE local 2026-11-05) + 12 plan mở lại lần 2, đã xong cả 12 (04-42..04-53, bản đồ trong editor và tab Tổng quan, PUB-06; quyết định ở `04-CONTEXT.md` D-111..D-140, research ở `04-RESEARCH.md` mục "Mở lại lần 2 (2026-11-05): bản đồ"; wave 26-33, 04-53 là checkpoint UAT)
+  6. (MAP-01, mở lại lần 3 2026-11-06, đã lập kế hoạch 04-55..04-58) Trong form thêm/sửa điểm, ô "Vị trí" mặc định là ô tìm địa điểm trong phạm vi Việt Nam (Photon, dự phòng Nominatim cho reverse, gọi qua BFF `/api/places/*`): chưa gõ thì thấy gợi ý theo điểm đến (Tham quan, Ăn uống, Lưu trú), gõ từ 2 ký tự thì thấy kết quả; chọn một kết quả thì tự điền vị trí, địa chỉ và tên (chỉ khi Tên trống hoặc là giá trị tự điền), không đổi Ghi chú; lối phụ "Nhập tọa độ thủ công" vẫn nhận tọa độ/link Google Maps và tọa độ mới được tra địa chỉ để tự điền; không kết quả nào nằm ở Hoàng Sa, Trường Sa hoặc ngoài Việt Nam; nhà cung cấp lỗi thì có thông báo tiếng Việt, "Thử lại" và vẫn lưu được bằng tọa độ thủ công (D-141..D-153)
+**Plans**: 41 plans, đã xong cả 41 (23 plan đầu + 18 plan mở lại 04-24..04-41 cho ITIN-02, ITIN-03: tài liệu hợp đồng BE, checkpoint BE 04-25, rồi FE và UAT; 04-41 tách từ 04-30 nên xếp ở wave 18, trước 04-31; UAT mục D 8/8 PASS trên BE local 2026-11-05) + 12 plan mở lại lần 2, đã xong cả 12 (04-42..04-53, bản đồ trong editor và tab Tổng quan, PUB-06; quyết định ở `04-CONTEXT.md` D-111..D-140, research ở `04-RESEARCH.md` mục "Mở lại lần 2 (2026-11-05): bản đồ"; wave 26-33, 04-53 là checkpoint UAT) + 4 plan mở lại lần 3, chưa làm (04-55..04-58, tìm địa điểm, MAP-01; quyết định ở `04-CONTEXT.md` D-141..D-153; wave 34-37, 04-58 là checkpoint UAT mục F). Mã 04-54 đã dùng cho commit nút ghi công "i" (D-114, không có file plan)
 **UI hint**: yes
 **Research flag**: cần research sâu khi plan (parse link Google Maps, dnd-kit với React 19 StrictMode, `CalendarDate`, mapper ngày thưa)
 
@@ -183,6 +184,12 @@ Mở lại lần 2 (2026-11-05, bản đồ trong editor + tab Tổng quan, PUB-
 - [x] 04-51-PLAN.md — Nối bản đồ + Tổng quan vào editor: tab mặc định, đồng bộ chọn pin↔danh sách, canh khung, thêm từ Tổng quan (wave 31)
 - [x] 04-52-PLAN.md — Cổng lint/typecheck/test từng gói + `next build` (worker, tách bundle) + mục E checklist UAT (wave 32)
 - [x] 04-53-PLAN.md — UAT thủ công bản đồ, gồm kiểm bằng mắt Hoàng Sa/Trường Sa (checkpoint; wave 33)
+
+Mở lại lần 3 (2026-11-06, tìm địa điểm trong form thêm điểm, MAP-01; D-141..D-153):
+- [ ] 04-55-PLAN.md — Domain `place.ts` (phân loại, ghép địa chỉ, chủ quyền Hoàng Sa/Trường Sa, tự điền) + port `PlaceSearchProvider`/`PlaceLookup` + `createPlaceSearchService` (wave 34)
+- [ ] 04-56-PLAN.md — Adapter Photon, Nominatim reverse, HTTP lookup + BFF `/api/places/{search,suggestions,reverse}` (phiên, Origin, giới hạn theo user, cache TTL, env `PHOTON_BASE_URL`/`NOMINATIM_BASE_URL`) + mã lỗi (wave 35)
+- [ ] 04-57-PLAN.md — `createPlaceHooks`, `places.client.ts`, `SearchInput inputRef`, combobox tìm địa điểm + gợi ý + tự điền + reverse cho tọa độ nhập tay, nối vào `WaypointFormDialog` (wave 36)
+- [ ] 04-58-PLAN.md — Mục F checklist UAT tìm địa điểm và UAT thủ công (checkpoint; wave 37)
 
 ### Phase 5: Map & Public View
 **Goal**: Khách chưa đăng nhập mở link chia sẻ và đọc được lịch trình đã xuất bản dưới dạng bài viết hoặc bản đồ; link hiển thị preview đẹp khi dán vào ứng dụng nhắn tin

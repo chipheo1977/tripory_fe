@@ -239,6 +239,18 @@ it("uses behavior 'auto' when the user prefers reduced motion", async () => {
   );
 });
 
+it("renders the km line with the caption size (12px token), regular weight and muted colour", () => {
+  setup();
+
+  for (const tab of screen.getAllByRole("tab")) {
+    const km = within(tab).queryByText("12,4 km");
+    if (km === null) continue;
+    const classes = km.className.split(/\s+/);
+    expect(classes).toEqual(expect.arrayContaining(["text-caption", "font-regular", "text-muted", "tabular-nums"]));
+    expect(classes).not.toContain("text-label");
+  }
+});
+
 it("puts the Overview tab before Ngày 1 with the BE total km as its second line", () => {
   setup();
   const tabs = screen.getAllByRole("tab");

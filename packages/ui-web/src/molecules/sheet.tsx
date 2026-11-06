@@ -13,6 +13,7 @@ type SheetSnapPoint = number | string;
 
 export type SheetDefaultSnap = 'peek' | 'medium' | 'expanded';
 const snapIndexes: Record<SheetDefaultSnap, number> = { peek: 0, medium: 1, expanded: 2 };
+const SNAP_NAMES = ['peek', 'medium', 'expanded'] as const satisfies readonly SheetDefaultSnap[];
 
 type SheetContextValue = {
   dismissible: boolean;
@@ -40,6 +41,10 @@ export type SheetProps = Omit<
   dismissible?: boolean;
   disablePointerDismissal?: boolean;
   defaultSnap?: SheetDefaultSnap;
+  /** Mức hiện tại theo tên (controlled). Không truyền thì Sheet tự giữ mức, khởi đầu ở `defaultSnap`. Bỏ qua khi `fixedSnap`. */
+  snap?: SheetDefaultSnap;
+  /** Báo tên mức sau mỗi lần vuốt/kéo tới mức khác (không gọi khi đóng hay khi `fixedSnap`). */
+  onSnapChange?: (snap: SheetDefaultSnap) => void;
   /** Sheet bottom chỉ có một mức (mức mở rộng), chỉ số snap luôn 0 (D-66, D-67). Mặc định `false`. */
   fixedSnap?: boolean;
   insetTop?: number;
@@ -64,8 +69,10 @@ export function Sheet({
   modal = true,
   onOpenChange,
   onOpenChangeComplete,
+  onSnapChange,
   onSnapPointChange,
   position = 'bottom',
+  snap,
   ...props
 }: SheetProps) {
   const [viewportHeight, setViewportHeight] = useState(640);
@@ -81,7 +88,9 @@ export function Sheet({
     setPrevFixedSnap(fixedSnap);
     setSnapIndex(initialIndex);
   }
-  const snapPoint: SheetSnapPoint | null = snapPoints[snapIndex] ?? null;
+  const controlledIndex = snap === undefined || fixedSnap ? null : snapIndexes[snap];
+  const activeIndex = controlledIndex ?? snapIndex;
+  const snapPoint: SheetSnapPoint | null = snapPoints[activeIndex] ?? null;
   const closingRef = useRef(false);
 
   useEffect(() => {
@@ -95,10 +104,12 @@ export function Sheet({
   const setActiveSnapPoint = useCallback((nextSnapPoint: SheetSnapPoint) => {
     const nextIndex = snapPoints.indexOf(nextSnapPoint);
     if (nextIndex >= 0) setSnapIndex(nextIndex);
+    const nextName = SNAP_NAMES[nextIndex];
+    if (nextName !== undefined && !fixedSnap) onSnapChange?.(nextName);
     onSnapPointChange?.(nextSnapPoint);
-  }, [onSnapPointChange, snapPoints]);
+  }, [fixedSnap, onSnapChange, onSnapPointChange, snapPoints]);
 
-  const atTopSnap = isTopSnap(position, snapIndex, snapPoints.length);
+  const atTopSnap = isTopSnap(position, activeIndex, snapPoints.length);
   const topSnap = snapPoints.at(-1);
   const topSnapHeight = topSnap === undefined ? null : typeof topSnap === 'number' ? `${topSnap * viewportHeight}px` : topSnap;
   const context = useMemo<SheetContextValue>(

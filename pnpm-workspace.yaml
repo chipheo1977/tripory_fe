@@ -44,4 +44,7 @@ catalog:
   "@dnd-kit/modifiers": 9.0.0
   "@dnd-kit/sortable": 10.0.0
   "@dnd-kit/utilities": 3.2.2
+  # Bản đồ editor (PUB-06, D-111): react-map-gl 8.1.x hỗ trợ maplibre v6 (PR #2598); đã đọc tarball 2026-11-05
+  maplibre-gl: 6.16.0
+  react-map-gl: 8.1.3
 

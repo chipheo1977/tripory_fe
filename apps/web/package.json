@@ -27,10 +27,12 @@
     "@tripory/shared-kernel": "workspace:*",
     "@tripory/ui-web": "workspace:*",
     "lucide-react": "catalog:",
+    "maplibre-gl": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-hook-form": "catalog:",
+    "react-map-gl": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

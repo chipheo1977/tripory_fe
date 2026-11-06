@@ -270,6 +270,7 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
   const [focusMenuAfterPublish, setFocusMenuAfterPublish] = useState(false);
 
   const addButtonRef = useRef<HTMLButtonElement | null>(null);
+  const appliedFocusRequest = useRef<WaypointFocusRequest | null>(null);
   const tripInfoButtonRef = useRef<HTMLButtonElement | null>(null);
   const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const recentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -435,6 +436,9 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
   // Ở Tổng quan không có danh sách điểm, nên focus "Thêm điểm đến" sau khi thêm phải tự về nút của Tổng quan.
   useEffect(() => {
     if (activeTab !== "overview" || focusRequest?.target !== "add") return;
+    // Mỗi yêu cầu chỉ áp một lần: không nhớ thì mỗi lần quay lại Tổng quan focus lại bị kéo về nút thêm.
+    if (appliedFocusRequest.current === focusRequest) return;
+    appliedFocusRequest.current = focusRequest;
     addButtonRef.current?.focus();
   }, [activeTab, focusRequest]);
 

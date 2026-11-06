@@ -12,5 +12,6 @@ export * from './location-input';
 export * from './map-view';
 export * from './metadata';
 export * from './permissions';
+export * from './place';
 export * from './trip-title';
 export * from './updates';

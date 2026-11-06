@@ -2,12 +2,16 @@ import type { ItineraryId, Wgs84Coordinate } from '@tripory/shared-kernel';
 import type {
   CalendarDate,
   Destination,
+  GeoBounds,
   InterestCode,
   Itinerary,
   ItineraryMetadata,
   ItinerarySummary,
+  LngLat,
   Page,
+  Place,
   StatusFilter,
+  SuggestionCategory,
   Waypoint,
 } from '../domain';
 
@@ -67,4 +71,30 @@ export type DestinationCatalog = Readonly<{
   list(): readonly Destination[];
   /** Mã lạ hoặc `null` trả `null`; không ném lỗi (dữ liệu cũ, mã BE thêm trước FE). */
   findBySlug(slug: string | null): Destination | null;
+}>;
+
+/** Tìm theo từ khóa trong `bounds`, ưu tiên gần `bias` (tâm điểm đến) khi có. */
+export type PlaceSearchQuery = Readonly<{ text: string; bounds: GeoBounds; bias: LngLat | null; limit: number }>;
+
+/** Gợi ý một nhóm danh mục trong khung của điểm đến, không có từ khóa (D-146). */
+export type PlaceSuggestionQuery = Readonly<{ bounds: GeoBounds; category: SuggestionCategory; limit: number }>;
+
+/**
+ * Nhà cung cấp địa điểm phía server (Photon bây giờ, có thể đổi sang Goong sau, D-142, D-151). Lỗi mạng, timeout
+ * hay phản hồi sai dạng đều ném lỗi; lọc chủ quyền là việc của service, không phải của adapter.
+ */
+export type PlaceSearchProvider = Readonly<{
+  search(query: PlaceSearchQuery, signal?: AbortSignal): Promise<readonly Place[]>;
+  suggest(query: PlaceSuggestionQuery, signal?: AbortSignal): Promise<readonly Place[]>;
+  reverse(coordinate: Wgs84Coordinate, signal?: AbortSignal): Promise<Place | null>;
+}>;
+
+/** Chỉ tra ngược tọa độ: Nominatim dự phòng khi Photon không có địa chỉ (D-142). */
+export type PlaceReverseProvider = Pick<PlaceSearchProvider, 'reverse'>;
+
+/** Phía client: gọi BFF `/api/places/*`, không bao giờ gọi thẳng nhà cung cấp. Lỗi BFF lan ra dưới dạng `ApiError`. */
+export type PlaceLookup = Readonly<{
+  search(query: Readonly<{ text: string; destinationCode: string | null }>, signal?: AbortSignal): Promise<readonly Place[]>;
+  suggest(destinationCode: string, signal?: AbortSignal): Promise<readonly Place[]>;
+  reverse(coordinate: Wgs84Coordinate, signal?: AbortSignal): Promise<Place | null>;
 }>;

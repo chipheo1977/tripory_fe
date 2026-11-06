@@ -2,7 +2,8 @@
 
 **Gathered:** 2026-10-23
 **Updated:** 2026-10-30 (mở lại: form tạo lịch trình 4 khối, nhiều ảnh bìa, tự lưu "Thông tin chuyến đi"; D-52..D-101)
-**Status:** Ready for planning (phần mở lại ITIN-02/ITIN-03; PUB-02 để sau)
+**Updated:** 2026-11-05 (mở lại lần 2: bản đồ MapLibre + OpenFreeMap trong editor, tab Tổng quan; PUB-06; D-111..D-140)
+**Status:** Ready for planning (phần mở lại lần 2: bản đồ trong editor; phần mở lại ITIN-02/ITIN-03 đã xong 41/41 plan)
 
 <domain>
 ## Phase Boundary
@@ -23,8 +24,15 @@ Phase này giao, cho người dùng đã đăng nhập và bằng API BE thật:
 9. "Thông tin chuyến đi" tự lưu khi có thay đổi, không còn nút Lưu/Hủy (ITIN-03, D-87..D-91).
 10. Tài liệu đặc tả hợp đồng BE cho 7–9 (không kèm code); user tự sửa `tripory_be` trước, FE làm sau (D-52, D-57, D-58).
 
+**Mở lại lần 2, 2026-11-05 (bản đồ trong editor, PUB-06):**
+
+11. Component bản đồ dùng chung (MapLibre GL JS + nền OpenFreeMap, style riêng) thay `TripSummary` ở canvas desktop và làm nền phía sau bottom sheet trên mobile: pin theo ngày có số thứ tự, đường nối trong ngày, zoom/pan (chuột, hai ngón), chọn điểm đồng bộ với danh sách, tự canh khung (D-111..D-130).
+12. Tab **"Tổng quan"** đứng trước "Ngày 1" trong dải tab ngày: bản đồ hiện mọi ngày; cột trái hiện thông tin chung của chuyến đi và một dòng tóm tắt cho mỗi ngày; chỉ xem, ngoại lệ là nút "Thêm điểm" có ô chọn ngày (D-131..D-140).
+13. Cập nhật yêu cầu: PUB-06 vào Phase 4; PUB-02 về Phase 5 chỉ còn nút chuyển Bài viết/Bản đồ; bỏ chữ "SVG" (D-129, D-130).
+Không cần thay đổi BE cho phần này: bản đồ chỉ đọc tọa độ waypoint đã có.
+
 Nằm ngoài phase:
-- Bản đồ SVG trong editor và trang công khai (PUB-02, PUB-06 → Phase 5). Phase 4 chỉ chừa vùng "canvas" để Phase 5 thay bằng bản đồ. [Lệch: PUB-02 đã chuyển từ Phase 5 vào Phase 4 theo yêu cầu user 2026-10-30, chưa lập kế hoạch; PUB-06 vẫn ở Phase 5, chờ user xác nhận.]
+- ~~Bản đồ SVG trong editor và trang công khai (PUB-02, PUB-06 → Phase 5).~~ Đã đổi 2026-11-05: bản đồ trong editor (PUB-06) làm ở phần mở lại lần 2 dưới đây (mục 11). Phần còn lại ngoài phase: nút chuyển Bài viết/Bản đồ trên trang công khai (PUB-02 → Phase 5) và ảnh Open Graph (PUB-05 → Phase 5).
 - Trang công khai `/itineraries/[id]`, copy link / Web Share / QR, **hộp chia sẻ sau khi xuất bản** (D-40 → Phase 5, cùng PUB-04).
 - Tìm địa điểm theo tên (MAP-01), bấm lên bản đồ để chọn vị trí (MAP-02): v2.
 - Kéo waypoint giữa các ngày, xóa/đổi thứ tự ngày, hủy xuất bản: BE không có endpoint.
@@ -180,7 +188,50 @@ Nằm ngoài phase:
 - **D-109:** Sửa `04-UI-SPEC.md` phần `NumberStepper` cho khớp Base UI 1.8.0 (không có PageUp/PageDown, ô trống khi blur trả `null`, `aria-roledescription` tiếng Anh cần ghi đè) trong plan component `ui-web`.
 - **D-110:** Sửa đặc tả `tripory/docs` PT-01 (D-98) ở repo `C:\Users\OS\Documents\personal\tripory`: agent sửa file, **không commit ở repo đó** (user tự commit).
 
+### Mở lại lần 2 (2026-11-05): nền bản đồ (PUB-06)
+- **D-111:** Lớp hiển thị là **MapLibre GL JS** (BSD-3), nền vector tile **OpenFreeMap** (dữ liệu OSM, không key, miễn phí, không SLA). **Thay quyết định cũ "giữ bản đồ SVG port từ FE cũ, chỉ hiển thị"** (`.planning/PROJECT.md` Key Decisions, `research/STACK.md`, `research/SUMMARY.md`). Không dùng Mapbox, Google Maps cho phần hiển thị. Lý do và so sánh: `.agents/tasks/map-providers-comparison.md`.
+- **D-112:** Dùng **style riêng** (JSON do repo giữ, không trỏ thẳng style mặc định của OpenFreeMap), trỏ nguồn tile OpenFreeMap. Đổi nguồn tile sau này (Goong, Vietmap, MapTiler, PMTiles tự host) chỉ đổi URL trong style, không viết lại component.
+- **D-113 (Hoàng Sa, Trường Sa, bắt buộc):** dữ liệu OSM ghi quần đảo Hoàng Sa thuộc Trung Quốc. Style riêng phải: (1) nhãn lấy `name:vi` (dự phòng `name`); (2) ẩn ranh giới quốc gia tranh chấp trên biển; (3) ẩn nhãn quần đảo gốc của OSM ở hai vùng này; (4) thêm lớp nhãn riêng "Quần đảo Hoàng Sa (Việt Nam)" và "Quần đảo Trường Sa (Việt Nam)". Trước khi phát hành phải **kiểm bằng mắt** ở mức zoom thấy cả Biển Đông và ghi vào UAT. Căn cứ: Luật Đo đạc và bản đồ 2018 cấm phát hành bản đồ sai chủ quyền (mới đối chiếu qua bản tóm tắt, chưa đọc nguyên văn điều luật).
+- **D-114:** Ghi công "© OpenStreetMap" (kèm OpenFreeMap) ở góc dưới phải, luôn hiện (ODbL).
+- **D-115:** Bản đồ chỉ hiển thị, **không** bấm lên bản đồ để chọn vị trí và **không** tìm POI (MAP-01, MAP-02 vẫn v2). Không gửi dữ liệu lịch trình cho OpenFreeMap; chỉ tải tile.
+- **D-116:** Kiểu nền **sáng, nhạt màu** để pin nổi bật, nhãn tiếng Việt.
+- **D-117:** Không khóa cứng biên; **mức thu nhỏ tối đa** chỉ vừa đủ thấy cả Việt Nam và Biển Đông.
+
+### Mở lại lần 2: bố cục bản đồ
+- **D-118 (desktop):** bản đồ chiếm cả canvas bên phải (thay `TripSummary` ở canvas, D-13). Tóm tắt chuyến đi chuyển lên **đầu cột trái**, chỉ ở tab Tổng quan (D-133).
+- **D-119 (mobile):** bản đồ là **nền toàn màn phía sau bottom sheet 3 mức** (D-14, D-15 giữ nguyên: mở ở mức giữa). Mức thấp thấy gần hết bản đồ, mức giữa thấy nửa. Tóm tắt (thông tin chung) vào đầu nội dung sheet ở tab Tổng quan.
+- **D-120:** Không tải được bản đồ (OpenFreeMap lỗi, không có WebGL): quay về hiện tóm tắt chuyến đi như hiện nay (`TripSummary` biến thể `canvas`/`compact`), kèm thông báo "Không tải được bản đồ" và nút "Thử lại". Editor vẫn dùng được đủ chức năng.
+- **D-121:** Lịch trình chưa có điểm nào: căn bản đồ theo **tỉnh điểm đến**, kèm dòng "Thêm điểm đến để thấy trên bản đồ". Lịch trình cũ không có điểm đến thì căn cả Việt Nam. Danh mục 34 điểm đến cần thêm **tọa độ tâm và khung bao (bbox) xấp xỉ** cho mỗi tỉnh (dữ liệu tĩnh ở FE, không cần BE).
+
+### Mở lại lần 2: pin, đường nối, ngày đang chọn
+- **D-122:** Tab một ngày: ngày đang chọn hiện **đậm**, các ngày khác **mờ** (vẫn thấy). Tab Tổng quan: mọi ngày đậm như nhau (D-131).
+- **D-123:** Pin **màu theo ngày** (bảng màu lấy từ token của `design-tokens`, lặp lại khi hết màu), **số thứ tự trong ngày** ghi trên pin (1, 2, 3... theo `orderIndex`). Màu ngày dùng chung cho chấm màu ở dòng ngày (D-135) và tab ngày nếu cần.
+- **D-124:** Đường nối **chỉ trong cùng ngày**, đường thẳng giữa các điểm theo thứ tự, **không nối qua đêm** (khớp cách BE tính km). Áp dụng cả ở tab Tổng quan (mỗi ngày một đường riêng, màu của ngày).
+
+### Mở lại lần 2: đồng bộ chọn và canh khung
+- **D-125 (bấm pin, tab ngày):** hiện tên điểm cạnh pin, highlight dòng tương ứng trong danh sách và cuộn tới; trên mobile đưa sheet lên mức giữa. Không mở form sửa.
+- **D-126 (bấm dòng điểm):** bấm vào vùng dòng (không phải nút Sửa/Xóa/tay cầm kéo) thì bản đồ di chuyển tới pin đó và highlight. Nút Sửa, Xóa, tay cầm kéo giữ hành vi cũ.
+- **D-127 (tự canh khung):** mở editor và đổi tab: vừa khung các điểm của tab đó (Tổng quan: mọi điểm). Thêm hoặc sửa điểm: di chuyển tới điểm đó, giữ mức zoom. Xóa hoặc kéo thả: giữ nguyên khung. Tôn trọng `prefers-reduced-motion` (không bay, nhảy thẳng), giống D-47 của Phase 4.
+- **D-128:** Truy cập bàn phím: danh sách bên trái là đường chính để chọn điểm bằng bàn phím và trình đọc màn hình; pin trên bản đồ là phần bổ trợ cho chuột/chạm (không bắt buộc focus được bằng Tab). Bản đồ có nút zoom +/− dùng được bằng bàn phím.
+
+### Mở lại lần 2: ghi lại yêu cầu
+- **D-129:** **PUB-06** chuyển vào Phase 4, mô tả mở rộng: "bản đồ dùng chung trong editor: pin theo ngày, đường nối, zoom/pan, đồng bộ chọn với danh sách". **PUB-02** về lại Phase 5, chỉ còn: "người xem chuyển giữa chế độ Bài viết và Bản đồ trên trang công khai" (dùng lại component của PUB-06).
+- **D-130:** Đổi "Bản đồ SVG" thành "bản đồ" trong `REQUIREMENTS.md`, `ROADMAP.md` (tên Phase 5 và tiêu chí). Ghi trong `research/STACK.md` và `PROJECT.md` Key Decisions rằng quyết định "chỉ SVG" đã thay bằng D-111.
+
+### Mở lại lần 2: tab Tổng quan
+- **D-131:** Dải tab ngày thêm tab **"Tổng quan"** đứng trước "Ngày 1". Chọn Tổng quan: bản đồ hiện mọi ngày đậm như nhau, mỗi ngày màu và đường nối riêng (D-124), canh khung vừa mọi điểm.
+- **D-132 (tab mặc định):** mở editor thì chọn sẵn **Tổng quan nếu lịch trình đã có ít nhất một điểm**, **Ngày 1 nếu chưa có điểm**. (Thay hành vi hiện tại "luôn Ngày 1".)
+- **D-133 (thông tin chung):** đầu cột trái ở tab Tổng quan có: ảnh bìa, tiêu đề, mô tả, ngày khởi hành, số ngày, tổng số điểm, tổng km (BE), trạng thái Nháp/Đã xuất bản, nút "Sửa thông tin" (mở "Thông tin chuyến đi"). **Không** hiện điểm đến và sở thích (giữ D-76), **không** hiện ngày kết thúc (UX-03 vẫn v2). Chỉ hiện ở tab Tổng quan; ở tab ngày, cột trái chỉ có danh sách điểm của ngày (tiêu đề đã ở header).
+- **D-134 (danh sách ở Tổng quan):** chỉ tóm tắt từng ngày, **không liệt kê điểm**.
+- **D-135 (dòng ngày):** chấm màu của ngày, "Ngày N · phụ đề", "X điểm · Y km"; ngày chưa có điểm ghi "Chưa có điểm". **Bấm dòng thì chuyển sang tab ngày đó** (bản đồ canh khung ngày đó, D-127). Desktop: rê chuột hoặc focus vào dòng thì ngày đó nổi lên trên bản đồ.
+- **D-136 (bấm pin ở Tổng quan):** hiện tên điểm cạnh pin kèm "Ngày N", làm nổi dòng của ngày đó. **Không** tự chuyển tab.
+- **D-137 (chỉ xem):** tab Tổng quan chỉ để xem. Sửa/xóa/kéo thả điểm và sửa phụ đề ngày phải chuyển sang tab ngày. **Ngoại lệ duy nhất:** nút "Thêm điểm" (D-138).
+- **D-138 (thêm điểm từ Tổng quan):** form thêm điểm có **thêm ô chọn ngày**, mặc định **ngày cuối cùng**. Ô chọn ngày chỉ có khi mở từ Tổng quan; form **sửa** điểm giữ nguyên không có ô chọn ngày (BE không chuyển điểm giữa ngày, UAT bước 9). Thêm vào ngày chưa có bản ghi vẫn theo cơ chế ngày thưa hiện có.
+- **D-139 (sau khi thêm từ Tổng quan):** ở lại tab Tổng quan, bản đồ di chuyển tới điểm mới (D-127).
+- **D-140:** Tab Tổng quan ghi **tổng km** dưới nhãn giống tab ngày, dùng `TotalDistanceKm` của BE.
+
 ### Claude's Discretion
+- (Mở lại lần 2) Thư viện React cho MapLibre (`react-map-gl/maplibre` hay dùng `maplibre-gl` trực tiếp), cách nạp client-only (dynamic import, không SSR), cấu hình worker cho Turbopack; tách gói (bản đồ không nằm trong bundle của trang không cần); vị trí code (component trình bày ở `ui-web` nhận dữ liệu qua props, phép biến đổi lịch trình thành điểm/đường ở `packages/itinerary` domain, style JSON ở app) theo luật tầng; cách hiện tên điểm cạnh pin (tooltip hay popup); độ mờ của ngày không chọn; bảng màu ngày cụ thể trong token; tọa độ tâm/bbox 34 tỉnh (nguồn và cách lưu); cách kiểm Hoàng Sa/Trường Sa tự động được tới đâu (test style JSON) bên cạnh kiểm bằng mắt; CSP nếu có.
 - Hình dạng 4 tầng của `packages/itinerary`: tên type, use case, port, Zod DTO (`z.iso.datetime({ offset: true })`, `z.iso.date()`), mapper ACL, query key, `createItineraryHooks`.
 - Dữ liệu editor lấy bằng RSC prefetch kèm hydrate React Query hay chỉ fetch ở client có skeleton. Chọn theo `cacheComponents` và bẫy Bearer stale ở D-46.
 - Optimistic cho thêm/sửa waypoint (ngoài reorder và xóa) hay chờ BE trả về rồi refetch.
@@ -201,7 +252,7 @@ Nằm ngoài phase:
 ### Phạm vi và tiêu chí
 - `.planning/ROADMAP.md` §Phase 4: goal, 5 success criteria (tiêu chí 4 đã ghi chú theo D-40), research flag (parse link Google Maps, dnd-kit với React 19 StrictMode, `CalendarDate`, mapper ngày thưa).
 - `.planning/REQUIREMENTS.md`: ITIN-01..14 (ITIN-11 có ghi chú D-40); Out of Scope (kéo giữa các ngày, xóa/đổi thứ tự ngày, hủy xuất bản).
-- `.planning/PROJECT.md` §Constraints, §Key Decisions: nhập vị trí chỉ bằng ô dán, giữ bản đồ SVG, không dựng mock, BE là nguồn sự thật.
+- `.planning/PROJECT.md` §Constraints, §Key Decisions: nhập vị trí chỉ bằng ô dán, ~~giữ bản đồ SVG~~ (thay bằng D-111: MapLibre + OpenFreeMap), không dựng mock, BE là nguồn sự thật.
 
 ### Quyết định phase trước
 - `.planning/phases/03-identity-session-bff/03-CONTEXT.md`: D-10 (gate `(dashboard)`), D-20 (hết phiên), D-24 (hồi phục phiên khi access stale), D-30/D-31 (trạng thái gửi, dòng cold start), mẫu lỗi form.
@@ -237,7 +288,15 @@ Nằm ngoài phase:
 - Đặc tả nghiệp vụ (repo `C:\Users\OS\Documents\personal\tripory`): `docs/traveler/ITINERARY_01_MAP+TIMELINE/PT-01_metadata.md` (cần sửa theo D-98), `docs/traveler/DISCOVERY_FEED_01/PT-01_hero_and_smart_search.md` (danh mục Discovery), BRD (lọc theo destination, duration, interests).
 - `.kiro/steering/coding-rules.md`, `.kiro/steering/code-review.md`: không dùng `? :`/`&&` để ẩn/hiện component (dùng prop `visible`), SOLID, giới hạn khoảng 7 prop / 150 dòng.
 
+### Mở lại lần 2 (2026-11-05): bản đồ trong editor
+- `.agents/tasks/map-providers-comparison.md`: so sánh MapLibre/OpenFreeMap, Mapbox, Google, Goong, Vietmap, Leaflet, SVG; giá, điều khoản, rủi ro Hoàng Sa/Trường Sa, ghi chú tích hợp (react-map-gl 8.x, `setWorkerUrl` của MapLibre v6, hướng dẫn Next.js + Turbopack).
+- Docs MapLibre GL JS (https://maplibre.org/maplibre-gl-js/docs/), react-map-gl (https://visgl.github.io/react-map-gl/docs/get-started), OpenFreeMap (https://openfreemap.org/). Researcher lấy bản hiện hành, kiểm phiên bản tương thích React 19 và Next 16.4.
+- `apps/web/src/modules/itinerary/ui/editor-layout.tsx` (slot `canvas`, `summary`, `timeline`), `trip-summary.tsx` (biến thể `canvas`/`compact`, sẽ là dự phòng khi bản đồ lỗi, D-120), `day-tabs.tsx`, `waypoint-list.tsx`, `waypoint-form-dialog.tsx`.
+- `packages/itinerary/src/infrastructure/static-destination-catalog.ts`: thêm tọa độ tâm/bbox 34 tỉnh (D-121).
+- `.planning/REQUIREMENTS.md` PUB-02, PUB-06; `.planning/ROADMAP.md` §Phase 4, §Phase 5: sửa theo D-129, D-130.
+
 ### FE cũ (tham khảo UX, không port code mock)
+- Bản đồ SVG cũ (tham khảo hành vi zoom 0,5–3, tự căn giữa khi chọn điểm, không port): `C:\Users\OS\Documents\personal\tripory\src\components\itinerary\{MapCanvas,MapPin,MapControls}.tsx`, `src\components\public-itinerary\PublicMapView.tsx`, `src\lib\projection.ts`.
 - `C:\Users\OS\Documents\personal\tripory\src\pages\ItineraryEditorPage.tsx`
 - `C:\Users\OS\Documents\personal\tripory\src\components\itinerary\{TimelineSheet,DaySwitcher,SortableWaypointList,SortableWaypointItem,WaypointItem,WaypointDetailModal,EmptyTimelineState,PublishModal}.tsx`
 
@@ -281,6 +340,14 @@ Nằm ngoài phase:
 - Lệnh ghi editor dùng `useWriteMutation` chung `mutationKey` và `scope: itinerary:{id}` (xếp hàng tuần tự); `SaveIndicator` đọc `useIsMutating` (D-30) — tự lưu metadata đi qua cùng cơ chế.
 - `domain/calendar-date.ts` (`CalendarDate`), `domain/day-range.ts` (`buildDayRange`).
 
+### Mở lại lần 2 (2026-11-05)
+- Chưa có thư viện bản đồ nào trong repo; mọi version mới vào `catalog:` của `pnpm-workspace.yaml` và pin cứng.
+- `EditorLayout` đã tách `canvas` (desktop) và `summary` (nền mobile sau sheet); bản đồ thế vào hai slot này, `TripSummary` giữ lại làm dự phòng (D-120).
+- `DayTabs` hiện bắt đầu ở "Ngày 1" và ghi km dưới nhãn; tab Tổng quan thêm vào đầu (D-131, D-140). Lựa chọn ngày đang lưu ở state của editor (cần đổi kiểu thành "Tổng quan | số ngày").
+- `WaypointFormDialog` hiện không có ô chọn ngày (cố ý); thêm ô chọn ngày chỉ khi mở từ Tổng quan (D-138).
+- Danh mục 34 điểm đến là dữ liệu tĩnh ở `packages/itinerary` (`static-destination-catalog.ts`), chưa có tọa độ.
+- `prefers-reduced-motion` đã được tôn trọng ở editor (UAT bước 23), bản đồ theo cùng quy tắc.
+
 </code_context>
 
 <specifics>
@@ -311,7 +378,11 @@ Nằm ngoài phase:
 - Điểm đến ngoài Việt Nam (global), chọn nhiều điểm đến, chọn thẳng điểm du lịch (Đà Lạt, Phú Quốc...) thay vì tỉnh.
 - Xếp hạng phổ biến theo thống kê BE thay bảng tĩnh (D-61).
 - Dùng sở thích để lọc/gợi ý ở Discovery.
-- PUB-02 (chuyển từ Phase 5) và câu hỏi PUB-06: lập kế hoạch sau phần mở lại này.
+- ~~PUB-02 (chuyển từ Phase 5) và câu hỏi PUB-06: lập kế hoạch sau phần mở lại này.~~ Đã chốt 2026-11-05 (D-129): PUB-06 làm ở mở lại lần 2; PUB-02 về Phase 5.
+- (Mở lại lần 2) Nút chuyển Bài viết/Bản đồ trên trang công khai → Phase 5 (PUB-02), dùng lại component bản đồ.
+- (Mở lại lần 2) Ảnh Open Graph vẽ đường đi bằng `ImageResponse`/SVG, không dùng tile để tránh rủi ro biển đảo → Phase 5 (PUB-05).
+- (Mở lại lần 2) Tìm POI theo tên qua Goong gọi từ BFF (cần đọc điều khoản lưu dữ liệu), dự phòng Photon/Nominatim; bấm bản đồ chọn vị trí → v2 (MAP-01, MAP-02).
+- (Mở lại lần 2) Nét đứt nối điểm cuối ngày N sang điểm đầu ngày N+1; chuyển sang tab Danh sách/Bản đồ trên mobile thay sheet; sửa ngay ở tab Tổng quan (đã chọn chỉ xem); hiện điểm đến, sở thích, ngày kết thúc ở thông tin chung.
 
 ### Reviewed Todos (not folded)
 Không có todo nào khớp với Phase 4.
@@ -323,3 +394,4 @@ Không có todo nào khớp với Phase 4.
 *Phase: 04-itinerary-crud-editor*
 *Context gathered: 2026-10-23*
 *Context updated: 2026-10-30 (mở lại ITIN-02, ITIN-03)*
+*Context updated: 2026-11-05 (mở lại lần 2: bản đồ MapLibre + OpenFreeMap trong editor, tab Tổng quan, PUB-06; D-111..D-140)*

@@ -58,11 +58,11 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 ### Trang công khai và chia sẻ (PUB)
 
 - [ ] **PUB-01**: Khách chưa đăng nhập xem được trang công khai SSR của lịch trình đã xuất bản, bố cục bài viết theo ngày
-- [ ] **PUB-02**: Người xem chuyển được giữa chế độ Bài viết và Bản đồ SVG (pin theo ngày, polyline, zoom/pan, đồng bộ chọn với danh sách)
+- [ ] **PUB-02**: Người xem chuyển được giữa chế độ Bài viết và Bản đồ trên trang công khai (dùng lại component bản đồ của PUB-06)
 - [ ] **PUB-03**: Lịch trình nháp trả trang 403 cho khách, id sai trả 404; chủ xem nháp thấy banner "Bản nháp – chỉ bạn thấy" và nút Sửa
 - [ ] **PUB-04**: Người xem có thể chia sẻ bằng copy link, Web Share (mobile) và mã QR
 - [ ] **PUB-05**: Link khi dán vào Zalo/Messenger hiển thị preview Open Graph (tiêu đề, mô tả, ảnh bìa); nháp đặt `noindex`
-- [ ] **PUB-06**: Bản đồ SVG là một component dùng chung, editor cũng hiển thị được
+- [ ] **PUB-06**: Bản đồ dùng chung (MapLibre + OpenFreeMap, thể hiện Hoàng Sa, Trường Sa thuộc Việt Nam) hiển thị trong editor: pin theo ngày, đường nối trong ngày, zoom/pan, đồng bộ chọn với danh sách, tab "Tổng quan"; trang công khai dùng lại
 
 ### Hồ sơ và người dùng (PROF)
 
@@ -202,11 +202,11 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | ITIN-13 | Phase 4 | Complete |
 | ITIN-14 | Phase 4 | Complete |
 | PUB-01 | Phase 5 | Pending |
-| PUB-02 | Phase 4 | Pending (chuyển từ Phase 5 theo yêu cầu user 2026-10-30) |
+| PUB-02 | Phase 5 | Pending (về lại Phase 5 ngày 2026-11-05: chỉ còn nút chuyển Bài viết/Bản đồ) |
 | PUB-03 | Phase 5 | Pending |
 | PUB-04 | Phase 5 | Pending |
 | PUB-05 | Phase 5 | Pending |
-| PUB-06 | Phase 5 | Pending |
+| PUB-06 | Phase 4 | Pending (chuyển vào Phase 4, mở lại lần 2 ngày 2026-11-05) |
 | PROF-01 | Phase 6 | Pending |
 | PROF-02 | Phase 6 | Pending |
 | PROF-03 | Phase 6 | Pending |

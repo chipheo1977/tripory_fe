@@ -344,7 +344,7 @@ pnpm --filter @tripory/web exec playwright install chromium
 | Twilio NTS, Metered free | Đắt hoặc free quá nhỏ; Metered mất tới 2 phút để credential có hiệu lực | Cloudflare Realtime TURN |
 | `simple-peer`, PeerJS, `webrtc-adapter` | Thêm lớp không cần; signaling đã có ở hub | `RTCPeerConnection` native |
 | `extendable-media-recorder`, `opus-media-recorder`, RecordRTC, ghi WAV | Safari 18.4+ đã ghi WebM/Opus; WAV vượt 4,5 MB rất nhanh | `MediaRecorder` native với `audio/webm;codecs=opus` |
-| Mapbox GL / `react-map-gl` / `@turf/distance` | Chưa có token; quãng đường do BE tính | Bản đồ SVG port từ FE cũ, hiển thị `TotalDistanceKm`/`DayDistanceKm` của BE |
+| Mapbox GL / `@turf/distance` | Chưa có token; quãng đường do BE tính | ~~Bản đồ SVG port từ FE cũ~~ Thay 2026-11-05 (`04-CONTEXT.md` D-111): MapLibre GL JS + nền OpenFreeMap (có thể qua `react-map-gl/maplibre`), hiển thị `TotalDistanceKm`/`DayDistanceKm` của BE |
 | shadcn `toast` cũ, `tailwindcss-animate` | Đã bị thay ở bản Tailwind 4 của shadcn | `sonner`, `tw-animate-css` |
 | `jsdom` 30.x | Yêu cầu Node ^24.15; local là 24.14.1 | `jsdom` 29.1.1, hoặc nâng Node |
 | MSW 3.x (ở milestone này) | Kiến trúc test bằng fake repo và tiêm `fetch` | Fake `HttpClient`/repository |

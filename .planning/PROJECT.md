@@ -26,7 +26,7 @@ Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình 
 - [ ] Người dùng có thể đăng ký, đăng nhập, duy trì phiên và đăng xuất qua BFF cùng origin; access token và refresh token nằm trong cookie httpOnly và không thể bị JavaScript phía client đọc.
 - [ ] Người dùng đã đăng nhập có thể tạo, xem, sửa và xóa lịch trình bằng API thật của backend.
 - [ ] Người dùng có thể thêm, sửa, xóa và sắp xếp waypoint theo ngày, đặt phụ đề ngày và xuất bản lịch trình.
-- [ ] Người dùng có thể thao tác waypoint mà không phụ thuộc Mapbox token, sử dụng bản đồ SVG để hiển thị và nhập vị trí bằng cách dán tọa độ hoặc link Google Maps.
+- [ ] Người dùng có thể thao tác waypoint mà không phụ thuộc Mapbox token, sử dụng bản đồ MapLibre + OpenFreeMap để hiển thị và nhập vị trí bằng cách dán tọa độ hoặc link Google Maps.
 - [ ] Khách chưa đăng nhập có thể xem trang công khai của một lịch trình đã xuất bản; lịch trình nháp hiển thị đúng trạng thái lỗi quyền truy cập.
 - [ ] Người dùng có thể xem và cập nhật hồ sơ thật, tìm người dùng khác và xem danh sách lịch trình của mình.
 - [ ] Người dùng có thể gửi/nhận tin nhắn text và voice theo thời gian thực, theo dõi trạng thái đã đọc và xem lịch sử hội thoại.
@@ -65,7 +65,7 @@ Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình 
 - **Deployment**: Frontend chạy trên Vercel; backend được triển khai ở nơi khác và cung cấp URL công khai có HTTPS, CORS và WebSocket/SignalR hoạt động.
 - **Authentication**: REST từ client đi qua BFF cùng origin; access và refresh token nằm trong cookie httpOnly. SignalR kết nối thẳng tới backend bằng access token ngắn hạn lấy qua endpoint server-side của app.
 - **Realtime**: WebRTC phải hoạt động qua mạng khác nhau; TURN là bắt buộc, credential phải ngắn hạn và secret nhà cung cấp chỉ nằm trong biến môi trường server-side.
-- **Maps**: Không phụ thuộc Mapbox trong milestone này; dùng bản đồ SVG hiện có hoặc giải pháp không cần token.
+- **Maps**: Không phụ thuộc Mapbox trong milestone này; dùng giải pháp không cần token: MapLibre GL JS + OpenFreeMap (quyết định 2026-11-05, thay bản đồ SVG).
 - **Compatibility**: Frontend mới chạy song song với frontend cũ và cùng sử dụng backend hiện có; không được yêu cầu gỡ frontend cũ để vận hành.
 - **Dependencies**: Deploy backend nằm ngoài repo này và là gate để nghiệm thu deployment, auth, SignalR và gọi thoại end-to-end.
 - **Quality**: Trước khi hoàn tất công việc phải chạy `pnpm lint`, `pnpm typecheck`, `pnpm test`; chạy build và kiểm tra runtime/visual phù hợp cho phần giao diện bị ảnh hưởng.
@@ -85,7 +85,7 @@ Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình 
 | SignalR kết nối trực tiếp tới backend | Vercel route handlers không phải proxy WebSocket dài hạn; backend phải cho phép origin frontend | — Pending |
 | Bắt buộc TURN cho gọi thoại | STUN đơn thuần không đảm bảo kết nối WebRTC giữa các NAT/mạng di động khác nhau | — Pending |
 | Credential TURN được cấp ngắn hạn qua endpoint server-side | Tránh lộ TURN secret dài hạn trong JavaScript bundle | — Pending |
-| Giữ bản đồ SVG, hoãn Mapbox | Chưa có Mapbox token nhưng luồng Itinerary vẫn cần tiến triển | — Pending |
+| ~~Giữ bản đồ SVG, hoãn Mapbox~~ Thay 2026-11-05: bản đồ MapLibre GL JS + nền OpenFreeMap (không key, miễn phí), style riêng thể hiện Hoàng Sa, Trường Sa thuộc Việt Nam; vẫn không dùng Mapbox | Chưa có Mapbox token; bản đồ chỉ có lưới quá nghèo thông tin; so sánh ở `.agents/tasks/map-providers-comparison.md`, quyết định `04-CONTEXT.md` D-111 | — Pending |
 | Không dựng mock cho tính năng backend chưa hỗ trợ | Tránh tạo trải nghiệm giả và công việc phải bỏ khi contract thật xuất hiện | — Pending |
 | Viết tay schema Zod trước, cân nhắc type sinh từ OpenAPI sau | Cần kiểm tra runtime sớm trong khi contract generation chưa phải dependency của nền móng | — Pending |
 | Hạ pnpm về 10 ngay từ Phase 0a (đổi `packageManager`, điều chỉnh cấu hình workspace cho tương thích) | Vercel chỉ hỗ trợ chính thức pnpm 6–10; tránh rủi ro build hỏng khi deploy (quyết định 2026-10-09 sau research) | — Pending |

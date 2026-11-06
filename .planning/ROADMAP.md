@@ -2,7 +2,7 @@
 
 ## Overview
 
-Milestone 1 đi từ khung giao diện có deploy Vercel ngay từ đầu, qua nền HTTP/kernel và phiên đăng nhập BFF, tới luồng chính của Core Value: tạo, sửa, xuất bản lịch trình, xem trang công khai có bản đồ SVG, quản lý hồ sơ/danh bạ, rồi chat realtime, tin nhắn thoại và gọi thoại qua TURN. Milestone kết thúc bằng một gate nghiệm thu trên URL production để vài người quen dùng thử và góp ý, trong khi FE Vite cũ vẫn chạy song song.
+Milestone 1 đi từ khung giao diện có deploy Vercel ngay từ đầu, qua nền HTTP/kernel và phiên đăng nhập BFF, tới luồng chính của Core Value: tạo, sửa, xuất bản lịch trình, xem trang công khai có bản đồ, quản lý hồ sơ/danh bạ, rồi chat realtime, tin nhắn thoại và gọi thoại qua TURN. Milestone kết thúc bằng một gate nghiệm thu trên URL production để vài người quen dùng thử và góp ý, trong khi FE Vite cũ vẫn chạy song song.
 
 Thứ tự phase giữ đúng lộ trình đã chốt (0a → 0b → 0c → 1 → 2 → 3 → 4 → deploy), đánh số lại thành Phase 1–8.
 
@@ -12,7 +12,7 @@ Thứ tự phase giữ đúng lộ trình đã chốt (0a → 0b → 0c → 1 �
 | 2 | 0b — HTTP + shared kernel |
 | 3 | 0c — Identity + session (BFF) |
 | 4 | 1 — Itinerary CRUD + editor |
-| 5 | 2 — Bản đồ SVG + public view |
+| 5 | 2 — Bản đồ + public view |
 | 6 | 3 — Profile + users |
 | 7 | 4 — Chat realtime + voice + gọi thoại |
 | 8 | Deploy & nghiệm thu |
@@ -31,9 +31,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: HTTP & Shared Kernel** - `api-client` chuẩn hóa lỗi BE, single-flight refresh và `shared-kernel` dùng chung (completed 2026-10-12)
 - [x] **Phase 3: Identity & Session (BFF)** - Đăng ký, đăng nhập, phiên cookie httpOnly, refresh im lặng và BFF có allowlist
  (completed 2026-10-23)
-- [x] **Phase 4: Itinerary CRUD & Editor** - "Lịch trình của tôi" và editor đầy đủ tới bước xuất bản (reopened 2026-10-30: form tạo 4 khối thay tạo nhanh (ITIN-02), nhiều ảnh bìa và tự lưu "Thông tin chuyến đi" (ITIN-03) đang làm; PUB-02 chuyển từ Phase 5 để sau; 23/41 plan đã xong, 18 plan mở lại 04-24..04-41 đã lập cho ITIN-02, ITIN-03 và chưa thực thi, PUB-02 chưa lập)
+- [x] **Phase 4: Itinerary CRUD & Editor** - "Lịch trình của tôi" và editor đầy đủ tới bước xuất bản (reopened 2026-10-30: form tạo 4 khối thay tạo nhanh (ITIN-02), nhiều ảnh bìa và tự lưu "Thông tin chuyến đi" (ITIN-03) đã xong 41/41 plan; mở lại lần 2 2026-11-05: bản đồ MapLibre + OpenFreeMap trong editor và tab Tổng quan (PUB-06), chưa lập plan)
  (completed 2026-11-05)
-- [ ] **Phase 5: SVG Map & Public View** - Trang công khai SSR, bản đồ SVG dùng chung, chia sẻ và Open Graph
+- [ ] **Phase 5: Map & Public View** - Trang công khai SSR, chuyển Bài viết/Bản đồ (dùng lại bản đồ của editor), chia sẻ và Open Graph
 - [ ] **Phase 6: Profile & Users** - Hồ sơ thật, tab lịch trình, danh bạ và lối vào hội thoại
 - [ ] **Phase 7: Chat, Voice & Calls** - Chat realtime, tin nhắn thoại và gọi thoại 1-1 qua TURN
 - [ ] **Phase 8: Deploy & Acceptance Gate** - Production Vercel trỏ BE công khai, smoke E2E và kênh góp ý
@@ -115,15 +115,15 @@ Plans:
 ### Phase 4: Itinerary CRUD & Editor
 **Goal**: Người dùng đã đăng nhập tạo, sửa, sắp xếp và xuất bản một lịch trình thật bằng API BE, trên cả desktop và mobile
 **Depends on**: Phase 3
-**Requirements**: ITIN-01, ITIN-02, ITIN-03, ITIN-04, ITIN-05, ITIN-06, ITIN-07, ITIN-08, ITIN-09, ITIN-10, ITIN-11, ITIN-12, ITIN-13, ITIN-14, PUB-02
+**Requirements**: ITIN-01, ITIN-02, ITIN-03, ITIN-04, ITIN-05, ITIN-06, ITIN-07, ITIN-08, ITIN-09, ITIN-10, ITIN-11, ITIN-12, ITIN-13, ITIN-14, PUB-06
 **Success Criteria** (what must be TRUE):
-  0. (PUB-02, chuyển từ Phase 5 theo yêu cầu user 2026-10-30, chưa lập kế hoạch) Người xem chuyển được giữa chế độ Bài viết và Bản đồ SVG: pin theo ngày, polyline, zoom/pan, chọn điểm đồng bộ với danh sách
+  0. (PUB-06, mở lại lần 2 2026-11-05, chưa lập kế hoạch) Editor hiển thị bản đồ dùng chung (MapLibre + OpenFreeMap, style riêng thể hiện Hoàng Sa, Trường Sa thuộc Việt Nam): pin màu theo ngày có số thứ tự, đường nối trong ngày, zoom/pan, chọn điểm đồng bộ với danh sách; dải tab ngày có tab "Tổng quan" hiện mọi ngày
   1. Người dùng thấy "Lịch trình của tôi" có phân trang và lọc Tất cả/Nháp/Đã xuất bản, tạo lịch trình trong một modal 4 khối accordion (điểm đến trong 34 tỉnh/thành, tên mặc định theo điểm đến, ngày khởi hành và số ngày, sở thích) rồi vào thẳng editor với đủ số ngày đã chọn và ảnh bìa mặc định theo điểm đến, và xóa được lịch trình sau khi xác nhận (thay tạo nhanh bằng tiêu đề, mở lại 2026-10-30; BE lưu điểm đến, sở thích, ngày khởi hành, số ngày và ảnh bìa mặc định trong một request)
   2. Trong editor, người dùng sửa metadata (tiêu đề, mô tả, ngày khởi hành, ảnh bìa URL có preview; mở lại 2026-10-30: tự lưu không có nút Lưu, tối đa 5 ảnh bìa dạng lưới và chọn một ảnh hiển thị), chuyển/thêm ngày, sửa phụ đề ngày inline, thêm/sửa waypoint bằng cách dán tọa độ "lat, lng" hoặc link Google Maps, và thấy quãng đường theo ngày cùng tổng do BE tính
   3. Người dùng xóa waypoint và hoàn tác được trong 5 giây; kéo thả sắp xếp waypoint trong ngày bằng chuột, cảm ứng hoặc bàn phím, thấy rollback khi BE lỗi
   4. Người dùng luôn thấy trạng thái Đang lưu / Đã lưu / Lỗi – thử lại, được cảnh báo khi rời trang lúc còn request; xuất bản được khi có ≥ 1 waypoint sau khi xác nhận không thể hủy, rồi thấy lịch trình chuyển sang "Đã xuất bản" (hộp chia sẻ sau khi xuất bản chuyển sang Phase 5 theo `04-CONTEXT.md` D-40)
-**Plans**: 41 plans, đã xong cả 41 (23 plan đầu + 18 plan mở lại 04-24..04-41 cho ITIN-02, ITIN-03: tài liệu hợp đồng BE, checkpoint BE 04-25, rồi FE và UAT; 04-41 tách từ 04-30 nên xếp ở wave 18, trước 04-31; UAT mục D 8/8 PASS trên BE local 2026-11-05) + plan cho PUB-02
-**Plans**: 41 plans (23 đã xong + 18 plan mở lại 04-24..04-41 cho ITIN-02, ITIN-03, chưa thực thi: tài liệu hợp đồng BE, checkpoint chờ user sửa BE, rồi FE và UAT; 04-41 tách từ 04-30 nên xếp ở wave 18, trước 04-31) + plan cho PUB-02 (chưa lập, để sau; PUB-02 KHÔNG nằm trong 04-24..04-41)
+  5. Người không phải chủ không thấy thao tác sửa; trên mobile, timeline nằm trong bottom sheet nhiều mức và vẫn thao tác đủ các bước trên
+**Plans**: 41 plans, đã xong cả 41 (23 plan đầu + 18 plan mở lại 04-24..04-41 cho ITIN-02, ITIN-03: tài liệu hợp đồng BE, checkpoint BE 04-25, rồi FE và UAT; 04-41 tách từ 04-30 nên xếp ở wave 18, trước 04-31; UAT mục D 8/8 PASS trên BE local 2026-11-05) + plan cho mở lại lần 2 (bản đồ trong editor và tab Tổng quan, PUB-06; chưa lập, quyết định ở `04-CONTEXT.md` D-111..D-140)
 **UI hint**: yes
 **Research flag**: cần research sâu khi plan (parse link Google Maps, dnd-kit với React 19 StrictMode, `CalendarDate`, mapper ngày thưa)
 
@@ -170,15 +170,15 @@ Plans:
 - [x] 04-39-PLAN.md — UAT bổ sung, ghi chú VALIDATION, BE-DEPENDENCIES, PT-01 (repo `tripory`, không commit), bất biến tĩnh, full suite + build (wave 24)
 - [x] 04-40-PLAN.md — UAT thủ công cuối phần mở lại (BE thật; desktop, iPhone Safari, Android Chrome; checkpoint; wave 25)
 
-### Phase 5: SVG Map & Public View
-**Goal**: Khách chưa đăng nhập mở link chia sẻ và đọc được lịch trình đã xuất bản dưới dạng bài viết hoặc bản đồ SVG; link hiển thị preview đẹp khi dán vào ứng dụng nhắn tin
+### Phase 5: Map & Public View
+**Goal**: Khách chưa đăng nhập mở link chia sẻ và đọc được lịch trình đã xuất bản dưới dạng bài viết hoặc bản đồ; link hiển thị preview đẹp khi dán vào ứng dụng nhắn tin
 **Depends on**: Phase 4
-**Requirements**: PUB-01, PUB-03, PUB-04, PUB-05, PUB-06 (PUB-02 đã chuyển sang Phase 4)
+**Requirements**: PUB-01, PUB-02, PUB-03, PUB-04, PUB-05 (PUB-06 chuyển sang Phase 4 ngày 2026-11-05; PUB-02 về lại đây, chỉ còn nút chuyển Bài viết/Bản đồ)
 **Success Criteria** (what must be TRUE):
   1. Khách chưa đăng nhập mở link lịch trình đã xuất bản và thấy trang SSR bố cục bài viết theo ngày
   2. Khách mở lịch trình nháp thấy trang 403, id sai thấy 404; chủ mở nháp thấy banner "Bản nháp – chỉ bạn thấy" và nút Sửa
   3. Người xem chia sẻ được bằng copy link, Web Share trên mobile và mã QR; chủ xuất bản xong trong editor thì hộp chia sẻ mở sẵn và editor có nút "Chia sẻ" (phần ITIN-11 chuyển từ Phase 4); dán link vào Zalo/Messenger hiện preview với tiêu đề, mô tả, ảnh bìa; trang nháp có `noindex`
-  4. Editor hiển thị cùng component bản đồ SVG với trang công khai
+  4. Trang công khai có nút chuyển Bài viết/Bản đồ, dùng lại component bản đồ đã làm cho editor ở Phase 4 (PUB-02; PUB-06)
 **Plans**: TBD
 **UI hint**: yes
 
@@ -234,8 +234,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 1. Design System, UI Skeleton & Walking Skeleton | 8/8 | Complete | 2026-10-12 |
 | 2. HTTP & Shared Kernel | 4/4 | CompleComplete
 | 3. Identity & Session (BFF) | 15/15 | Executed (UAT 19/19 PASS, chờ verify-work) | 2026-10-23 |
-| 4. Itinerary CRUD & Editor | 41/41 | Executed (UAT 23/23 PASS + mục D 8/8 PASS trên BE local; BE đã merge vào dev nhưng chưa kiểm BE đã deploy; PUB-02 chưa lập plan) | 2026-11-05 |
-| 5. SVG Map & Public View | 0/TBD | Not started | - |
+| 4. Itinerary CRUD & Editor | 41/41 | Reopened lần 2 (41 plan đã xong, UAT 23/23 + mục D 8/8 PASS; BE đã deploy Render; bản đồ trong editor PUB-06 đã thảo luận, chưa lập plan) | 2026-11-05 (41 plan) |
+| 5. Map & Public View | 0/TBD | Not started | - |
 | 6. Profile & Users | 0/TBD | Not started | - |
 | 7. Chat, Voice & Calls | 0/TBD | Not started | - |
 | 8. Deploy & Acceptance Gate | 0/TBD | Not started | - |

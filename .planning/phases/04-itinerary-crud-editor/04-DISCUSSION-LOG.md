@@ -220,3 +220,67 @@ Hình dạng type/port/adapter điểm đến, vị trí lưu 34 ảnh, componen
 
 ## Deferred Ideas
 Hiện/sửa điểm đến và sở thích; điểm đến trên thẻ; tải ảnh lên; global, nhiều điểm đến, chọn thẳng điểm du lịch; xếp hạng theo thống kê BE; dùng sở thích ở Discovery; PUB-02 và câu hỏi PUB-06.
+
+
+---
+
+# Mở lại lần 2 (2026-11-05): bản đồ trong editor (PUB-06)
+
+> **Chỉ là nhật ký.** Quyết định nằm ở `04-CONTEXT.md` D-111..D-140.
+
+**Chế độ:** `/gsd-discuss-phase 4`, cập nhật CONTEXT (giữ D-01..D-110), câu hỏi gộp theo lượt. Người dùng chọn cập nhật CONTEXT và thảo luận cả 5 vùng.
+**Đầu vào trước phiên:** `.agents/tasks/map-providers-comparison.md` (so sánh MapLibre/OpenFreeMap, MapTiler, Mapbox, Google, Goong, Vietmap, Leaflet, SVG). Người dùng chọn MapLibre + OpenFreeMap; chọn làm trong Phase 4 (bản đồ trong editor trước) thay vì trả PUB-02 về Phase 5.
+
+## Bố cục
+| Câu hỏi | Lựa chọn đã trình bày | Chọn |
+|---|---|---|
+| Desktop | ★ bản đồ cả canvas, tóm tắt lên đầu cột trái · tóm tắt là thẻ nổi trên bản đồ | ★ |
+| Mobile | ★ bản đồ là nền sau bottom sheet 3 mức · hai tab Danh sách/Bản đồ | ★ |
+
+## Hiển thị theo ngày
+| Câu hỏi | Lựa chọn đã trình bày | Chọn |
+|---|---|---|
+| Ngày nào hiện | ★ ngày chọn đậm, ngày khác mờ · chỉ ngày chọn · tất cả như nhau | ★ + thêm tab "Tổng quan" trước "Ngày 1" hiện tất cả (ý của người dùng) |
+| Pin | ★ màu theo ngày + số thứ tự · một màu, chỉ số | ★ |
+| Đường nối | ★ chỉ trong ngày, không nối qua đêm · thêm nét đứt giữa các ngày | ★, áp dụng cả ở Tổng quan |
+
+## Đồng bộ chọn
+| Câu hỏi | Lựa chọn đã trình bày | Chọn |
+|---|---|---|
+| Bấm pin | ★ tên cạnh pin + highlight, cuộn dòng; mobile sheet lên giữa · mở form sửa | ★ |
+| Bấm dòng | ★ bản đồ di chuyển tới pin · không đồng bộ | ★ |
+| Tự canh khung | ★ mở/đổi tab vừa khung; thêm/sửa di chuyển tới điểm; xóa/kéo giữ khung · luôn canh lại | ★ |
+
+## Style và trạng thái
+| Câu hỏi | Lựa chọn đã trình bày | Chọn |
+|---|---|---|
+| Nền | ★ sáng, nhạt · nhiều màu | ★ |
+| Khung nhìn | ★ không khóa, thu nhỏ tối đa vừa Việt Nam + Biển Đông · khóa trong Việt Nam | ★ |
+| Chưa có điểm | ★ căn theo tỉnh điểm đến + gợi ý · luôn căn cả Việt Nam | ★ |
+| Không tải được | ★ quay về tóm tắt + "Không tải được bản đồ" + Thử lại · chỉ báo lỗi | ★ |
+
+## Ghi lại yêu cầu
+| Câu hỏi | Lựa chọn đã trình bày | Chọn |
+|---|---|---|
+| PUB-02/PUB-06 | ★ PUB-06 vào Phase 4, PUB-02 về Phase 5 chỉ còn nút chuyển · giữ PUB-02 ở Phase 4 + PUB-07 mới | ★ |
+| Chữ "SVG" | ★ đổi thành "bản đồ", ghi quyết định cũ đã thay · giữ nguyên | ★ |
+
+## Tab Tổng quan (phát sinh)
+| Câu hỏi | Lựa chọn đã trình bày | Chọn |
+|---|---|---|
+| Tab mặc định | ★ Tổng quan nếu có điểm, Ngày 1 nếu chưa · luôn Ngày 1 · luôn Tổng quan | ★ |
+| Danh sách | liệt kê điểm nhóm theo ngày · chỉ tóm tắt từng ngày | tóm tắt từng ngày + thông tin chung (người dùng chọn b) |
+| Sửa ở Tổng quan | sửa/xóa được · chỉ xem | chỉ xem (b), ngoại lệ nút Thêm điểm |
+| Thêm điểm | ★ form có ô chọn ngày, mặc định ngày cuối · ẩn nút | ★ |
+| Tổng km dưới nhãn | ★ có (BE) · không | ★ |
+| Thông tin chung | ★ ảnh bìa, tiêu đề, mô tả, ngày khởi hành, số ngày, số điểm, km, trạng thái, nút Sửa · + điểm đến, sở thích · + ngày kết thúc | ★ ("ok") |
+| Tóm tắt ở tab nào | ★ chỉ Tổng quan · mọi tab | ★ |
+| Dòng ngày | ★ chấm màu, Ngày N · phụ đề, X điểm · Y km; bấm chuyển tab; rê/focus làm nổi · bấm chỉ làm nổi | ★ |
+| Bấm pin ở Tổng quan | ★ tên + "Ngày N", làm nổi dòng, không chuyển tab · chuyển tab | ★ |
+| Sau khi thêm từ Tổng quan | ★ ở lại, bản đồ tới điểm mới · chuyển sang tab ngày | ★ |
+
+## Claude's Discretion
+Thư viện React cho MapLibre, cách nạp client-only, worker cho Turbopack, chia bundle, vị trí code theo tầng, tooltip hay popup cho tên điểm, độ mờ ngày không chọn, bảng màu ngày, nguồn tọa độ tâm/bbox 34 tỉnh, kiểm tự động style Hoàng Sa/Trường Sa, CSP.
+
+## Deferred Ideas
+Nút chuyển Bài viết/Bản đồ trên trang công khai (PUB-02 → Phase 5); ảnh Open Graph (PUB-05); tìm POI qua Goong, bấm chọn vị trí (v2); nét đứt nối giữa các ngày; tab Danh sách/Bản đồ trên mobile; sửa ngay ở Tổng quan; hiện điểm đến, sở thích, ngày kết thúc ở thông tin chung.

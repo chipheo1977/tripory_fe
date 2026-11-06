@@ -117,13 +117,13 @@ Plans:
 **Depends on**: Phase 3
 **Requirements**: ITIN-01, ITIN-02, ITIN-03, ITIN-04, ITIN-05, ITIN-06, ITIN-07, ITIN-08, ITIN-09, ITIN-10, ITIN-11, ITIN-12, ITIN-13, ITIN-14, PUB-06
 **Success Criteria** (what must be TRUE):
-  0. (PUB-06, mở lại lần 2 2026-11-05, chưa lập kế hoạch) Editor hiển thị bản đồ dùng chung (MapLibre + OpenFreeMap, style riêng thể hiện Hoàng Sa, Trường Sa thuộc Việt Nam): pin màu theo ngày có số thứ tự, đường nối trong ngày, zoom/pan, chọn điểm đồng bộ với danh sách; dải tab ngày có tab "Tổng quan" hiện mọi ngày
+  0. (PUB-06, mở lại lần 2 2026-11-05, đã lập kế hoạch 04-42..04-53) Editor hiển thị bản đồ dùng chung (MapLibre + OpenFreeMap, style riêng thể hiện Hoàng Sa, Trường Sa thuộc Việt Nam): pin màu theo ngày có số thứ tự, đường nối trong ngày, zoom/pan, chọn điểm đồng bộ với danh sách; dải tab ngày có tab "Tổng quan" hiện mọi ngày
   1. Người dùng thấy "Lịch trình của tôi" có phân trang và lọc Tất cả/Nháp/Đã xuất bản, tạo lịch trình trong một modal 4 khối accordion (điểm đến trong 34 tỉnh/thành, tên mặc định theo điểm đến, ngày khởi hành và số ngày, sở thích) rồi vào thẳng editor với đủ số ngày đã chọn và ảnh bìa mặc định theo điểm đến, và xóa được lịch trình sau khi xác nhận (thay tạo nhanh bằng tiêu đề, mở lại 2026-10-30; BE lưu điểm đến, sở thích, ngày khởi hành, số ngày và ảnh bìa mặc định trong một request)
   2. Trong editor, người dùng sửa metadata (tiêu đề, mô tả, ngày khởi hành, ảnh bìa URL có preview; mở lại 2026-10-30: tự lưu không có nút Lưu, tối đa 5 ảnh bìa dạng lưới và chọn một ảnh hiển thị), chuyển/thêm ngày, sửa phụ đề ngày inline, thêm/sửa waypoint bằng cách dán tọa độ "lat, lng" hoặc link Google Maps, và thấy quãng đường theo ngày cùng tổng do BE tính
   3. Người dùng xóa waypoint và hoàn tác được trong 5 giây; kéo thả sắp xếp waypoint trong ngày bằng chuột, cảm ứng hoặc bàn phím, thấy rollback khi BE lỗi
   4. Người dùng luôn thấy trạng thái Đang lưu / Đã lưu / Lỗi – thử lại, được cảnh báo khi rời trang lúc còn request; xuất bản được khi có ≥ 1 waypoint sau khi xác nhận không thể hủy, rồi thấy lịch trình chuyển sang "Đã xuất bản" (hộp chia sẻ sau khi xuất bản chuyển sang Phase 5 theo `04-CONTEXT.md` D-40)
   5. Người không phải chủ không thấy thao tác sửa; trên mobile, timeline nằm trong bottom sheet nhiều mức và vẫn thao tác đủ các bước trên
-**Plans**: 41 plans, đã xong cả 41 (23 plan đầu + 18 plan mở lại 04-24..04-41 cho ITIN-02, ITIN-03: tài liệu hợp đồng BE, checkpoint BE 04-25, rồi FE và UAT; 04-41 tách từ 04-30 nên xếp ở wave 18, trước 04-31; UAT mục D 8/8 PASS trên BE local 2026-11-05) + plan cho mở lại lần 2 (bản đồ trong editor và tab Tổng quan, PUB-06; chưa lập, quyết định ở `04-CONTEXT.md` D-111..D-140)
+**Plans**: 41 plans, đã xong cả 41 (23 plan đầu + 18 plan mở lại 04-24..04-41 cho ITIN-02, ITIN-03: tài liệu hợp đồng BE, checkpoint BE 04-25, rồi FE và UAT; 04-41 tách từ 04-30 nên xếp ở wave 18, trước 04-31; UAT mục D 8/8 PASS trên BE local 2026-11-05) + 12 plan mở lại lần 2 (04-42..04-53, bản đồ trong editor và tab Tổng quan, PUB-06; quyết định ở `04-CONTEXT.md` D-111..D-140, research ở `04-RESEARCH.md` mục "Mở lại lần 2 (2026-11-05): bản đồ"; wave 26-33, 04-53 là checkpoint UAT)
 **UI hint**: yes
 **Research flag**: cần research sâu khi plan (parse link Google Maps, dnd-kit với React 19 StrictMode, `CalendarDate`, mapper ngày thưa)
 
@@ -169,6 +169,20 @@ Plans:
 - [x] 04-38-PLAN.md — `TripInfoDialog` tự lưu + lưới ảnh, editor host tự lưu, bỏ bản nháp metadata, dọn export cũ của hộp tạo nhanh (wave 23)
 - [x] 04-39-PLAN.md — UAT bổ sung, ghi chú VALIDATION, BE-DEPENDENCIES, PT-01 (repo `tripory`, không commit), bất biến tĩnh, full suite + build (wave 24)
 - [x] 04-40-PLAN.md — UAT thủ công cuối phần mở lại (BE thật; desktop, iPhone Safari, Android Chrome; checkpoint; wave 25)
+
+Mở lại lần 2 (2026-11-05, bản đồ trong editor + tab Tổng quan, PUB-06; D-111..D-140):
+- [ ] 04-42-PLAN.md — Token bản đồ: 8 màu ngày (trỏ primitive, test tương phản ≥ 4.5:1), kích thước pin/chấm/nhãn, độ mờ (wave 26)
+- [ ] 04-43-PLAN.md — Domain thuần: màu ngày, pin, đường, nhấn mạnh, khung canh, tab mặc định, tóm tắt ngày; tâm/bbox 34 tỉnh (OSM, ODbL) (wave 26)
+- [ ] 04-44-PLAN.md — Catalog `maplibre-gl` 6.16.0 + `react-map-gl` 8.1.3; style nền riêng OpenFreeMap có lọc Hoàng Sa/Trường Sa theo vùng + test (wave 26)
+- [ ] 04-48-PLAN.md — Ô "Ngày" trong form thêm mở từ Tổng quan; form sửa không đổi (wave 26)
+- [ ] 04-45-PLAN.md — `ui-web`: `MapPin`, `MapToneDot`, `MapZoomControls`, `Sheet snap/onSnapChange`, `snapHeightPx` (wave 27)
+- [ ] 04-46-PLAN.md — `TripMap` (react-map-gl, worker Turbopack, client-only), camera, ghi công, fake cho test jsdom (wave 28)
+- [ ] 04-47-PLAN.md — Tab "Tổng quan" trong `DayTabs`, `OverviewSummary`, `DayOverviewRow`, `OverviewPanel`, chuỗi dòng ngày (wave 28)
+- [ ] 04-49-PLAN.md — `EditorLayout` slot bản đồ dùng chung desktop/mobile, vùng an toàn theo mức sheet; `EditorMapArea` tải/rỗng/lỗi → TripSummary (wave 29)
+- [ ] 04-50-PLAN.md — Danh sách chọn điểm khi bản đồ sẵn sàng (D-126), tách `DayPanel`, điểm nối cho editor (wave 30)
+- [ ] 04-51-PLAN.md — Nối bản đồ + Tổng quan vào editor: tab mặc định, đồng bộ chọn pin↔danh sách, canh khung, thêm từ Tổng quan (wave 31)
+- [ ] 04-52-PLAN.md — Cổng lint/typecheck/test từng gói + `next build` (worker, tách bundle) + mục E checklist UAT (wave 32)
+- [ ] 04-53-PLAN.md — UAT thủ công bản đồ, gồm kiểm bằng mắt Hoàng Sa/Trường Sa (checkpoint; wave 33)
 
 ### Phase 5: Map & Public View
 **Goal**: Khách chưa đăng nhập mở link chia sẻ và đọc được lịch trình đã xuất bản dưới dạng bài viết hoặc bản đồ; link hiển thị preview đẹp khi dán vào ứng dụng nhắn tin
@@ -234,7 +248,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 1. Design System, UI Skeleton & Walking Skeleton | 8/8 | Complete | 2026-10-12 |
 | 2. HTTP & Shared Kernel | 4/4 | CompleComplete
 | 3. Identity & Session (BFF) | 15/15 | Executed (UAT 19/19 PASS, chờ verify-work) | 2026-10-23 |
-| 4. Itinerary CRUD & Editor | 41/41 | Reopened lần 2 (41 plan đã xong, UAT 23/23 + mục D 8/8 PASS; BE đã deploy Render; bản đồ trong editor PUB-06 đã thảo luận, chưa lập plan) | 2026-11-05 (41 plan) |
+| 4. Itinerary CRUD & Editor | 41/53 | Reopened lần 2 (41 plan đã xong, UAT 23/23 + mục D 8/8 PASS; BE đã deploy Render; bản đồ trong editor PUB-06 đã lập 12 plan 04-42..04-53, chờ thực thi) | 2026-11-05 (41 plan) |
 | 5. Map & Public View | 0/TBD | Not started | - |
 | 6. Profile & Users | 0/TBD | Not started | - |
 | 7. Chat, Voice & Calls | 0/TBD | Not started | - |

@@ -2039,3 +2039,243 @@ Ghi chú chia plan:
 - **R6:** Bảng file cụ thể cho domain, port `DestinationCatalog`, adapter tĩnh và composition, cùng 4 component `ui-web` mới. Subpath Base UI đã có trong allowlist ESLint, không cần sửa rule.
 - **R7:** Danh sách test cần viết lại, trong đó có khoảng 17 file fixture vỡ typecheck khi `Itinerary` thêm trường. Có nháp UAT cho bước 2, 2a, 5a–5c và 6 dòng lỗi thời của `04-VALIDATION.md`.
 - **R8:** 14 rủi ro, 11 câu hỏi mở và cách chia 11 plan (04-24..04-34). Ba plan `autonomous: false`: 04-25 chờ BE, 04-26 ảnh, 04-34 UAT cuối. (Lưu ý: cách chia này đã được chia lại thành 18 plan 04-24..04-41, xem danh sách trong ROADMAP.md Phase 4; số thứ tự và checkpoint trong dòng này chỉ là bản nháp lúc nghiên cứu.)
+
+---
+
+# Mở lại lần 2 (2026-11-05): bản đồ
+
+**Researched:** 2026-11-05 (tra nguồn ngày 2026-11-05)
+**Domain:** MapLibre GL JS + react-map-gl trong Next 16.4 (Turbopack, React 19), style vector tile OpenFreeMap, Hoàng Sa/Trường Sa, dữ liệu khung nhìn 34 tỉnh
+**Confidence:** HIGH cho phiên bản, worker, URL OpenFreeMap, dữ liệu tile (đã đọc tile thật); MEDIUM cho hành vi Turbopack khi build (docs chính thức, chưa build thử trong repo)
+**Người làm:** orchestrator tự làm vai `gsd-phase-researcher` theo `C:\Users\OS\.kiro\agents\gsd-phase-researcher.md` (môi trường không có công cụ sinh sub-agent).
+
+## Ràng buộc của user (tóm tắt, nguyên văn ở `04-CONTEXT.md` D-111..D-140)
+
+- D-111/D-112: MapLibre GL JS + OpenFreeMap, style JSON riêng của repo; đổi nguồn tile chỉ đổi URL trong style.
+- D-113 (bắt buộc): nhãn `name:vi` → `name`; ẩn ranh giới tranh chấp trên biển; ẩn nhãn gốc OSM ở Hoàng Sa, Trường Sa; thêm "Quần đảo Hoàng Sa (Việt Nam)", "Quần đảo Trường Sa (Việt Nam)"; kiểm bằng mắt, ghi UAT.
+- D-114 ghi công luôn hiện; D-115 chỉ hiển thị, không gửi dữ liệu lịch trình đi đâu; D-116 nền sáng; D-117 không khóa biên, thu nhỏ tối đa vừa Việt Nam + Biển Đông.
+- D-118..D-121 bố cục, lỗi quay về `TripSummary`, chưa có điểm căn theo tỉnh (tâm + bbox 34 tỉnh tĩnh ở FE).
+- D-122..D-128 pin/đường/nhấn mạnh/đồng bộ chọn/canh khung/reduced motion/bàn phím; D-131..D-140 tab Tổng quan, tab mặc định, ô "Ngày" chỉ ở form thêm mở từ Tổng quan.
+- Ngoài phạm vi: MAP-01/MAP-02, PUB-02 (nút Bài viết/Bản đồ), PUB-05 (ảnh OG), nét đứt qua đêm, sửa ngay ở Tổng quan.
+- Discretion: chọn react-map-gl hay maplibre trực tiếp, nạp client-only, worker, tách bundle, vị trí code, nhãn pin, độ mờ, bảng màu, nguồn tọa độ tỉnh, mức tự động hóa test Hoàng Sa/Trường Sa, CSP.
+
+## Tóm tắt
+
+Dùng `maplibre-gl` **6.16.0** và `react-map-gl` **8.1.3** (import `react-map-gl/maplibre`). react-map-gl 8.1.x đã hỗ trợ maplibre v6 (PR #2598 "react-maplibre - support maplibre-gl v6", merge 2026-07-29), type style lấy thẳng từ `maplibre-gl` nên không lệch type. Component `Map` của react-map-gl tự `import('maplibre-gl')` trong `useEffect`, bắt lỗi khởi tạo (không có WebGL) qua `onError`, và chịu được StrictMode mount hai lần. Worker của v6 đặt bằng prop `workerUrl={new URL('maplibre-gl/dist/maplibre-gl-worker.mjs', import.meta.url).toString()}` (đúng mẫu docs MapLibre cho Next.js 15+ Turbopack). Toàn bộ code chạm `react-map-gl`/`maplibre-gl` nằm ở app (`apps/web/src/modules/itinerary/ui/map/`), nạp bằng `next/dynamic(..., { ssr: false })` từ một Client Component. Như vậy **không sửa allowlist ESLint**: app không có allowlist thư viện, còn `ui-web` cấm cả `maplibre-gl` lẫn `import()` động.
+
+Đọc tile OpenFreeMap thật cho thấy rủi ro chủ quyền không nằm ở nhãn "Paracel Islands" (lớp `place` của OpenMapTiles không có archipelago) mà ở **nhãn hành chính của Trung Quốc có `name:vi`**: "Tam Sa" (三沙市), "Quận Tây Sa" (西沙区), "Quận Nam Sa" (南沙区), 永乐群岛, 七连屿, 永兴镇, 渚碧岛, cùng "Kalayaan" của Philippines, và một **vòng ranh giới `admin_level=2`, `maritime=0`, `adm0_l=TWN`** quanh đảo Ba Bình. Lọc theo tên không bền. Cách chắc là lọc theo vùng: mọi lớp chữ `place`/`water_name` và mọi lớp `boundary` có thêm `["!", ["within", SOVEREIGNTY_MASK]]` (MultiPolygon hai vùng quần đảo), cộng lọc `maritime`/`disputed`/`claimed_by`, không vẽ nhãn POI/park/aerodrome, rồi thêm hai nhãn GeoJSON riêng.
+
+Tâm và bbox 34 tỉnh lấy một lần từ dữ liệu OSM sau sáp nhập (Photon/komoot, `admin_level=4`, 34/34 khớp), làm tròn ra ngoài 2 chữ số, kẹp vào khung đất liền; Khánh Hòa dùng khung tay vì extent OSM gồm cả Trường Sa. Bảng giá trị ở R9.3, planner chép nguyên.
+
+**Khuyến nghị chính:** app sở hữu `TripMap` (react-map-gl), domain `itinerary` sở hữu mọi phép biến đổi thuần (màu ngày, pin, đường, nhấn mạnh, khung canh, tab mặc định, tóm tắt ngày), `ui-web` chỉ thêm phần trình bày chung không phụ thuộc thư viện bản đồ (`MapPin`, `MapZoomControls`, `Sheet` controlled snap).
+
+## Bản đồ trách nhiệm (mở lại lần 2)
+
+| Năng lực | Tầng chính | Tầng phụ | Lý do |
+|---|---|---|---|
+| Vẽ bản đồ, marker, lớp đường, camera | Browser (app `modules/itinerary/ui/map`) | — | Cần WebGL, chỉ chạy client; app được import thư viện ngoài không qua allowlist |
+| Tile, glyph, sprite | CDN ngoài (tiles.openfreemap.org) | — | Tải thẳng từ trình duyệt, không qua BFF (không có key, không có dữ liệu người dùng; D-115) |
+| Màu ngày, pin, đường, nhấn mạnh, khung canh, tab mặc định, tóm tắt ngày | `packages/itinerary` domain | — | Hàm thuần, dùng lại cho Phase 5 và mobile |
+| Tâm/bbox 34 tỉnh | `packages/itinerary` infrastructure (catalog tĩnh) | domain (type `Destination`) | Cùng chỗ với 34 điểm đến hiện có (D-121) |
+| Pin, nút zoom, Sheet controlled | `packages/ui-web` | — | Trình bày chung, token, không phụ thuộc thư viện bản đồ |
+| Chuỗi tiếng Việt của dòng ngày, ghi công, nhãn | app | — | Copy là việc của UI |
+| Dữ liệu tọa độ waypoint | BE (đã có) | — | Không đổi BE |
+
+## Standard Stack (mới)
+
+| Thư viện | Version (pin) | Ngày phát hành | Dùng cho | Nguồn |
+|---|---|---|---|---|
+| `maplibre-gl` | 6.16.0 | 2026-10-25 | Lõi bản đồ WebGL, BSD-3 | [VERIFIED: npm registry `npm view maplibre-gl`] |
+| `react-map-gl` | 8.1.3 | 2026-09-02 | `Map`, `Marker`, `Source`, `Layer` cho React; import `react-map-gl/maplibre` | [VERIFIED: npm registry; peer `maplibre-gl >=1.13.0` optional, `react >=16.3.0`] |
+
+- `react-map-gl` 8.1.3 kéo `@vis.gl/react-maplibre@8.1.3` (peer `maplibre-gl >=4.0.0`) và `@vis.gl/react-mapbox` (peer mapbox-gl optional, không cài). `@vis.gl/react-maplibre` khai báo dependency `@maplibre/maplibre-gl-style-spec ^19` nhưng chỉ dùng type, và type style của nó re-export từ `maplibre-gl` (`dist/types/style-spec.d.ts`), nên `StyleSpecification` của maplibre 6 truyền vào `mapStyle` không lệch type. [VERIFIED: đọc tarball 8.1.3]
+- Hỗ trợ maplibre v6: issue/PR #2598 "fix: react-maplibre - support maplibre-gl v6" merge 2026-07-29 (trước bản 8.1.3). [CITED: github.com/visgl/react-map-gl/issues?q=maplibre+v6]
+- maplibre-gl 6 chỉ phát hành ESM (`exports["."].import = ./dist/maplibre-gl.mjs`), có `./dist/*` trong `exports` nên `maplibre-gl/dist/maplibre-gl.css` và `maplibre-gl/dist/maplibre-gl-worker.mjs` resolve được. [VERIFIED: package.json 6.16.0]
+- Thêm vào `pnpm-workspace.yaml` `catalog:` (pin cứng, không `^`): `maplibre-gl: 6.16.0`, `react-map-gl: 8.1.3`; chỉ `apps/web/package.json` dùng (`"catalog:"`). `pnpm install` chạy được trên máy này (chỉ `pnpm <script>` ở gốc crash, 04-02/04-09 SUMMARY).
+
+**Đã cân nhắc:** gọi `maplibre-gl` trực tiếp (bớt một dependency, nhưng phải tự viết vòng đời marker bằng portal, nguồn GeoJSON, sự kiện; nhiều code hơn và test khó hơn). Chọn react-map-gl vì marker là React children (dùng class token), có `onError` bắt lỗi khởi tạo, và mock bằng `vi.mock('react-map-gl/maplibre')` đơn giản.
+
+## R9.1 Nạp client-only, worker, CSS, tách bundle, StrictMode
+
+- **Docs Next 16.4** (`apps/web/node_modules/next/dist/docs/01-app/02-guides/lazy-loading.md`): `next/dynamic(() => import(...), { ssr: false })` chỉ dùng trong Client Component; dùng trong Server Component sẽ lỗi. [CITED: docs Next 16.4 trong repo]
+- **CSS:** `01-getting-started/11-css.md` mục "External stylesheets": CSS của package ngoài import được ở bất kỳ đâu. Import `maplibre-gl/dist/maplibre-gl.css` trong `trip-map.tsx` (module chỉ nạp qua dynamic) để CSS chỉ tải cùng chunk bản đồ. [CITED]
+- **Worker (maplibre v6):** docs MapLibre, tab Turbopack: `setWorkerUrl(new URL('maplibre-gl/dist/maplibre-gl-worker.mjs', import.meta.url).toString())` trong file `'use client'`; Next 15+ phát worker thành asset có hash ở cả `next build` (Turbopack) lẫn `--webpack`. [CITED: maplibre.org/maplibre-gl-js/docs/ mục ESM/Installation]. react-map-gl có prop `workerUrl` gọi `setWorkerUrl` trước khi tạo map (`dist/utils/set-globals.js`). [VERIFIED: tarball]. Hằng `WORKER_URL` đặt ở module scope của `trip-map.tsx` để Turbopack nhận diện mẫu `new URL(..., import.meta.url)` tĩnh.
+- **Tách bundle:** `EditorMapArea` (client) → `dynamic(() => import('./map/trip-map').then((m) => m.TripMap), { ssr: false, loading: () => <Skeleton …/> })`. Bên trong, react-map-gl tự `import('maplibre-gl')` nên lõi maplibre là chunk riêng nữa. Kiểm sau build: chỉ chunk của route editor tham chiếu `maplibre`; `.next/static` có file `maplibre-gl-worker*.mjs`.
+- **StrictMode:** `Map` tạo instance trong `.then` của promise và kiểm `isMounted`; lần mount đầu bị hủy trước khi promise xong nên chỉ tạo một map; cleanup gọi `destroy()`. Không bật `reuseMaps` (giữ instance cũ giữa các lần mở editor, không cần). [VERIFIED: `dist/components/map.js`]
+- **Lỗi khởi tạo:** constructor maplibre ném lỗi khi không có WebGL; react-map-gl `.catch` gọi `onError` (không có `target`). Lỗi style/nguồn trước `load` cũng tới `onError`. Quy tắc D-120: lỗi trước `load` hoặc quá 15 giây chưa `load` thì chuyển "lỗi"; `onError` sau `load` (tile lẻ) bỏ qua.
+- **Tương tác:** `dragRotate={false}`, `touchPitch={false}`, `pitchWithRotate={false}`, `maxPitch={0}`, `attributionControl={false}`, `cooperativeGestures` không bật; trong `onLoad` gọi `map.touchZoomRotate.disableRotation()` và `map.keyboard.disableRotation()` (hai ngón vẫn zoom, không xoay). Tên truy cập canvas đặt qua option `locale={{ 'Map.Title': '…' }}` (maplibre có khóa `Map.Title` cho `aria-label` canvas) [VERIFIED: d.ts có `"Map.Title": string`]; `aria-describedby` gán bằng `map.getCanvas().setAttribute(...)` trong `onLoad`.
+- **Marker click nổi bọt lên map:** gọi `event.originalEvent.stopPropagation()` trong `onClick` của `Marker`, nếu không `onClick` của `Map` (bỏ chọn) chạy ngay sau. [ASSUMED theo docs react-map-gl Marker; kiểm bằng test component và UAT]
+- **Thứ tự chồng pin:** marker là phần tử định vị tuyệt đối thêm theo thứ tự mount, không sắp lại khi nhấn mạnh đổi. Dùng `style={{ zIndex: pin.stackOrder }}` của `Marker` (số do domain tính). Đây là style inline, không phải class `z-*`, nên không phạm guard token; lệch nhẹ so với câu "không dùng z-index số" của UI-SPEC, có lý do kỹ thuật.
+
+## R9.2 OpenFreeMap: URL, schema, Hoàng Sa/Trường Sa, glyph, ghi công
+
+**URL** [VERIFIED: tải `https://tiles.openfreemap.org/styles/positron` và TileJSON `https://tiles.openfreemap.org/planet` ngày 2026-11-05]:
+
+| Thành phần | Giá trị dùng trong style |
+|---|---|
+| Nguồn vector | `{ "type": "vector", "url": "https://tiles.openfreemap.org/planet" }` (TileJSON; đường tile có phiên bản theo tuần như `/planet/20261101_080013_pt/{z}/{x}/{y}.pbf`, nên KHÔNG ghi cứng `tiles`) |
+| Zoom tile | `minzoom 0`, `maxzoom 14` (overzoom tới 18 bình thường) |
+| Glyph | `https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf`; font có sẵn: `Noto Sans Regular`, `Noto Sans Bold`, `Noto Sans Italic` |
+| Sprite | `https://tiles.openfreemap.org/sprites/ofm_f384/ofm` (không cần vì không vẽ icon POI; bỏ khóa `sprite`) |
+| Lớp (`vector_layers`) | aerodrome_label, aeroway, boundary, building, housenumber, landcover, landuse, mountain_peak, park, place, poi, transportation, transportation_name, water, water_name, waterway (schema OpenMapTiles) |
+| Ghi công của TileJSON | `OpenFreeMap © OpenMapTiles Data from OpenStreetMap` (link openfreemap.org, openmaptiles.org, openstreetmap.org/copyright) |
+
+**Glyph tiếng Việt:** range `7680-7935.pbf` (Latin Extended Additional, chứa ạ ả ấ ầ ẩ ẫ ậ … ỹ) của cả ba font trả 200, 130–139 KB (có glyph thật). [VERIFIED]. Dùng `"text-font": ["Noto Sans Regular"]` (nhãn thường) và `["Noto Sans Bold"]` (quốc gia, quần đảo).
+
+**`name:vi`:** "South China Sea" ở `water_name` (class `sea`) có `name:vi` = "Biển Đông" (U+0042 U+0069 U+1EC3 U+006E U+0020 U+0110 U+00F4 U+006E U+0067). 776/1094 nhãn `state/province` trong 4 tile mẫu có `name:vi`. [VERIFIED: đọc tile z2–z5]. Mọi `text-field` dùng `["coalesce", ["get", "name:vi"], ["get", "name"]]`.
+
+**Ranh giới:** style positron gốc lọc `boundary` bằng `["!=", ["get", "maritime"], 1]`, `["!=", ["get", "disputed"], 1]`, `["!", ["has", "claimed_by"]]` và có lớp `boundary_disputed` riêng. Style của repo: chỉ hai lớp (`admin_level` 2 và 4), cùng ba điều kiện trên, KHÔNG có lớp disputed, thêm `["!", ["within", SOVEREIGNTY_MASK]]`.
+
+**Đọc tile thật quanh hai quần đảo** (z3–z10, 3×3 tile mỗi mức) [VERIFIED 2026-11-05]:
+
+| Vùng | Nhãn nguy hiểm tìm thấy (lớp `place`) | Ranh giới trong vùng |
+|---|---|---|
+| Hoàng Sa | `三沙市` (name:vi "Tam Sa", city, z7), `西沙区` (name:vi "Quận Tây Sa"), `永乐群岛`, `七连屿`, `永兴镇`, các "Xã khu …" (Ấp Công, Ngân Tự, Cam Tuyền, Tấn Khanh, Linh Dương, Triệu Thuật, Bắc Đảo), tên đảo/bãi chữ Trung (Phú Lâm = 永兴岛, …); `aerodrome_label` "Sansha Yongxing Airport"; `park` khu bảo tồn của Trung Quốc | Chỉ `maritime=1` (CHN) |
+| Trường Sa | `南沙区` (name:vi "Quận Nam Sa", city), `Kalayaan` (town, Philippines), `渚碧岛` (Zhubi), cùng nhãn tiếng Việt (Trường Sa, Sinh Tồn, Song Tử Tây, Đảo Nam Yết, Đá Lớn …) | `maritime=1`, `disputed=1`, và **6 đoạn `admin_level=2, maritime=0, adm0_l=TWN`** (vòng quanh đảo Ba Bình) |
+
+Không có nhãn "Paracel Islands"/"Spratly Islands": OpenMapTiles không đưa `place=archipelago` vào lớp `place`. Vì vậy "nhãn quần đảo gốc của OSM" (D-113 mục 3) trên thực tế là các nhãn hành chính trên.
+
+**Cách lọc (chốt):** biểu thức `within` (MapLibre GL JS ≥ 1.9.0) trả true khi Point hoặc LineString nằm trọn trong Polygon/MultiPolygon. [CITED: maplibre.org/maplibre-style-spec/expressions/ mục `within`]. Nó không hỗ trợ Polygon, nên style **không vẽ nhãn** của `park`, `aerodrome_label`, `poi`, `mountain_peak` (UI-SPEC đã ẩn POI). Mask (lng, lat; vòng kín):
+
+```ts
+// Khung che hai quần đảo: ẩn mọi nhãn OSM và mọi ranh giới nằm trọn trong vùng này (D-113 mục 2, 3).
+export const SOVEREIGNTY_MASK = {
+  type: 'MultiPolygon',
+  coordinates: [
+    // Hoàng Sa: cách Hải Nam (mũi nam ~18.1°B) và bờ miền Trung (~109.5°Đ) đủ xa
+    [[[110.5, 15.3], [113.3, 15.3], [113.3, 17.5], [110.5, 17.5], [110.5, 15.3]]],
+    // Trường Sa: tránh bờ Sabah (Kudat 116.8°Đ 6.9°B), Balabac (117.0°Đ 7.9°B), Palawan; tránh Phú Quý/Côn Đảo ở phía tây
+    [[[111.3, 6.2], [114.0, 6.2], [116.0, 7.2], [116.4, 8.0], [116.4, 12.0], [111.3, 12.0], [111.3, 6.2]]],
+  ],
+} as const;
+```
+
+Ẩn cả nhãn tiếng Việt trong vùng mask là chủ ý: chỉ còn hai nhãn riêng của repo, không lẫn với "Tam Sa", "Quận Nam Sa".
+
+**Nhãn riêng:** nguồn `geojson` trong style (`sovereignty-labels`), 2 Point: "Quần đảo Hoàng Sa (Việt Nam)" tại `[112.0, 16.5]`, "Quần đảo Trường Sa (Việt Nam)" tại `[114.5, 10.0]`; lớp symbol `maxzoom: 10`, `text-font ["Noto Sans Bold"]`, `text-size 14`, `text-color #4B6475`, `text-halo-color #FFFFFF`, `text-halo-width 1`, `text-allow-overlap true`, `text-ignore-placement true`, đặt sau mọi lớp chữ khác.
+
+**Điều khoản:** OpenFreeMap không cần key, miễn phí, không SLA; ghi công yêu cầu "OpenFreeMap © OpenMapTiles Data from OpenStreetMap" (TileJSON). ODbL yêu cầu ghi công OSM. UI-SPEC đã có `MapAttribution` riêng với ba link.
+
+## R9.3 Tâm và bbox 34 tỉnh (D-121)
+
+**Nguồn:** dữ liệu ranh giới OSM (`boundary=administrative`, `admin_level=4`, sau sắp xếp 2025), truy qua Photon `https://photon.komoot.io/api/?q=<tên>` (lọc `countrycode=VN`, `extra.admin_level=4`, tên khớp không dấu), 34/34 khớp, 34 request cách nhau 1,3 giây (fair use). Nominatim không phân giải DNS từ máy này. Giấy phép: © OpenStreetMap contributors, ODbL; ghi nguồn trong comment của file. Tâm là điểm nhãn/trung tâm hành chính của relation; bbox là `extent` làm tròn ra ngoài 2 chữ số rồi kẹp vào khung đất liền `[[102.1, 8.3], [109.6, 23.4]]` (khung nhìn, không phải ranh giới hành chính). **Khánh Hòa** dùng khung tay `[[108.55, 11.25], [109.47, 12.87]]` vì extent OSM tới 114.86°Đ, 7.69°B (gồm Trường Sa); kẹp không đủ. Đà Nẵng: extent OSM không gồm Hoàng Sa. [VERIFIED 2026-11-05]
+
+Lưu tĩnh: thêm field `view: DestinationView` (`center: LngLat`, `bounds: GeoBounds`) vào type `Destination` (domain), bảng `DESTINATION_VIEWS` theo slug trong `static-destination-catalog.ts` (không đổi chữ ký `d(...)`). Giá trị (lng, lat):
+
+```ts
+  'vn-an-giang': view([105.043, 10.319], [[103.05, 8.99], [105.58, 10.97]]), // OSM R1875748
+  'vn-bac-ninh': view([106.201, 21.276], [[105.88, 20.96], [107.04, 21.63]]), // OSM R1902690
+  'vn-ca-mau': view([105.087, 9.018], [[103.48, 8.3], [106.06, 9.64]]), // OSM R1873490
+  'vn-cao-bang': view([106.106, 22.743], [[105.26, 22.35], [106.84, 23.12]]), // OSM R1844412
+  'vn-can-tho': view([105.787, 10.036], [[105.22, 8.7], [106.46, 10.33]]), // OSM R1874283
+  'vn-da-nang': view([108.212, 16.068], [[107.21, 14.95], [109.03, 16.34]]), // OSM R1891418
+  'vn-dak-lak': view([108.798, 12.874], [[107.48, 12.16], [109.6, 13.7]]), // OSM R1884034
+  'vn-dien-bien': view([103.217, 21.655], [[102.14, 20.89], [103.6, 22.55]]), // OSM R1903340
+  'vn-dong-nai': view([107.112, 11.439], [[106.41, 10.57], [107.58, 12.3]]), // OSM R1904421
+  'vn-dong-thap': view([105.927, 10.425], [[105.18, 10.13], [107, 10.98]]), // OSM R1875866
+  'vn-gia-lai': view([108.635, 14.02], [[107.45, 12.99], [109.59, 14.71]]), // OSM R1884018
+  'vn-ha-noi': view([105.854, 21.028], [[105.28, 20.56], [106.03, 21.39]]), // OSM R1903516
+  'vn-ha-tinh': view([105.762, 18.35], [[105.1, 17.9], [106.76, 18.77]]), // OSM R1898458
+  'vn-hai-phong': view([106.679, 20.883], [[106.12, 19.91], [107.96, 21.24]]), // OSM R1902682
+  'vn-ho-chi-minh': view([106.717, 10.774], [[105.97, 8.34], [108.44, 11.51]]), // OSM R1973756
+  'vn-hue': view([107.586, 16.464], [[107.03, 15.99], [108.49, 17.12]]), // OSM R1891483
+  'vn-hung-yen': view([106.284, 20.607], [[105.89, 20.07], [107.12, 21.01]]), // OSM R1901032
+  'vn-khanh-hoa': view([108.995, 12.298], [[108.55, 11.25], [109.47, 12.87]]), // OSM R1887959 (bbox tay, bỏ Trường Sa)
+  'vn-lai-chau': view([103.18, 22.292], [[102.32, 21.68], [103.99, 22.82]]), // OSM R1903322
+  'vn-lang-son': view([106.614, 21.849], [[106.09, 21.32], [107.37, 22.47]]), // OSM R5522596
+  'vn-lao-cai': view([104.183, 22.307], [[103.52, 21.32], [105.11, 22.85]]), // OSM R1903400
+  'vn-lam-dong': view([108.134, 11.661], [[107.2, 9.37], [109.41, 12.82]]), // OSM R1885367
+  'vn-nghe-an': view([105.061, 19.198], [[103.87, 18.55], [106.27, 20.01]]), // OSM R1898509
+  'vn-ninh-binh': view([106.1, 20.287], [[105.54, 19.41], [106.96, 20.71]]), // OSM R1900963
+  'vn-phu-tho': view([105.135, 21.301], [[104.81, 20.3], [105.86, 21.72]]), // OSM R1902930
+  'vn-quang-ngai': view([108.692, 14.995], [[107.33, 13.92], [109.47, 15.8]]), // OSM R1890793
+  'vn-quang-ninh': view([107.076, 20.956], [[106.43, 20.46], [108.21, 21.67]]), // OSM R1902947
+  'vn-quang-tri': view([106.955, 17.217], [[105.6, 16.3], [107.7, 18.14]]), // OSM R1895630
+  'vn-son-la': view([104.158, 21.228], [[103.21, 20.57], [105.03, 22.04]]), // OSM R1903291
+  'vn-tay-ninh': view([106.261, 11.08], [[105.5, 10.39], [106.75, 11.79]]), // OSM R1898961
+  'vn-thai-nguyen': view([105.844, 21.961], [[105.43, 21.32], [106.25, 22.75]]), // OSM R1902967
+  'vn-thanh-hoa': view([105.482, 19.978], [[104.37, 19.18], [106.27, 20.67]]), // OSM R1898590
+  'vn-tuyen-quang': view([105.072, 22.338], [[104.33, 21.49], [105.6, 23.4]]), // OSM R1903418
+  'vn-vinh-long': view([106.295, 10.047], [[105.68, 9.08], [107, 10.35]]), // OSM R1875887
+```
+
+Test kiểm tính đúng sau sáp nhập bằng địa danh trong alias (lng, lat): Phú Quốc `[103.96, 10.23]` ∈ An Giang; Đà Lạt `[108.44, 11.94]` và Phan Thiết `[108.10, 10.93]` ∈ Lâm Đồng; Hội An `[108.33, 15.88]` ∈ Đà Nẵng; Vũng Tàu `[107.08, 10.35]` ∈ TP. Hồ Chí Minh; Sa Pa `[103.84, 22.34]` ∈ Lào Cai; Hà Giang `[104.98, 22.82]` ∈ Tuyên Quang; Nha Trang `[109.19, 12.24]` và Phan Rang `[108.99, 11.56]` ∈ Khánh Hòa; Quy Nhơn `[109.22, 13.78]` ∈ Gia Lai; Hạ Long `[107.08, 20.95]` ∈ Quảng Ninh.
+
+Ghi nhận (ngoài phạm vi): OSM ghi Đồng Nai là "Thành phố Đồng Nai"; danh mục đang ghi "Tỉnh Đồng Nai" theo NQ 202/2025 (D-92). Không đổi ở phần này.
+
+## R9.4 Test
+
+- **jsdom không có WebGL:** test component `TripMap` dùng `vi.mock('react-map-gl/maplibre', () => ({ Map: FakeMap, Marker: FakeMarker, Source: FakeSource, Layer: () => null }))`. `FakeMap` render `children` trong `<div data-testid="fake-map">`, lưu props cuối vào biến module để test đọc (`mapStyle`, `workerUrl`, `locale`, `dragRotate`, …), gọi `props.onLoad({ target: fakeMapInstance })` khi test yêu cầu, và nhận `ref` qua `useImperativeHandle` trả `{ fitBounds: vi.fn(), easeTo: vi.fn(), jumpTo: vi.fn(), zoomIn: vi.fn(), zoomOut: vi.fn(), getZoom, getMinZoom, getMaxZoom, setMinZoom: vi.fn(), cameraForBounds: () => ({ zoom: 4 }), getCanvas: () => canvas, touchZoomRotate: { disableRotation: vi.fn() }, keyboard: { disableRotation: vi.fn() }, on/off: vi.fn() }`. `FakeMarker` render `<div onClick={() => props.onClick?.({ originalEvent: new MouseEvent('click') })} style={props.style}>{children}</div>`. Import CSS trong jsdom: Vitest bỏ qua CSS mặc định. `new URL('maplibre-gl/dist/…', import.meta.url)` trong Node tạo `file:` URL hợp lệ, không ném lỗi.
+- **`EditorMapArea`:** mock `./map/trip-map` (không cần `next/dynamic` thật: tách loader thành `trip-map.lazy.tsx`, test mock module lazy để trả component giả gọi `onStatusChange`). Kiểm đủ trạng thái: đang tải, sẵn sàng, chưa có điểm, lỗi, quá 15 giây (fake timers), tile lỗi sau `load`, "Thử lại".
+- **Domain thuần** (`packages/itinerary`, môi trường node): bảng test cho `dayColorIndex`, `defaultEditorTab`, `buildMapPins`, `buildDayRoutes`, `fitTargetFor`, `summarizeDays`, `countVisibleWaypoints`.
+- **Style JSON** (`basemap-style.test.ts`, app, node): duyệt `style.layers` kiểm (1) mọi lớp `symbol` có `text-field` dùng `coalesce` `name:vi` → `name`, trừ lớp `sovereignty-labels`; (2) mọi lớp `source-layer: 'boundary'` có filter chứa `maritime`, `disputed`, `claimed_by` và `within`; (3) mọi lớp `source-layer` thuộc `place`/`water_name` có `within` với `SOVEREIGNTY_MASK`; (4) không lớp nào có `source-layer` thuộc `poi`, `park` kiểu symbol, `aerodrome_label`, `mountain_peak`, `housenumber`; (5) nguồn `sovereignty-labels` có đúng hai feature với hai chuỗi khóa và tọa độ; (6) `sources.openmaptiles.url === 'https://tiles.openfreemap.org/planet'`, `glyphs` trỏ OpenFreeMap; (7) không có `sprite`; (8) điểm mẫu đã thấy trong tile (`[112.334, 16.832]` Tam Sa/Quận Tây Sa, `[112.887, 9.545]` Quận Nam Sa, `[114.285, 11.054]` Kalayaan, `[114.36, 10.38]` Ba Bình) nằm trong mask (hàm point-in-polygon nhỏ trong test); và các điểm đất liền/đảo Việt Nam khác (`[108.93, 10.52]` Phú Quý, `[106.61, 8.68]` Côn Đảo, `[109.13, 15.38]` Lý Sơn, `[109.46, 12.65]` Mũi Đôi) nằm ngoài mask. Tự động hóa này không thay bước kiểm bằng mắt.
+- **Kiểm bằng trình duyệt thật:** máy có Chrome và Edge; cache Playwright có `chromium-1248` nhưng repo không có package Playwright và không nên thêm cho phase này. UAT kiểm bằng mắt trên Chrome desktop + iPhone Safari + Android Chrome.
+- Baseline test trước khi làm: itinerary 427, ui-web 342, web ~1741.
+
+## R9.5 CSP và reduced motion
+
+- **CSP:** repo hiện không đặt CSP (không có `headers()` trong `next.config.ts`, `proxy.ts` không ghi `Content-Security-Policy`). [VERIFIED: grep `apps/web/src`, `next.config.ts`]. Tile, glyph tải được không cần cấu hình. Nếu sau này thêm CSP: `connect-src https://tiles.openfreemap.org`, `worker-src 'self' blob:`, `img-src 'self' data: blob:` (docs CSP Next ở `01-app/02-guides/content-security-policy.md`). Không thêm CSP trong phần này (ngoài phạm vi, không có yêu cầu).
+- **Reduced motion:** MapLibre có `AnimationOptions.essential`: mặc định animation bị tắt khi `prefers-reduced-motion` [VERIFIED: d.ts]. Repo vẫn tự đọc `window.matchMedia('(prefers-reduced-motion: reduce)').matches` lúc gọi camera và truyền `duration: 0` (UI-SPEC: đọc lúc thao tác, không cache lúc mount), áp dụng cho `fitBounds`, `easeTo`, `zoomIn/zoomOut` của nút zoom.
+
+## Common Pitfalls (mở lại lần 2)
+
+1. **Ghi cứng URL tile có phiên bản** (`/planet/20261101_…`): tuần sau 404. Dùng `url` TileJSON.
+2. **Đặt `TripMap` trong `ui-web`:** ESLint chặn `maplibre-gl`/`react-map-gl` (allowlist `UI_RUNTIME`) và chặn `import()` động trong package. Không sửa rule; code bản đồ ở app.
+3. **Style có hex nằm trong thư mục guard:** `packages/ui-web/src/token-guard.test.ts` cấm hex ở `ui-web/atoms|molecules` và `apps/web/src/components`. Đặt style ở `apps/web/src/modules/itinerary/ui/map/basemap-style.ts`. Guard của `design-tokens` vẫn quét `apps/web/src/modules` để tìm class Tailwind: chạy `pnpm --filter @tripory/design-tokens test -- --run` sau khi thêm file style.
+4. **Đọc màu ngày cho lớp line:** `getComputedStyle(document.documentElement).getPropertyValue('--map-day-N')` trả `''` trong jsdom. Hàm đọc màu tách riêng (`readDayColors`) để test mock; không hard-code hex làm dự phòng.
+5. **Click marker kích hoạt bỏ chọn của map:** `stopPropagation` (R9.1).
+6. **Canh khung khi vùng bản đồ chưa có kích thước** (mobile, sheet vừa mở): chỉ canh sau `onLoad`, và khi lệnh camera mới tới (seq tăng). Đổi kích thước khung không canh lại (UI-SPEC), chỉ tính lại `minZoom` bằng `cameraForBounds(VIETNAM_VIEW_BOUNDS)`.
+7. **Pin mờ chặn bấm pin thường:** pin mờ `pointer-events-none` và `stackOrder` thấp hơn.
+8. **`within` không áp cho Polygon:** không vẽ nhãn park/aerodrome/POI (R9.2).
+9. **Khánh Hòa/Đà Nẵng bbox lẫn quần đảo:** dùng bảng R9.3, test chặn `east ≤ 109.6`.
+10. **`LoadedEditor` đã ~400 dòng:** state chọn điểm, nhấn mạnh, lệnh camera đặt vào hook riêng (`use-map-selection.ts`, `use-map-camera.ts`), không nhồi thêm vào container.
+11. **Nút chính của thẻ đổi hành vi (D-126):** chỉ khi bản đồ `ready`; đang tải/lỗi giữ mở form sửa. Test cũ của `waypoint-list` (bấm thẻ mở form sửa) phải chạy với bản đồ không sẵn sàng hoặc được cập nhật.
+12. **Tab mặc định D-132 và bản nháp D-36:** bản nháp form thêm vẫn mở đúng tab Ngày N; `defaultEditorTab` chỉ dùng khi không có bản nháp.
+
+## Assumptions Log
+
+| # | Claim | Section | Risk if Wrong |
+|---|---|---|---|
+| A1 | `event.originalEvent.stopPropagation()` trong `Marker onClick` ngăn `Map onClick` | R9.1 | Bấm pin vừa chọn vừa bỏ chọn; test `TripMap` và UAT bắt được, sửa bằng cờ bỏ qua click kế |
+| A2 | Turbopack trong Next 16.4 phát worker thành asset với mẫu `new URL('maplibre-gl/dist/maplibre-gl-worker.mjs', import.meta.url)` | R9.1 | Bản đồ không chạy khi build; plan tích hợp có bước `pnpm --filter @tripory/web build` và grep asset; dự phòng: copy worker vào `public/` và truyền `/maplibre-gl-worker.mjs?v=6.16.0` |
+| A3 | Mask đủ rộng để phủ mọi nhãn ở zoom > 10 (chỉ đọc tile tới z10) | R9.2 | Có thể sót nhãn ở zoom rất gần; nhãn riêng chỉ tới z10; UAT kiểm thêm ở zoom 12 quanh đảo Phú Lâm, Ba Bình |
+
+## Open Questions (RESOLVED)
+
+1. react-map-gl hay maplibre trực tiếp? — RESOLVED: react-map-gl 8.1.3 (R9.1).
+2. Lọc Hoàng Sa/Trường Sa theo tên hay vùng? — RESOLVED: theo vùng (`within`) + lọc thuộc tính ranh giới; danh sách tên ở R9.2 chỉ dùng làm điểm mẫu cho test.
+3. Nguồn tọa độ tỉnh? — RESOLVED: OSM qua Photon, bảng R9.3 (ODbL, ghi nguồn).
+4. Có cần sửa allowlist ESLint? — RESOLVED: không.
+5. Không còn quyết định sản phẩm bỏ ngỏ.
+
+## Environment Availability
+
+| Dependency | Required By | Available | Version | Fallback |
+|---|---|---|---|---|
+| Node | build/test | ✓ | 24.14.1 | — |
+| pnpm install | thêm dependency | ✓ (`pnpm <script>` ở gốc crash; dùng `pnpm --filter`) | — | — |
+| tiles.openfreemap.org | runtime, UAT | ✓ (tải style, TileJSON, tile, glyph) | planet 20261101 | — |
+| Chrome / Edge | UAT bằng mắt | ✓ | — | — |
+| Playwright | không bắt buộc | chỉ có cache chromium-1248, không có package | — | UAT thủ công |
+
+## Security Domain (mở lại lần 2)
+
+| ASVS | Áp dụng | Kiểm soát |
+|---|---|---|
+| V5 Input Validation | có (tọa độ đã qua `Wgs84Coordinate` ở ACL) | Domain bỏ qua tọa độ không hữu hạn khi dựng bbox |
+| V8 Data Protection | có | Không gửi tên/tọa độ lịch trình cho OpenFreeMap; chỉ tải tile theo khung nhìn (D-115). Request tile lộ vùng đang xem cho CDN bên thứ ba (chấp nhận, như mọi bản đồ web) |
+| V14 Config | có | Dependency pin cứng trong catalog; không thêm key/secret |
+| XSS | có | Tên điểm hiển thị trong nhãn pin bằng React text node, không `setHTML` của Popup, không `dangerouslySetInnerHTML` |
+
+## Sources
+
+- npm registry: `maplibre-gl` 6.16.0 (2026-10-25), `react-map-gl` 8.1.3 (2026-09-02), `@vis.gl/react-maplibre` 8.1.3; tarball đọc ngày 2026-11-05.
+- https://maplibre.org/maplibre-gl-js/docs/ (ESM, worker, Turbopack/Next 15+), https://maplibre.org/maplibre-style-spec/expressions/ (`within`).
+- https://github.com/visgl/react-map-gl/issues?q=maplibre+v6 (PR #2598, #2602).
+- https://tiles.openfreemap.org/styles/positron, https://tiles.openfreemap.org/planet, tile `planet/20261101_080013_pt` z2–z10, glyph `Noto Sans */7680-7935.pbf`.
+- https://photon.komoot.io/api (OSM, ODbL), 34 relation `admin_level=4`.
+- Docs Next 16.4 trong repo: `lazy-loading.md`, `11-css.md`, `content-security-policy.md`.
+
+**Valid until:** 2026-12-05 (OpenFreeMap đổi bản planet hằng tuần; schema ổn định).
+
+**Bổ sung khi lập plan (2026-11-05):** token `size-touch` của repo là `--semantic-size-touch-min: 24px` (WCAG 2.2 mức tối thiểu), không phải 44px như UI-SPEC ghi. Vùng chạm pin và nút zoom dùng `size-control-lg` / `IconButton size="lg"` (48px) để đạt ≥ 44px; ở 320px mức sheet vừa cột nút zoom cao 16 + 48 + 4 + 48 = 116px, vẫn vừa 163px còn thấy.

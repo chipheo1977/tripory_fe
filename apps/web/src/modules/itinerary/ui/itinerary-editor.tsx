@@ -252,7 +252,7 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
   );
   const destinationBounds = useMemo(() => destinationBoundsFor(itinerary.destinationCode), [itinerary.destinationCode]);
   const selection = useMapSelection();
-  const camera = useMapCamera(fitTargetFor(itinerary, emptyPending, tab, destinationBounds));
+  const camera = useMapCamera(() => fitTargetFor(itinerary, emptyPending, tab, destinationBounds));
   const wide = useMediaQuery(LG_QUERY);
   const [mapStatus, setMapStatus] = useState<MapStatus>("loading");
   const [sheetRequest, setSheetRequest] = useState<SheetSnapRequest | null>(null);

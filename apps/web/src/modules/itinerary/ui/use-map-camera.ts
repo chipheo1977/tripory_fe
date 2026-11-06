@@ -13,8 +13,16 @@ export type EditorMapCamera = Readonly<{
   reveal(center: LngLat): void;
 }>;
 
-export function useMapCamera(initial: MapFitTarget): EditorMapCamera {
-  const [command, setCommand] = useState<MapCameraCommand>({ seq: 1, kind: "fit", target: initial });
+/**
+ * `initial` chỉ được đọc một lần lúc mount (lệnh `fit` đầu tiên); đổi giá trị này sau đó không di chuyển camera.
+ * Muốn đổi khung nhìn, gọi `fit`/`focus`/`reveal`. Truyền hàm để tránh tính toán lại ở mỗi lần render.
+ */
+export function useMapCamera(initial: MapFitTarget | (() => MapFitTarget)): EditorMapCamera {
+  const [command, setCommand] = useState<MapCameraCommand>(() => ({
+    seq: 1,
+    kind: "fit",
+    target: typeof initial === "function" ? initial() : initial,
+  }));
   const fit = useCallback((target: MapFitTarget) => setCommand((prev) => ({ seq: prev.seq + 1, kind: "fit", target })), []);
   const focus = useCallback((center: LngLat) => setCommand((prev) => ({ seq: prev.seq + 1, kind: "focus", center })), []);
   const reveal = useCallback((center: LngLat) => setCommand((prev) => ({ seq: prev.seq + 1, kind: "reveal", center })), []);

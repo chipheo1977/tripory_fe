@@ -45,6 +45,17 @@ export const fakeMapInstance = {
   off: vi.fn(),
 };
 
+// Giống `MapRef` thật của react-map-gl (create-ref.js): chỉ có các HÀM của bản đồ (trừ nhóm bị bỏ qua như `setMinZoom`)
+// và `getMap()`; KHÔNG có thuộc tính đối tượng như `touchZoomRotate`/`keyboard`. Mock quá rộng từng che mất lỗi
+// `Cannot read properties of undefined (reading 'disableRotation')` ở UAT.
+const SKIPPED_METHODS = new Set(["setMinZoom"]);
+export const fakeMapRef = {
+  getMap: () => fakeMapInstance,
+  ...Object.fromEntries(
+    Object.entries(fakeMapInstance).filter(([key, value]) => typeof value === "function" && !SKIPPED_METHODS.has(key)),
+  ),
+};
+
 export function resetFakeMap() {
   fakeMapState.props = null;
   fakeMapState.zoom = 5;
@@ -67,7 +78,7 @@ const capture = <K extends keyof typeof fakeMapState>(key: K, value: (typeof fak
 
 export const Map = forwardRef<unknown, AnyProps>(function FakeMap(props, ref) {
   capture("props", props);
-  useImperativeHandle(ref, () => fakeMapInstance);
+  useImperativeHandle(ref, () => fakeMapRef);
   return (
     <div data-testid="fake-map" onClick={() => props.onClick?.({})}>
       {props.children as ReactNode}

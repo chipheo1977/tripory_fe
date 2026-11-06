@@ -6,6 +6,7 @@
 // người dùng, token sẽ nằm trong cache key dạng plain text. `React.cache` chỉ sống trong một request.
 import "server-only";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { cache } from "react";
 import { readSession, readViewerFromCookie } from "./server/session-store";
 import type { SessionKind } from "./server/dashboard-gate";
@@ -30,6 +31,10 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
  */
 export const getSessionKind = cache(async (): Promise<SessionKind> => {
   const jar = await cookies();
+  // Với `partialPrefetching`, `cookies()` vẫn được đọc trong lượt prerender runtime nên chưa đủ làm hoãn tới lúc có
+  // request thật; Next báo `blocking-prerender-current-time` cho `Date.now()` bên dưới (docs: caching.md, "Random values
+  // and timestamps"). `connection()` đẩy phần còn lại sang thời điểm request, đúng cách docs hướng dẫn.
+  await connection();
   const nowSec = Math.floor(Date.now() / 1000);
 
   return readSession((name) => jar.get(name)?.value, nowSec, isSecureCookieEnv()).state;

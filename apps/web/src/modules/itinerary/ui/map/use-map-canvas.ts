@@ -24,8 +24,11 @@ export function useMapCanvas(mapRef: RefObject<MapRef | null>, { ready, describe
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || map === null) return undefined;
-    map.touchZoomRotate.disableRotation();
-    map.keyboard.disableRotation();
+    // `MapRef` của react-map-gl chỉ sao chép các HÀM của bản đồ (create-ref.js), không có thuộc tính đối tượng như
+    // `touchZoomRotate`/`keyboard` dù kiểu TypeScript nói có; phải lấy qua `getMap()`.
+    const instance = map.getMap();
+    instance.touchZoomRotate.disableRotation();
+    instance.keyboard.disableRotation();
     const canvas = map.getCanvas();
     canvas.setAttribute("aria-describedby", describedById);
 

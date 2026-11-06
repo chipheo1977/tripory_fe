@@ -66,6 +66,19 @@ describe("auth security invariants (static)", () => {
     expect(owners).toEqual(["composition/viewer.server.ts"]);
   });
 
+  // Cache Components + partialPrefetching: `cookies()` vẫn đọc được trong lượt prerender runtime, nên chỉ đọc cookie
+  // trước `Date.now()` là chưa đủ (lỗi `blocking-prerender-current-time` ở /itineraries/mine và /itineraries/[id]/edit,
+  // 04-53 FAIL-2). Phải `await connection()` trước `Date.now()`.
+  it("awaits connection() before reading the clock in composition/viewer.server.ts", () => {
+    const file = inDir("composition/").find((candidate) => candidate.rel === "composition/viewer.server.ts");
+    expect(file).toBeDefined();
+    const code = (file?.text ?? "").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    const connectionAt = code.indexOf("await connection()");
+    const clockAt = code.indexOf("Date.now()");
+    expect(connectionAt).toBeGreaterThan(-1);
+    expect(clockAt).toBeGreaterThan(connectionAt);
+  });
+
   // T-03-72: token không ở storage, không ở biến NEXT_PUBLIC_ (lộ vào bundle client).
   // Ngoại lệ duy nhất, có chủ đích (Phase 4 D-36, T-04-41): adapter bản nháp form của editor dùng `sessionStorage`
   // (khóa theo viewer, TTL 24 giờ, chỉ giá trị form, không bao giờ token). `localStorage` vẫn cấm ở mọi nơi.

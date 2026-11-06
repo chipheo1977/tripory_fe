@@ -23,6 +23,11 @@ export type DayTabsProps = Readonly<{
 
 const prefersReducedMotion = (): boolean => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+function trackTab(tabs: Map<EditorTab, HTMLElement>, tab: EditorTab, element: HTMLElement | null): void {
+  if (element === null) tabs.delete(tab);
+  else tabs.set(tab, element);
+}
+
 function TabKmLine({ km }: Readonly<{ km: string | null }>) {
   if (km === null) return null;
   return <span className="text-label text-muted tabular-nums">{km}</span>;
@@ -74,11 +79,6 @@ export function DayTabs({ itinerary, selectedTab, onSelectTab }: DayTabsProps) {
     }
   }, [selectedTab, dayCount]);
 
-  const registerTab = (tab: EditorTab) => (element: HTMLElement | null) => {
-    if (element === null) tabRefs.current.delete(tab);
-    else tabRefs.current.set(tab, element);
-  };
-
   return (
     <Tabs onValueChange={(value) => onSelectTab(parseTabValue(value))} value={tabValue(selectedTab)} variant="line">
       <div className="flex items-center overflow-x-auto">
@@ -86,7 +86,7 @@ export function DayTabs({ itinerary, selectedTab, onSelectTab }: DayTabsProps) {
           <TabsTrigger
             aria-label={overviewTabAccessibleName(itinerary.totalDistanceKm)}
             className="flex-col gap-inline-xs py-inline-sm"
-            ref={registerTab(OVERVIEW_TAB)}
+            ref={(element) => trackTab(tabRefs.current, OVERVIEW_TAB, element)}
             value={tabValue(OVERVIEW_TAB)}
           >
             <span className="text-label font-semibold">Tổng quan</span>
@@ -99,7 +99,7 @@ export function DayTabs({ itinerary, selectedTab, onSelectTab }: DayTabsProps) {
                 aria-label={km === null ? `Ngày ${day.dayNumber}` : `Ngày ${day.dayNumber}, ${km}`}
                 className="flex-col gap-inline-xs py-inline-sm"
                 key={day.dayNumber}
-                ref={registerTab(day.dayNumber)}
+                ref={(element) => trackTab(tabRefs.current, day.dayNumber, element)}
                 value={tabValue(day.dayNumber)}
               >
                 <span className="flex items-center gap-inline-xs text-label font-semibold">

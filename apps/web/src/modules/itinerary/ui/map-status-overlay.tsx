@@ -7,7 +7,7 @@ import { MapPin } from "lucide-react";
 
 export type MapStatusOverlayProps = Readonly<{ visible: boolean }>;
 
-const MAX_WIDTH = "calc(100% - var(--semantic-size-control-lg) - 3 * var(--semantic-space-stack-md))";
+const MAX_WIDTH = "calc(100% - var(--semantic-size-control-sm) - 3 * var(--semantic-space-stack-md))";
 
 export function MapStatusOverlay({ visible }: MapStatusOverlayProps) {
   if (!visible) return null;

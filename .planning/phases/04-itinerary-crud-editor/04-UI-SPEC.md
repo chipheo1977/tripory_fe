@@ -830,7 +830,7 @@ Phần bản đồ còn thấy được (header 64px, mức sheet theo `resolveS
 | 768×1024 | 960px | thấy 704px | thấy 346px | thấy 18px |
 | 1440×900 (desktop) | 1040×836 | không có sheet | | |
 
-- Ở 320px mức vừa vẫn đủ chỗ cho cột nút zoom (16 + 44 + 4 + 44 = 108px) và chip gợi ý.
+- Ở 320px mức vừa vẫn đủ chỗ cho cột nút zoom (16 + 32 + 4 + 32 = 84px) và chip gợi ý.
 - Ở mức mở rộng, bản đồ gần như bị che; ghi công và nút zoom nằm sau sheet là chấp nhận được vì bản đồ không còn được hiển thị.
 - Không overflow ngang ở cả bốn bề rộng. Tablet 768px vẫn là bố cục sheet (form là Dialog từ `md`, như cũ).
 
@@ -904,7 +904,7 @@ Style JSON nằm ở app (vị trí do planner chốt), trỏ nguồn vector til
 ### Khung nhìn và zoom (D-117, D-128)
 
 - Không khóa biên (`maxBounds` không đặt). Mức thu nhỏ tối đa là mức vừa đủ chứa khung Việt Nam và Biển Đông (`VIETNAM_VIEW_BOUNDS`, xấp xỉ 101,5–118,5° Đ, 5,5–24,0° B) trong khung bản đồ hiện tại; tính lại khi khung đổi kích thước. Mức phóng to tối đa 18.
-- **`MapZoomControls`:** nhóm `div role="group" aria-label="Thu phóng bản đồ"` ở góc trên phải (`absolute top-stack-md right-stack-md`), hai `IconButton variant="secondary"` (44×44px) xếp dọc cách nhau 4px: icon `Plus` `aria-label` "Phóng to", icon `Minus` `aria-label` "Thu nhỏ". Mỗi lần bấm đổi 1 mức zoom quanh tâm. Ở mức tối đa/tối thiểu thì nút tương ứng `disabled`. Dùng được bằng Tab, Enter, Space. Không dùng `NavigationControl` mặc định của MapLibre (nhãn tiếng Anh, vùng chạm nhỏ). Không có nút la bàn.
+- **`MapZoomControls`:** nhóm `div role="group" aria-label="Thu phóng bản đồ"` ở góc trên phải (`absolute top-stack-md right-stack-md`), hai `IconButton variant="secondary" size="sm"` (32×32px, token `control-sm`, trên `touch-min` 24px; **[Cập nhật 2026-11-06, UAT 04-53]** trước đó 48px nên bị chê to) xếp dọc cách nhau 4px: icon `Plus` `aria-label` "Phóng to", icon `Minus` `aria-label` "Thu nhỏ". Mỗi lần bấm đổi 1 mức zoom quanh tâm. Ở mức tối đa/tối thiểu thì nút tương ứng `disabled`. Dùng được bằng Tab, Enter, Space. Không dùng `NavigationControl` mặc định của MapLibre (nhãn tiếng Anh, vùng chạm nhỏ). Không có nút la bàn.
 - **Bàn phím trên canvas:** canvas của MapLibre là một điểm dừng Tab, giữ keyboard handler mặc định (mũi tên di chuyển, `+`/`−` phóng to/thu nhỏ). Canvas có `aria-label` tiếng Việt (bảng copy). Esc khi canvas đang focus thì bỏ chọn điểm.
 - Thao tác chuột/chạm: kéo một ngón/chuột để pan, cuộn chuột hoặc hai ngón để zoom, nhấp đúp để phóng to. Không bật "cooperative gestures" (bản đồ là nội dung chính của màn hình).
 

@@ -23,7 +23,8 @@ it('nút 48px (size lg)', () => {
   setup();
 
   const classes = screen.getByRole('button', { name: 'Phóng to' }).className.split(/\s+/);
-  expect(classes).toEqual(expect.arrayContaining(['h-control-lg', 'w-control-lg']));
+  expect(classes).toEqual(expect.arrayContaining(['h-control-sm', 'w-control-sm']));
+  expect(classes).not.toContain('h-control-lg');
 });
 
 it('bấm gọi đúng handler', async () => {

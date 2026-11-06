@@ -15,15 +15,18 @@ export type MapZoomControlsProps = Readonly<{
   labels?: Readonly<{ group?: string; zoomIn?: string; zoomOut?: string }>;
 }>;
 
-/** Nhóm hai nút phóng to/thu nhỏ (D-128). Nút 48px (`size="lg"`), dùng được bằng Tab, Enter, Space. */
+/**
+ * Nhóm hai nút phóng to/thu nhỏ (D-128). Nút 32px (`size="sm"`, token `control-sm`), lớn hơn vùng chạm tối thiểu
+ * `touch-min` (24px) nên không cần mở rộng vùng bấm. Dùng được bằng Tab, Enter, Space.
+ */
 export function MapZoomControls({ onZoomIn, onZoomOut, canZoomIn, canZoomOut, visible = true, className, labels }: MapZoomControlsProps) {
   if (!visible) return null;
   return (
     <div aria-label={labels?.group ?? 'Thu phóng bản đồ'} className={cn('flex flex-col gap-inline-xs', className)} role="group">
-      <IconButton aria-label={labels?.zoomIn ?? 'Phóng to'} disabled={!canZoomIn} onClick={onZoomIn} size="lg" variant="secondary">
+      <IconButton aria-label={labels?.zoomIn ?? 'Phóng to'} disabled={!canZoomIn} onClick={onZoomIn} size="sm" variant="secondary">
         <Icon icon={Plus} size="sm" />
       </IconButton>
-      <IconButton aria-label={labels?.zoomOut ?? 'Thu nhỏ'} disabled={!canZoomOut} onClick={onZoomOut} size="lg" variant="secondary">
+      <IconButton aria-label={labels?.zoomOut ?? 'Thu nhỏ'} disabled={!canZoomOut} onClick={onZoomOut} size="sm" variant="secondary">
         <Icon icon={Minus} size="sm" />
       </IconButton>
     </div>

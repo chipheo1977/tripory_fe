@@ -51,7 +51,13 @@ export function TimelinePanel({
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <div className="sticky top-0 z-sticky border-b border-border bg-surface">
-        <DayTabs itinerary={itinerary} onSelectDay={onSelectDay} selectedDay={day.dayNumber} />
+        <DayTabs
+          itinerary={itinerary}
+          onSelectTab={(tab) => {
+            if (tab !== "overview") onSelectDay(tab);
+          }}
+          selectedTab={day.dayNumber}
+        />
       </div>
       <div className="px-stack-md pt-stack-md">
         <DaySubtitle day={day} itineraryId={itinerary.id} key={day.dayNumber} />

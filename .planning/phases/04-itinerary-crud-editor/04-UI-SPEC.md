@@ -60,7 +60,7 @@ Dùng nguyên scale Phase 1 (bội số 4):
 
 Exceptions: none. Các kích thước dưới đây thuộc sizing contract, không phải spacing.
 
-Phần mở lại lần 2 (2026-11-05) không thêm token spacing. Gán dùng: nút zoom và chip gợi ý cách mép bản đồ 16px (`stack-md`), gap giữa hai nút zoom 4px (`inline-xs`), nhãn pin cách pin 8px, ghi công cách mép 8px (`inline-sm`), padding `OverviewPanel` 16px, gap giữa các khối thông tin chung 16px, gap giữa các dòng ngày 8px, padding dòng ngày 16px ngang / 8px dọc, chấm màu cách chữ 8px (dòng ngày) và 4px (tab ngày).
+Phần mở lại lần 2 (2026-11-05) không thêm token spacing. Gán dùng: nút zoom và chip gợi ý cách mép bản đồ 16px (`stack-md`), gap giữa hai nút zoom 4px (`inline-xs`), nhãn pin cách pin 8px, nút ghi công "i" cách mép phải 16px (`stack-md`, thẳng hàng cột nút zoom) và cách đáy 8px, gap giữa nút "i" và dòng ghi công khi mở 4px (`inline-xs`, đổi 2026-11-06), padding `OverviewPanel` 16px, gap giữa các khối thông tin chung 16px, gap giữa các dòng ngày 8px, padding dòng ngày 16px ngang / 8px dọc, chấm màu cách chữ 8px (dòng ngày) và 4px (tab ngày).
 
 Phần mở lại 2026-10-30 không thêm token. Gán dùng: padding trigger và panel accordion 16px (`px-stack-md`), padding dọc trigger 8px (`py-stack-sm`), gap giữa các ô trong một khối 16px, gap giữa chip và giữa các ô lưới ảnh 8px (`gap-inline-sm`), padding chân form dính đáy 16px dọc (`py-stack-md`), padding khung "Link ảnh" 16px.
 
@@ -833,7 +833,7 @@ Phần bản đồ còn thấy được (header 64px, mức sheet theo `resolveS
 | 1440×900 (desktop) | 1040×836 | không có sheet | | |
 
 - Ở 320px mức vừa vẫn đủ chỗ cho cột nút zoom (16 + 32 + 4 + 32 = 84px) và chip gợi ý.
-- Ở mức mở rộng, bản đồ gần như bị che; ghi công và nút zoom nằm sau sheet là chấp nhận được vì bản đồ không còn được hiển thị.
+- Ở mức mở rộng, bản đồ gần như bị che; nút ghi công "i" và nút zoom nằm sau sheet là chấp nhận được vì bản đồ không còn được hiển thị.
 - Không overflow ngang ở cả bốn bề rộng. Tablet 768px vẫn là bố cục sheet (form là Dialog từ `md`, như cũ).
 
 ### Token mới (`packages/design-tokens`)
@@ -977,8 +977,8 @@ Nhấn mạnh do một hàm thuần tính từ (tab, ngày đang rê/focus, đi�
 
 | Trạng thái | Hiển thị |
 |-----------|----------|
-| Đang tải (nạp thư viện, style, tile đầu) | `Skeleton block` phủ kín vùng bản đồ; không hiện nút zoom, ghi công; `p.sr-only role="status"` "Đang tải bản đồ…". Danh sách và form dùng được ngay; nút chính của thẻ mở form sửa cho tới khi bản đồ sẵn sàng |
-| Sẵn sàng | Bản đồ, pin, đường, nút zoom, ghi công |
+| Đang tải (nạp thư viện, style, tile đầu) | `Skeleton block` phủ kín vùng bản đồ; không hiện nút zoom, nút ghi công "i"; `p.sr-only role="status"` "Đang tải bản đồ…". Danh sách và form dùng được ngay; nút chính của thẻ mở form sửa cho tới khi bản đồ sẵn sàng |
+| Sẵn sàng | Bản đồ, pin, đường, nút zoom, nút ghi công "i" (thu gọn; dòng ghi công chỉ hiện khi bấm nút) |
 | Sẵn sàng, chưa có điểm | Như trên + `MapStatusOverlay`: chip ở góc trên trái (`absolute top-stack-md left-stack-md`, bề rộng tối đa bằng bề rộng bản đồ trừ cột nút zoom và 3 khoảng 16px, xuống dòng khi dài), `rounded-pill bg-surface-elevated shadow-md px-stack-md py-inline-sm`, icon `MapPin` 16px `text-muted` + "Thêm điểm đến để thấy trên bản đồ" (Label regular `text-text`). Chip không bấm được |
 | Lỗi | Xem dưới |
 
@@ -994,9 +994,12 @@ Nhấn mạnh do một hàm thuần tính từ (tab, ngày đang rê/focus, đi�
 
 ### Ghi công (`MapAttribution`, D-114)
 
-- Luôn hiện khi bản đồ sẵn sàng. Tắt `AttributionControl` mặc định (nó tự thu gọn thành nút "i" dưới 640px), dùng thành phần riêng: `p` ở góc dưới phải (`absolute right-inline-sm`), `bg-surface/80 rounded-subtle px-inline-xs text-label text-muted`, xuống dòng được (`max-w-full`), không che nút zoom.
-- Nội dung: phần sr-only "Nguồn bản đồ: " rồi ba link `© OpenStreetMap` (`https://www.openstreetmap.org/copyright`) · `OpenFreeMap` (`https://openfreemap.org`) · `OpenMapTiles` (`https://www.openmaptiles.org`), mở tab mới, `rel="noopener noreferrer"`, gạch chân khi hover/focus, focus ring chuẩn. Tên riêng giữ nguyên.
-- Vị trí đáy: desktop cách mép dưới 8px. Dưới `lg`: ngay trên mép sheet (đáy = chiều cao phần bị sheet che + 8px; sheet đóng thì nằm trên chip "Lịch trình"); ở mức mở rộng ghi công nằm sau sheet cùng bản đồ.
+- **Đổi 2026-11-06 (theo yêu cầu user, xem D-114 trong 04-CONTEXT):** thu gọn thành nút "i"; bản gốc "luôn hiện dòng chữ" thay bằng mô tả dưới đây. Nút "i" luôn hiện khi bản đồ sẵn sàng, đây là phần "nhìn thấy được" mà ODbL (OSM) và CC BY 4.0 (OpenMapTiles) đòi; không được ẩn nút ở mức sheet thấp, vừa hay khi sheet đóng.
+- Tắt `AttributionControl` mặc định, dùng thành phần riêng `MapAttribution` (không dùng `AttributionControl compact` của MapLibre vì khó điều khiển vị trí theo sheet, chữ tiếng Việt và test; hook `useAttributionDisclosure` giữ trạng thái). Mặc định thu gọn: chỉ `IconButton variant="secondary" size="sm"` (32×32px, token `control-sm`, trên `touch-min` 24px, cùng kiểu nút zoom) icon `Info` 16px `aria-hidden`, `aria-label` và `title` "Ghi công bản đồ", `aria-expanded`, `aria-controls` trỏ vùng chữ. Bấm chuột/chạm/Enter/Space mở hoặc đóng. Vùng gốc `absolute left-stack-md right-stack-md` (`pointer-events-none`, chỉ nút và vùng chữ nhận chuột), nút ở mép phải thẳng hàng cột nút zoom.
+- Khi mở, vùng chữ hiện kề bên trái nút, cùng hàng đáy: `p` `rounded-control border border-border bg-surface px-inline-sm text-label text-muted shadow-sm`, xuống dòng được, tối đa tới khoảng đệm trái 16px nên không tràn khung ở 320px và không chạm cột nút zoom ở phải. Nút `shrink-0` để không bị bóp khi chữ dài. Không hoạt ảnh (không cần xử lý `prefers-reduced-motion`).
+- Đóng: bấm nút lần nữa, Esc, hoặc bấm ra ngoài vùng ghi công. Esc khi đang mở chỉ đóng ghi công (chặn lan, nên sheet lịch trình và canvas không nhận phím đó) và chỉ trả focus về nút khi focus đang nằm trong vùng ghi công. Esc khi đang đóng đi tiếp như cũ.
+- Nội dung khi mở (không đổi so với bản gốc): phần sr-only "Nguồn bản đồ: " rồi ba link `© OpenStreetMap` (`https://www.openstreetmap.org/copyright`) · `OpenFreeMap` (`https://openfreemap.org`) · `OpenMapTiles` (`https://www.openmaptiles.org`), mở tab mới, `rel="noopener noreferrer"`, gạch chân khi hover/focus, focus ring chuẩn. Tên riêng giữ nguyên.
+- Vị trí đáy (áp cho nút "i" và vùng chữ): desktop cách mép dưới 8px. Dưới `lg`: ngay trên mép sheet (đáy = chiều cao phần bị sheet che + 8px; sheet đóng thì nằm trên chip "Lịch trình"); ở mức mở rộng nút "i" nằm sau sheet cùng bản đồ (chấp nhận, FLAG 1). Kiểm chạy thật 2026-11-06 ở 390×844, 390×667, 320×568, 1440×900: nút trong màn hình và không bị che ở mức thấp, vừa, sheet đóng.
 
 ### Tab Tổng quan (`OverviewPanel`, D-131..D-140)
 
@@ -1050,7 +1053,7 @@ thanh "Thêm điểm đến"    sticky bottom (cùng style thanh của tab ngày
 
 - Danh sách bên trái (tab ngày) và các dòng ngày (Tổng quan) là đường chính để chọn điểm/ngày bằng bàn phím. Mọi việc làm được bằng pin đều làm được từ danh sách: chọn điểm (nút chính của thẻ), xem ngày (dòng ngày), sửa (menu ⋯).
 - Vùng bản đồ: `section aria-labelledby` trỏ `h2.sr-only` "Bản đồ lịch trình". Canvas có `aria-label` "Bản đồ lịch trình. Dùng phím mũi tên để di chuyển, phím cộng và trừ để phóng to, thu nhỏ." và `aria-describedby` trỏ câu sr-only "Danh sách điểm đến trong lịch trình có cùng nội dung với bản đồ." Pin và nhãn pin `aria-hidden`.
-- Thứ tự Tab theo DOM: header → cột/sheet timeline (tab, nội dung, nút thêm) → canvas bản đồ → "Phóng to" → "Thu nhỏ" → ba link ghi công. Desktop: cột trái đứng trước canvas trong DOM (như cũ). Mobile: giữ thứ tự đã duyệt header → nền (nay là bản đồ: canvas, nút zoom, ghi công) → sheet; sheet không modal không trap focus (như cũ).
+- Thứ tự Tab theo DOM: header → cột/sheet timeline (tab, nội dung, nút thêm) → canvas bản đồ → "Phóng to" → "Thu nhỏ" → nút "Ghi công bản đồ" → (khi đã mở) ba link ghi công. Desktop: cột trái đứng trước canvas trong DOM (như cũ). Mobile: giữ thứ tự đã duyệt header → nền (nay là bản đồ: canvas, nút zoom, ghi công) → sheet; sheet không modal không trap focus (như cũ).
 - Thẻ điểm đang chọn: `aria-current="true"`. Dòng ngày không dùng `aria-current` (chỉ là làm nổi tạm thời).
 - Reduced motion: không bay, không chuyển màu dần, không đổi kích thước pin có hoạt ảnh, cuộn danh sách không mượt.
 
@@ -1147,7 +1150,7 @@ thanh "Thêm điểm đến"    sticky bottom (cùng style thanh của tab ngày
 | Tab Tổng quan (D-131, D-140) | "Tổng quan"; dòng 2 "{x} km"; tên truy cập "Tổng quan, {x} km" / "Tổng quan" |
 | Vùng bản đồ (D-128) | `h2.sr-only` "Bản đồ lịch trình"; canvas `aria-label` "Bản đồ lịch trình. Dùng phím mũi tên để di chuyển, phím cộng và trừ để phóng to, thu nhỏ."; mô tả sr "Danh sách điểm đến trong lịch trình có cùng nội dung với bản đồ." |
 | Nút zoom (D-128) | Nhóm "Thu phóng bản đồ"; "Phóng to"; "Thu nhỏ" |
-| Ghi công (D-114) | sr "Nguồn bản đồ: "; link "© OpenStreetMap", "OpenFreeMap", "OpenMapTiles" (tên riêng) |
+| Ghi công (D-114) | Nút "Ghi công bản đồ" (`aria-label` và `title`); khi mở: sr "Nguồn bản đồ: "; link "© OpenStreetMap", "OpenFreeMap", "OpenMapTiles" (tên riêng) |
 | Nhãn quần đảo (D-113, chuỗi khóa) | "Quần đảo Hoàng Sa (Việt Nam)"; "Quần đảo Trường Sa (Việt Nam)" |
 | Nhãn cạnh pin (D-125, D-136) | Tab ngày: "{tên}"; Tổng quan: "{tên}" + "Ngày {N}" |
 | Thẻ điểm khi bản đồ hiển thị (D-126) | Mô tả sr "Nhấn để xem trên bản đồ" |
@@ -1226,14 +1229,14 @@ Giọng văn theo Phase 1/3: tiếng Việt trung tính, câu ngắn, không d�
 **Bổ sung 2026-11-05 (bản đồ, tab Tổng quan):**
 
 - Mọi việc làm được bằng pin đều làm được bằng bàn phím từ danh sách hoặc dòng ngày (WCAG 2.1.1); pin và nhãn pin `aria-hidden`, không nhận focus (D-128).
-- Vùng bản đồ là `section` có heading sr-only; canvas có `aria-label` tiếng Việt và mô tả trỏ về danh sách; nút "Phóng to"/"Thu nhỏ" là `IconButton` 44×44px có `aria-label`, `disabled` ở biên zoom; ghi công là link có focus ring.
+- Vùng bản đồ là `section` có heading sr-only; canvas có `aria-label` tiếng Việt và mô tả trỏ về danh sách; nút "Phóng to"/"Thu nhỏ" là `IconButton` 44×44px có `aria-label`, `disabled` ở biên zoom; ghi công là nút "Ghi công bản đồ" (`aria-expanded`, `aria-controls`, 32×32px) mở ra ba link có focus ring.
 - Tab "Tổng quan" là `TabsTrigger` đầu tiên trong roving focus (←/→, Home/End); chấm màu `aria-hidden`; tên truy cập tab không đổi theo màu.
 - Dòng ngày là `button` có tên truy cập đầy đủ ("Xem Ngày 2: …"); Enter/Space chuyển tab và focus vào tab mới, không để focus rơi về `body`. Thẻ điểm đang chọn có `aria-current="true"`.
 - Ô "Ngày" của form thêm từ Tổng quan có nhãn "Ngày", là `Select` theo Base UI (mũi tên, Enter, Esc, gõ chữ để nhảy); focus ban đầu vẫn ở ô Tên.
 - Màu không là kênh duy nhất: pin có số, nhãn Tổng quan ghi "Ngày N", chấm màu đi cùng chữ "Ngày N", pin chọn có vòng viền đậm và lớn hơn. Số trắng trên pin ≥ 4.99:1; pin trên nền ≥ 3.84:1 (đồ họa ≥ 3:1).
 - Trạng thái bản đồ đọc được: "Đang tải bản đồ…" (`role="status"`), lỗi là `InlineAlert info` (`role="status"`) có nút "Thử lại"; sau "Thử lại" focus vào `section` bản đồ.
 - `prefers-reduced-motion`: canh khung, di chuyển tới điểm, nút zoom đều nhảy thẳng; pin đổi kích thước và dòng "vừa thêm" không có hoạt ảnh.
-- Smoke ở 320×568, 390×844, 768×1024, 1440×900: không overflow ngang; nút zoom và chip gợi ý không chồng nhau ở 320px; ghi công thấy được ở mức sheet thấp/vừa và khi sheet đóng (không bị chip "Lịch trình" che); header không bị sheet che; nhãn tên dài cắt ellipsis trong 240px.
+- Smoke ở 320×568, 390×844, 768×1024, 1440×900: không overflow ngang; nút zoom và chip gợi ý không chồng nhau ở 320px; nút ghi công "i" thấy được ở mức sheet thấp/vừa và khi sheet đóng (không bị chip "Lịch trình" che), mở ra không tràn ngang và không chồng nút zoom ở 320px; header không bị sheet che; nhãn tên dài cắt ellipsis trong 240px.
 
 ---
 
@@ -1268,7 +1271,7 @@ Giọng văn theo Phase 1/3: tiếng Việt trung tính, câu ngắn, không d�
 | (2026-11-05) Hàm thuần domain bản đồ | `dayColorIndex` lặp 1..8; pin: bỏ điểm đang chờ xóa, số 1-based theo `orderIndex` trên tập hiển thị, ngày đúng; đường: một đường mỗi ngày có ≥ 2 điểm, không nối qua ngày; nhấn mạnh theo bảng §Nhấn mạnh theo tab; khung canh theo tab (mọi điểm, một ngày, ngày trống → mọi điểm, không điểm → bbox tỉnh → `VIETNAM_VIEW_BOUNDS`); tab mặc định D-132; chuỗi dòng ngày và tên truy cập (có/không phụ đề, có/không km, không điểm); hàng meta Tổng quan ("Chưa có điểm", bỏ km 0) |
 | (2026-11-05) Style JSON | Mọi lớp chữ dùng `coalesce` `name:vi` → `name`; lớp ranh giới loại `maritime`/`disputed`; nhãn quần đảo gốc của OSM bị lọc; có hai lớp nhãn với đúng chuỗi "Quần đảo Hoàng Sa (Việt Nam)" và "Quần đảo Trường Sa (Việt Nam)"; không lớp POI nào hiện; nguồn tile trỏ OpenFreeMap. Bổ sung, không thay, bước kiểm bằng mắt trong UAT |
 | (2026-11-05) Token | 6 token kích thước/độ mờ và 8 token màu ngày tồn tại, trỏ primitive; tương phản mỗi màu ngày với trắng ≥ 4.5:1; class `bg-map-day-N`, `size-(--map-pin-size)` có CSS thật (guard sẵn có) |
-| (2026-11-05) `TripMap` / `MapZoomControls` / `MapAttribution` | Map thật thay bằng fake ở jsdom (không có WebGL). Lớp marker `aria-hidden`, pin mờ không bắt sự kiện; bấm pin gọi `onPinSelect`; bấm nền gọi `onBackgroundClick`; nút zoom có nhãn, `disabled` ở biên; ghi công có 3 link và phần sr "Nguồn bản đồ: "; reduced motion gọi đường nhảy thẳng (thời lượng 0) |
+| (2026-11-05) `TripMap` / `MapZoomControls` / `MapAttribution` | Map thật thay bằng fake ở jsdom (không có WebGL). Lớp marker `aria-hidden`, pin mờ không bắt sự kiện; bấm pin gọi `onPinSelect`; bấm nền gọi `onBackgroundClick`; nút zoom có nhãn, `disabled` ở biên; ghi công mặc định thu gọn (chỉ nút "Ghi công bản đồ", `aria-expanded=false`), bấm/Enter/Space mở ra 3 link (href, `target=_blank`, `rel=noopener noreferrer`) và phần sr "Nguồn bản đồ: ", Esc đóng và trả focus về nút (không lan tới sheet), bấm ra ngoài đóng (2026-11-06); reduced motion gọi đường nhảy thẳng (thời lượng 0) |
 | (2026-11-05) `EditorMapArea` | Đang tải: skeleton + status sr; chưa có điểm: chip đúng copy; lỗi (thư viện, WebGL, style, quá 15 giây): `InlineAlert info` đúng copy + "Thử lại" + `TripSummary` dự phòng; "Thử lại" về đang tải và focus vào `section`; tile lỗi sau `load` không chuyển sang lỗi |
 | (2026-11-05) `DayTabs` | Tab "Tổng quan" đứng đầu, km dòng 2 khi > 0, tên truy cập; chấm màu `aria-hidden` theo bảng ánh xạ; tab mặc định theo D-132; đổi tab bỏ chọn điểm |
 | (2026-11-05) `OverviewPanel` | Thông tin chung đủ trường D-133, không có điểm đến/sở thích/ngày kết thúc; dòng ngày đúng copy cho ngày có/không phụ đề, có/không km, không điểm; bấm dòng chuyển tab và focus tab; rê/focus nhấn mạnh chỉ từ `lg`; bấm pin làm nổi dòng của ngày, không đổi tab; nút "Thêm điểm đến" luôn có và mở form có ô Ngày mặc định ngày cuối; thêm xong ở lại Tổng quan, dòng ngày làm nổi, focus về nút |
@@ -1339,7 +1342,7 @@ Test bằng Vitest + Testing Library (jsdom), fake `HttpClient`, không MSW. Kh�
 
 Khuyến nghị (không chặn):
 
-- **FLAG 1 (Dimension 2, D-114):** ở mức sheet mở rộng trên mobile, ghi công nằm sau sheet cùng bản đồ. Đã ghi lý do (bản đồ không còn được hiển thị ở mức này); UAT xác nhận ghi công thấy được ở mức thấp, vừa và khi sheet đóng.
+- **FLAG 1 (Dimension 2, D-114):** ở mức sheet mở rộng trên mobile, nút ghi công "i" nằm sau sheet cùng bản đồ. Đã ghi lý do (bản đồ không còn được hiển thị ở mức này); UAT xác nhận nút "i" thấy được ở mức thấp, vừa và khi sheet đóng (cập nhật 2026-11-06: từ dòng ghi công luôn hiện sang nút "i" thu gọn, xem D-114).
 - **FLAG 2 (Dimension 3):** cặp màu ngày 3/6/7 (ngọc lục, lục lam, xanh lá mạ) khó phân biệt với người mù màu đỏ-lục. Đã giảm thiểu bằng số trên pin, nhãn "Ngày N" ở Tổng quan và việc ngày không chọn bị làm mờ; không đổi bảng màu. Nếu UAT thấy khó phân biệt, planner có thể đổi thứ tự hoặc thay một màu, giữ ngưỡng ≥ 4.5:1 với chữ trắng.
 
 ---

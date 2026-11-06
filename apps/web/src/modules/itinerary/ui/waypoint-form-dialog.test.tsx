@@ -714,6 +714,18 @@ it("a typed coordinate triggers one reverse call and fills the address but not t
   expect(h.reverse).toHaveBeenCalledWith({ latitude: 11.9404, longitude: 108.4583 });
 });
 
+it("typing a coordinate key by key makes one reverse call, only for the finished coordinate", async () => {
+  h.reverse.mockResolvedValue(STREET);
+  const { user } = setup({ destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  switchToManual();
+  await user.type(locationInput(), "11.9404, 108.4583");
+  expect(await screen.findByText("Đã điền địa chỉ từ OpenStreetMap, bạn có thể sửa.")).toBeTruthy();
+  expect(addressInput().value).toBe("Hùng Vương, Xuân Hương, Đà Lạt, Lâm Đồng");
+  expect(h.reverse).toHaveBeenCalledTimes(1);
+  expect(h.reverse).toHaveBeenCalledWith({ latitude: 11.9404, longitude: 108.4583 });
+});
+
 it("a reverse hit on a named place fills an empty name", async () => {
   h.reverse.mockResolvedValue(CRAZY_HOUSE);
   setup();

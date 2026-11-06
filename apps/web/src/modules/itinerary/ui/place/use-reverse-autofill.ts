@@ -2,11 +2,12 @@
 
 // Tra địa chỉ cho tọa độ nhập tay (chế độ thủ công, D-149): chỉ với tọa độ trần mới hợp lệ, không phải link Google Maps
 // (link giữ luật D-49) và không phải giá trị đã có khi mở form hoặc vừa chọn từ danh sách (`settled`). Mỗi tọa độ chỉ
-// được áp một lần; kết quả đến muộn của tọa độ cũ không ghi đè.
+// được áp một lần; kết quả đến muộn của tọa độ cũ không ghi đè. Chỉ tra khi ô đã đứng yên `REVERSE_DEBOUNCE_MS`.
 import { coordinateInputOf, parseLocationInput, type Place } from "@tripory/itinerary";
 import type { Wgs84Coordinate } from "@tripory/shared-kernel";
 import { useEffect, useRef } from "react";
 import { places } from "@/composition/places.client";
+import { useDebouncedValue } from "./use-debounced-value";
 
 export type ReverseStatus = "idle" | "loading" | "filled" | "none" | "failed";
 
@@ -46,8 +47,14 @@ export function reverseStatusOf(target: Wgs84Coordinate | null, query: ReverseQu
   return "filled";
 }
 
+/** Chỉ tra khi ô Vị trí đứng yên chừng này: gõ từng ký tự không bắn một request cho mỗi tọa độ dở dang. */
+export const REVERSE_DEBOUNCE_MS = 400;
+
 export function useReverseAutofill({ enabled, raw, settled, onPlace }: ReverseAutofillInput): ReverseStatus {
-  const target = enabled ? reverseTargetOf(raw, settled) : null;
+  const stableRaw = useDebouncedValue(raw, REVERSE_DEBOUNCE_MS);
+  // Đang gõ (chưa đứng yên) thì không tra và không áp kết quả đến muộn của tọa độ trước đó.
+  const active = enabled && raw === stableRaw;
+  const target = active ? reverseTargetOf(raw, settled) : null;
   const query = places.useReversePlace(target);
   const key = target === null ? null : coordinateInputOf(target);
   const applied = useRef<string | null>(null);

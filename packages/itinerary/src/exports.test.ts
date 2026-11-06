@@ -85,7 +85,7 @@ const INFRASTRUCTURE_NAMES = [
   'itineraryDetailDto',
 ] as const;
 
-const REACT_NAMES = ['createItineraryHooks', 'itineraryKeys'] as const;
+const REACT_NAMES = ['createItineraryHooks', 'itineraryKeys', 'createPlaceHooks', 'placeKeys'] as const;
 
 describe('itinerary public entry', () => {
   it('entry gốc là module hợp lệ', () => {

@@ -5,23 +5,25 @@
 // "Xóa điểm đến" trong form sửa chỉ báo `onDeleteRequested` rồi đóng: luồng xóa có hoàn tác thuộc editor (04-18).
 // Người dùng dán link POI thì Tên/Địa chỉ đang trống được tự điền (D-49), nhưng vẫn phải có tọa độ mới gửi được (D-48).
 import { zodResolver } from "@hookform/resolvers/zod";
-import { formatCoordinate, type PlaceHint, type Waypoint } from "@tripory/itinerary";
+import { formatCoordinate, type Waypoint } from "@tripory/itinerary";
 import type { ItineraryId, Wgs84Coordinate } from "@tripory/shared-kernel";
-import { Button, FormField, FormFieldLabel, InlineAlert, Input, Textarea } from "@tripory/ui-web";
+import { Button, InlineAlert, Input, Textarea } from "@tripory/ui-web";
 import { Trash2 } from "lucide-react";
-import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { SubmitStatus } from "@/components/submit-status";
 import { itinerary as itineraryHooks } from "@/composition/itinerary.client";
 import { draftKey, draftStorage, type DraftKind } from "./draft-storage";
 import { mapWaypointError } from "./form-error-mapping";
 import { FormFieldRow } from "./form-field-row";
 import { LOCATION_REQUIRED, waypointSchema, type WaypointValues } from "./form-schemas";
-import { LocationField, useLocationState } from "./location-field";
+import { useLocationState } from "./location-field";
+import { usePlaceAutofill, type NameSource } from "./place/use-place-autofill";
 import { ResponsiveFormSurface } from "./responsive-form-surface";
 import { useSaveStatusStore } from "./save-status";
 import { useFormDraft } from "./use-form-draft";
 import { WaypointDayField, type WaypointDayChoice } from "./waypoint-day-field";
+import { WaypointLocationBlock } from "./waypoint-location-block";
 
 export type { WaypointDayChoice };
 
@@ -44,9 +46,14 @@ export type WaypointFormDialogProps = Readonly<{
   onDeleteRequested(waypoint: Waypoint): void;
   /** Báo form có thay đổi chưa lưu, để editor bật cảnh báo rời trang. */
   onDirtyChange?: (dirty: boolean) => void;
+  /** Điểm đến của lịch trình: gợi ý địa điểm và ưu tiên kết quả tìm gần đó (D-146). `null` = không gợi ý. */
+  destinationCode?: string | null;
 }>;
 
-const NAME_FROM_LINK = "Đã lấy tên từ link, bạn có thể sửa.";
+const NAME_DESCRIPTIONS: Readonly<Record<NameSource, string>> = {
+  link: "Đã lấy tên từ link, bạn có thể sửa.",
+  place: "Đã lấy tên từ địa điểm đã chọn, bạn có thể sửa.",
+};
 const RESTORED_MESSAGE = "Đã khôi phục nội dung chưa lưu";
 
 const draftKindOf = (mode: WaypointFormMode, dayNumber: number): DraftKind =>
@@ -95,10 +102,9 @@ function WaypointForm({
   onUpdated,
   onDeleteRequested,
   onDirtyChange,
+  destinationCode = null,
 }: FormProps) {
   const titleId = useId();
-  const locationId = useId();
-  const locationStatusId = useId();
   const notesId = useId();
   const store = useSaveStatusStore();
   const form = useForm<WaypointValues>({
@@ -118,12 +124,12 @@ function WaypointForm({
   const [alert, setAlert] = useState<string | null>(null);
   // Ngày đang chọn gắn với đúng `mode` đã mở: mở lại bằng `mode` mới thì quay về ngày mặc định.
   const [picked, setPicked] = useState<PickedDay | null>(null);
-  const [nameFromLink, setNameFromLink] = useState(false);
+  const autofill = usePlaceAutofill(form);
   const submittingRef = useRef(false);
   const nameRef = useRef<HTMLElement | null>(null);
 
-  const { control, getValues, reset, setValue } = form;
-  const { errors, isSubmitting, isDirty, isSubmitted, touchedFields } = form.formState;
+  const { control, reset } = form;
+  const { errors, isSubmitting, isDirty } = form.formState;
   const locked = isSubmitting;
   const chosenDay = chosenDayOf(picked, mode);
   const dayChoices = mode.kind === "add" ? mode.dayChoices : undefined;
@@ -137,6 +143,8 @@ function WaypointForm({
     draftStorage.remove(openedKey);
   };
   const initialLocation = toValues(mode).location;
+  // Giá trị Vị trí lúc mở (bản nháp nếu có): khối Vị trí chọn chế độ mặc định và không tra ngược giá trị này.
+  const openedLocation = (restored ?? toValues(mode)).location;
 
   // Mở form là bắt đầu form mới từ điểm đến hiện tại (hoặc bản nháp); đọc qua ref để dữ liệu refetch không ghi đè.
   const latest = useRef({ mode, restored });
@@ -167,25 +175,12 @@ function WaypointForm({
   );
 
   // Link POI: chỉ điền ô đang trống, không bao giờ ghi đè nội dung người dùng đã nhập (D-49).
-  const onPlace = useCallback(
-    (place: PlaceHint) => {
-      const current = getValues();
-      if (place.name !== null && current.name.trim() === "") {
-        setValue("name", place.name, { shouldDirty: true, shouldValidate: true });
-        setNameFromLink(true);
-      }
-      if (place.address !== null && current.address.trim() === "") {
-        setValue("address", place.address, { shouldDirty: true, shouldValidate: true });
-      }
-    },
-    [getValues, setValue],
-  );
   const location = useWatch({ control, name: "location" }) ?? "";
-  const { state: locationState, flush } = useLocationState(location, onPlace);
+  const { state: locationState, flush } = useLocationState(location, autofill.applyLinkHint);
 
   const finish = () => {
     setAlert(null);
-    setNameFromLink(false);
+    autofill.forget();
     onClose();
   };
 
@@ -267,10 +262,8 @@ function WaypointForm({
   const addressField = form.register("address");
   const notesField = form.register("notes");
 
-  const locationFormError = errors.location?.message;
-  const showLocationError = touchedFields.location === true || isSubmitted;
-  const locationInvalid = locationFormError !== undefined || (showLocationError && locationState.status === "error");
   const adding = mode.kind === "add";
+  const nameDescription = autofill.nameSource === null ? undefined : NAME_DESCRIPTIONS[autofill.nameSource];
 
   return (
     <ResponsiveFormSurface
@@ -283,6 +276,7 @@ function WaypointForm({
     >
       <InlineAlert variant="info">{restored === null ? null : RESTORED_MESSAGE}</InlineAlert>
       <InlineAlert>{alert}</InlineAlert>
+      <FormProvider {...form}>
       <form aria-labelledby={titleId} className="flex flex-col gap-stack-sm" noValidate onSubmit={onSubmit}>
         <WaypointDayField
           choices={dayChoices ?? []}
@@ -291,17 +285,12 @@ function WaypointForm({
           value={chosenDay}
           visible={pickDay}
         />
-        <FormFieldRow
-          description={nameFromLink ? NAME_FROM_LINK : undefined}
-          error={errors.name?.message}
-          label="Tên"
-          required
-        >
+        <FormFieldRow description={nameDescription} error={errors.name?.message} label="Tên" required>
           <Input
             {...nameField}
             autoComplete="off"
             onChange={(event) => {
-              setNameFromLink(false);
+              autofill.forget();
               return nameOnChange(event);
             }}
             readOnly={locked}
@@ -313,29 +302,13 @@ function WaypointForm({
           />
         </FormFieldRow>
 
-        <Controller
-          control={control}
-          name="location"
-          render={({ field }) => (
-            <FormField invalid={locationInvalid}>
-              <FormFieldLabel required>Vị trí</FormFieldLabel>
-              <LocationField
-                describedById={locationStatusId}
-                error={locationFormError}
-                id={locationId}
-                inputRef={field.ref}
-                onBlur={() => {
-                  field.onBlur();
-                  // Blur là lúc người dùng đã dán xong: không chờ hết debounce mới đọc link rút gọn.
-                  void flush();
-                }}
-                onChange={field.onChange}
-                showError={showLocationError}
-                state={locationState}
-                value={field.value}
-              />
-            </FormField>
-          )}
+        <WaypointLocationBlock
+          autofill={autofill}
+          destinationCode={destinationCode}
+          formKey={kind}
+          location={{ state: locationState, flush }}
+          open={open}
+          openedLocation={openedLocation}
         />
 
         <FormFieldRow error={errors.address?.message} label="Địa chỉ">
@@ -374,6 +347,7 @@ function WaypointForm({
           <SubmitStatus pending={locked} />
         </div>
       </form>
+      </FormProvider>
     </ResponsiveFormSurface>
   );
 }

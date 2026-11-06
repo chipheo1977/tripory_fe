@@ -30,6 +30,8 @@ import type { Itinerary, ItinerarySummary, Page, StatusFilter, Waypoint } from '
 // `options?.onX` SAU logic cache của mình. Callback cấp `mutate(vars, {...})` bị bỏ khi component unmount hoặc
 // Activity ẩn, còn cấp hook thì không.
 
+export { createPlaceHooks, placeKeys, type PlaceHooks } from './place-hooks';
+
 export const ITINERARY_PAGE_SIZE = 12;
 
 /** Khóa query/mutation dùng chung để UI đọc trạng thái lưu và để app seed/xóa cache. */

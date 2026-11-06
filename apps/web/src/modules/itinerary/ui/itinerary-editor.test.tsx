@@ -26,7 +26,20 @@ const h = vi.hoisted(() => ({
   setDaySubtitle: vi.fn(),
   updateMetadata: vi.fn(),
   router: { back: vi.fn(), push: vi.fn(), replace: vi.fn() },
+  suggest: vi.fn(),
 }));
+
+// Lookup giả thay BFF `/api/places/*` của form điểm đến: không gọi mạng thật.
+vi.mock("@/composition/places.client", async () => {
+  const { createPlaceHooks } = await import("@tripory/itinerary/react");
+  return {
+    places: createPlaceHooks({
+      search: () => Promise.resolve([]),
+      suggest: (code) => h.suggest(code),
+      reverse: () => Promise.resolve(null),
+    }),
+  };
+});
 
 vi.mock("@/composition/itinerary.client", async () => {
   const { createItineraryHooks: factory } = await import("@tripory/itinerary/react");
@@ -134,6 +147,7 @@ let undoToasts: Array<{ onAction(): void }> = [];
 beforeEach(() => {
   server = makeItinerary();
   undoToasts = [];
+  h.suggest.mockResolvedValue([]);
   clearEnteredFromList();
   sessionStorage.clear();
   h.router.back.mockReset();
@@ -263,6 +277,7 @@ it("adds a waypoint at the end of the day, highlights it for 1500 ms and announc
   await user.click(screen.getByRole("button", { name: "Thêm điểm đến" }));
   const dialog = await screen.findByRole("dialog", { name: "Thêm điểm đến vào Ngày 1" });
   await user.type(within(dialog).getByLabelText(/^Tên/), "Chợ");
+  await user.click(within(dialog).getByRole("button", { name: "Nhập tọa độ thủ công" }));
   await user.type(within(dialog).getByLabelText(/^Vị trí/), "10.7725, 106.7009");
   await user.click(within(dialog).getByRole("button", { name: "Thêm điểm đến" }));
 
@@ -530,6 +545,17 @@ it("fits the bounding box of the destination province when there is no waypoint 
   expect(screen.getByText("Thêm điểm đến để thấy trên bản đồ")).toBeTruthy();
 });
 
+it("passes the itinerary destination to the add form, which suggests places there", async () => {
+  server = makeItinerary({ destinationCode: "vn-da-nang" });
+  const { user } = setup();
+  await loaded();
+  await openDayTab(user, 1);
+  await user.click(screen.getByRole("button", { name: "Thêm điểm đến" }));
+  const dialog = await screen.findByRole("dialog", { name: "Thêm điểm đến vào Ngày 1" });
+  expect(within(dialog).getByRole("combobox", { name: "Tìm địa điểm" })).toBeTruthy();
+  await waitFor(() => expect(h.suggest).toHaveBeenCalledWith("vn-da-nang"));
+});
+
 it("fits Vietnam when there is no waypoint and no destination", async () => {
   server = makeItinerary({ waypoints: [], destinationCode: null });
   setup();
@@ -651,6 +677,7 @@ it("adds a waypoint from the Overview tab: day field defaults to the last day, t
   const dialog = await screen.findByRole("dialog", { name: "Thêm điểm đến" });
   expect(within(dialog).getByRole("combobox", { name: "Ngày" }).textContent).toContain("Ngày 2");
   await user.type(within(dialog).getByLabelText(/^Tên/), "Chợ");
+  await user.click(within(dialog).getByRole("button", { name: "Nhập tọa độ thủ công" }));
   await user.type(within(dialog).getByLabelText(/^Vị trí/), "10.7725, 106.7009");
   await user.click(within(dialog).getByRole("button", { name: "Thêm điểm đến" }));
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());

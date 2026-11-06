@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { defaultCoverFor, destinationBoundsFor } from "./destination-cover";
+import { defaultCoverFor, destinationBoundsFor, destinationNameFor } from "./destination-cover";
 
 it("trả URL ảnh mặc định theo slug", () => {
   expect(defaultCoverFor("vn-da-nang")).toBe("https://triporyv1.vercel.app/destinations/vn-da-nang.jpg");
@@ -22,4 +22,10 @@ it("trả khung nhìn của tỉnh theo slug và null khi không có", () => {
   ]);
   expect(destinationBoundsFor(null)).toBeNull();
   expect(destinationBoundsFor("vn-khong-co")).toBeNull();
+});
+
+it("trả tên tỉnh theo slug và null khi không có", () => {
+  expect(destinationNameFor("vn-lam-dong")).toBe("Lâm Đồng");
+  expect(destinationNameFor(null)).toBeNull();
+  expect(destinationNameFor("vn-khong-co")).toBeNull();
 });

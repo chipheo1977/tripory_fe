@@ -531,6 +531,7 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
       </p>
 
       <WaypointFormDialog
+        destinationCode={itinerary.destinationCode}
         itineraryId={itineraryId}
         mode={formMode}
         onAdded={handleAdded}

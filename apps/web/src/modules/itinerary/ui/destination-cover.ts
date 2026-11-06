@@ -8,3 +8,7 @@ export const defaultCoverFor = (destinationCode: string | null): string | null =
 /** Khung nhìn xấp xỉ của tỉnh/thành, để canh bản đồ khi chưa có điểm nào (D-121). `null` khi chưa có điểm đến hoặc mã lạ. */
 export const destinationBoundsFor = (destinationCode: string | null): GeoBounds | null =>
   destinationCatalog.findBySlug(destinationCode)?.view.bounds ?? null;
+
+/** Tên tỉnh/thành để ghi "Gợi ý ở …" (D-146). `null` khi chưa có điểm đến hoặc mã lạ: khi đó không gọi gợi ý. */
+export const destinationNameFor = (destinationCode: string | null): string | null =>
+  destinationCatalog.findBySlug(destinationCode)?.name ?? null;

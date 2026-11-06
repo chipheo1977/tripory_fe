@@ -84,7 +84,7 @@ describe("waypointSchema", () => {
 
   it("only checks that the location is not empty (parsing belongs to LocationField)", () => {
     expect(messagesOf(waypointSchema.safeParse(waypoint({ location: " " })))).toEqual([
-      "location:Vui lòng dán tọa độ hoặc link Google Maps.",
+      "location:Vui lòng chọn địa điểm hoặc nhập tọa độ.",
     ]);
     expect(waypointSchema.safeParse(waypoint({ location: "không phải tọa độ" })).success).toBe(true);
   });

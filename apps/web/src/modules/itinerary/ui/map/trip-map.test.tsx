@@ -169,17 +169,19 @@ describe("trạng thái", () => {
 
     expect(onStatusChange).toHaveBeenCalledWith("loading");
     expect(screen.queryByRole("button", { name: "Phóng to" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Ghi công bản đồ" })).toBeNull();
     expect(screen.queryByRole("link", { name: "© OpenStreetMap" })).toBeNull();
   });
 
-  it("load: ready, hiện nút zoom, ghi công và thiết lập canvas", () => {
+  it("load: ready, hiện nút zoom, nút ghi công thu gọn và thiết lập canvas", () => {
     const { onStatusChange } = setup();
 
     load();
 
     expect(onStatusChange).toHaveBeenLastCalledWith("ready");
     expect(screen.getByRole("group", { name: "Thu phóng bản đồ" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "© OpenStreetMap" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Ghi công bản đồ" }).getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByRole("link", { name: "© OpenStreetMap" })).toBeNull();
     expect(fakeMapInstance.touchZoomRotate.disableRotation).toHaveBeenCalled();
     expect(fakeMapInstance.keyboard.disableRotation).toHaveBeenCalled();
     expect(fakeMapInstance.cameraForBounds).toHaveBeenCalledWith(
@@ -187,6 +189,23 @@ describe("trạng thái", () => {
     );
     expect(mapProps().minZoom).toBe(4);
     expect(fakeMapCanvas.getAttribute("aria-describedby")).toBe(document.querySelector("p.sr-only")?.id);
+  });
+
+  it("ghi công: Tab đi Phóng to → Thu nhỏ → nút ghi công → link, bấm nút mới thấy link, đáy theo phần sheet che", async () => {
+    const { user } = setup({ viewport: { ...DESKTOP_VIEWPORT, coveredBottom: 120 } });
+    load();
+    const attribution = screen.getByRole("button", { name: "Ghi công bản đồ" });
+    expect(attribution.parentElement?.style.bottom).toBe("128px");
+
+    await user.click(screen.getByRole("button", { name: "Phóng to" }));
+    await user.tab();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Thu nhỏ" }));
+    await user.tab();
+    expect(document.activeElement).toBe(attribution);
+    await user.keyboard("{Enter}");
+    await user.tab();
+
+    expect(document.activeElement).toBe(screen.getByRole("link", { name: "© OpenStreetMap" }));
   });
 
   it("lỗi trước load là error, lỗi sau load bị bỏ qua", () => {

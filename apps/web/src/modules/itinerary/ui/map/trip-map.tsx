@@ -148,7 +148,7 @@ export function TripMap({
           onZoomOut={() => zoomBy("zoomOut")}
         />
       </MapControlColumn>
-      <MapAttribution className="absolute right-inline-sm" style={{ bottom: viewport.coveredBottom + 8 }} visible={ready} />
+      <MapAttribution className="absolute left-stack-md right-stack-md" style={{ bottom: viewport.coveredBottom + 8 }} visible={ready} />
       <p className="sr-only" id={describedById}>
         Danh sách điểm đến trong lịch trình có cùng nội dung với bản đồ.
       </p>

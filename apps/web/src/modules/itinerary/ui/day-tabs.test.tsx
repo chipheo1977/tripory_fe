@@ -5,10 +5,10 @@ import { parseItineraryId, parseUserId } from "@tripory/shared-kernel";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { makeQueryClient } from "@/composition/query-client";
-import { DayTabs } from "./day-tabs";
+import { DayTabs, type DayTabsProps } from "./day-tabs";
 import { createSaveStatusStore, SaveStatusProvider } from "./save-status";
 
 const h = vi.hoisted(() => ({
@@ -88,8 +88,13 @@ function setup(initialTab: EditorTab = 1, totalKm: number = base.totalDistanceKm
   queryClient.setQueryData(itineraryKeys.detail(ID!), { ...base, totalDistanceKm: totalKm });
   const onSelectDay = vi.fn();
 
+  const focus = { set: (_request: DayTabsProps["focusRequest"]) => undefined as void };
   function Harness() {
     const [tab, setTab] = useState<EditorTab>(initialTab);
+    const [focusRequest, setFocusRequest] = useState<DayTabsProps["focusRequest"]>(null);
+    useEffect(() => {
+      focus.set = setFocusRequest;
+    }, []);
     const { data } = useQuery({
       queryKey: itineraryKeys.detail(ID!),
       queryFn: () => h.getById() as Promise<Itinerary>,
@@ -103,6 +108,7 @@ function setup(initialTab: EditorTab = 1, totalKm: number = base.totalDistanceKm
           onSelectDay(next);
           setTab(next);
         }}
+        focusRequest={focusRequest}
         selectedTab={tab}
       />
     );
@@ -115,7 +121,7 @@ function setup(initialTab: EditorTab = 1, totalKm: number = base.totalDistanceKm
       </SaveStatusProvider>
     </QueryClientProvider>,
   );
-  return { user, store, onSelectDay };
+  return { user, store, onSelectDay, focus };
 }
 
 const addButton = () => screen.getByRole("button", { name: "Thêm ngày" });
@@ -273,4 +279,19 @@ it("adding a day while on the Overview tab selects the new day", async () => {
   await user.click(addButton());
   await screen.findByRole("tab", { name: "Ngày 4" });
   expect(onSelectDay).toHaveBeenCalledWith(4);
+});
+it("focusRequest moves focus to the requested tab once per seq", async () => {
+  const { focus } = setup(1);
+  act(() => focus.set({ tab: 2, seq: 1 }));
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("tab", { name: "Ngày 2" })));
+
+  screen.getByRole("tab", { name: "Ngày 3" }).focus();
+  act(() => focus.set({ tab: 2, seq: 1 }));
+  expect(document.activeElement).toBe(screen.getByRole("tab", { name: "Ngày 3" }));
+});
+
+it("focusRequest can target the Overview tab", async () => {
+  const { focus } = setup(2);
+  act(() => focus.set({ tab: "overview", seq: 2 }));
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("tab", { name: /^Tổng quan/ })));
 });

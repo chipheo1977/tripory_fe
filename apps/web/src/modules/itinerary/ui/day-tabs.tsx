@@ -19,6 +19,8 @@ export type DayTabsProps = Readonly<{
   itinerary: Itinerary;
   selectedTab: EditorTab;
   onSelectTab(tab: EditorTab): void;
+  /** Đưa focus vào một tab (ví dụ sau khi bấm dòng ngày ở Tổng quan: D-135). Mỗi `seq` chỉ áp một lần. */
+  focusRequest?: Readonly<{ tab: EditorTab; seq: number }> | null;
 }>;
 
 const prefersReducedMotion = (): boolean => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -33,7 +35,7 @@ function TabKmLine({ km }: Readonly<{ km: string | null }>) {
   return <span className="text-label text-muted tabular-nums">{km}</span>;
 }
 
-export function DayTabs({ itinerary, selectedTab, onSelectTab }: DayTabsProps) {
+export function DayTabs({ itinerary, selectedTab, onSelectTab, focusRequest = null }: DayTabsProps) {
   const store = useSaveStatusStore();
   const days = useMemo(() => buildDayRange(itinerary), [itinerary]);
   const tabRefs = useRef(new Map<EditorTab, HTMLElement>());
@@ -65,6 +67,14 @@ export function DayTabs({ itinerary, selectedTab, onSelectTab }: DayTabsProps) {
   };
 
   const dayCount = days.length;
+  const appliedFocusSeq = useRef<number | null>(null);
+  useEffect(() => {
+    if (focusRequest === null || appliedFocusSeq.current === focusRequest.seq) return;
+    const target = tabRefs.current.get(focusRequest.tab);
+    if (target === undefined) return;
+    appliedFocusSeq.current = focusRequest.seq;
+    target.focus();
+  }, [focusRequest, dayCount]);
   useEffect(() => {
     const selected = tabRefs.current.get(selectedTab);
     if (selected === undefined) return;

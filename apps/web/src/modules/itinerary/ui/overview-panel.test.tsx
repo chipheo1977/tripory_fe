@@ -250,3 +250,54 @@ describe("OverviewPanel", () => {
     expect(actions.onEdit).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("DayOverviewRow scroll", () => {
+  const scrollIntoView = vi.fn();
+
+  function Row({ emphasis }: { emphasis: DayRowEmphasis }) {
+    return (
+      <ol>
+        <DayOverviewRow day={day()} emphasis={emphasis} onEmphasizeDay={() => undefined} onSelectDay={() => undefined} />
+      </ol>
+    );
+  }
+
+  it("scrolls into view when it becomes 'selected', once", () => {
+    Element.prototype.scrollIntoView = scrollIntoView;
+    scrollIntoView.mockClear();
+    const { rerender } = render(<Row emphasis="none" />);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    rerender(<Row emphasis="selected" />);
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest", behavior: "smooth" });
+
+    rerender(<Row emphasis="selected" />);
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not scroll for 'recent'", () => {
+    Element.prototype.scrollIntoView = scrollIntoView;
+    scrollIntoView.mockClear();
+    const { rerender } = render(<Row emphasis="none" />);
+
+    rerender(<Row emphasis="recent" />);
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("uses behavior 'auto' when the user prefers reduced motion", () => {
+    Element.prototype.scrollIntoView = scrollIntoView;
+    scrollIntoView.mockClear();
+    const original = window.matchMedia;
+    window.matchMedia = ((query: string) =>
+      ({ matches: query.includes("prefers-reduced-motion"), media: query }) as unknown as MediaQueryList) as typeof window.matchMedia;
+    try {
+      const { rerender } = render(<Row emphasis="none" />);
+      rerender(<Row emphasis="selected" />);
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest", behavior: "auto" });
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+});

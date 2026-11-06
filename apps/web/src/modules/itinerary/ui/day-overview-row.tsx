@@ -6,6 +6,8 @@ import type { DaySummary } from "@tripory/itinerary";
 import { cn, Icon, MapToneDot } from "@tripory/ui-web";
 import { dayColorIndex } from "@tripory/itinerary";
 import { ChevronRight } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { prefersReducedMotion } from "./map/map-camera";
 import { dayRowAccessibleName, dayRowMeta, dayRowTitle } from "./overview-format";
 
 /** `selected`: ngày của pin đang chọn (D-136). `recent`: vừa thêm điểm từ Tổng quan, 1500ms (D-139). */
@@ -26,6 +28,15 @@ const EMPHASIS_CLASS: Readonly<Record<DayRowEmphasis, string>> = {
 };
 
 export function DayOverviewRow({ day, emphasis, onSelectDay, onEmphasizeDay }: DayOverviewRowProps) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const previous = useRef<DayRowEmphasis>(emphasis);
+  // Chuyển sang "selected" (pin của ngày này vừa được chọn) thì cuộn dòng vào khung, không mượt khi giảm chuyển động (D-136).
+  useEffect(() => {
+    const was = previous.current;
+    previous.current = emphasis;
+    if (emphasis !== "selected" || was === "selected") return;
+    buttonRef.current?.scrollIntoView?.({ block: "nearest", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+  }, [emphasis]);
   return (
     <li>
       <button
@@ -40,6 +51,7 @@ export function DayOverviewRow({ day, emphasis, onSelectDay, onEmphasizeDay }: D
         onFocus={() => onEmphasizeDay(day.dayNumber)}
         onMouseEnter={() => onEmphasizeDay(day.dayNumber)}
         onMouseLeave={() => onEmphasizeDay(null)}
+        ref={buttonRef}
         type="button"
       >
         <MapToneDot className="mt-inline-xs" tone={dayColorIndex(day.dayNumber)} />

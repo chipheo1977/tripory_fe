@@ -285,7 +285,7 @@ it("saves an edit and keeps the full stored coordinate when the location was not
   await screen.findByRole("dialog");
   set(nameInput(), "Chợ Bến Thành mới");
   await user.click(submitButton());
-  await waitFor(() => expect(onUpdated).toHaveBeenCalledWith("wp-1"));
+  await waitFor(() => expect(onUpdated).toHaveBeenCalledWith("wp-1", COORDINATE));
   expect(h.update).toHaveBeenCalledTimes(1);
   expect(h.update).toHaveBeenCalledWith("wp-1", {
     name: "Chợ Bến Thành mới",

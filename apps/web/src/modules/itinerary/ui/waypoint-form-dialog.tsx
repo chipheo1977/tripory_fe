@@ -39,7 +39,8 @@ export type WaypointFormDialogProps = Readonly<{
   restored?: WaypointValues | null;
   onClose(): void;
   onAdded(waypoint: Waypoint): void;
-  onUpdated(waypointId: string): void;
+  /** `coordinate` là tọa độ đã gửi, để bản đồ di chuyển tới điểm vừa sửa (D-127). */
+  onUpdated(waypointId: string, coordinate: Wgs84Coordinate): void;
   onDeleteRequested(waypoint: Waypoint): void;
   /** Báo form có thay đổi chưa lưu, để editor bật cảnh báo rời trang. */
   onDirtyChange?: (dirty: boolean) => void;
@@ -218,7 +219,7 @@ function WaypointForm({
         await update.mutateAsync({ waypointId: mode.waypoint.id, ...fields });
         removeDrafts();
         finish();
-        onUpdated(mode.waypoint.id);
+        onUpdated(mode.waypoint.id, coordinate);
       }
     } catch (error) {
       const mapped = mapWaypointError(error);

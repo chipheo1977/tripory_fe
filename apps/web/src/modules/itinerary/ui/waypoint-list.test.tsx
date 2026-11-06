@@ -4,9 +4,9 @@ import { itineraryKeys } from "@tripory/itinerary/react";
 import { createWgs84Coordinate, parseItineraryId, parseUserId } from "@tripory/shared-kernel";
 import { notify } from "@tripory/ui-web";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createRef, StrictMode, type RefObject } from "react";
+import { createRef, StrictMode, useState, type RefObject } from "react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { makeQueryClient } from "@/composition/query-client";
 import { createSaveStatusStore, SaveStatusProvider } from "./save-status";
@@ -93,6 +93,8 @@ type SetupOptions = {
   strict?: boolean;
   emptyAction?: () => void;
   externalAddButton?: boolean;
+  /** Bật chế độ chọn điểm (bản đồ hiển thị); `selectedId` ban đầu. */
+  selectable?: { selectedId: string | null };
 };
 
 function setup(options: SetupOptions = {}) {
@@ -108,7 +110,11 @@ function setup(options: SetupOptions = {}) {
   const onFlushPending = vi.fn();
   const addButtonRef: RefObject<HTMLButtonElement | null> = createRef();
 
+  const onSelect = vi.fn();
+  let setSelected: (id: string | null) => void = () => undefined;
   function Harness() {
+    const [selectedId, setSelectedId] = useState<string | null>(options.selectable?.selectedId ?? null);
+    setSelected = setSelectedId;
     const { data } = useQuery({
       queryKey: itineraryKeys.detail(ID!),
       queryFn: () => h.getById() as Promise<Itinerary>,
@@ -129,6 +135,7 @@ function setup(options: SetupOptions = {}) {
           onFlushPending={onFlushPending}
           onRemove={onRemove}
           pendingIds={options.pendingIds ?? new Set()}
+          selection={options.selectable === undefined ? undefined : { selectedId, onSelect }}
         />
         {options.externalAddButton ? (
           <button ref={addButtonRef} type="button">
@@ -147,7 +154,8 @@ function setup(options: SetupOptions = {}) {
     </QueryClientProvider>
   );
   render(options.strict ? <StrictMode>{tree}</StrictMode> : tree);
-  return { user, store, queryClient, onRemove, onEdit, onFlushPending, addButtonRef };
+  const select = (id: string | null) => act(() => setSelected(id));
+  return { user, store, queryClient, onRemove, onEdit, onFlushPending, addButtonRef, onSelect, select };
 }
 
 /** Tên accessible của nút chính từng thẻ, theo thứ tự đang hiển thị. */
@@ -394,4 +402,87 @@ it("highlights a freshly added waypoint", () => {
   expect(card?.className).toContain("bg-primary-subtle");
   const other = screen.getByRole("button", { name: "2 Dinh Độc Lập" }).closest("li");
   expect(other?.className).not.toContain("bg-primary-subtle");
+});
+
+const scrollIntoView = vi.fn();
+const mainOf = (name: RegExp | string) => screen.getByRole("button", { name });
+
+it("without selection the main button opens the edit form and there is no hint", async () => {
+  const { user, onEdit } = setup();
+  await user.click(mainOf("2 Dinh Độc Lập"));
+  expect(onEdit).toHaveBeenCalledWith(W1);
+  expect(screen.queryByText("Nhấn để xem trên bản đồ")).toBeNull();
+  expect(mainOf("2 Dinh Độc Lập").getAttribute("aria-describedby")).toBeNull();
+});
+
+it("with selection the main button selects the waypoint instead of editing, and points to one shared hint", async () => {
+  const { user, onEdit, onSelect } = setup({ selectable: { selectedId: null } });
+  await user.click(mainOf("2 Dinh Độc Lập"));
+  expect(onSelect).toHaveBeenCalledTimes(1);
+  expect(onSelect).toHaveBeenCalledWith(W1);
+  expect(onEdit).not.toHaveBeenCalled();
+  const hints = screen.getAllByText("Nhấn để xem trên bản đồ");
+  expect(hints).toHaveLength(1);
+  for (const name of ["1 Chợ Bến Thành, Lê Lợi, Quận 1", "2 Dinh Độc Lập", "3 Bưu điện"]) {
+    expect(mainOf(name).getAttribute("aria-describedby")).toBe(hints[0]?.id);
+  }
+});
+
+it("with selection the main button is reachable with Tab and activated with Enter", async () => {
+  const { user, onSelect } = setup({ selectable: { selectedId: null } });
+  mainOf("1 Chợ Bến Thành, Lê Lợi, Quận 1").focus();
+  await user.keyboard("{Enter}");
+  expect(onSelect).toHaveBeenCalledWith(W0);
+});
+
+it("the ⋯ menu still edits and removes when selection is on", async () => {
+  const { user, onEdit, onRemove, onSelect } = setup({ selectable: { selectedId: null } });
+  await user.click(screen.getByRole("button", { name: 'Thao tác cho "Dinh Độc Lập"' }));
+  await user.click(await screen.findByRole("menuitem", { name: "Sửa" }));
+  expect(onEdit).toHaveBeenCalledWith(W1);
+  await user.click(screen.getByRole("button", { name: 'Thao tác cho "Bưu điện"' }));
+  await user.click(await screen.findByRole("menuitem", { name: "Xóa" }));
+  expect(onRemove).toHaveBeenCalledWith(W2);
+  expect(onSelect).not.toHaveBeenCalled();
+});
+
+it("marks only the selected card with aria-current and a ring", () => {
+  setup({ selectable: { selectedId: "w1" } });
+  const selected = mainOf("2 Dinh Độc Lập");
+  expect(selected.getAttribute("aria-current")).toBe("true");
+  expect(selected.closest("li")?.className.split(/\s+/)).toEqual(expect.arrayContaining(["ring-2", "ring-inset", "ring-text"]));
+  for (const name of ["1 Chợ Bến Thành, Lê Lợi, Quận 1", "3 Bưu điện"]) {
+    expect(mainOf(name).getAttribute("aria-current")).toBeNull();
+    expect(mainOf(name).closest("li")?.className).not.toContain("ring-text");
+  }
+});
+
+it("scrolls the card into view when the selected id changes, smoothly unless reduced motion", async () => {
+  Element.prototype.scrollIntoView = scrollIntoView;
+  scrollIntoView.mockClear();
+  const { select } = setup({ selectable: { selectedId: null } });
+  expect(scrollIntoView).not.toHaveBeenCalled();
+  select("w2");
+  await waitFor(() => expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest", behavior: "smooth" }));
+  expect(scrollIntoView).toHaveBeenCalledTimes(1);
+});
+
+it("uses behavior 'auto' when the user prefers reduced motion", async () => {
+  Element.prototype.scrollIntoView = scrollIntoView;
+  scrollIntoView.mockClear();
+  const original = window.matchMedia;
+  window.matchMedia = ((query: string) =>
+    ({
+      matches: query.includes("prefers-reduced-motion"),
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    }) as unknown as MediaQueryList) as typeof window.matchMedia;
+  try {
+    const { select } = setup({ selectable: { selectedId: null } });
+    select("w1");
+    await waitFor(() => expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest", behavior: "auto" }));
+  } finally {
+    window.matchMedia = original;
+  }
 });

@@ -58,11 +58,9 @@ function SortableRow() {
       <SortableContext items={["a", "b"]}>
         <ol>
           <SortableWaypointItem
-            highlighted={false}
-            onEdit={vi.fn()}
-            onRemove={vi.fn()}
+            actions={{ onActivate: vi.fn(), onEdit: vi.fn(), onRemove: vi.fn() }}
+            appearance={{ highlighted: false, selected: false, reducedMotion: true, hintId: null }}
             position={1}
-            reducedMotion
             showHandle
             waypoint={waypoint("a", "Hồ Xuân Hương")}
           />

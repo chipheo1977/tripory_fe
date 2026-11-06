@@ -57,6 +57,7 @@ const primitiveTokens = {
   '--primitive-space-8': '32px',
   '--primitive-space-12': '48px',
   '--primitive-space-16': '64px',
+  '--primitive-font-size-0': '12px',
   '--primitive-font-size-1': '14px',
   '--primitive-font-size-2': '16px',
   '--primitive-font-size-3': '20px',
@@ -147,6 +148,7 @@ const semanticTokens = {
   '--semantic-breakpoint-xl': '1280px',
   '--semantic-font-family-sans': 'var(--font-inter), system-ui, sans-serif',
   '--semantic-font-size-body': 'var(--primitive-font-size-2)',
+  '--semantic-font-size-caption': 'var(--primitive-font-size-0)',
   '--semantic-font-size-label': 'var(--primitive-font-size-1)',
   '--semantic-font-size-heading': 'var(--primitive-font-size-3)',
   '--semantic-font-size-display': 'var(--primitive-font-size-4)',
@@ -235,6 +237,7 @@ describe('Tailwind theme contract', () => {
       'shadow-overlay',
       'p-stack-md',
       'text-body',
+      'text-caption',
       'font-semibold',
       'md:flex',
     ]);
@@ -246,6 +249,19 @@ describe('Tailwind theme contract', () => {
     expect(css).toContain('.p-stack-md');
     expect(css).toContain('padding: var(--semantic-space-stack-md)');
     expect(css).not.toContain('.text-zinc-600');
+    // Cỡ chữ nhỏ hơn `label` (12px): caption đi qua semantic, kèm line-height và letter-spacing như các cỡ khác.
+    expect(css).toContain('.text-caption');
+    expect(css).toContain('font-size: var(--semantic-font-size-caption)');
+  });
+
+  it('caption (12px) nhỏ hơn label (14px) và khai báo đủ line-height, letter-spacing trong theme', () => {
+    const themeCss = readSource('theme.css');
+
+    expect(primitiveTokens['--primitive-font-size-0']).toBe('12px');
+    expect(semanticTokens['--semantic-font-size-caption']).toBe('var(--primitive-font-size-0)');
+    expect(themeCss).toContain('--text-caption: var(--semantic-font-size-caption);');
+    expect(themeCss).toContain('--text-caption--line-height: var(--semantic-line-height-body);');
+    expect(themeCss).toContain('--text-caption--letter-spacing: var(--semantic-letter-spacing-normal);');
   });
 
   it('reset namespace mặc định và giữ breakpoint dạng literal', () => {

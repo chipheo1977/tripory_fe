@@ -102,11 +102,12 @@ Không đổi so với Phase 1, chỉ gán vai trò:
 | Body | 16px | 400 | 1.5 | Giá trị Input/Textarea, mô tả trong canvas, nội dung dialog xác nhận, mục menu, phụ đề ngày, tên điểm đến trong danh sách chọn (chưa chọn), con số của bộ đếm ngày, chữ "ngày" sau bộ đếm |
 | Body (semibold) | 16px | 600 | 1.5 | Tiêu đề trên header editor (`h1`, cắt ellipsis), tên waypoint trong thẻ, tiêu đề khối accordion ("Điểm đến"…), tên điểm đến đang chọn |
 | Label | 14px | 600 | 1.5 | Chữ nút, tab lọc, dòng 1 tab ngày ("Ngày 2"), Badge, nhãn ô, chữ chip sở thích, nhãn nhóm "Phổ biến"/"Tất cả"/"Kết quả tìm kiếm", chữ ô "Thêm ảnh" |
-| Label (regular) | 14px | 400 | 1.5 | Địa chỉ waypoint, meta thẻ ("Khởi hành … · … km"), dòng 2 tab ngày (km), chỉ báo lưu, dòng "Đã nhận: …", mô tả ô, lỗi field, dòng giải thích nút Xuất bản (dòng D-41 "Thay đổi hiển thị ngay với người xem" đã bỏ), dòng tóm tắt của khối accordion, dòng alias "gồm Đà Lạt", ghi chú dưới lưới ảnh bìa |
+| Label (regular) | 14px | 400 | 1.5 | Địa chỉ waypoint, meta thẻ ("Khởi hành … · … km"), chỉ báo lưu, dòng "Đã nhận: …", mô tả ô, lỗi field, dòng giải thích nút Xuất bản (dòng D-41 "Thay đổi hiển thị ngay với người xem" đã bỏ), dòng tóm tắt của khối accordion, dòng alias "gồm Đà Lạt", ghi chú dưới lưới ảnh bìa |
+| Caption | 12px | 400 | 1.5 | **(2026-11-06, UAT 04-53)** Chỉ dòng 2 (km) của tab ngày/Tổng quan (`TabKmLine`); token mới `--semantic-font-size-caption` (`text-caption`), nhỏ hơn Label để hai dòng của tab không chiếm chỗ |
 | Heading | 20px | 600 | 1.2 | Tiêu đề thẻ lịch trình (tối đa 2 dòng), `DialogTitle`/`SheetTitle` (gồm "Lịch trình mới"), heading EmptyState/ErrorState, tiêu đề chuyến đi trong nền mobile |
 | Display | 28px | 600 | 1.2 | `h1` "Lịch trình của tôi", tiêu đề chuyến đi trong canvas desktop |
 
-Đúng 4 cỡ (14/16/20/28), đúng 2 weight (400/600). Số km và ngày dùng `tabular-nums`.
+Đúng 5 cỡ (12/14/16/20/28; 12px chỉ dành cho dòng km của tab ngày, thêm 2026-11-06), đúng 2 weight (400/600). Số km và ngày dùng `tabular-nums`.
 
 (2026-11-05) Phần bản đồ không thêm cỡ hay weight: số trên pin, nhãn tên pin, chip gợi ý, ghi công, dòng 2 của dòng ngày dùng Label (14px, 600 hoặc 400); dòng 1 của dòng ngày và tiêu đề `OverviewSummary` dưới `lg` dùng Body semibold; tiêu đề `OverviewSummary` từ `lg` dùng Heading (20px). Chữ trong style nền chỉ dùng 14px và 16px.
 

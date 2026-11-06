@@ -76,6 +76,7 @@
   --semantic-breakpoint-xl: 1280px;
   --semantic-font-family-sans: var(--font-inter), system-ui, sans-serif;
   --semantic-font-size-body: var(--primitive-font-size-2);
+  --semantic-font-size-caption: var(--primitive-font-size-0);
   --semantic-font-size-label: var(--primitive-font-size-1);
   --semantic-font-size-heading: var(--primitive-font-size-3);
   --semantic-font-size-display: var(--primitive-font-size-4);

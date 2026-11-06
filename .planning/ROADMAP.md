@@ -172,7 +172,7 @@ Plans:
 
 Mở lại lần 2 (2026-11-05, bản đồ trong editor + tab Tổng quan, PUB-06; D-111..D-140):
 - [x] 04-42-PLAN.md — Token bản đồ: 8 màu ngày (trỏ primitive, test tương phản ≥ 4.5:1), kích thước pin/chấm/nhãn, độ mờ (wave 26)
-- [ ] 04-43-PLAN.md — Domain thuần: màu ngày, pin, đường, nhấn mạnh, khung canh, tab mặc định, tóm tắt ngày; tâm/bbox 34 tỉnh (OSM, ODbL) (wave 26)
+- [x] 04-43-PLAN.md — Domain thuần: màu ngày, pin, đường, nhấn mạnh, khung canh, tab mặc định, tóm tắt ngày; tâm/bbox 34 tỉnh (OSM, ODbL) (wave 26)
 - [ ] 04-44-PLAN.md — Catalog `maplibre-gl` 6.16.0 + `react-map-gl` 8.1.3; style nền riêng OpenFreeMap có lọc Hoàng Sa/Trường Sa theo vùng + test (wave 26)
 - [ ] 04-48-PLAN.md — Ô "Ngày" trong form thêm mở từ Tổng quan; form sửa không đổi (wave 26)
 - [ ] 04-45-PLAN.md — `ui-web`: `MapPin`, `MapToneDot`, `MapZoomControls`, `Sheet snap/onSnapChange`, `snapHeightPx` (wave 27)

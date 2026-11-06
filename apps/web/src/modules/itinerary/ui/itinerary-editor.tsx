@@ -22,6 +22,8 @@ import { DeleteItineraryDialog, type DeleteTarget } from "./delete-itinerary-dia
 import { draftPrefix, draftStorage } from "./draft-storage";
 import { EditorForbidden } from "./editor-forbidden";
 import { EditorHeader, EditorHeaderMinimal } from "./editor-header";
+import { DayPanel } from "./day-panel";
+import { DayTabs } from "./day-tabs";
 import { EditorLayout } from "./editor-layout";
 import { EditorSkeleton } from "./editor-skeleton";
 import { clearEnteredFromList, enteredFromList } from "./entry-flag";
@@ -243,6 +245,8 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
     ? selectedDay
     : (days.at(-1)?.dayNumber ?? 1);
 
+  // `days` luôn có ít nhất Ngày 1; `day` đã kẹp vào dải nên luôn tìm thấy.
+  const dayView = days.find((candidate) => candidate.dayNumber === day) ?? days[0]!;
   const flashHighlight = (waypointId: string): void => {
     if (highlightTimer.current !== null) clearTimeout(highlightTimer.current);
     setHighlightId(waypointId);
@@ -325,18 +329,26 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
         map={(frame) => <TripSummary itinerary={itinerary} onEdit={openTripInfo} variant={frame.wide ? "canvas" : "compact"} />}
         timeline={
           <TimelinePanel
-            addButtonRef={addButtonRef}
-            focusRequest={focusRequest}
-            highlightId={highlightId}
-            itinerary={itinerary}
-            onAdd={openAdd}
-            onEdit={openEdit}
-            onFlushPending={pending.flush}
-            onRemove={removeWaypoint}
-            onSelectDay={setSelectedDay}
-            pendingIds={pendingIds}
-            selectedDay={day}
-          />
+            tabs={
+              <DayTabs
+                itinerary={itinerary}
+                onSelectTab={(tab) => {
+                  if (tab !== "overview") setSelectedDay(tab);
+                }}
+                selectedTab={day}
+              />
+            }
+          >
+            <DayPanel
+              addButtonRef={addButtonRef}
+              day={dayView}
+              feedback={{ highlightId, focusRequest }}
+              itinerary={itinerary}
+              list={{ onEdit: openEdit, onFlushPending: pending.flush, onRemove: removeWaypoint }}
+              onAdd={openAdd}
+              pendingIds={pendingIds}
+            />
+          </TimelinePanel>
         }
       />
 

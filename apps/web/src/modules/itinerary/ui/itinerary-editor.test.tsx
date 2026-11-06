@@ -6,6 +6,7 @@ import { notify } from "@tripory/ui-web";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { destinationCatalog } from "@/composition/destination-catalog";
 import { makeQueryClient } from "@/composition/query-client";
@@ -54,7 +55,8 @@ vi.mock("@/composition/itinerary.client", async () => {
 vi.mock("./map/trip-map.lazy", () => ({
   LazyTripMap: function FakeTripMap(props: Record<string, unknown>) {
     h.map.props = props;
-    return <div data-testid="fake-trip-map" />;
+    // Bản đồ thật chỉ vẽ `topControls` khi đã `ready`; bản giả vẽ luôn để test kiểm hành vi của chính nút.
+    return <div data-testid="fake-trip-map">{props.topControls as ReactNode}</div>;
   },
 }));
 vi.mock("./editor-layout", async (importOriginal) => {
@@ -481,6 +483,36 @@ const setMobile = () => {
 };
 const dayRow = (day: number) => screen.getByRole("button", { name: new RegExp(`^Xem Ngày ${day}`) });
 
+it("Overview tab has the gear 'Sửa thông tin' on the map (not as a text button in the summary) and it opens the trip info dialog", async () => {
+  const { user } = setup();
+  await loaded();
+  reportMap("ready");
+
+  const map = screen.getByTestId("fake-trip-map");
+  const gear = within(map).getByRole("button", { name: "Sửa thông tin" });
+  expect(gear.getAttribute("title")).toBe("Sửa thông tin");
+  expect(within(screen.getByRole("region", { name: "Thông tin chuyến đi" })).queryByRole("button", { name: "Sửa thông tin" })).toBeNull();
+
+  await user.click(gear);
+  expect(await screen.findByRole("dialog", { name: "Thông tin chuyến đi" })).toBeTruthy();
+});
+
+it("the gear 'Sửa thông tin' is keyboard operable and is not shown on a day tab", async () => {
+  const { user } = setup();
+  await loaded();
+  reportMap("ready");
+
+  const gear = within(screen.getByTestId("fake-trip-map")).getByRole("button", { name: "Sửa thông tin" });
+  gear.focus();
+  await user.keyboard("{Enter}");
+  expect(await screen.findByRole("dialog", { name: "Thông tin chuyến đi" })).toBeTruthy();
+  await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Đóng" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+
+  await openDayTab(user, 1);
+  expect(screen.queryByRole("button", { name: "Sửa thông tin" })).toBeNull();
+});
+
 it("starts with a fit command over all waypoints when it opens on the Overview tab", async () => {
   setup();
   await loaded();
@@ -676,4 +708,19 @@ it("when the map fails it shows the notice and the summary, and the main button 
   expect(screen.getByRole("region", { name: "Thông tin chuyến đi" })).toBeTruthy();
   await user.click(mainButton("w-a")!);
   expect(await screen.findByRole("dialog", { name: "Sửa điểm đến" })).toBeTruthy();
+});
+
+it("when the map fails on the Overview tab the gear is gone but the fallback summary keeps a 'Sửa thông tin' way to edit", async () => {
+  const { user } = setup();
+  await loaded();
+  reportMap("ready");
+  expect(screen.getAllByRole("button", { name: "Sửa thông tin" })).toHaveLength(1);
+
+  reportMap("error");
+
+  expect(screen.queryByTestId("fake-trip-map")).toBeNull();
+  const fallbackEdit = screen.getAllByRole("button", { name: "Sửa thông tin" });
+  expect(fallbackEdit).toHaveLength(1);
+  await user.click(fallbackEdit[0]!);
+  expect(await screen.findByRole("dialog", { name: "Thông tin chuyến đi" })).toBeTruthy();
 });

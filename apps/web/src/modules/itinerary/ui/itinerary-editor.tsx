@@ -48,6 +48,7 @@ import { clearEnteredFromList, enteredFromList } from "./entry-flag";
 import { waypointSchema, type WaypointValues } from "./form-schemas";
 import { useEditorLeaveGuard } from "./leave-guard";
 import type { MapStatus } from "./map/trip-map";
+import { MapEditInfoButton } from "./map-edit-info-button";
 import { OverviewPanel } from "./overview-panel";
 import { overviewSummaryData } from "./overview-format";
 import { PublishDialog } from "./publish-dialog";
@@ -465,6 +466,7 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
         }
         map={(frame) => (
           <EditorMapArea
+            controls={<MapEditInfoButton onClick={openTripInfo} visible={activeTab === "overview"} />}
             empty={empty}
             fallback={<TripSummary itinerary={itinerary} onEdit={openTripInfo} variant={frame.wide ? "canvas" : "compact"} />}
             frame={frame}

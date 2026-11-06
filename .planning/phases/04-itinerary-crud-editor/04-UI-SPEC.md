@@ -807,7 +807,8 @@ grid lg:grid-cols-[var(--editor-timeline-width)_1fr], cao 100dvh − header
 └─ EditorMapArea: relative isolate h-full overflow-hidden, không padding, không cuộn (1040×836 ở 1440×900)
      TripMap phủ kín
      MapStatusOverlay: chip gợi ý trên cùng bên trái (chỉ khi chưa có điểm)
-     MapZoomControls: trên cùng bên phải, cách mép 16px
+     Cột điều khiển (MapControlColumn): trên cùng bên phải, cách mép 16px, các nút cách 4px:
+       MapEditInfoButton (bánh răng, chỉ ở tab Tổng quan) rồi MapZoomControls
      MapAttribution: dưới cùng bên phải, cách mép 8px
 ```
 
@@ -905,6 +906,7 @@ Style JSON nằm ở app (vị trí do planner chốt), trỏ nguồn vector til
 
 - Không khóa biên (`maxBounds` không đặt). Mức thu nhỏ tối đa là mức vừa đủ chứa khung Việt Nam và Biển Đông (`VIETNAM_VIEW_BOUNDS`, xấp xỉ 101,5–118,5° Đ, 5,5–24,0° B) trong khung bản đồ hiện tại; tính lại khi khung đổi kích thước. Mức phóng to tối đa 18.
 - **`MapZoomControls`:** nhóm `div role="group" aria-label="Thu phóng bản đồ"` ở góc trên phải (`absolute top-stack-md right-stack-md`), hai `IconButton variant="secondary" size="sm"` (32×32px, token `control-sm`, trên `touch-min` 24px; **[Cập nhật 2026-11-06, UAT 04-53]** trước đó 48px nên bị chê to) xếp dọc cách nhau 4px: icon `Plus` `aria-label` "Phóng to", icon `Minus` `aria-label` "Thu nhỏ". Mỗi lần bấm đổi 1 mức zoom quanh tâm. Ở mức tối đa/tối thiểu thì nút tương ứng `disabled`. Dùng được bằng Tab, Enter, Space. Không dùng `NavigationControl` mặc định của MapLibre (nhãn tiếng Anh, vùng chạm nhỏ). Không có nút la bàn.
+- **`MapEditInfoButton` (2026-11-06, UAT 04-53):** thay nút chữ "Sửa thông tin" của `OverviewSummary`. `IconButton variant="secondary" size="sm"` (32×32px, cùng kiểu nút zoom) icon `Settings` (bánh răng) 16px `aria-hidden`, `aria-label` và `title` "Sửa thông tin". Đứng đầu cột điều khiển góc phải trên (`MapControlColumn`, cách mép 16px), ngay trên nút "Phóng to", cách 4px; thứ tự Tab: canvas → bánh răng → Phóng to → Thu nhỏ → ghi công. Bấm mở `TripInfoDialog` (cùng hành vi cũ). Chỉ hiện ở tab Tổng quan (nơi nút chữ từng hiện) và khi bản đồ sẵn sàng (cột chỉ vẽ khi `ready`); nhất quán desktop và mobile. Cột nhận nút bằng slot `topControls` của `TripMap` (qua `controls` của `EditorMapArea`), nên `TripMap` không biết nút làm gì. Khi bản đồ lỗi và quay về `TripSummary` thì nút bánh răng không có, nhưng `TripSummary` vẫn có nút chữ "Sửa thông tin" (không đổi), và nút "i" của header luôn có.
 - **Bàn phím trên canvas:** canvas của MapLibre là một điểm dừng Tab, giữ keyboard handler mặc định (mũi tên di chuyển, `+`/`−` phóng to/thu nhỏ). Canvas có `aria-label` tiếng Việt (bảng copy). Esc khi canvas đang focus thì bỏ chọn điểm.
 - Thao tác chuột/chạm: kéo một ngón/chuột để pan, cuộn chuột hoặc hai ngón để zoom, nhấp đúp để phóng to. Không bật "cooperative gestures" (bản đồ là nội dung chính của màn hình).
 
@@ -1012,12 +1014,12 @@ thanh "Thêm điểm đến"    sticky bottom (cùng style thanh của tab ngày
 
 | Phần | Từ `lg` (cột 400px) | Dưới `lg` (trong sheet) |
 |------|---------------------|-------------------------|
-| Ảnh bìa | Full width `aspect-(--itinerary-cover-ratio) rounded-container`, chuỗi dự phòng như §ItineraryCard; không có ảnh nào thì nền `surface-muted` + icon `ImagePlus` + `Button secondary sm` "Thêm ảnh bìa" (như `TripSummary`) | Ảnh thu nhỏ `w-(--overview-cover-thumb-width)` tỉ lệ 16:9 `rounded-container shrink-0` bên trái hàng đầu; không có ảnh thì nền `surface-muted` + icon `ImagePlus` 20px `text-subtle`, không có nút (đã có "Sửa thông tin") |
+| Ảnh bìa | Full width `aspect-(--itinerary-cover-ratio) rounded-container`, chuỗi dự phòng như §ItineraryCard; không có ảnh nào thì nền `surface-muted` + icon `ImagePlus` + `Button secondary sm` "Thêm ảnh bìa" (như `TripSummary`) | Ảnh thu nhỏ `w-(--overview-cover-thumb-width)` tỉ lệ 16:9 `rounded-container shrink-0` bên trái hàng đầu; không có ảnh thì nền `surface-muted` + icon `ImagePlus` 20px `text-subtle`, không có nút (đã có nút bánh răng "Sửa thông tin" trên bản đồ và nút "i" của header) |
 | Hàng 1 | `Badge` "Nháp"/"Đã xuất bản" · "Khởi hành {dd/MM/yyyy}" (bỏ khi không có), Label regular `text-muted` | Cạnh ảnh thu nhỏ, cùng nội dung |
 | Tiêu đề | Heading 20px semibold, `break-words` | Body semibold, `line-clamp-2`, cạnh ảnh thu nhỏ dưới hàng 1 |
 | Mô tả | Body `text-muted whitespace-pre-line line-clamp-4`; không có thì không render | Body `text-muted whitespace-pre-line line-clamp-2`, full width |
 | Hàng 2 | "{n} ngày · {m} điểm · {km}" (Label regular `text-muted tabular-nums`). `m` không tính điểm đang chờ xóa; `m = 0` thì "Chưa có điểm"; km của BE (`totalDistanceKm`), bằng 0 hoặc null thì bỏ | Như trái |
-| Nút | `Button secondary size="sm"` icon `Pencil` "Sửa thông tin" | Như trái |
+| Nút | **[Cập nhật 2026-11-06, UAT 04-53]** Không còn nút chữ "Sửa thông tin" trong khối này. Thay bằng nút bánh răng trên bản đồ (`MapEditInfoButton`, xem §Bản đồ → `MapEditInfoButton`). Bấm vùng nền khối vẫn mở `TripInfoDialog` (chuột/chạm) | Như trái |
 
 **`DayOverviewRow` (D-135).** `li` chứa một `button type="button"` full width, `min-h-touch rounded-container border border-border bg-surface px-stack-md py-stack-sm`, `flex items-start gap-inline-sm text-left`:
 

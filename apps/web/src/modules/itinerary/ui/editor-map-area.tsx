@@ -20,6 +20,8 @@ export type EditorMapAreaProps = Readonly<{
   handlers: Readonly<{ onPinSelect(waypointId: string): void; onBackgroundClick(): void }>;
   /** `TripSummary` đúng biến thể theo `frame.wide`, do nơi gọi dựng; chỉ hiện khi bản đồ lỗi. */
   fallback: ReactNode;
+  /** Nút bổ sung trong cột điều khiển của bản đồ, đứng trên nút zoom (ví dụ "Sửa thông tin"). Chỉ hiện khi bản đồ sẵn sàng. */
+  controls?: ReactNode;
   onStatusChange(status: MapStatus): void;
 }>;
 
@@ -29,10 +31,11 @@ type CanvasSlotProps = Readonly<{
   map: EditorMapAreaProps["map"];
   frame: MapFrame;
   handlers: EditorMapAreaProps["handlers"];
+  controls: ReactNode;
   onStatusChange(status: MapStatus): void;
 }>;
 
-function MapCanvasSlot({ visible, attempt, map, frame, handlers, onStatusChange }: CanvasSlotProps) {
+function MapCanvasSlot({ visible, attempt, map, frame, handlers, controls, onStatusChange }: CanvasSlotProps) {
   if (!visible) return null;
   return (
     <div className="absolute inset-0">
@@ -44,6 +47,7 @@ function MapCanvasSlot({ visible, attempt, map, frame, handlers, onStatusChange 
         onStatusChange={onStatusChange}
         pins={map.pins}
         routes={map.routes}
+        topControls={controls}
         viewport={frame.viewport}
       />
     </div>
@@ -97,7 +101,7 @@ function MapErrorFallback({ visible, wide, onRetry, retryRef, children }: ErrorF
   );
 }
 
-export function EditorMapArea({ frame, map, empty, handlers, fallback, onStatusChange }: EditorMapAreaProps) {
+export function EditorMapArea({ frame, map, empty, handlers, fallback, controls = null, onStatusChange }: EditorMapAreaProps) {
   const headingId = useId();
   const sectionRef = useRef<HTMLElement>(null);
   const retryRef = useRef<HTMLButtonElement>(null);
@@ -141,6 +145,7 @@ export function EditorMapArea({ frame, map, empty, handlers, fallback, onStatusC
       </h2>
       <MapCanvasSlot
         attempt={attempt}
+        controls={controls}
         frame={frame}
         handlers={handlers}
         map={map}

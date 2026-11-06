@@ -2,10 +2,10 @@
 
 // Thông tin chung ở đầu tab Tổng quan (D-133): ảnh bìa, trạng thái, ngày khởi hành, tiêu đề, mô tả, "{n} ngày · {m} điểm · {km}".
 // Cố ý không hiện điểm đến, sở thích (D-76) hay ngày kết thúc: dữ liệu vào đây không có các trường đó.
-// Bấm chuột/chạm vào vùng (ngoài nút) mở "Thông tin chuyến đi"; vùng bấm không nhận focus, bàn phím dùng nút thật.
+// Bấm chuột/chạm vào vùng (ngoài nút) mở "Thông tin chuyến đi"; vùng bấm không nhận focus. Bàn phím dùng nút bánh răng
+// "Sửa thông tin" trên bản đồ (MapEditInfoButton) hoặc nút "i" của header; không còn nút chữ trong vùng này.
 // Tiêu đề và mô tả là text node của React (`whitespace-pre-line`, không HTML).
-import { Badge, Button, cn } from "@tripory/ui-web";
-import { Pencil } from "lucide-react";
+import { Badge, cn } from "@tripory/ui-web";
 import type { MouseEvent } from "react";
 import type { OverviewSummaryData } from "./overview-format";
 import { TripCover } from "./trip-cover";
@@ -61,7 +61,7 @@ export function OverviewSummary({ data, variant, onEdit }: OverviewSummaryProps)
 
   return (
     <section aria-label="Thông tin chuyến đi">
-      {/* Vùng bấm chuột/chạm: cố ý không có tabindex/role, bàn phím đã có nút "Sửa thông tin" (UI-SPEC). */}
+      {/* Vùng bấm chuột/chạm: cố ý không có tabindex/role, bàn phím đã có nút bánh răng trên bản đồ và nút "i" của header (UI-SPEC). */}
       <div className="flex flex-col gap-stack-md" onClick={handleAreaClick}>
         <div className={style.head}>
           <TripCover
@@ -81,11 +81,6 @@ export function OverviewSummary({ data, variant, onEdit }: OverviewSummaryProps)
         </div>
         <DescriptionLine className={style.description} text={data.description} />
         <p className="text-label tabular-nums text-muted">{data.metaLine}</p>
-        <div>
-          <Button icon={Pencil} onClick={onEdit} size="sm" variant="secondary">
-            Sửa thông tin
-          </Button>
-        </div>
       </div>
     </section>
   );

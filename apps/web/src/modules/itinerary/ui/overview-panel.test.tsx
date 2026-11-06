@@ -32,7 +32,7 @@ const day = (overrides: Partial<DaySummary> = {}): DaySummary => ({
 const classesOf = (element: Element | null) => (element?.getAttribute("class") ?? "").split(/\s+/);
 
 describe("OverviewSummary", () => {
-  it("là section 'Thông tin chuyến đi' với trạng thái, ngày khởi hành, tiêu đề, mô tả, dòng meta và nút sửa", () => {
+  it("là section 'Thông tin chuyến đi' với trạng thái, ngày khởi hành, tiêu đề, mô tả và dòng meta", () => {
     render(<OverviewSummary data={summary()} onEdit={() => undefined} variant="wide" />);
 
     const section = screen.getByRole("region", { name: "Thông tin chuyến đi" });
@@ -40,7 +40,7 @@ describe("OverviewSummary", () => {
     expect(within(section).getByText("Khởi hành 05/11/2026")).toBeTruthy();
     expect(within(section).getByText("Đà Nẵng 3 ngày").tagName).toBe("P");
     expect(within(section).getByText("3 ngày · 5 điểm · 42,5 km")).toBeTruthy();
-    expect(within(section).getByRole("button", { name: "Sửa thông tin" })).toBeTruthy();
+    expect(within(section).queryByRole("button", { name: "Sửa thông tin" })).toBeNull();
     expect(section.querySelector("h1, h2")).toBeNull();
   });
 
@@ -52,15 +52,16 @@ describe("OverviewSummary", () => {
     expect(screen.queryByText("Dòng một", { exact: false })).toBeNull();
   });
 
-  it("nút 'Sửa thông tin' và bấm vùng nền đều gọi onEdit; bấm nút không gọi hai lần", async () => {
+  it("bấm vùng nền gọi onEdit; nút 'Thêm ảnh bìa' (wide) gọi đúng một lần, không có nút chữ 'Sửa thông tin'", async () => {
     const onEdit = vi.fn();
     const user = userEvent.setup();
-    render(<OverviewSummary data={summary()} onEdit={onEdit} variant="wide" />);
+    render(<OverviewSummary data={summary({ coverImageUrl: null })} onEdit={onEdit} variant="wide" />);
 
-    await user.click(screen.getByRole("button", { name: "Sửa thông tin" }));
+    expect(screen.queryByRole("button", { name: "Sửa thông tin" })).toBeNull();
+    fireEvent.click(screen.getByText("3 ngày · 5 điểm · 42,5 km"));
     expect(onEdit).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByText("3 ngày · 5 điểm · 42,5 km"));
+    await user.click(screen.getByRole("button", { name: "Thêm ảnh bìa" }));
     expect(onEdit).toHaveBeenCalledTimes(2);
   });
 
@@ -242,10 +243,11 @@ describe("OverviewPanel", () => {
     expect(classesOf(screen.getByRole("button", { name: "Xem Ngày 3, 1 điểm" }))).toContain("ring-text");
   });
 
-  it("'Sửa thông tin' trong phần thông tin chung gọi onEdit", async () => {
+  it("không còn nút chữ 'Sửa thông tin' (đã chuyển thành bánh răng trên bản đồ); bấm vùng thông tin chung vẫn gọi onEdit", async () => {
     const { actions, user } = setup();
 
-    await user.click(screen.getByRole("button", { name: "Sửa thông tin" }));
+    expect(screen.queryByRole("button", { name: "Sửa thông tin" })).toBeNull();
+    await user.click(within(screen.getByRole("region", { name: "Thông tin chuyến đi" })).getByText("Đà Nẵng 3 ngày"));
 
     expect(actions.onEdit).toHaveBeenCalledTimes(1);
   });

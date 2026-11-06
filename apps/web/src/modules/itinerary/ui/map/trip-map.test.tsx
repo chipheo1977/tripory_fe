@@ -81,6 +81,29 @@ describe("cấu hình bản đồ", () => {
   });
 });
 
+describe("nút bổ sung phía trên nút zoom", () => {
+  const extra = <button type="button">Nút thêm</button>;
+
+  it("nằm cùng cột và đứng trước nhóm zoom (thứ tự Tab: nút thêm rồi Phóng to), chỉ hiện khi bản đồ sẵn sàng", () => {
+    setup({ topControls: extra });
+    expect(screen.queryByRole("button", { name: "Nút thêm" })).toBeNull();
+
+    load();
+
+    const column = screen.getByRole("button", { name: "Nút thêm" }).parentElement as HTMLElement;
+    expect(column.contains(screen.getByRole("group", { name: "Thu phóng bản đồ" }))).toBe(true);
+    const order = [...column.querySelectorAll("button")].map((button) => button.getAttribute("aria-label") ?? button.textContent);
+    expect(order).toEqual(["Nút thêm", "Phóng to", "Thu nhỏ"]);
+  });
+
+  it("không truyền thì cột chỉ có nhóm zoom", () => {
+    setup();
+    load();
+
+    expect(screen.getByRole("group", { name: "Thu phóng bản đồ" }).parentElement?.children).toHaveLength(1);
+  });
+});
+
 describe("pin", () => {
   it("vẽ mỗi điểm một pin, chỉ pin được chọn có nhãn, zIndex theo stackOrder", () => {
     setup();

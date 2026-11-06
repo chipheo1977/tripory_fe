@@ -7,11 +7,12 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { DayRouteModel } from "@tripory/itinerary";
 import { VIETNAM_VIEW_BOUNDS } from "@tripory/itinerary";
 import { MapZoomControls } from "@tripory/ui-web";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Map, type MapRef } from "react-map-gl/maplibre";
 import { BASEMAP_STYLE } from "./basemap-style";
 import { readDayColors, readDimmedOpacity } from "./day-colors";
 import { MapAttribution } from "./map-attribution";
+import { MapControlColumn } from "./map-control-column";
 import {
   MAP_MAX_ZOOM,
   moveDuration,
@@ -34,6 +35,8 @@ export type TripMapProps = Readonly<{
   routes: readonly DayRouteModel[];
   camera: MapCameraCommand | null;
   viewport: MapViewport;
+  /** Nút bổ sung đứng trên nhóm zoom trong cùng cột góc phải trên (ví dụ "Sửa thông tin"); chỉ hiện khi bản đồ sẵn sàng. */
+  topControls?: ReactNode;
   onPinSelect(waypointId: string): void;
   onBackgroundClick(): void;
   onStatusChange(status: MapStatus): void;
@@ -54,7 +57,16 @@ const canZoomOut = (zoom: number, minZoom: number | undefined): boolean => {
   return zoom > minZoom + ZOOM_EPSILON;
 };
 
-export function TripMap({ pins, routes, camera, viewport, onPinSelect, onBackgroundClick, onStatusChange }: TripMapProps) {
+export function TripMap({
+  pins,
+  routes,
+  camera,
+  viewport,
+  topControls = null,
+  onPinSelect,
+  onBackgroundClick,
+  onStatusChange,
+}: TripMapProps) {
   const describedById = useId();
   const mapRef = useRef<MapRef>(null);
   const loadedRef = useRef(false);
@@ -127,14 +139,15 @@ export function TripMap({ pins, routes, camera, viewport, onPinSelect, onBackgro
         />
         <PinMarkers onPinSelect={onPinSelect} pins={pins} />
       </Map>
-      <MapZoomControls
-        canZoomIn={zoomInEnabled}
-        canZoomOut={zoomOutEnabled}
-        className="absolute right-stack-md top-stack-md"
-        onZoomIn={() => zoomBy("zoomIn")}
-        onZoomOut={() => zoomBy("zoomOut")}
-        visible={ready}
-      />
+      <MapControlColumn visible={ready}>
+        {topControls}
+        <MapZoomControls
+          canZoomIn={zoomInEnabled}
+          canZoomOut={zoomOutEnabled}
+          onZoomIn={() => zoomBy("zoomIn")}
+          onZoomOut={() => zoomBy("zoomOut")}
+        />
+      </MapControlColumn>
       <MapAttribution className="absolute right-inline-sm" style={{ bottom: viewport.coveredBottom + 8 }} visible={ready} />
       <p className="sr-only" id={describedById}>
         Danh sách điểm đến trong lịch trình có cùng nội dung với bản đồ.

@@ -250,7 +250,7 @@ function WaypointForm({
     >
       <InlineAlert variant="info">{restored === null ? null : RESTORED_MESSAGE}</InlineAlert>
       <InlineAlert>{alert}</InlineAlert>
-      <form aria-labelledby={titleId} className="flex flex-col gap-stack-md" noValidate onSubmit={onSubmit}>
+      <form aria-labelledby={titleId} className="flex flex-col gap-stack-sm" noValidate onSubmit={onSubmit}>
         <FormFieldRow
           description={nameFromLink ? NAME_FROM_LINK : undefined}
           error={errors.name?.message}

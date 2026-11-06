@@ -51,7 +51,7 @@ export function TripInfoDialog({ itinerary, autosave, open, onOpenChange }: Trip
     >
       <form
         aria-labelledby={titleId}
-        className="flex flex-col gap-stack-md"
+        className="flex flex-col gap-stack-sm"
         noValidate
         onSubmit={(event) => event.preventDefault()}
       >

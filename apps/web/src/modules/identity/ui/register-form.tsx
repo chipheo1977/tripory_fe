@@ -104,7 +104,7 @@ export function RegisterForm() {
       title="Tạo tài khoản"
       titleId={titleId}
     >
-      <form aria-labelledby={titleId} className="flex flex-col gap-stack-md" noValidate onSubmit={onSubmit}>
+      <form aria-labelledby={titleId} className="flex flex-col gap-stack-sm" noValidate onSubmit={onSubmit}>
         <AuthField error={errors.fullName?.message} label="Họ và tên">
           <Input
             {...form.register("fullName")}

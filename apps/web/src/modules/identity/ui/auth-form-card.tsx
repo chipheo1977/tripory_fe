@@ -21,7 +21,7 @@ export function AuthFormCard({ title, titleId, alert, children, footer }: AuthFo
       <h1 className="text-display font-semibold text-text" id={titleId}>
         {title}
       </h1>
-      <div className="flex flex-col gap-stack-md">
+      <div className="flex flex-col gap-stack-sm">
         {alert}
         {children}
       </div>

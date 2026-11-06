@@ -90,7 +90,7 @@ export function LoginForm() {
       title="Đăng nhập"
       titleId={titleId}
     >
-      <form aria-labelledby={titleId} className="flex flex-col gap-stack-md" noValidate onSubmit={onSubmit}>
+      <form aria-labelledby={titleId} className="flex flex-col gap-stack-sm" noValidate onSubmit={onSubmit}>
         <AuthField error={errors.email?.message} label="Email">
           <Input
             {...form.register("email")}

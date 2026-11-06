@@ -87,7 +87,7 @@ export function ChangePasswordForm() {
 
   return (
     <AuthFormCard alert={<InlineAlert>{alert}</InlineAlert>} title="Đổi mật khẩu" titleId={titleId}>
-      <form aria-labelledby={titleId} className="flex flex-col gap-stack-md" noValidate onSubmit={onSubmit}>
+      <form aria-labelledby={titleId} className="flex flex-col gap-stack-sm" noValidate onSubmit={onSubmit}>
         <AuthField error={errors.currentPassword?.message} label="Mật khẩu hiện tại">
           <ControlledPasswordInput
             autoComplete="current-password"

@@ -22,7 +22,7 @@ export function PasswordChecklist({ id, items, className }: PasswordChecklistPro
       <ul aria-live="polite" className="flex flex-col gap-inline-xs">
         {items.map((item) => (
           <li
-            className={cn("flex items-start gap-inline-xs text-label", item.met ? "text-text" : "text-muted")}
+            className={cn("flex items-center gap-inline-xs text-label", item.met ? "text-text" : "text-muted")}
             key={item.id}
           >
             <Icon className={item.met ? "text-success" : "text-muted"} icon={item.met ? CircleCheck : Circle} size="sm" />

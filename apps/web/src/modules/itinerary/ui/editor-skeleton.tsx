@@ -11,19 +11,19 @@ export function EditorSkeleton() {
         </div>
       </div>
       <div className="hidden lg:grid lg:grid-cols-[var(--editor-timeline-width)_1fr]">
-        <div className="flex flex-col gap-stack-md p-stack-md">
+        <div className="flex flex-col gap-stack-sm p-stack-md">
           <Skeleton variant="text" />
           <Skeleton variant="block" />
           <Skeleton variant="block" />
           <Skeleton variant="block" />
         </div>
-        <div className="flex flex-col gap-stack-md p-stack-md">
+        <div className="flex flex-col gap-stack-sm p-stack-md">
           <Skeleton className="aspect-(--itinerary-cover-ratio) h-auto" variant="block" />
           <Skeleton variant="text" />
           <Skeleton variant="text" />
         </div>
       </div>
-      <div className="flex flex-col gap-stack-md p-stack-md lg:hidden">
+      <div className="flex flex-col gap-stack-sm p-stack-md lg:hidden">
         <Skeleton className="aspect-(--itinerary-cover-ratio) h-auto" variant="block" />
         <Skeleton variant="block" />
         <Skeleton variant="block" />

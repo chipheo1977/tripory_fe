@@ -330,6 +330,39 @@ describe("handlePlacesReverse", () => {
   });
 
   it.each([
+    ["không có địa điểm", null],
+    ["địa điểm không có địa chỉ", { ...PLACE, address: null }],
+  ])("%s → chỉ cache 1 phút để lần sau thử lại fallback", async (_label, place) => {
+    const service = fakeService({ reverse: vi.fn(async () => place) });
+    let now = NOW_MS;
+    const deps = depsWith(service, { nowMs: () => now });
+    const path = "/api/places/reverse?lat=11.9404&lng=108.4583";
+
+    await handlePlacesReverse(placesRequest(path), deps);
+    now += 59_000;
+    await handlePlacesReverse(placesRequest(path), deps);
+    expect(service.reverse).toHaveBeenCalledTimes(1);
+
+    now += 1_000;
+    await handlePlacesReverse(placesRequest(path), deps);
+    expect(service.reverse).toHaveBeenCalledTimes(2);
+  });
+
+  it("có địa chỉ → cache 24 giờ", async () => {
+    const service = fakeService();
+    let now = NOW_MS;
+    const deps = depsWith(service, { nowMs: () => now });
+    const path = "/api/places/reverse?lat=11.9404&lng=108.4583";
+
+    await handlePlacesReverse(placesRequest(path), deps);
+    // Quá 1 phút (TTL của kết quả không địa chỉ) nhưng còn trong hạn phiên của cookie test.
+    now += 30 * 60_000;
+    await handlePlacesReverse(placesRequest(path), deps);
+
+    expect(service.reverse).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
     ["thiếu lat", "/api/places/reverse?lng=108.45"],
     ["lat rỗng", "/api/places/reverse?lat=&lng=108.45"],
     ["NaN", "/api/places/reverse?lat=abc&lng=108.45"],

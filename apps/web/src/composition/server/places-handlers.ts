@@ -4,7 +4,7 @@
 // env (không nhận URL từ client), không chuyển cookie/header của người dùng, không log từ khóa hay tọa độ.
 import { SESSION_EXPIRED } from "@tripory/api-client";
 import { placeQueryText, PLACE_QUERY_MIN_LENGTH } from "@tripory/itinerary";
-import type { DestinationCatalog, PlaceSearchService } from "@tripory/itinerary";
+import type { DestinationCatalog, Place, PlaceSearchService } from "@tripory/itinerary";
 import { createWgs84Coordinate } from "@tripory/shared-kernel";
 import type { NextRequest, NextResponse } from "next/server";
 import type { WindowLimiter } from "@/lib/in-memory/rate-limit";
@@ -25,6 +25,8 @@ const MINUTE_MS = 60_000;
 const SEARCH_TTL_MS = 10 * MINUTE_MS;
 const SUGGESTIONS_TTL_MS = 24 * 60 * MINUTE_MS;
 const REVERSE_TTL_MS = 24 * 60 * MINUTE_MS;
+/** Reverse không có địa chỉ (có thể vì cổng Nominatim vừa bỏ qua fallback): cache ngắn để lần sau thử lại. */
+const REVERSE_NO_ADDRESS_TTL_MS = MINUTE_MS;
 /** Trần độ dài từ khóa thô; dài hơn thì 400 thay vì lặng lẽ cắt. */
 const MAX_RAW_QUERY_LENGTH = 200;
 const COORDINATE_DECIMALS = 1e5;
@@ -66,11 +68,11 @@ function guard(request: NextRequest, deps: PlacesDeps): Guarded {
 }
 
 /** Trúng cache thì không gọi service. Lỗi service thành 502 và KHÔNG được cache. */
-async function cachedResponse(
+async function cachedResponse<T>(
   deps: PlacesDeps,
   nowMs: number,
-  cache: Readonly<{ key: string; ttlMs: number }>,
-  load: () => Promise<unknown>,
+  cache: Readonly<{ key: string; ttlMs: number | ((data: T) => number) }>,
+  load: () => Promise<T>,
 ): Promise<NextResponse> {
   const hit = deps.cache.get(cache.key);
 
@@ -78,8 +80,9 @@ async function cachedResponse(
 
   try {
     const data = await load();
+    const ttlMs = typeof cache.ttlMs === "function" ? cache.ttlMs(data) : cache.ttlMs;
 
-    deps.cache.set(cache.key, data, cache.ttlMs);
+    deps.cache.set(cache.key, data, ttlMs);
 
     return successEnvelope(data, nowMs);
   } catch {
@@ -132,6 +135,13 @@ export async function handlePlacesSuggestions(request: NextRequest, deps: Places
   }));
 }
 
+function reverseTtlOf({ place }: Readonly<{ place: Place | null }>): number {
+  if (place === null) return REVERSE_NO_ADDRESS_TTL_MS;
+  if (place.address === null) return REVERSE_NO_ADDRESS_TTL_MS;
+
+  return REVERSE_TTL_MS;
+}
+
 const roundCoordinate = (value: number): number => Math.round(value * COORDINATE_DECIMALS) / COORDINATE_DECIMALS;
 
 const numberParam = (request: NextRequest, name: string): number => {
@@ -159,7 +169,7 @@ export async function handlePlacesReverse(request: NextRequest, deps: PlacesDeps
 
   const key = `r:${coordinate.latitude},${coordinate.longitude}`;
 
-  return cachedResponse(deps, nowMs, { key, ttlMs: REVERSE_TTL_MS }, async () => ({
+  return cachedResponse(deps, nowMs, { key, ttlMs: reverseTtlOf }, async () => ({
     place: await deps.service.reverse(coordinate, request.signal),
   }));
 }

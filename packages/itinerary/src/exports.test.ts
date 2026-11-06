@@ -41,6 +41,19 @@ const DOMAIN_NAMES = [
   'selectCoverImage',
   'coverSlots',
   'focusTargetAfterRemove',
+  'VIETNAM_VIEW_BOUNDS',
+  'boundsOf',
+  'boundsContain',
+  'isDegenerate',
+  'OVERVIEW_TAB',
+  'DAY_COLOR_COUNT',
+  'dayColorIndex',
+  'countVisibleWaypoints',
+  'defaultEditorTab',
+  'buildMapPins',
+  'buildDayRoutes',
+  'fitTargetFor',
+  'summarizeDays',
 ] as const;
 
 const INFRASTRUCTURE_NAMES = [

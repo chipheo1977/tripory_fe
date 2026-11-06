@@ -21,8 +21,14 @@ import { LocationField, useLocationState } from "./location-field";
 import { ResponsiveFormSurface } from "./responsive-form-surface";
 import { useSaveStatusStore } from "./save-status";
 import { useFormDraft } from "./use-form-draft";
+import { WaypointDayField, type WaypointDayChoice } from "./waypoint-day-field";
 
-export type WaypointFormMode = Readonly<{ kind: "add"; dayNumber: number } | { kind: "edit"; waypoint: Waypoint }>;
+export type { WaypointDayChoice };
+
+// `dayChoices` có nghĩa là mở từ tab Tổng quan: form có ô chọn ngày, mặc định là `dayNumber` (D-138).
+export type WaypointFormMode = Readonly<
+  { kind: "add"; dayNumber: number; dayChoices?: readonly WaypointDayChoice[] } | { kind: "edit"; waypoint: Waypoint }
+>;
 
 export type WaypointFormDialogProps = Readonly<{
   itineraryId: ItineraryId;
@@ -42,8 +48,23 @@ export type WaypointFormDialogProps = Readonly<{
 const NAME_FROM_LINK = "Đã lấy tên từ link, bạn có thể sửa.";
 const RESTORED_MESSAGE = "Đã khôi phục nội dung chưa lưu";
 
-const draftKindOf = (mode: WaypointFormMode): DraftKind =>
-  mode.kind === "add" ? `add:${mode.dayNumber}` : `edit:${mode.waypoint.id}`;
+const draftKindOf = (mode: WaypointFormMode, dayNumber: number): DraftKind =>
+  mode.kind === "add" ? `add:${dayNumber}` : `edit:${mode.waypoint.id}`;
+
+const defaultDayOf = (mode: WaypointFormMode): number => (mode.kind === "add" ? mode.dayNumber : 1);
+
+type PickedDay = Readonly<{ mode: WaypointFormMode; day: number }>;
+
+const chosenDayOf = (picked: PickedDay | null, mode: WaypointFormMode): number => {
+  if (picked === null || picked.mode !== mode) return defaultDayOf(mode);
+  return picked.day;
+};
+
+const formTitle = (mode: WaypointFormMode): string => {
+  if (mode.kind === "edit") return "Sửa điểm đến";
+  if (mode.dayChoices !== undefined) return "Thêm điểm đến";
+  return `Thêm điểm đến vào Ngày ${mode.dayNumber}`;
+};
 
 const toValues = (mode: WaypointFormMode): WaypointValues =>
   mode.kind === "add"
@@ -94,6 +115,8 @@ function WaypointForm({
     onSuccess: () => store.markSaved(),
   });
   const [alert, setAlert] = useState<string | null>(null);
+  // Ngày đang chọn gắn với đúng `mode` đã mở: mở lại bằng `mode` mới thì quay về ngày mặc định.
+  const [picked, setPicked] = useState<PickedDay | null>(null);
   const [nameFromLink, setNameFromLink] = useState(false);
   const submittingRef = useRef(false);
   const nameRef = useRef<HTMLElement | null>(null);
@@ -101,8 +124,17 @@ function WaypointForm({
   const { control, getValues, reset, setValue } = form;
   const { errors, isSubmitting, isDirty, isSubmitted, touchedFields } = form.formState;
   const locked = isSubmitting;
-  const kind = draftKindOf(mode);
-  const key = draftKey({ viewerId, itineraryId, kind });
+  const chosenDay = chosenDayOf(picked, mode);
+  const dayChoices = mode.kind === "add" ? mode.dayChoices : undefined;
+  const pickDay = dayChoices !== undefined;
+  // `kind` quyết định khi nào reset form (theo mode đã mở); `key` theo ngày đang chọn để bản nháp mở lại đúng tab ngày.
+  const kind = draftKindOf(mode, defaultDayOf(mode));
+  const key = draftKey({ viewerId, itineraryId, kind: draftKindOf(mode, chosenDay) });
+  const openedKey = draftKey({ viewerId, itineraryId, kind });
+  const removeDrafts = () => {
+    draftStorage.remove(key);
+    draftStorage.remove(openedKey);
+  };
   const initialLocation = toValues(mode).location;
 
   // Mở form là bắt đầu form mới từ điểm đến hiện tại (hoặc bản nháp); đọc qua ref để dữ liệu refetch không ghi đè.
@@ -178,13 +210,13 @@ function WaypointForm({
     };
     try {
       if (mode.kind === "add") {
-        const waypoint = await add.mutateAsync({ dayNumber: mode.dayNumber, ...fields });
-        draftStorage.remove(key);
+        const waypoint = await add.mutateAsync({ dayNumber: chosenDay, ...fields });
+        removeDrafts();
         finish();
         onAdded(waypoint);
       } else {
         await update.mutateAsync({ waypointId: mode.waypoint.id, ...fields });
-        draftStorage.remove(key);
+        removeDrafts();
         finish();
         onUpdated(mode.waypoint.id);
       }
@@ -218,14 +250,14 @@ function WaypointForm({
   const handleOpenChange = (next: boolean) => {
     if (next) return;
     if (locked) return;
-    draftStorage.remove(key);
+    removeDrafts();
     finish();
   };
 
   const requestDelete = () => {
     if (mode.kind !== "edit" || locked) return;
     const { waypoint } = mode;
-    draftStorage.remove(key);
+    removeDrafts();
     finish();
     onDeleteRequested(waypoint);
   };
@@ -245,12 +277,19 @@ function WaypointForm({
       locked={locked}
       onOpenChange={handleOpenChange}
       open={open}
-      title={mode.kind === "add" ? `Thêm điểm đến vào Ngày ${mode.dayNumber}` : "Sửa điểm đến"}
+      title={formTitle(mode)}
       titleId={titleId}
     >
       <InlineAlert variant="info">{restored === null ? null : RESTORED_MESSAGE}</InlineAlert>
       <InlineAlert>{alert}</InlineAlert>
       <form aria-labelledby={titleId} className="flex flex-col gap-stack-sm" noValidate onSubmit={onSubmit}>
+        <WaypointDayField
+          choices={dayChoices ?? []}
+          disabled={locked}
+          onChange={(day) => setPicked({ mode, day })}
+          value={chosenDay}
+          visible={pickDay}
+        />
         <FormFieldRow
           description={nameFromLink ? NAME_FROM_LINK : undefined}
           error={errors.name?.message}

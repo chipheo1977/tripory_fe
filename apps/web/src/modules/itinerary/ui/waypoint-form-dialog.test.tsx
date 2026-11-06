@@ -453,3 +453,88 @@ it("has no sheet X button in the desktop dialog", async () => {
   await screen.findByRole("dialog");
   expect(screen.queryByRole("button", { name: "Đóng" })).toBeNull();
 });
+
+const OVERVIEW_MODE: WaypointFormMode = {
+  kind: "add",
+  dayNumber: 3,
+  dayChoices: [
+    { dayNumber: 1, subtitle: null },
+    { dayNumber: 2, subtitle: "Phố cổ" },
+    { dayNumber: 3, subtitle: null },
+  ],
+};
+const dayTrigger = () => screen.getByRole("combobox", { name: "Ngày" });
+
+it("opened from Overview shows a Day field above the name, defaulting to the last day, with the name focused", async () => {
+  setup({ mode: OVERVIEW_MODE });
+  expect(await screen.findByRole("dialog", { name: "Thêm điểm đến" })).toBeTruthy();
+  await waitFor(() => expect(document.activeElement).toBe(nameInput()));
+  expect(dayTrigger().textContent).toContain("Ngày 3");
+  const form = screen.getByRole("dialog").querySelector("form") as HTMLFormElement;
+  const labels = [...form.querySelectorAll("label")].map((label) => label.textContent ?? "");
+  expect(labels[0]).toBe("Ngày");
+  expect(labels.indexOf("Ngày")).toBeLessThan(labels.findIndex((label) => label.startsWith("Tên")));
+  expect(dayTrigger().compareDocumentPosition(nameInput()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+});
+
+it("lists every day with its subtitle and sends the chosen day", async () => {
+  const { user, onAdded } = setup({ mode: OVERVIEW_MODE });
+  await screen.findByRole("dialog");
+  await user.click(dayTrigger());
+  const options = (await screen.findAllByRole("option")).map((option) => option.textContent);
+  expect(options).toEqual(["Ngày 1", "Ngày 2 · Phố cổ", "Ngày 3"]);
+  await user.click(screen.getByRole("option", { name: "Ngày 1" }));
+  expect(dayTrigger().textContent).toContain("Ngày 1");
+  set(nameInput(), "Chợ");
+  set(locationInput(), COORDS_INPUT);
+  await user.click(submitButton());
+  await waitFor(() => expect(h.add).toHaveBeenCalledTimes(1));
+  expect(h.add.mock.calls[0]?.[0]).toMatchObject({ dayNumber: 1, name: "Chợ" });
+  await waitFor(() => expect(onAdded).toHaveBeenCalledTimes(1));
+});
+
+it("keeps the default (last) day when the user does not touch the field", async () => {
+  const { user } = setup({ mode: OVERVIEW_MODE });
+  await screen.findByRole("dialog");
+  set(nameInput(), "Chợ");
+  set(locationInput(), COORDS_INPUT);
+  await user.click(submitButton());
+  await waitFor(() => expect(h.add).toHaveBeenCalledTimes(1));
+  expect(h.add.mock.calls[0]?.[0]).toMatchObject({ dayNumber: 3 });
+});
+
+it("saves the expired-session draft under the chosen day, not the default one", async () => {
+  const { user } = setup({ mode: OVERVIEW_MODE });
+  await screen.findByRole("dialog");
+  await user.click(dayTrigger());
+  await user.click(await screen.findByRole("option", { name: "Ngày 2 · Phố cổ" }));
+  set(nameInput(), "Chợ");
+  act(() => sessionEvents.emitExpired());
+  const chosen = draftKey({ viewerId: VIEWER, itineraryId: ITINERARY_ID, kind: "add:2" });
+  const fallback = draftKey({ viewerId: VIEWER, itineraryId: ITINERARY_ID, kind: "add:3" });
+  expect(window.sessionStorage.getItem(chosen)).not.toBeNull();
+  expect(window.sessionStorage.getItem(fallback)).toBeNull();
+});
+
+it("has no Day field when opened from a day tab", async () => {
+  setup({ mode: { kind: "add", dayNumber: 2 } });
+  expect(await screen.findByRole("dialog", { name: "Thêm điểm đến vào Ngày 2" })).toBeTruthy();
+  expect(screen.queryByRole("combobox", { name: "Ngày" })).toBeNull();
+});
+
+it("has no Day field in the edit form", async () => {
+  setup({ mode: { kind: "edit", waypoint: SAVED } });
+  expect(await screen.findByRole("dialog", { name: "Sửa điểm đến" })).toBeTruthy();
+  expect(screen.queryByRole("combobox", { name: "Ngày" })).toBeNull();
+});
+
+it("disables the Day field while sending", async () => {
+  h.add.mockImplementation(() => new Promise(() => undefined));
+  const { user } = setup({ mode: OVERVIEW_MODE });
+  await screen.findByRole("dialog");
+  set(nameInput(), "Chợ");
+  set(locationInput(), COORDS_INPUT);
+  await user.click(submitButton());
+  await waitFor(() => expect(h.add).toHaveBeenCalledTimes(1));
+  expect((dayTrigger() as HTMLButtonElement).hasAttribute("disabled") || dayTrigger().getAttribute("aria-disabled") === "true").toBe(true);
+});

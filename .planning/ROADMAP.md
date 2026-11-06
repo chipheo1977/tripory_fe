@@ -182,7 +182,7 @@ Mở lại lần 2 (2026-11-05, bản đồ trong editor + tab Tổng quan, PUB-
 - [x] 04-50-PLAN.md — Danh sách chọn điểm khi bản đồ sẵn sàng (D-126), tách `DayPanel`, điểm nối cho editor (wave 30)
 - [x] 04-51-PLAN.md — Nối bản đồ + Tổng quan vào editor: tab mặc định, đồng bộ chọn pin↔danh sách, canh khung, thêm từ Tổng quan (wave 31)
 - [x] 04-52-PLAN.md — Cổng lint/typecheck/test từng gói + `next build` (worker, tách bundle) + mục E checklist UAT (wave 32)
-- [ ] 04-53-PLAN.md — UAT thủ công bản đồ, gồm kiểm bằng mắt Hoàng Sa/Trường Sa (checkpoint; wave 33)
+- [x] 04-53-PLAN.md — UAT thủ công bản đồ, gồm kiểm bằng mắt Hoàng Sa/Trường Sa (checkpoint; wave 33)
 
 ### Phase 5: Map & Public View
 **Goal**: Khách chưa đăng nhập mở link chia sẻ và đọc được lịch trình đã xuất bản dưới dạng bài viết hoặc bản đồ; link hiển thị preview đẹp khi dán vào ứng dụng nhắn tin

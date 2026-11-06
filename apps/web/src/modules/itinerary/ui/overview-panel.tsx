@@ -28,10 +28,10 @@ export function OverviewPanel({ summary, days, variant, rowEmphasis, onSelectDay
   const { onEdit, onAdd, addButtonRef } = actions;
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <div className="px-stack-md pt-stack-md">
+      <div className="px-stack-md py-stack-sm">
         <OverviewSummary data={summary} onEdit={onEdit} variant={variant} />
       </div>
-      <h3 className="border-t border-border px-stack-md pt-stack-md text-label font-semibold text-muted">Các ngày</h3>
+      <h3 className="border-t border-border px-stack-md pt-stack-sm text-label font-semibold text-muted">Các ngày</h3>
       <ol aria-label="Tóm tắt các ngày" className="flex flex-1 flex-col gap-inline-sm px-stack-md py-stack-md">
         {days.map((day) => (
           <DayOverviewRow

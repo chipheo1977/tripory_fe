@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: HTTP & Shared Kernel** - `api-client` chuẩn hóa lỗi BE, single-flight refresh và `shared-kernel` dùng chung (completed 2026-10-12)
 - [x] **Phase 3: Identity & Session (BFF)** - Đăng ký, đăng nhập, phiên cookie httpOnly, refresh im lặng và BFF có allowlist
  (completed 2026-10-23)
-- [x] **Phase 4: Itinerary CRUD & Editor** - "Lịch trình của tôi" và editor đầy đủ tới bước xuất bản (reopened 2026-10-30: form tạo 4 khối thay tạo nhanh (ITIN-02), nhiều ảnh bìa và tự lưu "Thông tin chuyến đi" (ITIN-03) đã xong 41/41 plan; mở lại lần 2 2026-11-05: bản đồ MapLibre + OpenFreeMap trong editor và tab Tổng quan (PUB-06), chưa lập plan)
+- [x] **Phase 4: Itinerary CRUD & Editor** - "Lịch trình của tôi" và editor đầy đủ tới bước xuất bản (reopened 2026-10-30: form tạo 4 khối thay tạo nhanh (ITIN-02), nhiều ảnh bìa và tự lưu "Thông tin chuyến đi" (ITIN-03) đã xong 41/41 plan; mở lại lần 2 2026-11-05: bản đồ MapLibre + OpenFreeMap trong editor và tab Tổng quan (PUB-06), 12 plan 04-42..04-53 đã xong; UAT mục E 14/14 PASS do người dùng xác nhận; verify phase 2026-11-06)
  (completed 2026-11-05)
 - [ ] **Phase 5: Map & Public View** - Trang công khai SSR, chuyển Bài viết/Bản đồ (dùng lại bản đồ của editor), chia sẻ và Open Graph
 - [ ] **Phase 6: Profile & Users** - Hồ sơ thật, tab lịch trình, danh bạ và lối vào hội thoại
@@ -123,7 +123,7 @@ Plans:
   3. Người dùng xóa waypoint và hoàn tác được trong 5 giây; kéo thả sắp xếp waypoint trong ngày bằng chuột, cảm ứng hoặc bàn phím, thấy rollback khi BE lỗi
   4. Người dùng luôn thấy trạng thái Đang lưu / Đã lưu / Lỗi – thử lại, được cảnh báo khi rời trang lúc còn request; xuất bản được khi có ≥ 1 waypoint sau khi xác nhận không thể hủy, rồi thấy lịch trình chuyển sang "Đã xuất bản" (hộp chia sẻ sau khi xuất bản chuyển sang Phase 5 theo `04-CONTEXT.md` D-40)
   5. Người không phải chủ không thấy thao tác sửa; trên mobile, timeline nằm trong bottom sheet nhiều mức và vẫn thao tác đủ các bước trên
-**Plans**: 41 plans, đã xong cả 41 (23 plan đầu + 18 plan mở lại 04-24..04-41 cho ITIN-02, ITIN-03: tài liệu hợp đồng BE, checkpoint BE 04-25, rồi FE và UAT; 04-41 tách từ 04-30 nên xếp ở wave 18, trước 04-31; UAT mục D 8/8 PASS trên BE local 2026-11-05) + 12 plan mở lại lần 2 (04-42..04-53, bản đồ trong editor và tab Tổng quan, PUB-06; quyết định ở `04-CONTEXT.md` D-111..D-140, research ở `04-RESEARCH.md` mục "Mở lại lần 2 (2026-11-05): bản đồ"; wave 26-33, 04-53 là checkpoint UAT)
+**Plans**: 41 plans, đã xong cả 41 (23 plan đầu + 18 plan mở lại 04-24..04-41 cho ITIN-02, ITIN-03: tài liệu hợp đồng BE, checkpoint BE 04-25, rồi FE và UAT; 04-41 tách từ 04-30 nên xếp ở wave 18, trước 04-31; UAT mục D 8/8 PASS trên BE local 2026-11-05) + 12 plan mở lại lần 2, đã xong cả 12 (04-42..04-53, bản đồ trong editor và tab Tổng quan, PUB-06; quyết định ở `04-CONTEXT.md` D-111..D-140, research ở `04-RESEARCH.md` mục "Mở lại lần 2 (2026-11-05): bản đồ"; wave 26-33, 04-53 là checkpoint UAT)
 **UI hint**: yes
 **Research flag**: cần research sâu khi plan (parse link Google Maps, dnd-kit với React 19 StrictMode, `CalendarDate`, mapper ngày thưa)
 
@@ -248,7 +248,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 1. Design System, UI Skeleton & Walking Skeleton | 8/8 | Complete | 2026-10-12 |
 | 2. HTTP & Shared Kernel | 4/4 | CompleComplete
 | 3. Identity & Session (BFF) | 15/15 | Executed (UAT 19/19 PASS, chờ verify-work) | 2026-10-23 |
-| 4. Itinerary CRUD & Editor | 41/53 | Reopened lần 2 (41 plan đã xong, UAT 23/23 + mục D 8/8 PASS; BE đã deploy Render; bản đồ trong editor PUB-06 đã lập 12 plan 04-42..04-53, chờ thực thi) | 2026-11-05 (41 plan) |
+| 4. Itinerary CRUD & Editor | 53/53 | Complete (UAT 23/23, mục D 8/8 và mục E 14/14 PASS do người dùng xác nhận; PUB-06 bản đồ trong editor xong; chưa kiểm trên thiết bị cảm ứng thật, xem 04-VERIFICATION.md) | 2026-11-06 |
 | 5. Map & Public View | 0/TBD | Not started | - |
 | 6. Profile & Users | 0/TBD | Not started | - |
 | 7. Chat, Voice & Calls | 0/TBD | Not started | - |

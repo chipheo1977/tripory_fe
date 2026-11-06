@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Completed 04-53-PLAN.md
-last_updated: "2026-11-06T08:44:58.175Z"
-last_activity: 2026-11-06 -- Phase 4 planning complete
+last_updated: "2026-11-06T08:48:44.329Z"
+last_activity: 2026-11-06
 progress:
   total_phases: 8
   completed_phases: 4
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình du lịch thật trên bản triển khai công khai, rồi trao đổi về chuyến đi với người khác.
-**Current focus:** Phase 4 mở lại đã xong 41/41 plan (ITIN-02, ITIN-03; UAT mục D 8/8 PASS trên BE local 2026-11-05); BE đã merge vào dev, chưa kiểm BE đã deploy và test thật mục 6-11 của 04-BE-CONTRACT; PUB-02 chưa có plan; Phase 5 sẵn sàng lập kế hoạch
+**Current focus:** Phase 4 xong 53/53 plan và đã verify (2026-11-06): ITIN-02, ITIN-03 (UAT mục D 8/8 PASS trên BE local), PUB-06 bản đồ trong editor (UAT mục E 14/14 PASS do người dùng xác nhận). Chưa kiểm trên thiết bị cảm ứng thật (iOS Safari, Android) và chưa kiểm BE đã deploy mục 6-11 của 04-BE-CONTRACT; chưa chạy code review cho 04-42..04-53. Phase 5 (PUB-01..PUB-05, dùng lại bản đồ PUB-06) sẵn sàng lập kế hoạch
 
 ## Current Position
 
-Phase: 4
-Plan: 04-42 (reopen 2: map, 12 plans 04-42..04-53)
-Status: Ready to execute
-Last activity: 2026-11-06 -- Phase 4 planning complete
+Phase: 5
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-11-06
 
 Phase 1 progress: [██████████] 100% — verified complete
 
@@ -36,7 +36,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 
 **Velocity:**
 
-- Total plans completed: 68
+- Total plans completed: 80
 - Average duration: 18m (7 plans with recorded duration; deployment checkpoint excluded)
 - Total execution time: 2h 5m (recorded execution plans)
 
@@ -47,7 +47,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | 01 | 8 | 2h 5m recorded | 18m recorded |
 | 2 | 4 | - | - |
 | 3 | 15 | - | - |
-| 4 | 41 | - | - |
+| 4 | 53 | - | - |
 
 **Recent Trend:**
 

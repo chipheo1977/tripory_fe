@@ -62,7 +62,7 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 - [ ] **PUB-03**: Lịch trình nháp trả trang 403 cho khách, id sai trả 404; chủ xem nháp thấy banner "Bản nháp – chỉ bạn thấy" và nút Sửa
 - [ ] **PUB-04**: Người xem có thể chia sẻ bằng copy link, Web Share (mobile) và mã QR
 - [ ] **PUB-05**: Link khi dán vào Zalo/Messenger hiển thị preview Open Graph (tiêu đề, mô tả, ảnh bìa); nháp đặt `noindex`
-- [ ] **PUB-06**: Bản đồ dùng chung (MapLibre + OpenFreeMap, thể hiện Hoàng Sa, Trường Sa thuộc Việt Nam) hiển thị trong editor: pin theo ngày, đường nối trong ngày, zoom/pan, đồng bộ chọn với danh sách, tab "Tổng quan"; trang công khai dùng lại
+- [x] **PUB-06**: Bản đồ dùng chung (MapLibre + OpenFreeMap, thể hiện Hoàng Sa, Trường Sa thuộc Việt Nam) hiển thị trong editor: pin theo ngày, đường nối trong ngày, zoom/pan, đồng bộ chọn với danh sách, tab "Tổng quan"; trang công khai dùng lại
 
 ### Hồ sơ và người dùng (PROF)
 
@@ -206,7 +206,7 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | PUB-03 | Phase 5 | Pending |
 | PUB-04 | Phase 5 | Pending |
 | PUB-05 | Phase 5 | Pending |
-| PUB-06 | Phase 4 | Pending (chuyển vào Phase 4, mở lại lần 2 ngày 2026-11-05) |
+| PUB-06 | Phase 4 | Complete (chuyển vào Phase 4, mở lại lần 2 ngày 2026-11-05; UAT mục E 14/14 PASS do người dùng xác nhận 2026-11-06; trang công khai dùng lại ở Phase 5) |
 | PROF-01 | Phase 6 | Pending |
 | PROF-02 | Phase 6 | Pending |
 | PROF-03 | Phase 6 | Pending |

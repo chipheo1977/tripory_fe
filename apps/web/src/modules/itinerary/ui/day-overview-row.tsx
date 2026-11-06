@@ -42,7 +42,7 @@ export function DayOverviewRow({ day, emphasis, onSelectDay, onEmphasizeDay }: D
       <button
         aria-label={dayRowAccessibleName(day)}
         className={cn(
-          "flex min-h-touch w-full items-start gap-inline-sm rounded-container border border-border bg-surface px-stack-md py-stack-sm text-left hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring",
+          "flex min-h-touch w-full items-center gap-inline-sm rounded-container border border-border bg-surface px-stack-md py-stack-sm text-left hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring",
           EMPHASIS_CLASS[emphasis],
         )}
         data-day-row={day.dayNumber}
@@ -59,7 +59,7 @@ export function DayOverviewRow({ day, emphasis, onSelectDay, onEmphasizeDay }: D
           <span className="truncate text-body font-semibold text-text">{dayRowTitle(day)}</span>
           <span className="text-label tabular-nums text-muted">{dayRowMeta(day)}</span>
         </span>
-        <Icon className="mt-inline-xs text-muted" icon={ChevronRight} size="sm" />
+        <Icon className="mt-inline-xs text-muted" icon={ChevronRight} size="md" />
       </button>
     </li>
   );

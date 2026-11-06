@@ -309,6 +309,7 @@ function WaypointForm({
           location={{ state: locationState, flush }}
           open={open}
           openedLocation={openedLocation}
+          savedLocation={initialLocation}
         />
 
         <FormFieldRow error={errors.address?.message} label="Địa chỉ">

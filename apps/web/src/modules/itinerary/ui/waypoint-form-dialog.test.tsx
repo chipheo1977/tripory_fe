@@ -758,6 +758,37 @@ it("edit form opens in manual mode and makes no reverse call for the saved coord
   expect(addressInput().value).toBe("Quận 1");
 });
 
+it("edit form: back to manual after 'Đổi địa điểm' with nothing picked restores the saved coordinate", async () => {
+  setup({ mode: { kind: "edit", waypoint: SAVED }, destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  fireEvent.click(screen.getByRole("button", { name: "Tìm địa điểm" }));
+  changePlace();
+  await waitFor(() => expect(document.activeElement).toBe(searchInput()));
+  switchToManual();
+  expect(locationInput().value).toBe("10.7769, 106.7009");
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  expect(h.reverse).not.toHaveBeenCalled();
+  expect(addressInput().value).toBe("Quận 1");
+});
+
+it("edit form: switching modes never overwrites a coordinate the user typed", async () => {
+  setup({ mode: { kind: "edit", waypoint: SAVED }, destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  set(locationInput(), "21.0285, 105.8542");
+  fireEvent.click(screen.getByRole("button", { name: "Tìm địa điểm" }));
+  switchToManual();
+  expect(locationInput().value).toBe("21.0285, 105.8542");
+});
+
+it("add form: back to manual with an empty location keeps it empty", async () => {
+  setup({ destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  switchToManual();
+  fireEvent.click(screen.getByRole("button", { name: "Tìm địa điểm" }));
+  switchToManual();
+  expect(locationInput().value).toBe("");
+});
+
 it("a restored draft with a location opens in manual mode without a reverse call", async () => {
   setup({ restored: { name: "Bản nháp", location: COORDS_INPUT, address: "Đường 1", notes: "" } });
   await screen.findByRole("dialog");

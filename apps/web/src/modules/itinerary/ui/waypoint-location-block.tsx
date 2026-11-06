@@ -14,7 +14,7 @@ import { BlockError } from "./block-error";
 import { destinationNameFor } from "./destination-cover";
 import type { WaypointValues } from "./form-schemas";
 import { LocationField, type LocationState } from "./location-field";
-import type { LocationMode } from "./place/location-mode";
+import { manualRestoreOf, type LocationMode } from "./place/location-mode";
 import { PickedPlaceSummary, pickedSummaryText } from "./place/picked-place-summary";
 import { PlaceSearchField } from "./place/place-search-field";
 import { useLocationSession } from "./place/use-location-session";
@@ -32,6 +32,8 @@ export type WaypointLocationBlockProps = Readonly<{
   formKey: string;
   /** Giá trị ô Vị trí lúc mở form (form sửa hoặc bản nháp): quyết định chế độ mặc định và không bị tra ngược. */
   openedLocation: string;
+  /** Tọa độ đã lưu của điểm đang sửa (chuỗi rỗng ở form thêm): trả lại khi quay về thủ công với ô trống. */
+  savedLocation?: string;
   location: Readonly<{ state: LocationState; flush(): Promise<LocationState> }>;
   autofill: Pick<PlaceAutofill, "applyPicked" | "applyReverse">;
 }>;
@@ -50,6 +52,7 @@ export function WaypointLocationBlock({
   open,
   formKey,
   openedLocation,
+  savedLocation = "",
   location,
   autofill,
 }: WaypointLocationBlockProps) {
@@ -86,7 +89,12 @@ export function WaypointLocationBlock({
   };
 
   const switchMode = () => {
-    flushSync(() => setMode(otherMode(mode)));
+    const next = otherMode(mode);
+    const restore = manualRestoreOf({ next, raw, hasPicked: picked !== null, saved: savedLocation });
+    flushSync(() => {
+      setMode(next);
+      if (restore !== null) setValue("location", restore, WRITE);
+    });
     setFocus("location");
   };
 

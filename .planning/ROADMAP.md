@@ -175,7 +175,7 @@ Mở lại lần 2 (2026-11-05, bản đồ trong editor + tab Tổng quan, PUB-
 - [x] 04-43-PLAN.md — Domain thuần: màu ngày, pin, đường, nhấn mạnh, khung canh, tab mặc định, tóm tắt ngày; tâm/bbox 34 tỉnh (OSM, ODbL) (wave 26)
 - [x] 04-44-PLAN.md — Catalog `maplibre-gl` 6.16.0 + `react-map-gl` 8.1.3; style nền riêng OpenFreeMap có lọc Hoàng Sa/Trường Sa theo vùng + test (wave 26)
 - [x] 04-48-PLAN.md — Ô "Ngày" trong form thêm mở từ Tổng quan; form sửa không đổi (wave 26)
-- [ ] 04-45-PLAN.md — `ui-web`: `MapPin`, `MapToneDot`, `MapZoomControls`, `Sheet snap/onSnapChange`, `snapHeightPx` (wave 27)
+- [x] 04-45-PLAN.md — `ui-web`: `MapPin`, `MapToneDot`, `MapZoomControls`, `Sheet snap/onSnapChange`, `snapHeightPx` (wave 27)
 - [ ] 04-46-PLAN.md — `TripMap` (react-map-gl, worker Turbopack, client-only), camera, ghi công, fake cho test jsdom (wave 28)
 - [ ] 04-47-PLAN.md — Tab "Tổng quan" trong `DayTabs`, `OverviewSummary`, `DayOverviewRow`, `OverviewPanel`, chuỗi dòng ngày (wave 28)
 - [ ] 04-49-PLAN.md — `EditorLayout` slot bản đồ dùng chung desktop/mobile, vùng an toàn theo mức sheet; `EditorMapArea` tải/rỗng/lỗi → TripSummary (wave 29)

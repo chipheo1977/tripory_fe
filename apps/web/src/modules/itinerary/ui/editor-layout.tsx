@@ -5,11 +5,13 @@ import { ChevronUp } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import {
   narrowViewport,
+  sheetHiddenBottomPx,
   wideViewport,
   type MapFrame,
   type SheetSnapName,
   type SheetSnapRequest,
 } from "./editor-map-viewport";
+import { TimelineHiddenBottomProvider } from "./timeline-add-bar";
 import { useMediaQuery } from "./use-media-query";
 
 /** Trùng breakpoint `lg` của Tailwind (1024px). */
@@ -95,7 +97,8 @@ function NarrowBody({ timeline, map, headerHeight, sheetSnapRequest }: NarrowBod
     setSnap("medium");
     setTimelineOpen(true);
   }, []);
-  const viewport = narrowViewport({ open: timelineOpen, snap, viewportHeight, headerHeight });
+  const sheetInput = { open: timelineOpen, snap, viewportHeight, headerHeight };
+  const viewport = narrowViewport(sheetInput);
 
   return (
     <>
@@ -114,7 +117,7 @@ function NarrowBody({ timeline, map, headerHeight, sheetSnapRequest }: NarrowBod
       >
         <SheetContent fillSnap>
           <SheetTitle className="sr-only">{TIMELINE_HEADING}</SheetTitle>
-          {timeline}
+          <TimelineHiddenBottomProvider value={sheetHiddenBottomPx(sheetInput)}>{timeline}</TimelineHiddenBottomProvider>
         </SheetContent>
       </Sheet>
       <ReopenChip onReopen={reopen} timelineOpen={timelineOpen} />

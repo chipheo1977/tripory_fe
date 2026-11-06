@@ -8,6 +8,7 @@ import type { DayView, Itinerary, Waypoint } from "@tripory/itinerary";
 import type { RefObject } from "react";
 import { AddButton } from "./add-button";
 import { DaySubtitle } from "./day-subtitle";
+import { TimelineAddBar } from "./timeline-add-bar";
 import { WaypointList, type WaypointFocusRequest, type WaypointSelection } from "./waypoint-list";
 
 export type DayPanelProps = Readonly<{
@@ -50,7 +51,7 @@ export function DayPanel({ itinerary, day, pendingIds, list, feedback, onAdd, ad
           selection={list.selection}
         />
       </div>
-      <div className="sticky bottom-0 border-t border-border bg-surface p-stack-md pb-[calc(var(--semantic-space-stack-md)+env(safe-area-inset-bottom))] empty:hidden">
+      <TimelineAddBar>
         <AddButton
           className="w-full"
           label="Thêm điểm đến"
@@ -59,7 +60,7 @@ export function DayPanel({ itinerary, day, pendingIds, list, feedback, onAdd, ad
           variant="secondary"
           visible={hasVisibleWaypoints}
         />
-      </div>
+      </TimelineAddBar>
     </>
   );
 }

@@ -5,6 +5,7 @@ import { installFakeResizeObserver, type FakeResizeObserverHandle } from "@/test
 import { EditorLayout, type EditorLayoutProps } from "./editor-layout";
 import { snapHeightPx } from "@tripory/ui-web";
 import type { MapFrame } from "./editor-map-viewport";
+import { TimelineAddBar } from "./timeline-add-bar";
 
 const h = vi.hoisted(() => ({ sheetProps: vi.fn(), frames: [] as unknown[] }));
 
@@ -147,6 +148,45 @@ it("below lg shows the map as a fixed background behind a non-modal timeline she
   // Chiều cao cố định bằng mức expanded: nếu mất thì nội dung ngắn làm Base UI gộp mất mức giữa.
   expect(sheet.style.height).toMatch(/px$/);
   expect(screen.queryByRole("button", { name: "Lịch trình" })).toBeNull();
+});
+
+it("below lg lifts the timeline add bar above the hidden part of the sheet, and not at expanded or from lg", async () => {
+  const timeline = (
+    <TimelineAddBar>
+      <button type="button">Thêm điểm đến</button>
+    </TimelineAddBar>
+  );
+  const barBottom = () => (screen.getByRole("button", { name: "Thêm điểm đến" }).parentElement as HTMLElement).style.bottom;
+
+  installMatchMedia(false);
+  const { rerender } = setup({ timeline });
+  await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
+  // Mức vừa (mặc định): đáy popup bị dịch xuống, thanh phải nâng lên (mức thấp/vừa: nút luôn thấy, không cần kéo lên expanded).
+  expect(barBottom()).toContain("px");
+  expect(barBottom()).not.toBe("0px");
+
+  rerender(
+    <EditorLayout
+      header={<div data-testid="header">header</div>}
+      map={renderMap}
+      sheetSnapRequest={{ seq: 1, snap: "expanded" }}
+      timeline={timeline}
+    />,
+  );
+  await waitFor(() => expect(barBottom()).toBe("0px"));
+});
+
+it("from lg the timeline add bar stays at bottom 0 (no sheet)", () => {
+  installMatchMedia(true);
+  setup({
+    timeline: (
+      <TimelineAddBar>
+        <button type="button">Thêm điểm đến</button>
+      </TimelineAddBar>
+    ),
+  });
+
+  expect((screen.getByRole("button", { name: "Thêm điểm đến" }).parentElement as HTMLElement).style.bottom).toBe("0px");
 });
 
 it("closing the timeline sheet shows a chip that reopens it", async () => {

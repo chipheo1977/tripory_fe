@@ -8,6 +8,7 @@ import { AddButton } from "./add-button";
 import { DayOverviewRow, type DayRowEmphasis } from "./day-overview-row";
 import type { OverviewSummaryData } from "./overview-format";
 import { OverviewSummary } from "./overview-summary";
+import { TimelineAddBar } from "./timeline-add-bar";
 
 export type OverviewPanelProps = Readonly<{
   summary: OverviewSummaryData;
@@ -42,9 +43,9 @@ export function OverviewPanel({ summary, days, variant, rowEmphasis, onSelectDay
           />
         ))}
       </ol>
-      <div className="sticky bottom-0 border-t border-border bg-surface p-stack-md pb-[calc(var(--semantic-space-stack-md)+env(safe-area-inset-bottom))]">
+      <TimelineAddBar>
         <AddButton className="w-full" label="Thêm điểm đến" onClick={onAdd} ref={addButtonRef} variant="secondary" />
-      </div>
+      </TimelineAddBar>
     </div>
   );
 }

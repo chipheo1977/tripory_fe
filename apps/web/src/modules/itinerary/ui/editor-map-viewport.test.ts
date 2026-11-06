@@ -1,6 +1,29 @@
 import { snapHeightPx } from "@tripory/ui-web";
 import { describe, expect, it } from "vitest";
-import { narrowViewport, REOPEN_CHIP_AREA_PX, wideViewport } from "./editor-map-viewport";
+import { narrowViewport, REOPEN_CHIP_AREA_PX, sheetHiddenBottomPx, wideViewport } from "./editor-map-viewport";
+
+describe("sheetHiddenBottomPx", () => {
+  const base = { open: true, viewportHeight: 844, headerHeight: 64 } as const;
+
+  it("mức expanded: không có phần đáy bị che", () => {
+    expect(sheetHiddenBottomPx({ ...base, snap: "expanded" })).toBe(0);
+  });
+
+  it.each(["peek", "medium"] as const)("mức %s: bằng expanded trừ mức hiện tại", (snap) => {
+    const expected = snapHeightPx(844, 64, "expanded") - snapHeightPx(844, 64, snap);
+
+    expect(sheetHiddenBottomPx({ ...base, snap })).toBe(expected);
+    expect(expected).toBeGreaterThan(0);
+  });
+
+  it("mức thấp bị che nhiều hơn mức vừa", () => {
+    expect(sheetHiddenBottomPx({ ...base, snap: "peek" })).toBeGreaterThan(sheetHiddenBottomPx({ ...base, snap: "medium" }));
+  });
+
+  it("sheet đóng: 0", () => {
+    expect(sheetHiddenBottomPx({ ...base, open: false, snap: "peek" })).toBe(0);
+  });
+});
 
 describe("wideViewport", () => {
   it("padding 64 mỗi cạnh, không có phần bị che", () => {

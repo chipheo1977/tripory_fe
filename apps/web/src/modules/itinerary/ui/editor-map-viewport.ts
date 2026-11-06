@@ -32,6 +32,18 @@ function coveredHeight({ open, snap, viewportHeight, headerHeight }: NarrowViewp
   return snapHeightPx(viewportHeight, headerHeight, snap);
 }
 
+/**
+ * Phần đáy popup của sheet đang nằm dưới mép màn hình ở mức hiện tại: popup luôn cao bằng mức expanded và bị dịch xuống
+ * `expanded − mức hiện tại`. Phần tử `sticky bottom-0` của timeline nằm ở đáy popup nên bị che từng đó; dùng số này làm
+ * `bottom` để thanh dính nằm đúng mép dưới nhìn thấy.
+ */
+export function sheetHiddenBottomPx(input: NarrowViewportInput): number {
+  if (!input.open) return 0;
+  const { viewportHeight, headerHeight, snap } = input;
+  const expanded = snapHeightPx(viewportHeight, headerHeight, "expanded");
+  return Math.max(expanded - snapHeightPx(viewportHeight, headerHeight, snap), 0);
+}
+
 export function narrowViewport(input: NarrowViewportInput): MapViewport {
   const mapHeight = Math.max(input.viewportHeight - input.headerHeight, 0);
   const coveredBottom = Math.min(coveredHeight(input), mapHeight);

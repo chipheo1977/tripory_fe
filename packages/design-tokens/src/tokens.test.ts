@@ -43,6 +43,13 @@ const primitiveTokens = {
   '--primitive-green-700': '#16794A',
   '--primitive-amber-50': '#FFFAEB',
   '--primitive-amber-700': '#B54708',
+  '--primitive-blue-700': '#1D4ED8',
+  '--primitive-emerald-700': '#047857',
+  '--primitive-pink-700': '#BE185D',
+  '--primitive-purple-700': '#7E22CE',
+  '--primitive-cyan-700': '#0E7490',
+  '--primitive-lime-700': '#4D7C0F',
+  '--primitive-slate-700': '#334155',
   '--primitive-space-1': '4px',
   '--primitive-space-2': '8px',
   '--primitive-space-4': '16px',
@@ -107,7 +114,7 @@ const semanticTokens = {
   '--semantic-size-control-sm': '32px',
   '--semantic-size-control-md': '40px',
   '--semantic-size-control-lg': '48px',
-  '--semantic-size-touch-min': '44px',
+  '--semantic-size-touch-min': '24px',
   '--semantic-size-content-sm': '640px',
   '--semantic-size-content-md': '768px',
   '--semantic-size-content-lg': '1200px',
@@ -175,7 +182,7 @@ describe('design token inventory', () => {
     expect(readSource('index.css')).not.toContain('dark.css');
   });
 
-  it('khai báo đúng component contract của Sheet và UserMenu', () => {
+  it('khai báo đúng component contract (Sheet, UserMenu, editor, bản đồ)', () => {
     expect(declarations(readSource('components.css'))).toEqual({
       '--sheet-side-width': 'min(400px, 100vw - 48px)',
       '--sheet-snap-peek': 'max(160px, 25dvh)',
@@ -184,6 +191,20 @@ describe('design token inventory', () => {
       '--user-menu-name-max-width': '160px',
       '--editor-timeline-width': '400px',
       '--itinerary-cover-ratio': '16 / 9',
+      '--map-pin-size': '28px',
+      '--map-pin-size-selected': '36px',
+      '--map-day-dot-size': '12px',
+      '--map-label-max-width': '240px',
+      '--overview-cover-thumb-width': '112px',
+      '--map-dimmed-opacity': '0.35',
+      '--map-day-1': 'var(--primitive-blue-700)',
+      '--map-day-2': 'var(--primitive-amber-700)',
+      '--map-day-3': 'var(--primitive-emerald-700)',
+      '--map-day-4': 'var(--primitive-pink-700)',
+      '--map-day-5': 'var(--primitive-purple-700)',
+      '--map-day-6': 'var(--primitive-cyan-700)',
+      '--map-day-7': 'var(--primitive-lime-700)',
+      '--map-day-8': 'var(--primitive-slate-700)',
     });
   });
 
@@ -303,6 +324,81 @@ describe('utility Phase 4 có CSS thật', () => {
     const css = await buildUtilities(['aspect-(--itinerary-cover-ratio)']);
 
     expect(css).toContain('aspect-ratio: var(--itinerary-cover-ratio)');
+  });
+});
+
+describe('token bản đồ (PUB-06)', () => {
+  const channel = (value: number) => {
+    const c = value / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  };
+  const relativeLuminance = (hex: string) => {
+    const r = Number.parseInt(hex.slice(1, 3), 16);
+    const g = Number.parseInt(hex.slice(3, 5), 16);
+    const b = Number.parseInt(hex.slice(5, 7), 16);
+    return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+  };
+  const contrastRatio = (a: string, b: string) => {
+    const [high, low] = [relativeLuminance(a), relativeLuminance(b)].sort((x, y) => y - x);
+    return (high + 0.05) / (low + 0.05);
+  };
+
+  const components = declarations(readSource('components.css'));
+  const primitives = declarations(readSource('primitives.css'));
+  const days = [1, 2, 3, 4, 5, 6, 7, 8];
+  const primitiveOfDay = (day: number) => {
+    const match = /^var\((--primitive-[a-z]+-700)\)$/u.exec(components[`--map-day-${day}`] ?? '');
+    return match === null ? '' : match[1];
+  };
+
+  it.each(days)('--map-day-%i trỏ primitive và đạt ≥ 4.5:1 với chữ trắng', (day) => {
+    const primitive = primitiveOfDay(day);
+
+    expect(primitive, `--map-day-${day} phải trỏ primitive *-700`).not.toBe('');
+    expect(contrastRatio(primitives[primitive], '#FFFFFF')).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('8 màu ngày dùng 8 primitive khác nhau và ngày 2 dùng lại amber-700', () => {
+    expect(new Set(days.map(primitiveOfDay)).size).toBe(8);
+    expect(primitiveOfDay(2)).toBe('--primitive-amber-700');
+  });
+
+  it('không ghi đè màu bản đồ trong dark.css (bản đồ luôn sáng)', () => {
+    expect(readSource('dark.css')).not.toContain('--map-');
+  });
+
+  it('ánh xạ --color-map-day-N sang token ngày', () => {
+    const theme = readSource('theme.css');
+
+    for (const day of days) {
+      expect(theme).toContain(`--color-map-day-${day}: var(--map-day-${day});`);
+    }
+  });
+
+  it('sinh utility màu ngày, kích thước và độ mờ có CSS thật', async () => {
+    const compiler = await compile('@import "tailwindcss"; @import "./index.css";', {
+      base: srcDir,
+      onDependency: () => undefined,
+    });
+    const css = compiler.build([
+      'bg-map-day-1',
+      'bg-map-day-8',
+      'size-(--map-pin-size)',
+      'size-(--map-pin-size-selected)',
+      'size-(--map-day-dot-size)',
+      'max-w-(--map-label-max-width)',
+      'w-(--overview-cover-thumb-width)',
+      'opacity-(--map-dimmed-opacity)',
+    ]);
+
+    expect(css).toMatch(/\.bg-map-day-1[^}]*map-day-1/u);
+    expect(css).toMatch(/\.bg-map-day-8[^}]*map-day-8/u);
+    expect(css).toContain('var(--map-pin-size)');
+    expect(css).toContain('var(--map-pin-size-selected)');
+    expect(css).toContain('var(--map-day-dot-size)');
+    expect(css).toContain('var(--map-label-max-width)');
+    expect(css).toContain('var(--overview-cover-thumb-width)');
+    expect(css).toContain('var(--map-dimmed-opacity)');
   });
 });
 

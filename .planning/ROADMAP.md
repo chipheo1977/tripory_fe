@@ -189,7 +189,7 @@ Mở lại lần 3 (2026-11-06, tìm địa điểm trong form thêm điểm, MA
 - [x] 04-55-PLAN.md — Domain `place.ts` (phân loại, ghép địa chỉ, chủ quyền Hoàng Sa/Trường Sa, tự điền) + port `PlaceSearchProvider`/`PlaceLookup` + `createPlaceSearchService` (wave 34)
 - [x] 04-56-PLAN.md — Adapter Photon, Nominatim reverse, HTTP lookup + BFF `/api/places/{search,suggestions,reverse}` (phiên, Origin, giới hạn theo user, cache TTL, env `PHOTON_BASE_URL`/`NOMINATIM_BASE_URL`) + mã lỗi (wave 35)
 - [x] 04-57-PLAN.md — `createPlaceHooks`, `places.client.ts`, `SearchInput inputRef`, combobox tìm địa điểm + gợi ý + tự điền + reverse cho tọa độ nhập tay, nối vào `WaypointFormDialog` (wave 36)
-- [ ] 04-58-PLAN.md — Mục F checklist UAT tìm địa điểm và UAT thủ công (checkpoint; wave 37)
+- [ ] 04-58-PLAN.md — Mục F checklist UAT tìm địa điểm và UAT thủ công (checkpoint; wave 37). Mục F (F1..F12) đã có trong `04-UAT-CHECKLIST.md`; chờ người dùng chạy UAT và điền cột kết quả
 
 ### Phase 5: Map & Public View
 **Goal**: Khách chưa đăng nhập mở link chia sẻ và đọc được lịch trình đã xuất bản dưới dạng bài viết hoặc bản đồ; link hiển thị preview đẹp khi dán vào ứng dụng nhắn tin

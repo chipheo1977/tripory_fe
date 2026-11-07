@@ -36,6 +36,8 @@ export type ResponsiveFormSurfaceProps = Readonly<{
   closeButton?: boolean;
   /** Sheet chỉ một mức, cao cố định. */
   fixedSnap?: boolean;
+  /** Sheet bỏ đệm đáy để chân form dính đáy sát mép màn hình; chân form tự đệm vùng an toàn. */
+  flushFooter?: boolean;
   /** Ô nhận focus khi mở. Truyền tường minh để không phụ thuộc thứ tự tab mặc định của Dialog/Sheet. */
   initialFocus?: ComponentProps<typeof DialogContent>["initialFocus"];
 }>;
@@ -52,6 +54,7 @@ export function ResponsiveFormSurface({
   locked,
   closeButton = false,
   fixedSnap = false,
+  flushFooter = false,
   initialFocus,
 }: ResponsiveFormSurfaceProps) {
   const wide = useIsWide();
@@ -91,7 +94,7 @@ export function ResponsiveFormSurface({
       onOpenChangeComplete={onOpenChangeComplete}
       open={open}
     >
-      <SheetContent closeDisabled={locked} fillSnap={fixedSnap} initialFocus={initialFocus}>
+      <SheetContent closeDisabled={locked} fillSnap={fixedSnap} flushFooter={flushFooter} initialFocus={initialFocus}>
         <SheetTitle id={titleId}>{title}</SheetTitle>
         {children}
       </SheetContent>

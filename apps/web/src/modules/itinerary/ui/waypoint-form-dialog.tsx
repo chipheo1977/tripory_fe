@@ -270,6 +270,7 @@ function WaypointForm({
 
   return (
     <ResponsiveFormSurface
+      flushFooter
       initialFocus={() => nameRef.current}
       locked={locked}
       onOpenChange={handleOpenChange}
@@ -328,7 +329,7 @@ function WaypointForm({
           />
         </FormFieldRow>
 
-        <div className="flex flex-col max-md:sticky max-md:bottom-0 max-md:bg-surface">
+        <div className="flex flex-col max-md:sticky max-md:bottom-0 max-md:bg-surface-elevated max-md:pt-stack-sm max-md:pb-[calc(var(--semantic-space-stack-lg)+env(safe-area-inset-bottom))]">
           <div className="flex flex-col gap-inline-sm md:flex-row-reverse md:items-center">
             <Button loading={locked} loadingLabel={adding ? "Đang thêm…" : "Đang lưu…"} type="submit">
               {adding ? "Thêm điểm đến" : "Lưu"}

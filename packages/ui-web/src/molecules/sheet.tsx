@@ -195,6 +195,11 @@ export type SheetContentProps = ComponentProps<typeof BaseDrawer.Popup> & {
    */
   fillSnap?: boolean;
   closeDisabled?: boolean;
+  /**
+   * Bottom: bỏ đệm đáy của popup để chân form dính đáy (`sticky bottom-0`) sát mép dưới màn hình. Nội dung tự lo đệm
+   * đáy cho vùng an toàn (`env(safe-area-inset-bottom)`). Mặc định `false` giữ đệm cũ.
+   */
+  flushFooter?: boolean;
 };
 
 /**
@@ -207,7 +212,7 @@ function popupHeightStyle(position: SheetPosition, topSnapHeight: string | null,
   return { maxHeight: topSnapHeight };
 }
 
-export function SheetContent({ children, className, closeDisabled = false, fillSnap = false, style, ...props }: SheetContentProps) {
+export function SheetContent({ children, className, closeDisabled = false, fillSnap = false, flushFooter = false, style, ...props }: SheetContentProps) {
   const { modal, position, atTopSnap, topSnapHeight } = useSheetContext();
   const fixedHeight = popupHeightStyle(position, topSnapHeight, fillSnap);
 
@@ -221,7 +226,8 @@ export function SheetContent({ children, className, closeDisabled = false, fillS
           data-sheet-position={position}
           data-swipe-direction={swipeDirections[position]}
           className={cn(
-            'pointer-events-auto flex flex-col overscroll-contain border-border bg-surface-elevated p-stack-lg pb-[calc(var(--semantic-space-stack-lg)+env(safe-area-inset-bottom))] text-text shadow-overlay outline-hidden transition-transform duration-(--semantic-motion-duration-slow) ease-standard',
+            'pointer-events-auto flex flex-col overscroll-contain border-border bg-surface-elevated p-stack-lg text-text shadow-overlay outline-hidden transition-transform duration-(--semantic-motion-duration-slow) ease-standard',
+            flushFooter ? 'pb-0' : 'pb-[calc(var(--semantic-space-stack-lg)+env(safe-area-inset-bottom))]',
             atTopSnap ? 'overflow-y-auto' : 'overflow-y-hidden',
             popupClasses[position],
             className,

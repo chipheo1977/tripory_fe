@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 04-53-PLAN.md
-last_updated: "2026-11-06T08:48:44.329Z"
-last_activity: 2026-11-06
+status: ready_to_plan
+stopped_at: Phase 4 hoàn thành (người dùng xác nhận 2026-11-07); sẵn sàng Phase 5
+last_updated: "2026-11-07T00:00:00.000Z"
+last_activity: 2026-11-07
 progress:
   total_phases: 8
   completed_phases: 4
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình du lịch thật trên bản triển khai công khai, rồi trao đổi về chuyến đi với người khác.
-**Current focus:** Phase 4 xong 53/53 plan và đã verify (2026-11-06): ITIN-02, ITIN-03 (UAT mục D 8/8 PASS trên BE local), PUB-06 bản đồ trong editor (UAT mục E 14/14 PASS do người dùng xác nhận). Chưa kiểm trên thiết bị cảm ứng thật (iOS Safari, Android) và chưa kiểm BE đã deploy mục 6-11 của 04-BE-CONTRACT; chưa chạy code review cho 04-42..04-53. Phase 5 (PUB-01..PUB-05, dùng lại bản đồ PUB-06) sẵn sàng lập kế hoạch
+**Current focus:** Phase 4 hoàn thành ngày 2026-11-07, người dùng xác nhận (57 plan 04-01..04-58, không có file plan 04-54): ITIN-01..ITIN-14, PUB-06 (UAT mục E 14/14 PASS do người dùng xác nhận) và MAP-01 tìm địa điểm Photon/Nominatim (mở lại lần 3). UAT mục F (F1..F12) và sửa chân form Sheet mobile `738c9a2` được chấp nhận theo xác nhận của người dùng, agent chưa kiểm độc lập. Chưa kiểm trên thiết bị cảm ứng thật, chưa kiểm BE đã deploy mục 6-11 của 04-BE-CONTRACT, chưa review độc lập 04-42..04-58. Phase 5 (PUB-01..PUB-05, dùng lại bản đồ PUB-06) sẵn sàng thảo luận/lập kế hoạch
 
 ## Current Position
 
 Phase: 5
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-11-06
+Last activity: 2026-11-07 (Phase 4 hoàn thành, người dùng xác nhận)
 
 Phase 1 progress: [██████████] 100% — verified complete
 
@@ -47,7 +47,7 @@ Phase 1 progress: [██████████] 100% — verified complete
 | 01 | 8 | 2h 5m recorded | 18m recorded |
 | 2 | 4 | - | - |
 | 3 | 15 | - | - |
-| 4 | 53 | - | - |
+| 4 | 57 (04-01..04-58, không có file plan 04-54) | - | - |
 
 **Recent Trend:**
 
@@ -201,7 +201,7 @@ Recent decisions affecting current work:
 - [Phase 4]: 04-20: EditorHeader/Minimal nhan viewer qua prop (UserMenu can); SaveIndicator+PublishButton render mot ban theo useMediaQuery sm; EditorLayout boc header trong wrapper sticky de ResizeObserver do insetTop cho Sheet
 - [Phase 4]: 04-21: ItineraryEditor nhan viewer (Viewer) thay viewerId; co data thi luon hien editor; co entry-flag xoa khi back dung no (khong o cleanup effect vi StrictMode); leaving giu khung cho sau khi xoa lich trinh
 - [Phase 04]: UAT thủ công 23/23 PASS (người chạy xác nhận, không đính kèm ảnh chụp); 04-SECURITY đóng 70/70 threat, UF-01..04 vẫn OPEN không chặn; Phase 4 nghiệm thu
-- [Phase 04]: 04-22: invariant <img regex ends at '/>' (=> in handlers breaks '>' match); BE dependencies for Phase 4 recorded in 04-BE-DEPENDENCIES.md
+- [Phase 04]: 2026-11-07: người dùng xác nhận hoàn thành Phase 4 gồm MAP-01 (tìm địa điểm). UAT mục F F1..F12 và sửa chân form Sheet mobile 738c9a2 ghi là chấp nhận theo xác nhận của người dùng, agent chưa kiểm độc lập (không PASS). Tồn đọng chuyển tiếp: Photon/Nominatim public server, cache trong bộ nhớ từng instance, place_id chưa lưu ở BE, UF-01..04, MD-01, LW-01..LW-06\n- [Phase 04]: 04-22: invariant <img regex ends at '/>' (=> in handlers breaks '>' match); BE dependencies for Phase 4 recorded in 04-BE-DEPENDENCIES.md
 
 ### Pending Todos
 
@@ -221,6 +221,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-11-06T08:44:58.169Z
-Stopped at: Completed 04-53-PLAN.md
+Last session: 2026-11-07T00:00:00.000Z
+Stopped at: Phase 4 hoàn thành, sẵn sàng /gsd-discuss-phase 5
 Resume file: None

@@ -57,7 +57,7 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 
 ### Bản đồ và địa điểm (MAP)
 
-- [ ] **MAP-01**: Người dùng tìm địa điểm theo tên trong phạm vi Việt Nam khi thêm/sửa waypoint, qua Photon (dự phòng Nominatim chỉ cho reverse geocoding) gọi từ BFF của app, đặt sau port `PlaceSearchProvider` (đổi nhà cung cấp không sửa UI); khi chưa gõ thì thấy danh sách gợi ý mặc định theo điểm đến của lịch trình (Tham quan, Ăn uống, Lưu trú); chọn một kết quả thì tự điền vị trí, địa chỉ và tên (khi ô Tên còn trống hoặc là giá trị tự điền); dán tọa độ "lat, lng" hoặc link Google Maps vẫn có ở lối phụ "Nhập tọa độ thủ công", và tọa độ nhập tay được tra địa chỉ (reverse) để tự điền; kết quả nằm ở quần đảo Hoàng Sa, Trường Sa hoặc không thuộc Việt Nam bị bỏ. BE không đổi, chỉ lưu tên, địa chỉ, tọa độ (chuyển từ v2 vào Phase 4 ngày 2026-11-06, mở lại lần 3; xem `04-CONTEXT.md` D-141..D-153)
+- [x] **MAP-01**: Người dùng tìm địa điểm theo tên trong phạm vi Việt Nam khi thêm/sửa waypoint, qua Photon (dự phòng Nominatim chỉ cho reverse geocoding) gọi từ BFF của app, đặt sau port `PlaceSearchProvider` (đổi nhà cung cấp không sửa UI); khi chưa gõ thì thấy danh sách gợi ý mặc định theo điểm đến của lịch trình (Tham quan, Ăn uống, Lưu trú); chọn một kết quả thì tự điền vị trí, địa chỉ và tên (khi ô Tên còn trống hoặc là giá trị tự điền); dán tọa độ "lat, lng" hoặc link Google Maps vẫn có ở lối phụ "Nhập tọa độ thủ công", và tọa độ nhập tay được tra địa chỉ (reverse) để tự điền; kết quả nằm ở quần đảo Hoàng Sa, Trường Sa hoặc không thuộc Việt Nam bị bỏ. BE không đổi, chỉ lưu tên, địa chỉ, tọa độ (chuyển từ v2 vào Phase 4 ngày 2026-11-06, mở lại lần 3; xem `04-CONTEXT.md` D-141..D-153)
 
 ### Trang công khai và chia sẻ (PUB)
 
@@ -211,7 +211,7 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | PUB-04 | Phase 5 | Pending |
 | PUB-05 | Phase 5 | Pending |
 | PUB-06 | Phase 4 | Complete (chuyển vào Phase 4, mở lại lần 2 ngày 2026-11-05; UAT mục E 14/14 PASS do người dùng xác nhận 2026-11-06; trang công khai dùng lại ở Phase 5) |
-| MAP-01 | Phase 4 | Pending |
+| MAP-01 | Phase 4 | Complete (mở lại lần 3, 2026-11-06; hoàn thành phase được người dùng xác nhận 2026-11-07; UAT mục F chấp nhận theo xác nhận, agent không kiểm độc lập Photon/Nominatim thật) |
 | PROF-01 | Phase 6 | Pending |
 | PROF-02 | Phase 6 | Pending |
 | PROF-03 | Phase 6 | Pending |

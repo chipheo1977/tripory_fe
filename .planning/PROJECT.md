@@ -16,7 +16,9 @@ Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình 
 
 <!-- Shipped and confirmed valuable. -->
 
-(None yet — ship to validate)
+- ✓ Người dùng đã đăng nhập tạo, xem, sửa và xóa lịch trình bằng API thật của backend (form tạo 4 khối, tự lưu metadata, nhiều ảnh bìa) — Phase 4
+- ✓ Người dùng thêm, sửa, xóa (hoàn tác 5 giây) và kéo thả sắp xếp waypoint theo ngày, đặt phụ đề ngày, xuất bản lịch trình; editor dùng được trên mobile với bottom sheet — Phase 4 (hộp chia sẻ sau xuất bản chuyển sang Phase 5)
+- ✓ Bản đồ MapLibre + OpenFreeMap trong editor, không cần Mapbox token; nhập vị trí bằng tìm địa điểm (Photon/Nominatim qua BFF, phạm vi Việt Nam) hoặc dán tọa độ/link Google Maps — Phase 4 (MAP-01 UAT mục F do người dùng xác nhận hoàn thành 2026-11-07, agent chưa kiểm độc lập)
 
 ### Active
 
@@ -24,9 +26,6 @@ Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình 
 
 - [ ] Người dùng có thể truy cập khung giao diện responsive cho các route thuộc milestone mà không gặp lỗi build hoặc điều hướng.
 - [ ] Người dùng có thể đăng ký, đăng nhập, duy trì phiên và đăng xuất qua BFF cùng origin; access token và refresh token nằm trong cookie httpOnly và không thể bị JavaScript phía client đọc.
-- [ ] Người dùng đã đăng nhập có thể tạo, xem, sửa và xóa lịch trình bằng API thật của backend.
-- [ ] Người dùng có thể thêm, sửa, xóa và sắp xếp waypoint theo ngày, đặt phụ đề ngày và xuất bản lịch trình.
-- [ ] Người dùng có thể thao tác waypoint mà không phụ thuộc Mapbox token, sử dụng bản đồ MapLibre + OpenFreeMap để hiển thị và nhập vị trí bằng cách dán tọa độ hoặc link Google Maps.
 - [ ] Khách chưa đăng nhập có thể xem trang công khai của một lịch trình đã xuất bản; lịch trình nháp hiển thị đúng trạng thái lỗi quyền truy cập.
 - [ ] Người dùng có thể xem và cập nhật hồ sơ thật, tìm người dùng khác và xem danh sách lịch trình của mình.
 - [ ] Người dùng có thể gửi/nhận tin nhắn text và voice theo thời gian thực, theo dõi trạng thái đã đọc và xem lịch sử hội thoại.
@@ -42,7 +41,7 @@ Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình 
 - Fork itinerary — backend chưa có endpoint; chờ hợp đồng API trước khi triển khai.
 - Social (like, comment, share nghiệp vụ), Discovery feed và Check-in/review — backend chưa hỗ trợ; không dựng mock trong frontend mới.
 - Mapbox GL và Mapbox Geocoding — chưa có token; milestone này giữ bản đồ SVG và hoãn package maps tích hợp Mapbox.
-- Tìm địa điểm bằng geocoder OSM (Nominatim/Photon) và nền bản đồ MapLibre + OpenFreeMap để bấm chọn vị trí — hoãn sang milestone sau (quyết định 2026-10-09).
+- Bấm lên bản đồ để chọn vị trí waypoint (MAP-02) — hoãn sang v2. Tìm địa điểm bằng Photon/Nominatim và nền MapLibre + OpenFreeMap đã làm ở Phase 4 (quyết định 2026-10-09 được thay ngày 2026-11-05/06).
 - `apps/admin` và ứng dụng mobile — không thuộc mục tiêu thử nghiệm frontend web đầu tiên.
 - Triển khai backend — thực hiện trong repo `tripory_be`; roadmap frontend chỉ coi URL backend công khai là phụ thuộc bên ngoài.
 - Thay thế hoặc gỡ frontend Vite cũ — frontend mới sẽ chạy song song trong milestone đầu để giảm rủi ro.
@@ -114,4 +113,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-09 after initialization*
+*Last updated: 2026-11-07 after Phase 4 completion*

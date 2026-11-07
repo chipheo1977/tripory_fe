@@ -31,8 +31,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: HTTP & Shared Kernel** - `api-client` chuẩn hóa lỗi BE, single-flight refresh và `shared-kernel` dùng chung (completed 2026-10-12)
 - [x] **Phase 3: Identity & Session (BFF)** - Đăng ký, đăng nhập, phiên cookie httpOnly, refresh im lặng và BFF có allowlist
  (completed 2026-10-23)
-- [x] **Phase 4: Itinerary CRUD & Editor** - "Lịch trình của tôi" và editor đầy đủ tới bước xuất bản (reopened 2026-10-30: form tạo 4 khối thay tạo nhanh (ITIN-02), nhiều ảnh bìa và tự lưu "Thông tin chuyến đi" (ITIN-03) đã xong 41/41 plan; mở lại lần 2 2026-11-05: bản đồ MapLibre + OpenFreeMap trong editor và tab Tổng quan (PUB-06), 12 plan 04-42..04-53 đã xong; UAT mục E 14/14 PASS do người dùng xác nhận; verify phase 2026-11-06)
- (completed 2026-11-05)
+- [x] **Phase 4: Itinerary CRUD & Editor** - "Lịch trình của tôi" và editor đầy đủ tới bước xuất bản (reopened 2026-10-30: form tạo 4 khối thay tạo nhanh (ITIN-02), nhiều ảnh bìa và tự lưu "Thông tin chuyến đi" (ITIN-03) đã xong 41/41 plan; mở lại lần 2 2026-11-05: bản đồ MapLibre + OpenFreeMap trong editor và tab Tổng quan (PUB-06), 12 plan 04-42..04-53 đã xong; UAT mục E 14/14 PASS do người dùng xác nhận; verify phase 2026-11-06; mở lại lần 3 2026-11-06: tìm địa điểm Photon/Nominatim trong form thêm/sửa điểm (MAP-01), 4 plan 04-55..04-58 đã xong)
+ (completed 2026-11-07)
 - [ ] **Phase 5: Map & Public View** - Trang công khai SSR, chuyển Bài viết/Bản đồ (dùng lại bản đồ của editor), chia sẻ và Open Graph
 - [ ] **Phase 6: Profile & Users** - Hồ sơ thật, tab lịch trình, danh bạ và lối vào hội thoại
 - [ ] **Phase 7: Chat, Voice & Calls** - Chat realtime, tin nhắn thoại và gọi thoại 1-1 qua TURN
@@ -124,7 +124,7 @@ Plans:
   4. Người dùng luôn thấy trạng thái Đang lưu / Đã lưu / Lỗi – thử lại, được cảnh báo khi rời trang lúc còn request; xuất bản được khi có ≥ 1 waypoint sau khi xác nhận không thể hủy, rồi thấy lịch trình chuyển sang "Đã xuất bản" (hộp chia sẻ sau khi xuất bản chuyển sang Phase 5 theo `04-CONTEXT.md` D-40)
   5. Người không phải chủ không thấy thao tác sửa; trên mobile, timeline nằm trong bottom sheet nhiều mức và vẫn thao tác đủ các bước trên
   6. (MAP-01, mở lại lần 3 2026-11-06, đã lập kế hoạch 04-55..04-58) Trong form thêm/sửa điểm, ô "Vị trí" mặc định là ô tìm địa điểm trong phạm vi Việt Nam (Photon, dự phòng Nominatim cho reverse, gọi qua BFF `/api/places/*`): chưa gõ thì thấy gợi ý theo điểm đến (Tham quan, Ăn uống, Lưu trú), gõ từ 2 ký tự thì thấy kết quả; chọn một kết quả thì tự điền vị trí, địa chỉ và tên (chỉ khi Tên trống hoặc là giá trị tự điền), không đổi Ghi chú; lối phụ "Nhập tọa độ thủ công" vẫn nhận tọa độ/link Google Maps và tọa độ mới được tra địa chỉ để tự điền; không kết quả nào nằm ở Hoàng Sa, Trường Sa hoặc ngoài Việt Nam; nhà cung cấp lỗi thì có thông báo tiếng Việt, "Thử lại" và vẫn lưu được bằng tọa độ thủ công (D-141..D-153)
-**Plans**: 41 plans, đã xong cả 41 (23 plan đầu + 18 plan mở lại 04-24..04-41 cho ITIN-02, ITIN-03: tài liệu hợp đồng BE, checkpoint BE 04-25, rồi FE và UAT; 04-41 tách từ 04-30 nên xếp ở wave 18, trước 04-31; UAT mục D 8/8 PASS trên BE local 2026-11-05) + 12 plan mở lại lần 2, đã xong cả 12 (04-42..04-53, bản đồ trong editor và tab Tổng quan, PUB-06; quyết định ở `04-CONTEXT.md` D-111..D-140, research ở `04-RESEARCH.md` mục "Mở lại lần 2 (2026-11-05): bản đồ"; wave 26-33, 04-53 là checkpoint UAT) + 4 plan mở lại lần 3, đã xong 3/4 (04-55..04-57 xong; 04-58 chờ UAT; tìm địa điểm, MAP-01; quyết định ở `04-CONTEXT.md` D-141..D-153; wave 34-37, 04-58 là checkpoint UAT mục F). Mã 04-54 đã dùng cho commit nút ghi công "i" (D-114, không có file plan)
+**Plans**: 41 plans, đã xong cả 41 (23 plan đầu + 18 plan mở lại 04-24..04-41 cho ITIN-02, ITIN-03: tài liệu hợp đồng BE, checkpoint BE 04-25, rồi FE và UAT; 04-41 tách từ 04-30 nên xếp ở wave 18, trước 04-31; UAT mục D 8/8 PASS trên BE local 2026-11-05) + 12 plan mở lại lần 2, đã xong cả 12 (04-42..04-53, bản đồ trong editor và tab Tổng quan, PUB-06; quyết định ở `04-CONTEXT.md` D-111..D-140, research ở `04-RESEARCH.md` mục "Mở lại lần 2 (2026-11-05): bản đồ"; wave 26-33, 04-53 là checkpoint UAT) + 4 plan mở lại lần 3, đã xong cả 4 (04-55..04-58; tìm địa điểm, MAP-01; quyết định ở `04-CONTEXT.md` D-141..D-153; wave 34-37, 04-58 là checkpoint UAT mục F, đóng theo xác nhận hoàn thành của người dùng 2026-11-07). Mã 04-54 đã dùng cho commit nút ghi công "i" (D-114, không có file plan)
 **UI hint**: yes
 **Research flag**: cần research sâu khi plan (parse link Google Maps, dnd-kit với React 19 StrictMode, `CalendarDate`, mapper ngày thưa)
 
@@ -189,7 +189,7 @@ Mở lại lần 3 (2026-11-06, tìm địa điểm trong form thêm điểm, MA
 - [x] 04-55-PLAN.md — Domain `place.ts` (phân loại, ghép địa chỉ, chủ quyền Hoàng Sa/Trường Sa, tự điền) + port `PlaceSearchProvider`/`PlaceLookup` + `createPlaceSearchService` (wave 34)
 - [x] 04-56-PLAN.md — Adapter Photon, Nominatim reverse, HTTP lookup + BFF `/api/places/{search,suggestions,reverse}` (phiên, Origin, giới hạn theo user, cache TTL, env `PHOTON_BASE_URL`/`NOMINATIM_BASE_URL`) + mã lỗi (wave 35)
 - [x] 04-57-PLAN.md — `createPlaceHooks`, `places.client.ts`, `SearchInput inputRef`, combobox tìm địa điểm + gợi ý + tự điền + reverse cho tọa độ nhập tay, nối vào `WaypointFormDialog` (wave 36)
-- [ ] 04-58-PLAN.md — Mục F checklist UAT tìm địa điểm và UAT thủ công (checkpoint; wave 37). Mục F (F1..F12) đã có trong `04-UAT-CHECKLIST.md`; chờ người dùng chạy UAT và điền cột kết quả
+- [x] 04-58-PLAN.md — Mục F checklist UAT tìm địa điểm và UAT thủ công (checkpoint; wave 37). Mục F (F1..F12) có trong `04-UAT-CHECKLIST.md`; ngày 2026-11-07 người dùng xác nhận hoàn thành phase, F1..F12 ghi "chấp nhận theo xác nhận của người dùng, agent không kiểm độc lập" (không phải PASS từng bước)
 
 ### Phase 5: Map & Public View
 **Goal**: Khách chưa đăng nhập mở link chia sẻ và đọc được lịch trình đã xuất bản dưới dạng bài viết hoặc bản đồ; link hiển thị preview đẹp khi dán vào ứng dụng nhắn tin
@@ -255,7 +255,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 1. Design System, UI Skeleton & Walking Skeleton | 8/8 | Complete | 2026-10-12 |
 | 2. HTTP & Shared Kernel | 4/4 | CompleComplete
 | 3. Identity & Session (BFF) | 15/15 | Executed (UAT 19/19 PASS, chờ verify-work) | 2026-10-23 |
-| 4. Itinerary CRUD & Editor | 53/53 | Complete (UAT 23/23, mục D 8/8 và mục E 14/14 PASS do người dùng xác nhận; PUB-06 bản đồ trong editor xong; chưa kiểm trên thiết bị cảm ứng thật, xem 04-VERIFICATION.md) | 2026-11-06 |
+| 4. Itinerary CRUD & Editor | 57/57 (04-01..04-58, không có file plan 04-54) | Complete (UAT 23/23, mục D 8/8 và mục E 14/14 PASS do người dùng xác nhận; mục F tìm địa điểm F1..F12 và sửa chân form Sheet mobile 738c9a2 được người dùng chấp nhận khi xác nhận hoàn thành, agent không kiểm độc lập; chưa kiểm trên thiết bị cảm ứng thật, xem 04-VERIFICATION.md) | 2026-11-07 |
 | 5. Map & Public View | 0/TBD | Not started | - |
 | 6. Profile & Users | 0/TBD | Not started | - |
 | 7. Chat, Voice & Calls | 0/TBD | Not started | - |

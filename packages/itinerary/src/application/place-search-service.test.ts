@@ -109,7 +109,8 @@ describe('createPlaceSearchService.suggest', () => {
       { bounds: LAM_DONG, category: 'food', limit: 6 },
       { bounds: LAM_DONG, category: 'lodging', limit: 6 },
     ]);
-    expect(result.map((item) => item.id)).toEqual(['A1', 'F1', 'L1']);
+    expect(result.places.map((item) => item.id)).toEqual(['A1', 'F1', 'L1']);
+    expect(result.partial).toBe(false);
   });
 
   it('tối đa 15 kết quả', async () => {
@@ -118,7 +119,7 @@ describe('createPlaceSearchService.suggest', () => {
     });
     const service = createPlaceSearchService({ provider, reverseFallback: null });
 
-    expect(await service.suggest(LAM_DONG)).toHaveLength(15);
+    expect((await service.suggest(LAM_DONG)).places).toHaveLength(15);
   });
 
   it('một nhóm lỗi thì trả các nhóm còn lại', async () => {
@@ -130,7 +131,10 @@ describe('createPlaceSearchService.suggest', () => {
     });
     const service = createPlaceSearchService({ provider, reverseFallback: null });
 
-    expect((await service.suggest(LAM_DONG)).map((item) => item.id)).toEqual(['attraction', 'lodging']);
+    const result = await service.suggest(LAM_DONG);
+
+    expect(result.places.map((item) => item.id)).toEqual(['attraction', 'lodging']);
+    expect(result.partial).toBe(true);
   });
 
   it('mọi nhóm lỗi thì ném lỗi đầu tiên', async () => {

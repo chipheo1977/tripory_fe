@@ -39,7 +39,7 @@ type FakeService = Readonly<{
 
 const fakeService = (overrides: Partial<FakeService> = {}): FakeService => ({
   search: vi.fn<PlaceSearchService["search"]>(async () => [PLACE]),
-  suggest: vi.fn<PlaceSearchService["suggest"]>(async () => [PLACE]),
+  suggest: vi.fn<PlaceSearchService["suggest"]>(async () => ({ places: [PLACE], partial: false })),
   reverse: vi.fn<PlaceSearchService["reverse"]>(async () => PLACE),
   ...overrides,
 });
@@ -292,6 +292,38 @@ describe("handlePlacesSuggestions", () => {
       [109.41, 12.82],
     ]);
     expect(((await res.json()) as { data: unknown }).data).toEqual({ places: [PLACE] });
+  });
+
+  it("kết quả thiếu nhóm (partial) chỉ cache 1 phút và không lộ cờ partial ra client", async () => {
+    const service = fakeService({ suggest: vi.fn(async () => ({ places: [PLACE], partial: true })) });
+    let now = NOW_MS;
+    const deps = depsWith(service, { nowMs: () => now });
+    const path = "/api/places/suggestions?destination=vn-lam-dong";
+
+    const first = await handlePlacesSuggestions(placesRequest(path), deps);
+    expect(((await first.json()) as { data: unknown }).data).toEqual({ places: [PLACE] });
+
+    now += 59_000;
+    await handlePlacesSuggestions(placesRequest(path), deps);
+    expect(service.suggest).toHaveBeenCalledTimes(1);
+
+    now += 1_000;
+    await handlePlacesSuggestions(placesRequest(path), deps);
+    expect(service.suggest).toHaveBeenCalledTimes(2);
+  });
+
+  it("kết quả đủ nhóm vẫn cache 24 giờ", async () => {
+    const service = fakeService();
+    let now = NOW_MS;
+    const deps = depsWith(service, { nowMs: () => now });
+    const path = "/api/places/suggestions?destination=vn-lam-dong";
+
+    await handlePlacesSuggestions(placesRequest(path), deps);
+    // Quá 1 phút (TTL của kết quả partial) nhưng còn trong hạn phiên của cookie test.
+    now += 30 * 60_000;
+    await handlePlacesSuggestions(placesRequest(path), deps);
+
+    expect(service.suggest).toHaveBeenCalledTimes(1);
   });
 
   it.each([

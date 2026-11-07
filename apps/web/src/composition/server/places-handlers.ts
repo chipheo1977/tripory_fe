@@ -24,6 +24,8 @@ export type PlacesDeps = Readonly<{
 const MINUTE_MS = 60_000;
 const SEARCH_TTL_MS = 10 * MINUTE_MS;
 const SUGGESTIONS_TTL_MS = 24 * 60 * MINUTE_MS;
+/** Gợi ý thiếu nhóm vì một lần gọi nhà cung cấp lỗi: cache ngắn để lần sau thử lại đủ ba nhóm. */
+const SUGGESTIONS_PARTIAL_TTL_MS = MINUTE_MS;
 const REVERSE_TTL_MS = 24 * 60 * MINUTE_MS;
 /** Reverse không có địa chỉ (có thể vì cổng Nominatim vừa bỏ qua fallback): cache ngắn để lần sau thử lại. */
 const REVERSE_NO_ADDRESS_TTL_MS = MINUTE_MS;
@@ -130,9 +132,17 @@ export async function handlePlacesSuggestions(request: NextRequest, deps: Places
 
   if (destination === null) return invalidQuery(nowMs);
 
-  return cachedResponse(deps, nowMs, { key: `g:${destination.slug}`, ttlMs: SUGGESTIONS_TTL_MS }, async () => ({
-    places: await deps.service.suggest(destination.view.bounds, request.signal),
-  }));
+  // `partial` không đi ra client: chỉ quyết định thời hạn cache của lần tải này.
+  let partial = false;
+  const ttlMs = () => (partial ? SUGGESTIONS_PARTIAL_TTL_MS : SUGGESTIONS_TTL_MS);
+
+  return cachedResponse(deps, nowMs, { key: `g:${destination.slug}`, ttlMs }, async () => {
+    const result = await deps.service.suggest(destination.view.bounds, request.signal);
+
+    partial = result.partial;
+
+    return { places: result.places };
+  });
 }
 
 function reverseTtlOf({ place }: Readonly<{ place: Place | null }>): number {

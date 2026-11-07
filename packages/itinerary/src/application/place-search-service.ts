@@ -19,11 +19,14 @@ const SUGGESTION_RESULT_LIMIT = 15;
 
 export type PlaceSearchInput = Readonly<{ text: string; bias: LngLat | null }>;
 
+/** `partial` = có nhóm gợi ý lỗi nên danh sách thiếu; nơi cache nên giữ ngắn để lần sau thử lại. */
+export type PlaceSuggestions = Readonly<{ places: readonly Place[]; partial: boolean }>;
+
 export type PlaceSearchService = Readonly<{
   /** `[]` khi từ khóa sau chuẩn hóa ngắn hơn 2 ký tự, không gọi nhà cung cấp. */
   search(input: PlaceSearchInput, signal?: AbortSignal): Promise<readonly Place[]>;
   /** Gợi ý theo nhóm Tham quan, Ăn uống, Lưu trú trong `bounds`; chỉ ném lỗi khi mọi nhóm đều lỗi. */
-  suggest(bounds: GeoBounds, signal?: AbortSignal): Promise<readonly Place[]>;
+  suggest(bounds: GeoBounds, signal?: AbortSignal): Promise<PlaceSuggestions>;
   /** `null` cho tọa độ ngoài VN hoặc thuộc Hoàng Sa/Trường Sa, không gọi nhà cung cấp nào. */
   reverse(coordinate: Wgs84Coordinate, signal?: AbortSignal): Promise<Place | null>;
 }>;
@@ -93,7 +96,10 @@ export function createPlaceSearchService({ provider, reverseFallback }: PlaceSea
       if (groups.length === 0 && failure !== undefined) throw failure.reason;
 
       const places = groups.flat().filter((place) => isNamed(place) && isPlaceAllowed(place));
-      return Object.freeze(uniqueById(places).slice(0, SUGGESTION_RESULT_LIMIT));
+      return Object.freeze({
+        places: Object.freeze(uniqueById(places).slice(0, SUGGESTION_RESULT_LIMIT)),
+        partial: failure !== undefined,
+      });
     },
 
     async reverse(coordinate: Wgs84Coordinate, signal?: AbortSignal) {

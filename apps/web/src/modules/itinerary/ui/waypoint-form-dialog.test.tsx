@@ -771,6 +771,24 @@ it("edit form: back to manual after 'Đổi địa điểm' with nothing picked 
   expect(addressInput().value).toBe("Quận 1");
 });
 
+it("edit form from a restored draft: back to manual restores the draft coordinate and does not reverse it", async () => {
+  const draftLocation = "21.0285, 105.8542";
+  setup({
+    mode: { kind: "edit", waypoint: SAVED },
+    destinationCode: LAM_DONG,
+    restored: { name: "Bản nháp", location: draftLocation, address: "Địa chỉ nháp", notes: "" },
+  });
+  await screen.findByRole("dialog");
+  fireEvent.click(screen.getByRole("button", { name: "Tìm địa điểm" }));
+  changePlace();
+  await waitFor(() => expect(document.activeElement).toBe(searchInput()));
+  switchToManual();
+  expect(locationInput().value).toBe(draftLocation);
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  expect(h.reverse).not.toHaveBeenCalled();
+  expect(addressInput().value).toBe("Địa chỉ nháp");
+});
+
 it("edit form: switching modes never overwrites a coordinate the user typed", async () => {
   setup({ mode: { kind: "edit", waypoint: SAVED }, destinationCode: LAM_DONG });
   await screen.findByRole("dialog");

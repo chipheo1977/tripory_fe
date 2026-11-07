@@ -32,7 +32,7 @@ export type WaypointLocationBlockProps = Readonly<{
   formKey: string;
   /** Giá trị ô Vị trí lúc mở form (form sửa hoặc bản nháp): quyết định chế độ mặc định và không bị tra ngược. */
   openedLocation: string;
-  /** Tọa độ đã lưu của điểm đang sửa (chuỗi rỗng ở form thêm): trả lại khi quay về thủ công với ô trống. */
+  /** Giá trị Vị trí lúc mở form sửa (bản nháp nếu có; chuỗi rỗng ở form thêm): trả lại khi quay về thủ công với ô trống. */
   savedLocation?: string;
   location: Readonly<{ state: LocationState; flush(): Promise<LocationState> }>;
   autofill: Pick<PlaceAutofill, "applyPicked" | "applyReverse">;

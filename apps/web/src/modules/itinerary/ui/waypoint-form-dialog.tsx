@@ -145,6 +145,9 @@ function WaypointForm({
   const initialLocation = toValues(mode).location;
   // Giá trị Vị trí lúc mở (bản nháp nếu có): khối Vị trí chọn chế độ mặc định và không tra ngược giá trị này.
   const openedLocation = (restored ?? toValues(mode)).location;
+  // Form sửa quay về thủ công với ô trống thì trả lại đúng giá trị lúc mở (bản nháp nếu có), không phải bản đã lưu;
+  // giá trị này cũng là `settled` của khối Vị trí nên không bị tra ngược (D-149). Form thêm không có giá trị để trả.
+  const restorableLocation = mode.kind === "edit" ? openedLocation : "";
 
   // Mở form là bắt đầu form mới từ điểm đến hiện tại (hoặc bản nháp); đọc qua ref để dữ liệu refetch không ghi đè.
   const latest = useRef({ mode, restored });
@@ -309,7 +312,7 @@ function WaypointForm({
           location={{ state: locationState, flush }}
           open={open}
           openedLocation={openedLocation}
-          savedLocation={initialLocation}
+          savedLocation={restorableLocation}
         />
 
         <FormFieldRow error={errors.address?.message} label="Địa chỉ">

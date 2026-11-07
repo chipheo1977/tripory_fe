@@ -10,13 +10,13 @@ export type ManualRestoreInput = Readonly<{
   /** Chuỗi hiện tại của ô Vị trí. */
   raw: string;
   hasPicked: boolean;
-  /** Tọa độ đã lưu của điểm đang sửa; chuỗi rỗng ở form thêm. */
+  /** Giá trị Vị trí lúc mở form sửa (bản nháp nếu có, không thì tọa độ đã lưu); chuỗi rỗng ở form thêm. */
   saved: string;
 }>;
 
 /**
  * Form sửa: quay về "Nhập tọa độ thủ công" khi ô Vị trí trống (vd sau "Đổi địa điểm") và chưa chọn địa điểm nào thì
- * trả lại tọa độ đã lưu. `null` = không đụng ô (không bao giờ ghi đè giá trị người dùng đã nhập).
+ * trả lại giá trị lúc mở form. `null` = không đụng ô (không bao giờ ghi đè giá trị người dùng đã nhập).
  */
 export function manualRestoreOf({ next, raw, hasPicked, saved }: ManualRestoreInput): string | null {
   if (next !== "manual") return null;

@@ -313,3 +313,15 @@ Không chạy `gsd-code-review` mới cho 04-42..04-53. `04-REVIEW.md` và `04-R
 6. **Chưa tự động hóa:** dòng ngày nổi khi bấm pin ở Tổng quan và cuộn thẻ điểm vào khung chỉ có unit test, chưa có kiểm trình duyệt tự động.
 7. **Cảnh báo cũ** MD-01, LW-01..LW-06 còn mở.
 8. **Thay đổi chưa commit của người dùng:** `day-overview-row.tsx`, `overview-panel.tsx` nằm ngoài các commit của phase này.
+
+
+## Đóng phase 2026-11-07 (mở lại lần 3: tìm địa điểm, MAP-01)
+
+**Người dùng xác nhận hoàn thành Phase 4 ngày 2026-11-07.** Đây là xác nhận của người dùng, không phải kết quả kiểm lại của agent.
+
+- Phạm vi thêm sau lần verify đầu: MAP-01 (plan 04-55..04-58, D-141..D-153) và sửa chân form thêm/sửa điểm trên Sheet mobile (738c9a2).
+- Bằng chứng do agent chạy: lint, typecheck, test, build ở các commit 04-55..04-57 (xem thông điệp commit; lần cuối ở c63424f: lint 8/8, typecheck 8/8, test 8/8 gồm itinerary 617, ui-web 378, web 2153). Agent không chạy lại các kiểm này khi đóng phase (chỉ sửa tài liệu).
+- **Chấp nhận theo xác nhận của người dùng, agent chưa kiểm độc lập:** mục F UAT (F1..F11), sửa chân form Sheet mobile 738c9a2. Agent chưa chạy Photon/Nominatim thật, thiết bị thật, NVDA/VoiceOver cho phần này.
+- Mục E (bản đồ) 14/14 PASS do người dùng xác nhận (xem phần trên).
+- Review: gsd-code-review mục E đã chạy ( 4-REVIEW.md,  4-REVIEW-FIX.md); chưa có review độc lập riêng cho 04-55..04-58.
+- Tồn đọng không chặn: xem "Chưa kiểm / tồn đọng" ở trên (MD-01, LW-01..LW-06, UF-01..UF-04 vẫn mở), thêm: server Photon/Nominatim công khai (giới hạn băng thông, điều khoản), cache trong bộ nhớ từng instance, place_id chưa lưu ở BE.

@@ -13,6 +13,7 @@ Thứ tự phase giữ đúng lộ trình đã chốt (0a → 0b → 0c → 1 �
 | 3 | 0c — Identity + session (BFF) |
 | 4 | 1 — Itinerary CRUD + editor |
 | 5 | 2 — Bản đồ + public view |
+| 5.1 | (chèn 2026-11-09) Like + comment lịch trình |
 | 6 | 3 — Profile + users |
 | 7 | 4 — Chat realtime + voice + gọi thoại |
 | 8 | Deploy & nghiệm thu |
@@ -34,6 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Itinerary CRUD & Editor** - "Lịch trình của tôi" và editor đầy đủ tới bước xuất bản (reopened 2026-10-30: form tạo 4 khối thay tạo nhanh (ITIN-02), nhiều ảnh bìa và tự lưu "Thông tin chuyến đi" (ITIN-03) đã xong 41/41 plan; mở lại lần 2 2026-11-05: bản đồ MapLibre + OpenFreeMap trong editor và tab Tổng quan (PUB-06), 12 plan 04-42..04-53 đã xong; UAT mục E 14/14 PASS do người dùng xác nhận; verify phase 2026-11-06; mở lại lần 3 2026-11-06: tìm địa điểm Photon/Nominatim trong form thêm/sửa điểm (MAP-01), 4 plan 04-55..04-58 đã xong)
  (completed 2026-11-07)
 - [ ] **Phase 5: Map & Public View** - Trang công khai SSR, chuyển Bài viết/Bản đồ (dùng lại bản đồ của editor), chia sẻ và Open Graph
+- [ ] **Phase 5.1: Itinerary Likes & Comments (INSERTED)** - Like và comment lịch trình đã xuất bản trên trang công khai; cần BE thêm API trước (hợp đồng BE rồi checkpoint deploy `tripory_be`)
 - [ ] **Phase 6: Profile & Users** - Hồ sơ thật, tab lịch trình, danh bạ và lối vào hội thoại
 - [ ] **Phase 7: Chat, Voice & Calls** - Chat realtime, tin nhắn thoại và gọi thoại 1-1 qua TURN
 - [ ] **Phase 8: Deploy & Acceptance Gate** - Production Vercel trỏ BE công khai, smoke E2E và kênh góp ý
@@ -203,6 +205,20 @@ Mở lại lần 3 (2026-11-06, tìm địa điểm trong form thêm điểm, MA
 **Plans**: TBD
 **UI hint**: yes
 
+### Phase 5.1: Itinerary Likes & Comments (INSERTED)
+**Goal**: Người xem trang công khai `/itineraries/[id]` like và comment được lịch trình đã xuất bản bằng API thật của BE; khách chưa đăng nhập vẫn xem được
+**Depends on**: Phase 5 (like/comment hiện trên trang công khai `/itineraries/[id]` do Phase 5 dựng); API like/comment của `tripory_be` (phụ thuộc ngoài, chưa có, xem External dependency)
+**Requirements**: SOC-01, SOC-02 (chuyển từ v2 BE-02 "Like, comment" vào v1 ngày 2026-11-09, chèn phase 5.1)
+**Success Criteria** (what must be TRUE; mức tối thiểu, chi tiết phạm vi chờ `/gsd-discuss-phase 5.1`):
+  1. Người đã đăng nhập like và bỏ like được một lịch trình đã xuất bản trên trang công khai và thấy số like
+  2. Người đã đăng nhập đọc và gửi được comment trên trang công khai
+  3. Khách chưa đăng nhập xem được trang công khai cùng số like và comment
+  4. Chờ discuss, chưa chốt: ai được bấm like (chủ lịch trình có tự like không), cách đếm số like, comment có sửa/xóa/trả lời không, phân trang comment, hiện tác giả comment ra sao (liên quan BE-06 ở v2), khách bấm like/comment thì xử lý thế nào
+**Plans**: TBD. Thứ tự bắt buộc: plan đầu tiên là tài liệu hợp đồng BE (không code, không ca kiểm thử, theo mẫu 04-24); plan thứ hai là checkpoint người dùng tự sửa và deploy `tripory_be`, xác nhận bằng một lần gọi thật (theo mẫu 04-25); mọi plan FE phụ thuộc checkpoint này
+**UI hint**: yes
+**External dependency**: `tripory_be` chưa có API like/comment. FE không dựng mock (quyết định "Không dựng mock cho tính năng backend chưa hỗ trợ" ở PROJECT.md), nên không plan FE nào chạy trước khi BE có API thật.
+**Note**: Chèn ngày 2026-11-09 theo yêu cầu người dùng "thêm like/comment ở milestone này". Phase 5 giữ nguyên phạm vi, `05-CONTEXT.md` không đổi. Roadmap từng ghi giới hạn 8 phase của granularity `standard` (xem Note của Phase 7); phase thập phân không thêm phase nguyên, Phase 6-8 giữ nguyên số nên giới hạn đó không bị vượt.
+
 ### Phase 6: Profile & Users
 **Goal**: Người dùng quản lý hồ sơ thật, xem lịch trình của mình từ hồ sơ, và tìm được người quen để bắt đầu nhắn tin
 **Depends on**: Phase 5
@@ -248,7 +264,7 @@ Mở lại lần 3 (2026-11-06, tìm địa điểm trong form thêm điểm, MA
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -257,6 +273,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 3. Identity & Session (BFF) | 15/15 | Executed (UAT 19/19 PASS, chờ verify-work) | 2026-10-23 |
 | 4. Itinerary CRUD & Editor | 57/57 (04-01..04-58, không có file plan 04-54) | Complete (UAT 23/23, mục D 8/8 và mục E 14/14 PASS do người dùng xác nhận; mục F tìm địa điểm F1..F12 và sửa chân form Sheet mobile 738c9a2 được người dùng chấp nhận khi xác nhận hoàn thành, agent không kiểm độc lập; chưa kiểm trên thiết bị cảm ứng thật, xem 04-VERIFICATION.md) | 2026-11-07 |
 | 5. Map & Public View | 0/TBD | Not started | - |
+| 5.1. Itinerary Likes & Comments (INSERTED) | 0/TBD | Not started (chờ hợp đồng BE và checkpoint deploy `tripory_be`) | - |
 | 6. Profile & Users | 0/TBD | Not started | - |
 | 7. Chat, Voice & Calls | 0/TBD | Not started | - |
 | 8. Deploy & Acceptance Gate | 0/TBD | Not started | - |

@@ -68,6 +68,11 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 - [ ] **PUB-05**: Link khi dán vào Zalo/Messenger hiển thị preview Open Graph (tiêu đề, mô tả, ảnh bìa); nháp đặt `noindex`
 - [x] **PUB-06**: Bản đồ dùng chung (MapLibre + OpenFreeMap, thể hiện Hoàng Sa, Trường Sa thuộc Việt Nam) hiển thị trong editor: pin theo ngày, đường nối trong ngày, zoom/pan, đồng bộ chọn với danh sách, tab "Tổng quan"; trang công khai dùng lại
 
+### Like và comment (SOC)
+
+- [ ] **SOC-01**: Người đã đăng nhập like và bỏ like được một lịch trình đã xuất bản trên trang công khai và thấy số like; khách chưa đăng nhập xem được số like. Chi tiết (ai được bấm, chủ có tự like không, cách đếm, khách bấm like thì sao) chờ `/gsd-discuss-phase 5.1`. Cần API like của `tripory_be` (chưa có), không dựng mock (chuyển từ v2 BE-02 vào Phase 5.1 ngày 2026-11-09)
+- [ ] **SOC-02**: Người đã đăng nhập đọc và gửi được comment trên trang công khai của lịch trình đã xuất bản; khách chưa đăng nhập đọc được comment. Chi tiết (sửa/xóa/trả lời, phân trang, hiện tác giả comment) chờ `/gsd-discuss-phase 5.1`. Cần API comment của `tripory_be` (chưa có), không dựng mock (chuyển từ v2 BE-02 vào Phase 5.1 ngày 2026-11-09)
+
 ### Hồ sơ và người dùng (PROF)
 
 - [ ] **PROF-01**: Người dùng xem và sửa được hồ sơ: họ tên, bio, avatar dạng URL; email chỉ đọc
@@ -139,7 +144,7 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 ### Chờ BE
 
 - **BE-01**: Fork lịch trình
-- **BE-02**: Like, comment
+- ~~**BE-02**: Like, comment~~ Đã chuyển vào v1, Phase 5.1 (chèn sau Phase 5 ngày 2026-11-09), tách thành SOC-01 (like) và SOC-02 (comment), xem mục "Like và comment (SOC)" ở v1. BE vẫn phải thêm API trước khi làm FE.
 - **BE-03**: Discovery feed
 - **BE-04**: Check-in và review waypoint
 - **BE-05**: Upload ảnh bìa/avatar
@@ -212,6 +217,8 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | PUB-05 | Phase 5 | Pending |
 | PUB-06 | Phase 4 | Complete (chuyển vào Phase 4, mở lại lần 2 ngày 2026-11-05; UAT mục E 14/14 PASS do người dùng xác nhận 2026-11-06; trang công khai dùng lại ở Phase 5) |
 | MAP-01 | Phase 4 | Complete (mở lại lần 3, 2026-11-06; hoàn thành phase được người dùng xác nhận 2026-11-07; UAT mục F chấp nhận theo xác nhận, agent không kiểm độc lập Photon/Nominatim thật) |
+| SOC-01 | Phase 5.1 | Pending (chuyển từ v2 BE-02 ngày 2026-11-09; chờ API like của `tripory_be`) |
+| SOC-02 | Phase 5.1 | Pending (chuyển từ v2 BE-02 ngày 2026-11-09; chờ API comment của `tripory_be`) |
 | PROF-01 | Phase 6 | Pending |
 | PROF-02 | Phase 6 | Pending |
 | PROF-03 | Phase 6 | Pending |
@@ -244,10 +251,10 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | DEPL-04 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 73 total (MAP-01 thêm vào v1 ngày 2026-11-06)
-- Mapped to phases: 73
+- v1 requirements: 75 total (MAP-01 thêm vào v1 ngày 2026-11-06; SOC-01, SOC-02 thêm vào v1 ngày 2026-11-09 thay BE-02)
+- Mapped to phases: 75
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-10-09*
-*Last updated: 2026-10-09 after roadmap creation*
+*Last updated: 2026-11-09 after inserting Phase 5.1 (SOC-01, SOC-02 from BE-02)*

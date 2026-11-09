@@ -27,6 +27,7 @@ Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình 
 - [ ] Người dùng có thể truy cập khung giao diện responsive cho các route thuộc milestone mà không gặp lỗi build hoặc điều hướng.
 - [ ] Người dùng có thể đăng ký, đăng nhập, duy trì phiên và đăng xuất qua BFF cùng origin; access token và refresh token nằm trong cookie httpOnly và không thể bị JavaScript phía client đọc.
 - [ ] Khách chưa đăng nhập có thể xem trang công khai của một lịch trình đã xuất bản; lịch trình nháp hiển thị đúng trạng thái lỗi quyền truy cập.
+- [ ] Người dùng đã đăng nhập like và comment được lịch trình đã xuất bản trên trang công khai; khách chưa đăng nhập xem được (Phase 5.1, SOC-01, SOC-02; cần API mới của backend, không dựng mock).
 - [ ] Người dùng có thể xem và cập nhật hồ sơ thật, tìm người dùng khác và xem danh sách lịch trình của mình.
 - [ ] Người dùng có thể gửi/nhận tin nhắn text và voice theo thời gian thực, theo dõi trạng thái đã đọc và xem lịch sử hội thoại.
 - [ ] Hai người dùng ở các mạng Internet khác nhau có thể gọi thoại ổn định qua WebRTC với TURN, dùng credential ngắn hạn thay vì để secret trong bundle client.
@@ -39,7 +40,7 @@ Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình 
 <!-- Explicit boundaries. Includes reasoning to prevent re-adding. -->
 
 - Fork itinerary — backend chưa có endpoint; chờ hợp đồng API trước khi triển khai.
-- Social (like, comment, share nghiệp vụ), Discovery feed và Check-in/review — backend chưa hỗ trợ; không dựng mock trong frontend mới.
+- Social ngoài like/comment (share nghiệp vụ), Discovery feed và Check-in/review — backend chưa hỗ trợ; không dựng mock trong frontend mới. Like và comment đã chuyển vào milestone này ở Phase 5.1 (SOC-01, SOC-02, quyết định 2026-11-09), backend phải thêm API trước khi làm frontend.
 - Mapbox GL và Mapbox Geocoding — chưa có token; milestone này giữ bản đồ SVG và hoãn package maps tích hợp Mapbox.
 - Bấm lên bản đồ để chọn vị trí waypoint (MAP-02) — hoãn sang v2. Tìm địa điểm bằng Photon/Nominatim và nền MapLibre + OpenFreeMap đã làm ở Phase 4 (quyết định 2026-10-09 được thay ngày 2026-11-05/06).
 - `apps/admin` và ứng dụng mobile — không thuộc mục tiêu thử nghiệm frontend web đầu tiên.
@@ -113,4 +114,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-11-07 after Phase 4 completion*
+*Last updated: 2026-11-09 after inserting Phase 5.1 (like, comment)*

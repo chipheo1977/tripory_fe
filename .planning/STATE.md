@@ -5,9 +5,9 @@ milestone_name: milestone
 status: planning
 stopped_at: Phase 5 context gathered
 last_updated: "2026-11-09T15:01:04.208Z"
-last_activity: 2026-11-07 (Phase 4 hoàn thành, người dùng xác nhận)
+last_activity: 2026-11-09 (chèn Phase 5.1 like/comment sau Phase 5)
 progress:
-  total_phases: 8
+  total_phases: 9
   completed_phases: 3
   total_plans: 84
   completed_plans: 83
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 Phase: 5
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-11-07 (Phase 4 hoàn thành, người dùng xác nhận)
+Last activity: 2026-11-09 (chèn Phase 5.1 like/comment sau Phase 5; Phase 5 vẫn là phase hiện tại)
 
 Phase 1 progress: [██████████] 100% — verified complete
 
@@ -203,6 +203,10 @@ Recent decisions affecting current work:
 - [Phase 04]: UAT thủ công 23/23 PASS (người chạy xác nhận, không đính kèm ảnh chụp); 04-SECURITY đóng 70/70 threat, UF-01..04 vẫn OPEN không chặn; Phase 4 nghiệm thu
 - [Phase 04]: 2026-11-07: người dùng xác nhận hoàn thành Phase 4 gồm MAP-01 (tìm địa điểm). UAT mục F F1..F12 và sửa chân form Sheet mobile 738c9a2 ghi là chấp nhận theo xác nhận của người dùng, agent chưa kiểm độc lập (không PASS). Tồn đọng chuyển tiếp: Photon/Nominatim public server, cache trong bộ nhớ từng instance, place_id chưa lưu ở BE, UF-01..04, MD-01, LW-01..LW-06\n- [Phase 04]: 04-22: invariant <img regex ends at '/>' (=> in handlers breaks '>' match); BE dependencies for Phase 4 recorded in 04-BE-DEPENDENCIES.md
 
+### Roadmap Evolution
+
+- Phase 5.1 inserted after Phase 5: Itinerary Likes & Comments (URGENT). Chèn ngày 2026-11-09 theo yêu cầu người dùng "thêm like/comment ở milestone này"; thư mục `.planning/phases/05.1-itinerary-likes-comments/`. Requirements SOC-01 (like), SOC-02 (comment) chuyển từ v2 BE-02. Phụ thuộc Phase 5 (trang công khai `/itineraries/[id]`) và API like/comment của `tripory_be` (chưa có): plan đầu là hợp đồng BE (mẫu 04-24), rồi checkpoint người dùng làm và deploy BE (mẫu 04-25) trước mọi plan FE; không dựng mock. Phạm vi chi tiết chờ `/gsd-discuss-phase 5.1`. Phase 5 và `05-CONTEXT.md` không đổi; Phase 6-8 giữ số, không vượt giới hạn 8 phase nguyên của granularity `standard`.
+
 ### Pending Todos
 
 None yet.
@@ -212,6 +216,7 @@ None yet.
 - External dependency: URL BE công khai (HTTPS + WSS, CORS cho Vercel và FE cũ) chặn nghiệm thu Phase 7 (SignalR, TURN giữa hai mạng) và Phase 8
 - Tài khoản TURN (free tier hoặc coturn) phải có trước khi plan Phase 7; kiểm Cloudflare TURN có đòi phương thức thanh toán không
 - Phase cần research sâu khi plan: 3, 4, 7, 8
+- External dependency: `tripory_be` chưa có API like/comment; chặn mọi plan FE của Phase 5.1 cho tới khi checkpoint deploy BE xong
 
 ## Deferred Items
 

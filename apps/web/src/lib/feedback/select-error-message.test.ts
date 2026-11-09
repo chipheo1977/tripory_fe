@@ -44,6 +44,9 @@ const EXPECTED = [
   ["WaypointName.Empty", "Vui lòng nhập tên điểm đến."],
   ["Waypoint.NotFound", "Điểm đến không còn tồn tại."],
   ["Maps.UnresolvableLink", "Không mở được link rút gọn này. Thử dán link đầy đủ hoặc tọa độ."],
+  ["Places.RateLimited", "Bạn tìm hơi nhanh. Đợi vài giây rồi thử lại."],
+  ["Places.Unavailable", "Chưa tìm được địa điểm lúc này. Thử lại hoặc nhập tọa độ thủ công."],
+  ["Bff.InvalidQuery", "Từ khóa tìm kiếm không hợp lệ."],
   ["Coordinate.InvalidLatitude", "Vĩ độ phải nằm trong khoảng -90 đến 90."],
   ["Coordinate.InvalidLongitude", "Kinh độ phải nằm trong khoảng -180 đến 180."],
   ["Conversation.NotFound", "Không tìm thấy cuộc trò chuyện."],
@@ -82,9 +85,9 @@ const UNMAPPED = [
 ] as const;
 
 describe("ERROR_MESSAGES", () => {
-  it("có đúng 51 mã (D-16 + Maps.UnresolvableLink + 11 mã form tạo và ảnh bìa)", () => {
-    expect(ERROR_MESSAGES.size).toBe(51);
-    expect(EXPECTED).toHaveLength(51);
+  it("có đúng 54 mã (D-16 + Maps.UnresolvableLink + 11 mã form tạo và ảnh bìa + 3 mã tìm địa điểm)", () => {
+    expect(ERROR_MESSAGES.size).toBe(54);
+    expect(EXPECTED).toHaveLength(54);
   });
 
   it.each(EXPECTED)("%s → %s", (code, message) => {

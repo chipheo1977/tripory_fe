@@ -213,7 +213,8 @@ describe("CreateItineraryDialog: chọn điểm đến và tên", () => {
     await user.tab();
     expect(titleInput().value).toBe("Chuyến đi Hà Nội");
     expect(screen.queryByText("Vui lòng nhập tên chuyến đi.")).toBeNull();
-  });
+    // Ba lần chọn điểm đến + gõ tên: ~2,3 giây khi chạy riêng, vượt 5 giây mặc định khi chạy cả bộ web.
+  }, 15_000);
 });
 
 describe("CreateItineraryDialog: Enter không gửi form", () => {

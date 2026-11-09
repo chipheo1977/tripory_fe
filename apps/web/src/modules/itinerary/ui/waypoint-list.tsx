@@ -29,7 +29,7 @@ import { itineraryKeys } from "@tripory/itinerary/react";
 import { EmptyState, Icon, notify } from "@tripory/ui-web";
 import { useQueryClient } from "@tanstack/react-query";
 import { MapPin } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type RefObject } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { itinerary as itineraryHooks } from "@/composition/itinerary.client";
 import { decideMutationError } from "@/lib/feedback";
@@ -48,6 +48,9 @@ export type WaypointFocusRequest = Readonly<{
   target: "main" | "handle" | "add";
 }>;
 
+/** Chế độ chọn điểm khi bản đồ hiển thị (D-126): nút chính của thẻ chọn điểm thay vì mở form sửa. */
+export type WaypointSelection = Readonly<{ selectedId: string | null; onSelect(waypoint: Waypoint): void }>;
+
 export type WaypointListProps = Readonly<{
   itinerary: Itinerary;
   day: DayView;
@@ -63,7 +66,18 @@ export type WaypointListProps = Readonly<{
   focusRequest: WaypointFocusRequest | null;
   /** Nút "Thêm điểm đến": ngày trống thì là nút trong EmptyState, ngày có điểm thì là thanh dưới của TimelinePanel. */
   addButtonRef: RefObject<HTMLButtonElement | null>;
+  /** Không truyền (bản đồ đang tải/lỗi): nút chính mở form sửa như trước. */
+  selection?: WaypointSelection;
 }>;
+
+function SelectionHint({ id, visible }: Readonly<{ id: string; visible: boolean }>) {
+  if (!visible) return null;
+  return (
+    <p className="sr-only" id={id}>
+      Nhấn để xem trên bản đồ
+    </p>
+  );
+}
 
 const subscribeNever = (): (() => void) => () => undefined;
 const getBody = (): HTMLElement => document.body;
@@ -89,8 +103,10 @@ export function WaypointList({
   highlightId,
   focusRequest,
   addButtonRef,
+  selection,
 }: WaypointListProps) {
   const store = useSaveStatusStore();
+  const hintId = useId();
   const queryClient = useQueryClient();
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const listRef = useRef<HTMLOListElement | null>(null);
@@ -172,6 +188,13 @@ export function WaypointList({
     findByDataset(listRef.current, attribute, focusRequest.waypointId)?.focus();
   }, [focusRequest, addButtonRef]);
 
+  const selectedId = selection?.selectedId ?? null;
+  useEffect(() => {
+    if (selectedId === null) return;
+    findByDataset(listRef.current, "waypointMain", selectedId)
+      ?.closest("li")
+      ?.scrollIntoView?.({ block: "nearest", behavior: reducedMotion ? "auto" : "smooth" });
+  }, [selectedId, reducedMotion]);
   useEffect(() => {
     if (highlightId === null) return;
     findByDataset(listRef.current, "waypointMain", highlightId)
@@ -199,6 +222,9 @@ export function WaypointList({
     );
   }
 
+  const activate = selection === undefined ? onEdit : selection.onSelect;
+  const actions = { onActivate: activate, onEdit, onRemove };
+  const itemHintId = selection === undefined ? null : hintId;
   const activeIndex = activeId === null ? -1 : visibleIds.indexOf(activeId);
   const activeWaypoint = activeIndex < 0 ? undefined : visible[activeIndex];
 
@@ -215,6 +241,7 @@ export function WaypointList({
       onDragStart={handleDragStart}
       sensors={sensors}
     >
+      <SelectionHint id={hintId} visible={selection !== undefined} />
       <SortableContext items={visibleIds} strategy={verticalListSortingStrategy}>
         <ol
           aria-label={`Điểm đến Ngày ${day.dayNumber}`}
@@ -224,12 +251,15 @@ export function WaypointList({
         >
           {visible.map((waypoint, index) => (
             <SortableWaypointItem
-              highlighted={waypoint.id === highlightId}
+              actions={actions}
+              appearance={{
+                highlighted: waypoint.id === highlightId,
+                selected: waypoint.id === selectedId,
+                reducedMotion,
+                hintId: itemHintId,
+              }}
               key={waypoint.id}
-              onEdit={onEdit}
-              onRemove={onRemove}
               position={index + 1}
-              reducedMotion={reducedMotion}
               showHandle={visible.length > 1}
               waypoint={waypoint}
             />

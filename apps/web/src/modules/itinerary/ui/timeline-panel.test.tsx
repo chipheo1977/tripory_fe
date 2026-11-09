@@ -1,13 +1,15 @@
-import type { Itinerary, Waypoint } from "@tripory/itinerary";
+import { buildDayRange, type Itinerary, type Waypoint } from "@tripory/itinerary";
 import { createWgs84Coordinate, parseItineraryId, parseUserId } from "@tripory/shared-kernel";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
-import { beforeEach, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { makeQueryClient } from "@/composition/query-client";
 import { createSaveStatusStore, SaveStatusProvider } from "./save-status";
-import { TimelinePanel, type TimelinePanelProps } from "./timeline-panel";
+import { DayPanel, type DayPanelProps } from "./day-panel";
+import { DayTabs } from "./day-tabs";
+import { TimelineHostProvider, TimelinePanel, type TimelineHost } from "./timeline-panel";
 
 vi.mock("@/composition/itinerary.client", async () => {
   const { createItineraryHooks: factory } = await import("@tripory/itinerary/react");
@@ -74,35 +76,48 @@ beforeEach(() => {
   Element.prototype.scrollIntoView = vi.fn();
 });
 
-function setup(overrides: Partial<TimelinePanelProps> = {}) {
+type SetupOptions = Readonly<{
+  selectedDay?: number;
+  pendingIds?: ReadonlySet<string>;
+  selection?: DayPanelProps["list"]["selection"];
+}>;
+
+function setup(options: SetupOptions = {}) {
   const user = userEvent.setup();
-  const props: TimelinePanelProps = {
-    itinerary,
-    selectedDay: 1,
-    onSelectDay: vi.fn(),
-    pendingIds: new Set(),
-    onRemove: vi.fn(),
-    onFlushPending: vi.fn(),
+  const day = buildDayRange(itinerary).find((candidate) => candidate.dayNumber === (options.selectedDay ?? 1))!;
+  const props = {
+    onSelectTab: vi.fn(),
     onAdd: vi.fn(),
     onEdit: vi.fn(),
-    highlightId: null,
-    focusRequest: null,
     addButtonRef: createRef<HTMLButtonElement>(),
-    ...overrides,
   };
   const { container } = render(
     <QueryClientProvider client={makeQueryClient()}>
       <SaveStatusProvider store={createSaveStatusStore()}>
-        <TimelinePanel {...props} />
+        <TimelinePanel
+          tabs={<DayTabs itinerary={itinerary} onSelectTab={props.onSelectTab} selectedTab={day.dayNumber} />}
+        >
+          <DayPanel
+            addButtonRef={props.addButtonRef}
+            day={day}
+            feedback={{ highlightId: null, focusRequest: null }}
+            itinerary={itinerary}
+            list={{ onEdit: props.onEdit, onFlushPending: vi.fn(), onRemove: vi.fn(), selection: options.selection }}
+            onAdd={props.onAdd}
+            pendingIds={options.pendingIds ?? new Set()}
+          />
+        </TimelinePanel>
       </SaveStatusProvider>
     </QueryClientProvider>,
   );
   return { user, props, container };
 }
 
-it("renders the day tabs, the subtitle and the waypoints of the selected day", () => {
-  setup();
-  expect(screen.getByRole("tablist", { name: "Các ngày" })).toBeTruthy();
+it("renders the tab bar in a sticky strip, then the subtitle and the waypoints of the selected day", () => {
+  const { container } = setup();
+  const strip = container.querySelector(".sticky.top-0");
+  expect(strip).not.toBeNull();
+  expect(within(strip as HTMLElement).getByRole("tablist", { name: "Các ngày" })).toBeTruthy();
   expect(screen.getByRole("button", { name: "Sửa phụ đề Ngày 1: Trung tâm" })).toBeTruthy();
   const list = screen.getByRole("list", { name: "Điểm đến Ngày 1" });
   expect(within(list).getByText("Chợ Bến Thành")).toBeTruthy();
@@ -149,8 +164,93 @@ it("puts the button inside the sticky bar when the day has visible waypoints", (
   expect(within(bar as HTMLElement).getByRole("button", { name: "Thêm điểm đến" })).toBeTruthy();
 });
 
-it("calls onSelectDay when another tab is chosen", async () => {
+it("calls onSelectTab when another tab is chosen", async () => {
   const { user, props } = setup();
   await user.click(screen.getByRole("tab", { name: "Ngày 2" }));
-  expect(props.onSelectDay).toHaveBeenCalledWith(2);
+  expect(props.onSelectTab).toHaveBeenCalledWith(2);
+});
+
+it("passes the selection down: the main button selects the waypoint instead of editing", async () => {
+  const onSelect = vi.fn();
+  const { user, props } = setup({ selection: { selectedId: "w2", onSelect } });
+  await user.click(screen.getByRole("button", { name: "1 Chợ Bến Thành" }));
+  expect(onSelect).toHaveBeenCalledWith(itinerary.waypoints[0]);
+  expect(props.onEdit).not.toHaveBeenCalled();
+  expect(screen.getByRole("button", { name: "2 Dinh Độc Lập" }).getAttribute("aria-current")).toBe("true");
+});
+
+it("without a selection the main button edits", async () => {
+  const { user, props } = setup();
+  await user.click(screen.getByRole("button", { name: "1 Chợ Bến Thành" }));
+  expect(props.onEdit).toHaveBeenCalledWith(itinerary.waypoints[0]);
+});
+
+describe("trong Sheet (TimelineHostProvider)", () => {
+  const renderInSheet = (host: TimelineHost, scrollResetKey: string | number = 0) =>
+    render(
+      <TimelineHostProvider value={host}>
+        <TimelinePanel scrollResetKey={scrollResetKey} tabs={<div role="tablist">tab</div>}>
+          <p>nội dung</p>
+        </TimelinePanel>
+      </TimelineHostProvider>,
+    );
+  const scroller = () => document.querySelector<HTMLElement>("[data-timeline-scroller]") as HTMLElement;
+
+  it("hàng tab nằm ngoài vùng cuộn (đứng yên), thân nằm trong vùng cuộn duy nhất", () => {
+    renderInSheet({ hiddenBottom: 270, scrollable: true });
+
+    expect(scroller().contains(screen.getByRole("tablist"))).toBe(false);
+    expect(scroller().contains(screen.getByText("nội dung"))).toBe(true);
+    expect(document.querySelectorAll("[data-timeline-scroller]")).toHaveLength(1);
+  });
+
+  it("vùng cuộn: cao đúng phần nhìn thấy (bottom = phần bị che), chỉ cuộn dọc, không kéo sheet khi vuốt, không lan cuộn", () => {
+    renderInSheet({ hiddenBottom: 270, scrollable: true });
+
+    expect(scroller().style.bottom).toBe("270px");
+    expect(scroller().className.split(/\s+/)).toEqual(expect.arrayContaining(["overflow-y-auto", "overscroll-contain", "touch-pan-y"]));
+    expect(scroller().hasAttribute("data-base-ui-swipe-ignore")).toBe(true);
+  });
+
+  it("peek (scrollable=false): không cuộn và về đầu", () => {
+    const { rerender } = renderInSheet({ hiddenBottom: 270, scrollable: true });
+    scroller().scrollTop = 80;
+
+    rerender(
+      <TimelineHostProvider value={{ hiddenBottom: 270, scrollable: false }}>
+        <TimelinePanel tabs={<div role="tablist">tab</div>}>
+          <p>nội dung</p>
+        </TimelinePanel>
+      </TimelineHostProvider>,
+    );
+
+    expect(scroller().className.split(/\s+/)).toContain("overflow-y-hidden");
+    expect(scroller().className.split(/\s+/)).not.toContain("overflow-y-auto");
+    expect(scroller().scrollTop).toBe(0);
+  });
+
+  it("đổi scrollResetKey (đổi tab) thì về đầu", () => {
+    const { rerender } = renderInSheet({ hiddenBottom: 0, scrollable: true }, "overview");
+    scroller().scrollTop = 80;
+
+    rerender(
+      <TimelineHostProvider value={{ hiddenBottom: 0, scrollable: true }}>
+        <TimelinePanel scrollResetKey={1} tabs={<div role="tablist">tab</div>}>
+          <p>nội dung</p>
+        </TimelinePanel>
+      </TimelineHostProvider>,
+    );
+
+    expect(scroller().scrollTop).toBe(0);
+  });
+
+  it("ngoài Sheet không có vùng cuộn riêng", () => {
+    render(
+      <TimelinePanel tabs={<div role="tablist">tab</div>}>
+        <p>nội dung</p>
+      </TimelinePanel>,
+    );
+
+    expect(document.querySelector("[data-timeline-scroller]")).toBeNull();
+  });
 });

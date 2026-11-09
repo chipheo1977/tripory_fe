@@ -3,7 +3,7 @@ status: complete
 phase: 04-itinerary-crud-editor
 source: [04-UAT-CHECKLIST.md, 04-01-SUMMARY.md … 04-22-SUMMARY.md, 04-VERIFICATION.md]
 started: 2026-10-26T00:00:00Z
-updated: 2026-10-30T00:00:00Z
+updated: 2026-11-07T00:00:00Z
 ---
 
 ## Current Test
@@ -138,3 +138,8 @@ skipped: 0
       issue: "test cũ khẳng định hành vi lỗi 'keeps the form locked after success' (đã viết lại, thêm test wrapper mô phỏng Activity)"
   missing:
     - "Đã xong: người chạy xác nhận PASS bước 2 (tạo, Back, dialog đóng, mở lại là form mới) ở 04-UAT-CHECKLIST.md"
+
+
+## Đóng phase 2026-11-07
+
+Người dùng xác nhận hoàn thành Phase 4 ngày 2026-11-07. Các bước 1..23 và mục D, E như ghi ở trên. Mục F (tìm địa điểm, F1..F12 trong  4-UAT-CHECKLIST.md) và sửa chân form Sheet mobile 738c9a2: chấp nhận theo xác nhận của người dùng, agent chưa kiểm độc lập (không ghi PASS).

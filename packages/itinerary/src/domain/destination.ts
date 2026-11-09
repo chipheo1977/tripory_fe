@@ -1,4 +1,9 @@
+import type { GeoBounds, LngLat } from './geo-bounds';
+
 export type DestinationKind = 'municipality' | 'province';
+
+/** Tâm và khung nhìn xấp xỉ của một đơn vị cấp tỉnh (D-121), không phải ranh giới hành chính. */
+export type DestinationView = Readonly<{ center: LngLat; bounds: GeoBounds }>;
 
 /** Một điểm đến của form tạo (đơn vị cấp tỉnh). `slug` bất biến, trùng mã BE (D-53). */
 export type Destination = Readonly<{
@@ -10,6 +15,7 @@ export type Destination = Readonly<{
   popularityRank: number | null; // 1-10 theo D-61, null nếu không xếp hạng
   aliases: readonly string[]; // tên tỉnh cũ và địa danh du lịch (có dấu)
   defaultCoverImageUrl: string | null; // URL https tuyệt đối của ảnh mặc định
+  view: DestinationView; // tâm và khung nhìn xấp xỉ (D-121), dùng để canh bản đồ
 }>;
 
 /** Số mục nhóm "Phổ biến" (D-60, D-61). */

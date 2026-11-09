@@ -41,17 +41,51 @@ const DOMAIN_NAMES = [
   'selectCoverImage',
   'coverSlots',
   'focusTargetAfterRemove',
+  'VIETNAM_VIEW_BOUNDS',
+  'boundsOf',
+  'boundsContain',
+  'isDegenerate',
+  'OVERVIEW_TAB',
+  'DAY_COLOR_COUNT',
+  'dayColorIndex',
+  'countVisibleWaypoints',
+  'defaultEditorTab',
+  'buildMapPins',
+  'buildDayRoutes',
+  'fitTargetFor',
+  'summarizeDays',
+  'PLACE_CATEGORY_LABELS',
+  'SUGGESTION_CATEGORIES',
+  'ATTRACTION_TOURISM_VALUES',
+  'FOOD_AMENITY_VALUES',
+  'LODGING_TOURISM_VALUES',
+  'placeCategoryOf',
+  'composePlaceAddress',
+  'VIETNAM_SEARCH_BOUNDS',
+  'HOANG_SA_BOUNDS',
+  'TRUONG_SA_BOUNDS',
+  'isSearchableCoordinate',
+  'isPlaceAllowed',
+  'PLACE_QUERY_MIN_LENGTH',
+  'PLACE_QUERY_MAX_LENGTH',
+  'placeQueryText',
+  'coordinateInputOf',
+  'planPlaceAutofill',
+  'createPlaceSearchService',
 ] as const;
 
 const INFRASTRUCTURE_NAMES = [
   'createHttpItineraryRepository',
   'createHttpShortLinkResolver',
+  'createHttpPlaceLookup',
+  'createNominatimReverseProvider',
+  'createPhotonPlaceSearchProvider',
   'createStaticDestinationCatalog',
   'toItinerary',
   'itineraryDetailDto',
 ] as const;
 
-const REACT_NAMES = ['createItineraryHooks', 'itineraryKeys'] as const;
+const REACT_NAMES = ['createItineraryHooks', 'itineraryKeys', 'createPlaceHooks', 'placeKeys'] as const;
 
 describe('itinerary public entry', () => {
   it('entry gốc là module hợp lệ', () => {

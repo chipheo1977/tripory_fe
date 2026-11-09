@@ -44,7 +44,7 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 - [x] **ITIN-02**: Người dùng tạo lịch trình trong một modal có 4 khối accordion (chỉ mở một khối mỗi lúc) rồi vào thẳng editor với đủ số ngày: (1) chọn một điểm đến trong 34 tỉnh/thành Việt Nam, nhóm "Phổ biến" và "Tất cả", tìm không dấu và theo alias (bắt buộc); (2) tên chuyến đi, mặc định "Chuyến đi {điểm đến}"; (3) ngày khởi hành (tùy chọn) và số ngày (mặc định 3, từ 1 tới 30); (4) sở thích (chọn nhiều, tùy chọn). Ảnh bìa mặc định theo điểm đến (xem `04-CONTEXT.md` D-52..D-101). BE lưu đủ các trường trong một request (phương án B). Mở lại 2026-10-30: bản tạo nhanh bằng tiêu đề đã giao ở Phase 4 (UAT bước 2 PASS) nay được thay bằng wizard; đề xuất ở `.agents/tasks/create-itinerary-wizard-proposal.md`
 - [x] **ITIN-03**: Người dùng có thể sửa metadata: tiêu đề, mô tả, ngày khởi hành, ảnh bìa dạng URL (có preview và nền dự phòng). Mở lại 2026-10-30: "Thông tin chuyến đi" tự lưu khi có thay đổi (không có nút Lưu); lưu tối đa 5 ảnh bìa dạng lưới và chọn một ảnh hiển thị; ảnh bìa chỉ sửa ở đây (xem `04-CONTEXT.md` D-79..D-91)
 - [x] **ITIN-04**: Người dùng có thể chuyển tab ngày, thêm ngày và sửa phụ đề ngày inline
-- [x] **ITIN-05**: Người dùng có thể thêm waypoint (tên, địa chỉ, ghi chú) và nhập vị trí bằng cách dán tọa độ "lat, lng" hoặc link Google Maps
+- [x] **ITIN-05**: Người dùng có thể thêm waypoint (tên, địa chỉ, ghi chú) và nhập vị trí bằng cách dán tọa độ "lat, lng" hoặc link Google Maps. Ghi chú 2026-11-06 (mở lại lần 3, MAP-01): tìm địa điểm theo tên nay là cách nhập vị trí chính; dán tọa độ hoặc link Google Maps vẫn giữ, thành lối phụ "Nhập tọa độ thủ công" (xem `04-CONTEXT.md` D-141..D-153)
 - [x] **ITIN-06**: Người dùng có thể sửa waypoint
 - [x] **ITIN-07**: Người dùng có thể xóa waypoint và hoàn tác trong 5 giây (hoãn gửi DELETE)
 - [x] **ITIN-08**: Người dùng có thể kéo thả sắp xếp waypoint trong ngày bằng chuột, cảm ứng và bàn phím; cập nhật optimistic và rollback khi lỗi
@@ -55,14 +55,18 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 - [x] **ITIN-13**: Người không phải chủ không thấy thao tác sửa (`canEdit` suy ra ở domain)
 - [x] **ITIN-14**: Editor dùng được trên mobile với bottom sheet nhiều mức cho timeline
 
+### Bản đồ và địa điểm (MAP)
+
+- [x] **MAP-01**: Người dùng tìm địa điểm theo tên trong phạm vi Việt Nam khi thêm/sửa waypoint, qua Photon (dự phòng Nominatim chỉ cho reverse geocoding) gọi từ BFF của app, đặt sau port `PlaceSearchProvider` (đổi nhà cung cấp không sửa UI); khi chưa gõ thì thấy danh sách gợi ý mặc định theo điểm đến của lịch trình (Tham quan, Ăn uống, Lưu trú); chọn một kết quả thì tự điền vị trí, địa chỉ và tên (khi ô Tên còn trống hoặc là giá trị tự điền); dán tọa độ "lat, lng" hoặc link Google Maps vẫn có ở lối phụ "Nhập tọa độ thủ công", và tọa độ nhập tay được tra địa chỉ (reverse) để tự điền; kết quả nằm ở quần đảo Hoàng Sa, Trường Sa hoặc không thuộc Việt Nam bị bỏ. BE không đổi, chỉ lưu tên, địa chỉ, tọa độ (chuyển từ v2 vào Phase 4 ngày 2026-11-06, mở lại lần 3; xem `04-CONTEXT.md` D-141..D-153)
+
 ### Trang công khai và chia sẻ (PUB)
 
 - [ ] **PUB-01**: Khách chưa đăng nhập xem được trang công khai SSR của lịch trình đã xuất bản, bố cục bài viết theo ngày
-- [ ] **PUB-02**: Người xem chuyển được giữa chế độ Bài viết và Bản đồ SVG (pin theo ngày, polyline, zoom/pan, đồng bộ chọn với danh sách)
+- [ ] **PUB-02**: Người xem chuyển được giữa chế độ Bài viết và Bản đồ trên trang công khai (dùng lại component bản đồ của PUB-06)
 - [ ] **PUB-03**: Lịch trình nháp trả trang 403 cho khách, id sai trả 404; chủ xem nháp thấy banner "Bản nháp – chỉ bạn thấy" và nút Sửa
 - [ ] **PUB-04**: Người xem có thể chia sẻ bằng copy link, Web Share (mobile) và mã QR
 - [ ] **PUB-05**: Link khi dán vào Zalo/Messenger hiển thị preview Open Graph (tiêu đề, mô tả, ảnh bìa); nháp đặt `noindex`
-- [ ] **PUB-06**: Bản đồ SVG là một component dùng chung, editor cũng hiển thị được
+- [x] **PUB-06**: Bản đồ dùng chung (MapLibre + OpenFreeMap, thể hiện Hoàng Sa, Trường Sa thuộc Việt Nam) hiển thị trong editor: pin theo ngày, đường nối trong ngày, zoom/pan, đồng bộ chọn với danh sách, tab "Tổng quan"; trang công khai dùng lại
 
 ### Hồ sơ và người dùng (PROF)
 
@@ -115,8 +119,8 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 
 ### Bản đồ và địa điểm
 
-- **MAP-01**: Tìm địa điểm theo tên qua geocoder OSM (Nominatim/Photon) gọi từ route handler, đặt sau port `PlaceSearch`
-- **MAP-02**: Nền bản đồ MapLibre + OpenFreeMap, bấm lên bản đồ để chọn vị trí waypoint
+- ~~**MAP-01**: Tìm địa điểm theo tên qua geocoder OSM (Nominatim/Photon) gọi từ route handler, đặt sau port `PlaceSearch`~~ Đã chuyển vào v1, Phase 4 (mở lại lần 3, 2026-11-06), xem mục "Bản đồ và địa điểm (MAP)" ở v1.
+- **MAP-02**: Nền bản đồ MapLibre + OpenFreeMap, bấm lên bản đồ để chọn vị trí waypoint. Ghi chú 2026-11-06: nền bản đồ đã làm ở PUB-06 (Phase 4); phần còn lại ở v2 chỉ là "bấm lên bản đồ để chọn vị trí" (D-141)
 - **MAP-03**: Mapbox GL + Geocoding khi có token
 
 ### Trải nghiệm bổ sung
@@ -202,11 +206,12 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | ITIN-13 | Phase 4 | Complete |
 | ITIN-14 | Phase 4 | Complete |
 | PUB-01 | Phase 5 | Pending |
-| PUB-02 | Phase 4 | Pending (chuyển từ Phase 5 theo yêu cầu user 2026-10-30) |
+| PUB-02 | Phase 5 | Pending (về lại Phase 5 ngày 2026-11-05: chỉ còn nút chuyển Bài viết/Bản đồ) |
 | PUB-03 | Phase 5 | Pending |
 | PUB-04 | Phase 5 | Pending |
 | PUB-05 | Phase 5 | Pending |
-| PUB-06 | Phase 5 | Pending |
+| PUB-06 | Phase 4 | Complete (chuyển vào Phase 4, mở lại lần 2 ngày 2026-11-05; UAT mục E 14/14 PASS do người dùng xác nhận 2026-11-06; trang công khai dùng lại ở Phase 5) |
+| MAP-01 | Phase 4 | Complete (mở lại lần 3, 2026-11-06; hoàn thành phase được người dùng xác nhận 2026-11-07; UAT mục F chấp nhận theo xác nhận, agent không kiểm độc lập Photon/Nominatim thật) |
 | PROF-01 | Phase 6 | Pending |
 | PROF-02 | Phase 6 | Pending |
 | PROF-03 | Phase 6 | Pending |
@@ -239,8 +244,8 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | DEPL-04 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 72 total
-- Mapped to phases: 72
+- v1 requirements: 73 total (MAP-01 thêm vào v1 ngày 2026-11-06)
+- Mapped to phases: 73
 - Unmapped: 0 ✓
 
 ---

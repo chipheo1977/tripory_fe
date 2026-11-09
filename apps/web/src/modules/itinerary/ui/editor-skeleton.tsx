@@ -1,6 +1,6 @@
 import { Skeleton } from "@tripory/ui-web";
 
-/** Khung chờ của trình chỉnh sửa lịch trình (UI-SPEC "Đang tải"): header, timeline và bản đồ/ảnh bìa. */
+/** Khung chờ của trình chỉnh sửa lịch trình (UI-SPEC "Đang tải"): header, timeline và bản đồ (một khối phủ kín vùng bản đồ). */
 export function EditorSkeleton() {
   return (
     <div className="min-h-dvh bg-background">
@@ -17,17 +17,12 @@ export function EditorSkeleton() {
           <Skeleton variant="block" />
           <Skeleton variant="block" />
         </div>
-        <div className="flex flex-col gap-stack-sm p-stack-md">
-          <Skeleton className="aspect-(--itinerary-cover-ratio) h-auto" variant="block" />
-          <Skeleton variant="text" />
-          <Skeleton variant="text" />
+        <div className="relative">
+          <Skeleton className="absolute inset-0 h-auto" variant="block" />
         </div>
       </div>
-      <div className="flex flex-col gap-stack-sm p-stack-md lg:hidden">
-        <Skeleton className="aspect-(--itinerary-cover-ratio) h-auto" variant="block" />
-        <Skeleton variant="block" />
-        <Skeleton variant="block" />
-        <Skeleton variant="block" />
+      <div className="relative h-dvh lg:hidden">
+        <Skeleton className="absolute inset-0 h-auto" variant="block" />
       </div>
       <p className="sr-only" role="status">Đang tải lịch trình…</p>
     </div>

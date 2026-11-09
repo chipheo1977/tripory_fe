@@ -1,7 +1,8 @@
 'use client';
 
 import { Search, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import type { Ref } from 'react';
 import { Icon } from '../atoms/icon';
 import { IconButton } from '../atoms/icon-button';
 import { Input } from '../atoms/input';
@@ -14,6 +15,8 @@ type SearchInputBaseProps = Omit<InputProps, 'allowClear' | 'aria-label' | 'clea
 export type SearchInputProps = SearchInputBaseProps & {
   clearable?: boolean;
   defaultValue?: string;
+  /** Ref tới ô nhập thật, gộp với ref nội bộ (vd. để form focus ô khi có lỗi). */
+  inputRef?: Ref<HTMLInputElement>;
   label: string;
   loading?: boolean;
   onValueChange?: (value: string) => void;
@@ -21,10 +24,19 @@ export type SearchInputProps = SearchInputBaseProps & {
   value?: string;
 };
 
+function assignRef<T>(ref: Ref<T> | undefined, value: T | null): void {
+  if (typeof ref === 'function') {
+    ref(value);
+    return;
+  }
+  if (ref !== null && ref !== undefined) ref.current = value;
+}
+
 export function SearchInput({
   className,
   clearable = true,
   defaultValue = '',
+  inputRef: externalRef,
   label,
   loading = false,
   onKeyDown,
@@ -34,6 +46,13 @@ export function SearchInput({
   ...props
 }: SearchInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const setInputRef = useCallback(
+    (element: HTMLInputElement | null) => {
+      inputRef.current = element;
+      assignRef(externalRef, element);
+    },
+    [externalRef],
+  );
   const [internalValue, setInternalValue] = useState(defaultValue);
   const currentValue = value ?? internalValue;
 
@@ -60,7 +79,7 @@ export function SearchInput({
       <Icon className="pointer-events-none absolute left-inline-sm top-1/2 -translate-y-1/2 text-subtle" icon={Search} size="sm" />
       <Input
         {...props}
-        ref={inputRef}
+        ref={setInputRef}
         aria-label={label}
         className={cn('pl-section pr-page-block', className)}
         onKeyDown={handleKeyDown}

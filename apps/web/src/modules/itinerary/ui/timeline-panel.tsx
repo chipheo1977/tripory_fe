@@ -1,85 +1,88 @@
 "use client";
 
-// Cột timeline của editor (UI-SPEC §Editor, §Bố cục desktop, §Ngày trống và hướng dẫn): tab ngày, phụ đề, danh sách
-// điểm đến kéo thả và thanh "Thêm điểm đến". Nằm trong cột trái từ `lg` hoặc trong Sheet dưới `lg`; không biết nó ở đâu.
+// Khung cột timeline của editor (UI-SPEC §Editor, §Bố cục desktop): thanh tab ở trên, thân tab ở dưới.
+// Nằm trong cột trái từ `lg` hoặc trong Sheet dưới `lg`; không biết tab nào đang chọn: thân là `DayPanel` (tab ngày) hoặc
+// `OverviewPanel` (tab Tổng quan) do editor ghép vào. Nơi chứa báo qua `TimelineHostProvider` (không có = cột trái).
 //
-// Nút "Thêm điểm đến" chỉ có MỘT bản tại mỗi thời điểm, và `addButtonRef` luôn trỏ vào nó: ngày có điểm thì là thanh dưới
-// sticky; ngày không còn điểm hiển thị thì là nút trong EmptyState (do WaypointList render khi có `emptyAction`).
-import { buildDayRange, type Itinerary, type Waypoint } from "@tripory/itinerary";
-import { useMemo, type RefObject } from "react";
-import { AddButton } from "./add-button";
-import { DayTabs } from "./day-tabs";
-import { DaySubtitle } from "./day-subtitle";
-import { WaypointList, type WaypointFocusRequest } from "./waypoint-list";
+// Cột trái: cột cha cuộn, thanh tab `sticky top-0`.
+// Trong Sheet: thanh tab đứng yên ngay dưới tay cầm, CHỈ thân tab cuộn và là vùng cuộn dọc duy nhất (popup không cuộn).
+// Vùng đó cao đúng phần nhìn thấy của sheet (trừ `hiddenBottom`), nên thanh "Thêm điểm đến" `sticky bottom-0` luôn sát đáy
+// màn hình và mục cuối cuộn tới được. Ở mức peek vùng không cuộn (`scrollable` false) và về đầu.
+import { cn } from "@tripory/ui-web";
+import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
 
-export type TimelinePanelProps = Readonly<{
-  itinerary: Itinerary;
-  selectedDay: number;
-  onSelectDay(dayNumber: number): void;
-  /** Id đang chờ xóa (có thể hoàn tác): ẩn khỏi danh sách và không tính là "ngày có điểm". */
-  pendingIds: ReadonlySet<string>;
-  onRemove(waypoint: Waypoint): void;
-  onFlushPending(): void;
-  onAdd(dayNumber: number): void;
-  onEdit(waypoint: Waypoint): void;
-  highlightId: string | null;
-  focusRequest: WaypointFocusRequest | null;
-  addButtonRef: RefObject<HTMLButtonElement | null>;
+export type TimelineHost = Readonly<{
+  /** Phần đáy popup đang nằm dưới mép màn hình (px), xem `sheetHiddenBottomPx`. */
+  hiddenBottom: number;
+  /** `false` ở mức peek: nội dung không cuộn được. */
+  scrollable: boolean;
 }>;
 
-export function TimelinePanel({
-  itinerary,
-  selectedDay,
-  onSelectDay,
-  pendingIds,
-  onRemove,
-  onFlushPending,
-  onAdd,
-  onEdit,
-  highlightId,
-  focusRequest,
-  addButtonRef,
-}: TimelinePanelProps) {
-  const days = useMemo(() => buildDayRange(itinerary), [itinerary]);
-  // Ngày đang chọn có thể vừa biến mất (lỗi thêm ngày được hoàn lại): rơi về ngày gần nhất thay vì render rỗng.
-  const day = days.find((candidate) => candidate.dayNumber === selectedDay) ?? days.at(-1);
-  if (day === undefined) return null;
+const TimelineHostContext = createContext<TimelineHost | null>(null);
 
-  const hasVisibleWaypoints = day.waypoints.some((waypoint) => !pendingIds.has(waypoint.id));
-  const add = () => onAdd(day.dayNumber);
+/** `EditorLayout` bọc timeline bằng provider này khi đặt trong Sheet. */
+export const TimelineHostProvider = TimelineHostContext.Provider;
+
+export type TimelinePanelProps = Readonly<{
+  /** `DayTabs`. */
+  tabs: ReactNode;
+  /** Đổi giá trị này (ví dụ tab đang chọn) thì vùng cuộn trong Sheet về đầu. */
+  scrollResetKey?: string | number;
+  children: ReactNode;
+}>;
+
+const SCROLL_CLASS = {
+  scrollable: "overflow-y-auto",
+  locked: "overflow-y-hidden",
+} as const;
+
+type SheetTimelineProps = Readonly<{ host: TimelineHost; tabs: ReactNode; scrollResetKey: string | number; children: ReactNode }>;
+
+function SheetTimeline({ host, tabs, scrollResetKey, children }: SheetTimelineProps) {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const { hiddenBottom, scrollable } = host;
+
+  // Về đầu khi vào mức không cuộn được hoặc đổi tab; đồng bộ với DOM, không phải state.
+  useEffect(() => {
+    if (scrollerRef.current !== null) scrollerRef.current.scrollTop = 0;
+  }, [scrollable, scrollResetKey]);
 
   return (
+    <>
+      <div className="shrink-0 border-b border-border bg-surface">{tabs}</div>
+      {/* Wrapper không có nội dung theo luồng: vùng cuộn tuyệt đối nên Content của Sheet không bị nới cao hơn phần nhìn thấy. */}
+      <div className="relative min-h-0 flex-1">
+        <div
+          // Vuốt trong vùng này chỉ cuộn nội dung, không kéo sheet; kéo sheet bằng tay cầm hoặc hàng tab.
+          className={cn(
+            "absolute inset-x-0 top-0 touch-pan-y overscroll-contain transition-[bottom] duration-(--semantic-motion-duration-slow) ease-standard",
+            scrollable ? SCROLL_CLASS.scrollable : SCROLL_CLASS.locked,
+          )}
+          data-base-ui-swipe-ignore=""
+          data-timeline-scroller=""
+          ref={scrollerRef}
+          style={{ bottom: hiddenBottom }}
+        >
+          <div className="flex min-h-full flex-col">{children}</div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export function TimelinePanel({ tabs, scrollResetKey = 0, children }: TimelinePanelProps) {
+  const host = useContext(TimelineHostContext);
+  if (host !== null) {
+    return (
+      <SheetTimeline host={host} scrollResetKey={scrollResetKey} tabs={tabs}>
+        {children}
+      </SheetTimeline>
+    );
+  }
+  return (
     <div className="flex min-h-full flex-1 flex-col">
-      <div className="sticky top-0 z-sticky border-b border-border bg-surface">
-        <DayTabs itinerary={itinerary} onSelectDay={onSelectDay} selectedDay={day.dayNumber} />
-      </div>
-      <div className="px-stack-md pt-stack-md">
-        <DaySubtitle day={day} itineraryId={itinerary.id} key={day.dayNumber} />
-      </div>
-      <div className="flex-1 px-stack-md py-stack-md">
-        <WaypointList
-          addButtonRef={addButtonRef}
-          day={day}
-          emptyAction={add}
-          focusRequest={focusRequest}
-          highlightId={highlightId}
-          itinerary={itinerary}
-          onEdit={onEdit}
-          onFlushPending={onFlushPending}
-          onRemove={onRemove}
-          pendingIds={pendingIds}
-        />
-      </div>
-      <div className="sticky bottom-0 border-t border-border bg-surface p-stack-md pb-[calc(var(--semantic-space-stack-md)+env(safe-area-inset-bottom))] empty:hidden">
-        <AddButton
-          className="w-full"
-          label="Thêm điểm đến"
-          onClick={add}
-          ref={addButtonRef}
-          variant="secondary"
-          visible={hasVisibleWaypoints}
-        />
-      </div>
+      <div className="sticky top-0 z-sticky border-b border-border bg-surface">{tabs}</div>
+      {children}
     </div>
   );
 }

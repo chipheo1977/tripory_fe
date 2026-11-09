@@ -32,3 +32,14 @@ pnpm dev          # http://localhost:3000
 | `pnpm typecheck` | `tsc --noEmit` mọi package (web chạy thêm `next typegen`) |
 | `pnpm test` | Vitest mọi package, gồm self-test của luật kiến trúc |
 | `pnpm --filter @tripory/web <script>` | Chạy script của riêng một app |
+
+<!--
+Chạy lệnh này trước khi deploy:
+pnpm lint
+pnpm typecheck
+pnpm test
+
+npx vercel pull --yes --environment=production
+npx vercel build --prod -> build local
+npx vercel deploy --prod -> build trên cloude và deploy
+-->

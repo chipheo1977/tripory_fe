@@ -10,27 +10,55 @@
 // Có dữ liệu thì luôn hiện editor, kể cả khi lần tải lại nền lỗi: mất mạng thoáng qua không được làm mất form đang mở.
 import { isApiError } from "@tripory/api-client";
 import type { Viewer } from "@tripory/identity";
-import { buildDayRange, canEdit, type Itinerary, type Waypoint } from "@tripory/itinerary";
+import {
+  buildDayRange,
+  buildDayRoutes,
+  buildMapPins,
+  canEdit,
+  countVisibleWaypoints,
+  defaultEditorTab,
+  fitTargetFor,
+  summarizeDays,
+  type EditorTab,
+  type Itinerary,
+  type Waypoint,
+} from "@tripory/itinerary";
 import { ErrorState } from "@tripory/ui-web";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { NavigationGuardProvider } from "@/components/navigation-guard";
 import { NotFoundView } from "@/components/not-found-view";
 import { itinerary as itineraryHooks } from "@/composition/itinerary.client";
-import type { ItineraryId } from "@tripory/shared-kernel";
+import type { ItineraryId, Wgs84Coordinate } from "@tripory/shared-kernel";
 import { DeleteItineraryDialog, type DeleteTarget } from "./delete-itinerary-dialog";
+import { destinationBoundsFor } from "./destination-cover";
 import { draftPrefix, draftStorage } from "./draft-storage";
 import { EditorForbidden } from "./editor-forbidden";
 import { EditorHeader, EditorHeaderMinimal } from "./editor-header";
+import type { DayRowEmphasis } from "./day-overview-row";
+import { DayPanel } from "./day-panel";
+import { DayTabs, type DayTabsProps } from "./day-tabs";
 import { EditorLayout } from "./editor-layout";
+import { EditorMapArea } from "./editor-map-area";
+import { toLngLat, toTripMapPins } from "./editor-map-pins";
+import type { SheetSnapRequest } from "./editor-map-viewport";
+import { EditorTimelineBody } from "./editor-timeline-body";
 import { EditorSkeleton } from "./editor-skeleton";
 import { clearEnteredFromList, enteredFromList } from "./entry-flag";
 import { waypointSchema, type WaypointValues } from "./form-schemas";
 import { useEditorLeaveGuard } from "./leave-guard";
+import type { MapStatus } from "./map/trip-map";
+import { MapEditInfoButton } from "./map-edit-info-button";
+import { OverviewPanel } from "./overview-panel";
+import { overviewSummaryData } from "./overview-format";
 import { PublishDialog } from "./publish-dialog";
 import { createSaveStatusStore, SaveStatusProvider } from "./save-status";
 import { TimelinePanel } from "./timeline-panel";
 import { TripInfoDialog } from "./trip-info-dialog";
+import { useEditorTab } from "./use-editor-tab";
+import { useMapCamera } from "./use-map-camera";
+import { useMapSelection } from "./use-map-selection";
+import { useMediaQuery } from "./use-media-query";
 import { useMetadataAutosave } from "./use-metadata-autosave";
 import { TripSummary } from "./trip-summary";
 import { usePendingDelete } from "./use-pending-delete";
@@ -39,6 +67,9 @@ import type { WaypointFocusRequest } from "./waypoint-list";
 
 const MY_ITINERARIES = "/itineraries/mine";
 const HIGHLIGHT_MS = 1500;
+/** Trùng breakpoint `lg` của Tailwind (1024px): rê dòng ngày chỉ có từ đây trở lên. */
+const LG_QUERY = "(min-width: 1024px)";
+const noop = (): void => undefined;
 const TITLE_FALLBACK = "Sửa lịch trình · Tripory";
 
 export type ItineraryEditorProps = Readonly<{
@@ -59,6 +90,25 @@ function navigateBack(router: ReturnType<typeof useRouter>): void {
   } else {
     router.push(MY_ITINERARIES);
   }
+}
+
+/** Tab ngày không còn trong dải thì về ngày cuối. */
+function clampTab(tab: EditorTab, lastDay: number): EditorTab {
+  if (tab === "overview") return tab;
+  return Math.min(tab, lastDay);
+}
+
+/** Ngày của thân tab ngày; ở Tổng quan thân đó không hiện nên dùng ngày cuối cho đủ kiểu. */
+function dayOfTab(tab: EditorTab, lastDay: number): number {
+  if (tab === "overview") return lastDay;
+  return tab;
+}
+
+/** Điểm đang chọn chỉ còn hiệu lực khi vẫn hiển thị (chưa xóa, không đang chờ hoàn tác). */
+function visibleSelection(selectedId: string | null, itinerary: Itinerary, pendingIds: ReadonlySet<string>): string | null {
+  if (selectedId === null || pendingIds.has(selectedId)) return null;
+  if (!itinerary.waypoints.some((candidate) => candidate.id === selectedId)) return null;
+  return selectedId;
 }
 
 type RestoredDraft = Readonly<{
@@ -195,9 +245,19 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
   // Bản nháp chỉ đọc một lần lúc mount (editor chỉ dựng sau khi có dữ liệu, nên không chạy phía server).
   const [restored] = useState(() => readRestoredDraft(viewer.id, itinerary));
 
-  const [selectedDay, setSelectedDay] = useState(() =>
-    restored.form?.mode.kind === "add" ? restored.form.mode.dayNumber : 1,
+  // Tab mặc định: Tổng quan khi đã có điểm, Ngày 1 khi chưa có (D-132); bản nháp form thêm mở lại đúng tab Ngày N (D-36).
+  const emptyPending = useMemo<ReadonlySet<string>>(() => new Set<string>(), []);
+  const { tab, selectTab } = useEditorTab(
+    restored.form?.mode.kind === "add" ? restored.form.mode.dayNumber : defaultEditorTab(itinerary, emptyPending),
   );
+  const destinationBounds = useMemo(() => destinationBoundsFor(itinerary.destinationCode), [itinerary.destinationCode]);
+  const selection = useMapSelection();
+  const camera = useMapCamera(() => fitTargetFor(itinerary, emptyPending, tab, destinationBounds));
+  const wide = useMediaQuery(LG_QUERY);
+  const [mapStatus, setMapStatus] = useState<MapStatus>("loading");
+  const [sheetRequest, setSheetRequest] = useState<SheetSnapRequest | null>(null);
+  const [tabFocus, setTabFocus] = useState<DayTabsProps["focusRequest"]>(null);
+  const [recentDay, setRecentDay] = useState<number | null>(null);
   const [formMode, setFormMode] = useState<WaypointFormMode | null>(restored.form?.mode ?? null);
   const [formRestored, setFormRestored] = useState<WaypointValues | null>(restored.form?.values ?? null);
   const [tripInfoOpen, setTripInfoOpen] = useState(false);
@@ -210,8 +270,10 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
   const [focusMenuAfterPublish, setFocusMenuAfterPublish] = useState(false);
 
   const addButtonRef = useRef<HTMLButtonElement | null>(null);
+  const appliedFocusRequest = useRef<WaypointFocusRequest | null>(null);
   const tripInfoButtonRef = useRef<HTMLButtonElement | null>(null);
   const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const recentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Tự lưu "Thông tin chuyến đi" sống ở cấp editor (dialog có thể unmount khi còn lệnh chờ); chưa lưu hết thì cảnh báo rời trang.
   const autosave = useMetadataAutosave(itineraryId);
@@ -225,6 +287,7 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
   useEffect(
     () => () => {
       if (highlightTimer.current !== null) clearTimeout(highlightTimer.current);
+      if (recentTimer.current !== null) clearTimeout(recentTimer.current);
     },
     [],
   );
@@ -238,10 +301,19 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
   }, [isPublic, focusMenuAfterPublish]);
 
   const days = useMemo(() => buildDayRange(itinerary), [itinerary]);
-  // Ngày đang chọn có thể biến mất (thêm ngày lỗi bị hoàn lại): kẹp về ngày cuối của dải.
-  const day = days.some((candidate) => candidate.dayNumber === selectedDay)
-    ? selectedDay
-    : (days.at(-1)?.dayNumber ?? 1);
+  // Tab ngày có thể biến mất (thêm ngày lỗi bị hoàn lại): kẹp về ngày cuối của dải.
+  const lastDay = days.at(-1)?.dayNumber ?? 1;
+  const activeTab = clampTab(tab, lastDay);
+  // `days` luôn có ít nhất Ngày 1; ngày đã kẹp vào dải nên luôn tìm thấy.
+  const dayView = days.find((candidate) => candidate.dayNumber === dayOfTab(activeTab, lastDay)) ?? days[0]!;
+
+  // Dữ liệu cho bản đồ và Tổng quan, tính từ hàm thuần của domain (04-43).
+  const selectedId = visibleSelection(selection.selectedWaypointId, itinerary, pendingIds);
+  const emphasis = { tab: activeTab, hoveredDay: wide ? selection.hoveredDay : null, selectedWaypointId: selectedId };
+  const pins = toTripMapPins(buildMapPins(itinerary, pendingIds, emphasis), activeTab);
+  const routes = buildDayRoutes(itinerary, pendingIds, emphasis);
+  const empty = countVisibleWaypoints(itinerary, pendingIds) === 0;
+  const selectedDayNumber = itinerary.waypoints.find((candidate) => candidate.id === selectedId)?.dayNumber ?? null;
 
   const flashHighlight = (waypointId: string): void => {
     if (highlightTimer.current !== null) clearTimeout(highlightTimer.current);
@@ -270,9 +342,63 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
     setFormMode({ kind: "add", dayNumber });
   };
 
+  // Thêm từ Tổng quan: form có ô "Ngày", mặc định ngày cuối (D-138).
+  const openAddFromOverview = (): void => {
+    setFormRestored(null);
+    setFormMode({
+      kind: "add",
+      dayNumber: lastDay,
+      dayChoices: days.map((candidate) => ({ dayNumber: candidate.dayNumber, subtitle: candidate.subtitle })),
+    });
+  };
+
   const openEdit = (waypoint: Waypoint): void => {
     setFormRestored(null);
     setFormMode({ kind: "edit", waypoint });
+  };
+
+  // Đổi tab: bỏ chọn điểm và canh khung theo tab mới (D-127).
+  const changeTab = (next: EditorTab): void => {
+    selection.clear();
+    selectTab(next);
+    camera.fit(fitTargetFor(itinerary, pendingIds, next, destinationBounds));
+  };
+
+  // Bấm dòng ngày ở Tổng quan: sang tab Ngày N và focus vào tab đó (D-135).
+  const selectDayFromRow = (dayNumber: number): void => {
+    changeTab(dayNumber);
+    setTabFocus((previous) => ({ tab: dayNumber, seq: (previous?.seq ?? 0) + 1 }));
+  };
+
+  // Bấm pin: chọn điểm, dời bản đồ nếu pin/nhãn ra ngoài vùng an toàn, đưa sheet về mức vừa (D-125, D-136).
+  const handlePinSelect = (waypointId: string): void => {
+    const target = itinerary.waypoints.find((candidate) => candidate.id === waypointId);
+    if (target === undefined) return;
+    selection.select(waypointId);
+    camera.reveal(toLngLat(target.coordinate));
+    setSheetRequest((previous) => ({ seq: (previous?.seq ?? 0) + 1, snap: "medium" }));
+  };
+
+  // Bấm nút chính của thẻ khi bản đồ sẵn sàng: chọn điểm và dời bản đồ tới pin, giữ zoom (D-126).
+  const handleActivate = (target: Waypoint): void => {
+    selection.select(target.id);
+    camera.focus(toLngLat(target.coordinate));
+  };
+  const mapReadySelection = mapStatus === "ready" ? { selectedId, onSelect: handleActivate } : undefined;
+
+  const rowEmphasis = (dayNumber: number): DayRowEmphasis => {
+    if (dayNumber === selectedDayNumber) return "selected";
+    if (dayNumber === recentDay) return "recent";
+    return "none";
+  };
+
+  const flashRecentDay = (dayNumber: number): void => {
+    if (recentTimer.current !== null) clearTimeout(recentTimer.current);
+    setRecentDay(dayNumber);
+    recentTimer.current = setTimeout(() => {
+      recentTimer.current = null;
+      setRecentDay(null);
+    }, HIGHLIGHT_MS);
   };
 
   // Chọn nơi nhận focus TRƯỚC khi điểm biến mất: thẻ kế tiếp, không có thì thẻ trước, không còn gì thì nút thêm (D-31).
@@ -282,6 +408,7 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
     );
     const index = shown.findIndex((candidate) => candidate.id === waypoint.id);
     const neighbour = shown[index + 1] ?? shown[index - 1];
+    if (waypoint.id === selection.selectedWaypointId) selection.clear();
     setFocusRequest(
       neighbour === undefined
         ? { waypointId: null, target: "add" }
@@ -294,7 +421,26 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
     setLiveMessage(`Đã thêm ${waypoint.name} vào Ngày ${waypoint.dayNumber}`);
     flashHighlight(waypoint.id);
     setFocusRequest({ waypointId: null, target: "add" });
+    // Thêm điểm: bản đồ di chuyển tới điểm mới giữ zoom, không tự chọn; ở Tổng quan vẫn ở lại Tổng quan (D-127, D-139).
+    camera.focus(toLngLat(waypoint.coordinate));
+    if (activeTab === "overview") flashRecentDay(waypoint.dayNumber);
   };
+
+  const handleUpdated = (waypointId: string, coordinate: Wgs84Coordinate): void => {
+    setFocusRequest({ waypointId, target: "main" });
+    const before = itinerary.waypoints.find((candidate) => candidate.id === waypointId)?.coordinate;
+    const moved = before === undefined || before.latitude !== coordinate.latitude || before.longitude !== coordinate.longitude;
+    if (moved) camera.focus(toLngLat(coordinate));
+  };
+
+  // Ở Tổng quan không có danh sách điểm, nên focus "Thêm điểm đến" sau khi thêm phải tự về nút của Tổng quan.
+  useEffect(() => {
+    if (activeTab !== "overview" || focusRequest?.target !== "add") return;
+    // Mỗi yêu cầu chỉ áp một lần: không nhớ thì mỗi lần quay lại Tổng quan focus lại bị kéo về nút thêm.
+    if (appliedFocusRequest.current === focusRequest) return;
+    appliedFocusRequest.current = focusRequest;
+    addButtonRef.current?.focus();
+  }, [activeTab, focusRequest]);
 
   const deleteTarget = useMemo<DeleteTarget | null>(
     () => (deleteOpen ? { id: itineraryId, title: itinerary.title, isPublic: itinerary.isPublic } : null),
@@ -311,7 +457,6 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
     <NavigationGuardProvider value={leave.guard}>
       <title>{`${itinerary.title} · Tripory`}</title>
       <EditorLayout
-        canvas={<TripSummary itinerary={itinerary} onEdit={openTripInfo} variant="canvas" />}
         header={
           <EditorHeader
             itinerary={itinerary}
@@ -323,21 +468,61 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
             tripInfoButtonRef={tripInfoButtonRef}
           />
         }
-        summary={<TripSummary itinerary={itinerary} onEdit={openTripInfo} variant="compact" />}
+        map={(frame) => (
+          <EditorMapArea
+            controls={<MapEditInfoButton onClick={openTripInfo} visible={activeTab === "overview"} />}
+            empty={empty}
+            fallback={<TripSummary itinerary={itinerary} onEdit={openTripInfo} variant={frame.wide ? "canvas" : "compact"} />}
+            frame={frame}
+            handlers={{ onPinSelect: handlePinSelect, onBackgroundClick: selection.clear }}
+            map={{ pins, routes, camera: camera.command }}
+            onStatusChange={setMapStatus}
+          />
+        )}
+        sheetSnapRequest={sheetRequest}
         timeline={
           <TimelinePanel
-            addButtonRef={addButtonRef}
-            focusRequest={focusRequest}
-            highlightId={highlightId}
-            itinerary={itinerary}
-            onAdd={openAdd}
-            onEdit={openEdit}
-            onFlushPending={pending.flush}
-            onRemove={removeWaypoint}
-            onSelectDay={setSelectedDay}
-            pendingIds={pendingIds}
-            selectedDay={day}
-          />
+            scrollResetKey={activeTab}
+            tabs={
+              <DayTabs
+                focusRequest={tabFocus}
+                itinerary={itinerary}
+                onSelectTab={changeTab}
+                selectedTab={activeTab}
+              />
+            }
+          >
+            <EditorTimelineBody
+              day={
+                <DayPanel
+                  addButtonRef={addButtonRef}
+                  day={dayView}
+                  feedback={{ highlightId, focusRequest }}
+                  itinerary={itinerary}
+                  list={{
+                    onEdit: openEdit,
+                    onFlushPending: pending.flush,
+                    onRemove: removeWaypoint,
+                    selection: mapReadySelection,
+                  }}
+                  onAdd={openAdd}
+                  pendingIds={pendingIds}
+                />
+              }
+              overview={
+                <OverviewPanel
+                  actions={{ onEdit: openTripInfo, onAdd: openAddFromOverview, addButtonRef }}
+                  days={summarizeDays(itinerary, pendingIds)}
+                  onEmphasizeDay={wide ? selection.hoverDay : noop}
+                  onSelectDay={selectDayFromRow}
+                  rowEmphasis={rowEmphasis}
+                  summary={overviewSummaryData(itinerary, pendingIds)}
+                  variant={wide ? "wide" : "compact"}
+                />
+              }
+              tab={activeTab}
+            />
+          </TimelinePanel>
         }
       />
 
@@ -346,13 +531,14 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
       </p>
 
       <WaypointFormDialog
+        destinationCode={itinerary.destinationCode}
         itineraryId={itineraryId}
         mode={formMode}
         onAdded={handleAdded}
         onClose={closeForm}
         onDeleteRequested={removeWaypoint}
         onDirtyChange={setFormDirty}
-        onUpdated={(waypointId) => setFocusRequest({ waypointId, target: "main" })}
+        onUpdated={handleUpdated}
         restored={formRestored}
         viewerId={viewer.id}
       />

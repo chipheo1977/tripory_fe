@@ -1,45 +1,66 @@
 "use client";
 
-// Thanh tab ngày + "Thêm ngày" (ITIN-04, D-27, D-28). Vẽ đủ Ngày 1..max (ngày thưa là ngày trống), mỗi tab hai dòng
-// ("Ngày N" + km của BE). Nút thêm nằm SAU `TabsList` nên không thuộc roving focus của tab.
+// Thanh tab "Tổng quan" + các ngày + "Thêm ngày" (ITIN-04, D-27, D-28, D-131). Vẽ đủ Ngày 1..max (ngày thưa là ngày trống),
+// mỗi tab hai dòng ("Ngày N" + km của BE; Tổng quan hiện tổng km). Nút thêm nằm SAU `TabsList` nên không thuộc roving
+// focus của tab.
 //
 // Thêm ngày là thao tác nền (D-30): optimistic ở hook, lỗi thì gỡ tab, chọn lại ngày trước, trả focus về nút
 // và báo "Lỗi – Thử lại" qua store (toast lỗi do MutationCache mặc định lo).
-import { buildDayRange, nextDayNumber, type Itinerary } from "@tripory/itinerary";
-import { Tabs, TabsList, TabsTrigger } from "@tripory/ui-web";
+import { buildDayRange, dayColorIndex, nextDayNumber, OVERVIEW_TAB, type EditorTab, type Itinerary } from "@tripory/itinerary";
+import { MapToneDot, Tabs, TabsList, TabsTrigger } from "@tripory/ui-web";
 import { useEffect, useMemo, useRef } from "react";
 import { itinerary as itineraryHooks } from "@/composition/itinerary.client";
 import { AddButton } from "./add-button";
 import { formatKm } from "./format";
+import { overviewTabAccessibleName, parseTabValue, tabValue } from "./overview-format";
 import { useSaveStatusStore } from "./save-status";
+import { useTabStrip } from "./use-tab-strip";
 
 export type DayTabsProps = Readonly<{
   itinerary: Itinerary;
-  selectedDay: number;
-  onSelectDay(day: number): void;
+  selectedTab: EditorTab;
+  onSelectTab(tab: EditorTab): void;
+  /** Đưa focus vào một tab (ví dụ sau khi bấm dòng ngày ở Tổng quan: D-135). Mỗi `seq` chỉ áp một lần. */
+  focusRequest?: Readonly<{ tab: EditorTab; seq: number }> | null;
 }>;
 
-const prefersReducedMotion = (): boolean => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Mờ dần ở mép còn tab bị cắt (gợi ý có thể vuốt/kéo); không nhận chuột.
+const FADE_CLASS = { start: "left-0 bg-linear-to-r", end: "right-0 bg-linear-to-l" } as const;
 
-export function DayTabs({ itinerary, selectedDay, onSelectDay }: DayTabsProps) {
+function EdgeFade({ visible, side }: Readonly<{ visible: boolean; side: keyof typeof FADE_CLASS }>) {
+  if (!visible) return null;
+  return <span aria-hidden="true" className={`pointer-events-none absolute inset-y-0 w-stack-lg from-surface to-transparent ${FADE_CLASS[side]}`} />;
+}
+
+function trackTab(tabs: Map<EditorTab, HTMLElement>, tab: EditorTab, element: HTMLElement | null): void {
+  if (element === null) tabs.delete(tab);
+  else tabs.set(tab, element);
+}
+
+function TabKmLine({ km }: Readonly<{ km: string | null }>) {
+  if (km === null) return null;
+  return <span className="text-caption font-regular text-muted tabular-nums">{km}</span>;
+}
+
+export function DayTabs({ itinerary, selectedTab, onSelectTab, focusRequest = null }: DayTabsProps) {
   const store = useSaveStatusStore();
   const days = useMemo(() => buildDayRange(itinerary), [itinerary]);
-  const tabRefs = useRef(new Map<number, HTMLElement>());
+  const tabRefs = useRef(new Map<EditorTab, HTMLElement>());
   const addButtonRef = useRef<HTMLButtonElement | null>(null);
   // Ngày vừa thêm cần nhận focus khi tab của nó đã render (cache optimistic ghi sau `onMutate`, trễ một nhịp).
   const focusDayRef = useRef<number | null>(null);
-  // Callback của mutation chụp closure lúc bấm; ref này cho nó biết ngày đang chọn tại lúc lỗi.
-  const selectedRef = useRef(selectedDay);
+  // Callback của mutation chụp closure lúc bấm; ref này cho nó biết tab đang chọn tại lúc lỗi.
+  const selectedRef = useRef(selectedTab);
   useEffect(() => {
-    selectedRef.current = selectedDay;
-  }, [selectedDay]);
+    selectedRef.current = selectedTab;
+  }, [selectedTab]);
 
   const addDay = itineraryHooks.useAddDay(itinerary.id, {
     onSuccess: () => store.markSaved(),
     onError: (_error, variables) => {
       focusDayRef.current = null;
-      // Chỉ lùi về ngày trước khi người dùng vẫn đang ở tab vừa bị gỡ; đã chuyển sang ngày khác thì giữ nguyên.
-      if (selectedRef.current === variables.dayNumber) onSelectDay(variables.dayNumber - 1);
+      // Chỉ lùi về ngày trước khi người dùng vẫn đang ở tab vừa bị gỡ; đã chuyển sang tab khác thì giữ nguyên.
+      if (selectedRef.current === variables.dayNumber) onSelectTab(variables.dayNumber - 1);
       addButtonRef.current?.focus();
       store.markFailed(() => addDay.mutate(variables));
     },
@@ -48,29 +69,48 @@ export function DayTabs({ itinerary, selectedDay, onSelectDay }: DayTabsProps) {
   const handleAdd = (): void => {
     const dayNumber = nextDayNumber(itinerary);
     focusDayRef.current = dayNumber;
-    onSelectDay(dayNumber);
+    onSelectTab(dayNumber);
     addDay.mutate({ dayNumber });
   };
 
+  const { stripProps, edges, scrollTabIntoView } = useTabStrip();
   const dayCount = days.length;
+  const appliedFocusSeq = useRef<number | null>(null);
   useEffect(() => {
-    const selected = tabRefs.current.get(selectedDay);
+    if (focusRequest === null || appliedFocusSeq.current === focusRequest.seq) return;
+    const target = tabRefs.current.get(focusRequest.tab);
+    if (target === undefined) return;
+    appliedFocusSeq.current = focusRequest.seq;
+    target.focus();
+  }, [focusRequest, dayCount]);
+  useEffect(() => {
+    const selected = tabRefs.current.get(selectedTab);
     if (selected === undefined) return;
-    selected.scrollIntoView({
-      inline: "nearest",
-      block: "nearest",
-      behavior: prefersReducedMotion() ? "auto" : "smooth",
-    });
-    if (focusDayRef.current === selectedDay) {
+    scrollTabIntoView(selected);
+    if (focusDayRef.current === selectedTab) {
       focusDayRef.current = null;
       selected.focus();
     }
-  }, [selectedDay, dayCount]);
+  }, [selectedTab, dayCount, scrollTabIntoView]);
 
   return (
-    <Tabs onValueChange={(value) => onSelectDay(Number(value))} value={String(selectedDay)} variant="line">
-      <div className="flex items-center overflow-x-auto">
+    <Tabs onValueChange={(value) => onSelectTab(parseTabValue(value))} value={tabValue(selectedTab)} variant="line">
+      <div className="relative">
+      {/* Cuộn ngang bằng vuốt (cảm ứng) hoặc kéo chuột, không thanh cuộn; `scroll-px` chừa lề khi cuộn tab vào khung. */}
+      <div
+        {...stripProps}
+        className="flex scroll-px-stack-lg items-center overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         <TabsList aria-label="Các ngày" className="shrink-0">
+          <TabsTrigger
+            aria-label={overviewTabAccessibleName(itinerary.totalDistanceKm)}
+            className="flex-col gap-inline-xs py-inline-sm"
+            ref={(element) => trackTab(tabRefs.current, OVERVIEW_TAB, element)}
+            value={tabValue(OVERVIEW_TAB)}
+          >
+            <span className="text-label font-semibold">Tổng quan</span>
+            <TabKmLine km={formatKm(itinerary.totalDistanceKm)} />
+          </TabsTrigger>
           {days.map((day) => {
             const km = formatKm(day.distanceKm);
             return (
@@ -78,19 +118,22 @@ export function DayTabs({ itinerary, selectedDay, onSelectDay }: DayTabsProps) {
                 aria-label={km === null ? `Ngày ${day.dayNumber}` : `Ngày ${day.dayNumber}, ${km}`}
                 className="flex-col gap-inline-xs py-inline-sm"
                 key={day.dayNumber}
-                ref={(element) => {
-                  if (element === null) tabRefs.current.delete(day.dayNumber);
-                  else tabRefs.current.set(day.dayNumber, element);
-                }}
-                value={String(day.dayNumber)}
+                ref={(element) => trackTab(tabRefs.current, day.dayNumber, element)}
+                value={tabValue(day.dayNumber)}
               >
-                <span className="text-label font-semibold">Ngày {day.dayNumber}</span>
-                {km === null ? null : <span className="text-label text-muted tabular-nums">{km}</span>}
+                <span className="flex items-center gap-inline-xs text-label font-semibold">
+                  <MapToneDot tone={dayColorIndex(day.dayNumber)} />
+                  Ngày {day.dayNumber}
+                </span>
+                <TabKmLine km={km} />
               </TabsTrigger>
             );
           })}
         </TabsList>
         <AddButton className="shrink-0" label="Thêm ngày" onClick={handleAdd} ref={addButtonRef} size="sm" variant="ghost" />
+      </div>
+      <EdgeFade side="start" visible={edges.start} />
+      <EdgeFade side="end" visible={edges.end} />
       </div>
     </Tabs>
   );

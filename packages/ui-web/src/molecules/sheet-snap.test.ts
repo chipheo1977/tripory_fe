@@ -1,6 +1,6 @@
 import { sheetPeekMinPx, sheetSnapPoints } from '@tripory/design-tokens';
 import { describe, expect, it } from 'vitest';
-import { isTopSnap, resolveFixedSnapPoints, resolveSnapPoints, snapPointsFor } from './sheet-snap';
+import { isTopSnap, resolveFixedSnapPoints, resolveSnapPoints, snapHeightPx, snapPointsFor } from './sheet-snap';
 
 describe('Sheet snap adapter', () => {
   it('giữ các hằng snap đã khóa trong design tokens', () => {
@@ -71,5 +71,19 @@ describe('snapPointsFor', () => {
   it('bottom fixedSnap có một mức', () => {
     expect(snapPointsFor('bottom', true, 844, 0)).toEqual(resolveFixedSnapPoints(844, 0));
     expect(snapPointsFor('bottom', true, 844, 0)).toHaveLength(1);
+  });
+});
+
+describe('snapHeightPx', () => {
+  it.each([
+    // [viewportHeight, insetTop, snap, expectedPx]
+    [844, 64, 'peek', 211],
+    [844, 64, 'medium', 506.4],
+    [844, 64, 'expanded', 776.48],
+    [568, 108, 'peek', 160],
+    [568, 108, 'expanded', 460],
+    [400, 300, 'medium', 100],
+  ] as const)('snapHeightPx(%i, %i, %s) = %d', (viewportHeight, insetTop, snap, expected) => {
+    expect(snapHeightPx(viewportHeight, insetTop, snap)).toBeCloseTo(expected, 5);
   });
 });

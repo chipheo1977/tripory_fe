@@ -1,14 +1,14 @@
 import { makeApiError } from "@tripory/api-client";
-import type { Itinerary } from "@tripory/itinerary";
+import type { EditorTab, Itinerary } from "@tripory/itinerary";
 import { itineraryKeys } from "@tripory/itinerary/react";
 import { parseItineraryId, parseUserId } from "@tripory/shared-kernel";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { makeQueryClient } from "@/composition/query-client";
-import { DayTabs } from "./day-tabs";
+import { DayTabs, type DayTabsProps } from "./day-tabs";
 import { createSaveStatusStore, SaveStatusProvider } from "./save-status";
 
 const h = vi.hoisted(() => ({
@@ -81,15 +81,20 @@ const setReducedMotion = (reduced: boolean) => {
     }) as unknown as MediaQueryList) as typeof window.matchMedia;
 };
 
-function setup(initialDay = 1) {
+function setup(initialTab: EditorTab = 1, totalKm: number = base.totalDistanceKm) {
   const user = userEvent.setup();
   const store = createSaveStatusStore();
   const queryClient = makeQueryClient();
-  queryClient.setQueryData(itineraryKeys.detail(ID!), base);
+  queryClient.setQueryData(itineraryKeys.detail(ID!), { ...base, totalDistanceKm: totalKm });
   const onSelectDay = vi.fn();
 
+  const focus = { set: (_request: DayTabsProps["focusRequest"]) => undefined as void };
   function Harness() {
-    const [day, setDay] = useState(initialDay);
+    const [tab, setTab] = useState<EditorTab>(initialTab);
+    const [focusRequest, setFocusRequest] = useState<DayTabsProps["focusRequest"]>(null);
+    useEffect(() => {
+      focus.set = setFocusRequest;
+    }, []);
     const { data } = useQuery({
       queryKey: itineraryKeys.detail(ID!),
       queryFn: () => h.getById() as Promise<Itinerary>,
@@ -99,11 +104,12 @@ function setup(initialDay = 1) {
     return (
       <DayTabs
         itinerary={data}
-        onSelectDay={(next) => {
+        onSelectTab={(next) => {
           onSelectDay(next);
-          setDay(next);
+          setTab(next);
         }}
-        selectedDay={day}
+        focusRequest={focusRequest}
+        selectedTab={tab}
       />
     );
   }
@@ -115,7 +121,7 @@ function setup(initialDay = 1) {
       </SaveStatusProvider>
     </QueryClientProvider>,
   );
-  return { user, store, onSelectDay };
+  return { user, store, onSelectDay, focus };
 }
 
 const addButton = () => screen.getByRole("button", { name: "Thêm ngày" });
@@ -138,7 +144,7 @@ it("draws Ngày 1 to the largest day, sparse days as empty tabs, with the BE km 
   setup();
 
   const tabs = screen.getAllByRole("tab");
-  expect(tabs.map((tab) => tab.getAttribute("aria-label"))).toEqual(["Ngày 1, 12,4 km", "Ngày 2", "Ngày 3"]);
+  expect(tabs.map((tab) => tab.getAttribute("aria-label"))).toEqual(["Tổng quan, 12,4 km", "Ngày 1, 12,4 km", "Ngày 2", "Ngày 3"]);
   expect(within(screen.getByRole("tab", { name: "Ngày 1, 12,4 km" })).getByText("12,4 km")).toBeTruthy();
   expect(screen.getByRole("tab", { name: "Ngày 2" }).textContent).toBe("Ngày 2");
 });
@@ -231,4 +237,73 @@ it("uses behavior 'auto' when the user prefers reduced motion", async () => {
   await waitFor(() =>
     expect(scrollIntoView).toHaveBeenCalledWith({ inline: "nearest", block: "nearest", behavior: "auto" }),
   );
+});
+
+it("renders the km line with the caption size (12px token), regular weight and muted colour", () => {
+  setup();
+
+  for (const tab of screen.getAllByRole("tab")) {
+    const km = within(tab).queryByText("12,4 km");
+    if (km === null) continue;
+    const classes = km.className.split(/\s+/);
+    expect(classes).toEqual(expect.arrayContaining(["text-caption", "font-regular", "text-muted", "tabular-nums"]));
+    expect(classes).not.toContain("text-label");
+  }
+});
+
+it("puts the Overview tab before Ngày 1 with the BE total km as its second line", () => {
+  setup();
+  const tabs = screen.getAllByRole("tab");
+  expect(tabs[0]?.getAttribute("aria-label")).toBe("Tổng quan, 12,4 km");
+  expect(tabs[1]?.getAttribute("aria-label")).toBe("Ngày 1, 12,4 km");
+  expect(within(tabs[0] as HTMLElement).getByText("Tổng quan")).toBeTruthy();
+  expect(within(tabs[0] as HTMLElement).getByText("12,4 km")).toBeTruthy();
+});
+
+it("names the Overview tab without km and draws no second line when the BE total is 0", () => {
+  setup(1, 0);
+  const overview = screen.getAllByRole("tab")[0] as HTMLElement;
+  expect(overview.getAttribute("aria-label")).toBe("Tổng quan");
+  expect(overview.textContent).toBe("Tổng quan");
+});
+
+it("gives every day tab an aria-hidden colour dot matching its day colour (cycle of 8)", () => {
+  setup();
+  const dayTabs = screen.getAllByRole("tab").slice(1);
+  dayTabs.forEach((tab, index) => {
+    const dot = tab.querySelector("[aria-hidden='true']");
+    expect(dot).not.toBeNull();
+    expect(dot?.className.split(/\s+/)).toContain(`bg-map-day-${index + 1}`);
+  });
+  expect(screen.getAllByRole("tab")[0]?.querySelector("[aria-hidden='true']")).toBeNull();
+});
+
+it("selecting the Overview tab reports 'overview'", async () => {
+  const { user, onSelectDay } = setup(2);
+  await user.click(screen.getByRole("tab", { name: /^Tổng quan/ }));
+  expect(onSelectDay).toHaveBeenCalledWith("overview");
+  expect(screen.getByRole("tab", { name: /^Tổng quan/ }).getAttribute("aria-selected")).toBe("true");
+});
+
+it("adding a day while on the Overview tab selects the new day", async () => {
+  h.setDaySubtitle.mockImplementation(() => new Promise<void>(() => undefined));
+  const { user, onSelectDay } = setup("overview");
+  await user.click(addButton());
+  await screen.findByRole("tab", { name: "Ngày 4" });
+  expect(onSelectDay).toHaveBeenCalledWith(4);
+});
+it("focusRequest moves focus to the requested tab once per seq", async () => {
+  const { focus } = setup(1);
+  act(() => focus.set({ tab: 2, seq: 1 }));
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("tab", { name: "Ngày 2" })));
+
+  screen.getByRole("tab", { name: "Ngày 3" }).focus();
+  act(() => focus.set({ tab: 2, seq: 1 }));
+  expect(document.activeElement).toBe(screen.getByRole("tab", { name: "Ngày 3" }));
+});
+
+it("focusRequest can target the Overview tab", async () => {
+  const { focus } = setup(2);
+  act(() => focus.set({ tab: "overview", seq: 2 }));
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("tab", { name: /^Tổng quan/ })));
 });

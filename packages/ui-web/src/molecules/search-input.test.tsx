@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createRef } from 'react';
 import { expect, it, vi } from 'vitest';
 import { SearchInput } from './search-input';
 
@@ -31,6 +32,21 @@ it('xóa bằng Escape, giữ focus và công bố trạng thái loading', async
   expect((input as HTMLInputElement).value).toBe('');
   expect(document.activeElement).toBe(input);
   expect(screen.getByRole('status', { name: 'Đang tìm kiếm' })).toBeTruthy();
+});
+
+it('inputRef trỏ tới ô nhập thật, nút xóa vẫn trả focus về ô', async () => {
+  const user = userEvent.setup();
+  const objectRef = createRef<HTMLInputElement>();
+  const callbackRef = vi.fn();
+  const { rerender } = render(<SearchInput label="Tìm địa điểm" defaultValue="Huế" inputRef={objectRef} />);
+
+  const input = screen.getByRole('searchbox', { name: 'Tìm địa điểm' });
+  expect(objectRef.current).toBe(input);
+  await user.click(screen.getByRole('button', { name: 'Xóa tìm kiếm' }));
+  expect(document.activeElement).toBe(input);
+
+  rerender(<SearchInput label="Tìm địa điểm" inputRef={callbackRef} />);
+  expect(callbackRef).toHaveBeenLastCalledWith(input);
 });
 
 it('không hiện nút xóa khi clear bị tắt hoặc giá trị rỗng', () => {

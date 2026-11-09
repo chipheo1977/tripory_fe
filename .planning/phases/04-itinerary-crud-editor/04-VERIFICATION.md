@@ -243,3 +243,85 @@ Mục D của `04-UAT-CHECKLIST.md`: 8/8 bước (2', 2a, 2b, 4a, 5a, 5b, 5c, 16
 3. **PUB-02** (chuyển từ Phase 5 vào Phase 4 ngày 2026-10-30): chưa có plan. `REQUIREMENTS.md` vẫn ghi Pending. Phase 4 chưa đủ theo yêu cầu cho tới khi PUB-02 được lập kế hoạch hoặc chuyển lại Phase 5.
 4. `REQUIREMENTS.md` vẫn ghi ITIN-02, ITIN-03 là Pending dù đã đạt.
 5. Cảnh báo cũ MD-01, LW-01..LW-06 còn mở.
+
+---
+
+## Xác minh lại phần mở lại lần 2 (2026-11-05, plans 04-42..04-53, PUB-06)
+
+**Ngày:** 2026-11-06 · **Nhánh:** `phase_4` · **HEAD:** `048da79` · **Phương pháp:** tự làm theo `gsd-verifier.md` (không có sub-agent): đọc 12 PLAN (`must_haves.truths`), `04-53-SUMMARY.md`, mục E của `04-UAT-CHECKLIST.md`; chạy lại lint/typecheck/test/build từng gói; đối chiếu mã và bản build. Phần ở trên và phần mở lại lần 1 giữ nguyên.
+
+**Trạng thái phần mở lại lần 2:** `passed` cho PUB-06 ở mức tự động và UAT thủ công của người dùng (E1..E14 PASS). Phần chưa kiểm trên thiết bị thật ghi ở "Chưa kiểm / tồn đọng" bên dưới; không phần nào bị coi là đã kiểm.
+
+### Sự thật cần đạt (từ `must_haves.truths` của 04-42..04-53 và D-111..D-140)
+
+| # | Sự thật | Bằng chứng | Trạng thái |
+|---|---------|------------|------------|
+| 1 | 8 token màu ngày, kích thước pin/chấm/nhãn, độ mờ; tương phản ≥ 4.5:1 với chữ trắng; `dark.css` không ghi đè (04-42) | `@tripory/design-tokens` test 33/33; token `caption` 12px thêm ở 04-53 (`ccf6291`) | ✓ |
+| 2 | Domain thuần: `dayColorIndex`, `buildMapPins`, `buildDayRoutes`, `fitTargetFor`, `defaultEditorTab`, `summarizeDays`, tâm/bbox 34 tỉnh (04-43) | `@tripory/itinerary` test 523/523 (23 file); hàm nằm ở tầng domain, ESLint ranh giới xanh | ✓ |
+| 3 | `maplibre-gl` 6.16.0 và `react-map-gl` 8.1.3 qua `catalog:`; style riêng trỏ OpenFreeMap, lọc ranh giới/nhãn Hoàng Sa, Trường Sa, hai nhãn chủ quyền đúng chuỗi và toạ độ (04-44) | `ui/map/basemap-style.ts` (`SOVEREIGNTY_LABEL_TEXTS`) và `basemap-style.test.ts` (đối chiếu hai nhãn tại [112.0, 16.5] và [114.5, 10.0], điểm mẫu trong/ngoài mask); `@tripory/web` test 1986/1986 | ✓ (xác nhận bằng mắt: E2, người dùng) |
+| 4 | `ui-web`: `MapPin`, `MapToneDot`, `MapZoomControls`, `Sheet` `snap`/`onSnapChange`, `snapHeightPx`, tương thích ngược (04-45) | `map-pin.tsx`, `map-zoom-controls.tsx`; `@tripory/ui-web` test 377/377 | ✓ |
+| 5 | `TripMap` client-only (`next/dynamic` ssr false), worker dạng asset, lỗi/loading, reduced motion (04-46) | `ui/map/trip-map.lazy.tsx`, `trip-map.tsx`; build có `maplibre-gl-worker.*.mjs` (519 KB) trong `.next/static`; E11, E14 PASS | ✓ |
+| 6 | Tab "Tổng quan", `OverviewSummary`, `DayOverviewRow`, `OverviewPanel` chỉ xem (04-47) | `overview-summary.tsx`, `overview-panel.tsx`, `day-overview-row.tsx`, `day-tabs.tsx` + test; E5 PASS | ✓ (xem Deviation về nút bánh răng) |
+| 7 | Ô "Ngày" trong form thêm mở từ Tổng quan, form sửa không đổi (04-48) | `waypoint-form-dialog.tsx` + test; E7 PASS | ✓ |
+| 8 | Bố cục: bản đồ phủ vùng phải từ `lg`, nền `fixed` dưới `lg`, vùng an toàn theo mức sheet; `EditorMapArea` đủ loading/empty/error (04-49) | `editor-layout.tsx`, `editor-map-area.tsx`, `editor-map-viewport.ts` + test; E8, E9, E13 PASS | ✓ |
+| 9 | Chọn điểm đồng bộ danh sách↔pin, tách `DayPanel` (04-50) | `waypoint-list.tsx` (`selection`), `day-panel.tsx` + test | ✓ |
+| 10 | Nối vào editor: tab mặc định, đồng bộ chọn, canh khung, thêm từ Tổng quan (04-51) | `itinerary-editor.tsx`, `use-map-camera.ts`, `editor-map-pins.ts` + test; E6, E7 PASS | ✓ (dòng nổi khi bấm pin ở Tổng quan và cuộn thẻ vào khung: chỉ unit test) |
+| 11 | Cổng lint/typecheck/test từng gói, build tách bundle, mục E trong checklist (04-52) | Bảng lệnh bên dưới; manifest client của `/itineraries/[id]/edit` có maplibre, của `/itineraries/mine` không (0 lần khớp) | ✓ |
+| 12 | UAT E1..E14 có kết quả PASS/N/A, không FAIL tồn đọng (04-53) | Mọi ô E1..E14 là PASS (do người dùng xác nhận); các lỗi phát sinh sửa ở 10 commit `b2b4228`..`bfc5bcd` | ✓ (xác nhận của người dùng, không có ảnh chụp trong repo) |
+
+**Yêu cầu:** PUB-06 là ID duy nhất trong frontmatter của 04-42..04-53, đã khai báo ở cả 12 plan; `REQUIREMENTS.md` ánh xạ PUB-06 vào Phase 4. Không có ID mồ côi. PUB-02 đã về lại Phase 5 (2026-11-05), nên tồn đọng số 3 của phần mở lại lần 1 không còn thuộc Phase 4.
+
+**Bất biến:** không `dangerouslySetInnerHTML`, `localStorage`, `window.location` hay `fetch(` trong các file `*map*.tsx` của editor; mọi lời gọi BE vẫn qua BFF; ESLint ranh giới xanh (`@tripory/config` 114 test, lint 0 lỗi mọi gói). E10 (Network chỉ có tile/TileJSON/glyph tới `tiles.openfreemap.org`, không mang dữ liệu lịch trình) do người dùng xác nhận.
+
+### Bằng chứng tự động (chạy lại 2026-11-06 trên HEAD `048da79`, Windows, `pnpm --filter <gói>`)
+
+| Gói | lint | typecheck | test |
+|-----|------|-----------|------|
+| `@tripory/shared-kernel` | 0 | 0 | 32/32 |
+| `@tripory/design-tokens` | 0 | 0 | 33/33 |
+| `@tripory/api-client` | 0 | 0 | 98/98 |
+| `@tripory/itinerary` | 0 | 0 | 523/523 |
+| `@tripory/identity` | 0 | 0 | 244/244 |
+| `@tripory/config` | 0 | 0 | 114/114 |
+| `@tripory/ui-web` | 0 | 0 | 377/377 |
+| `@tripory/web` | 0 (1 warning cũ ở `day-tabs.test.tsx`) | 0 | 1986/1986 (128 file) |
+| `pnpm --filter @tripory/web build` | exit 0, có route `/itineraries/[id]/edit` và `/itineraries/mine` | | |
+
+- Cổng hồi quy các phase trước (1-3) nằm trong các gói trên (identity, api-client, shared-kernel): xanh.
+- `pnpm` ở gốc repo (turbo) crash trên máy này, nên chạy từng gói. Lần chạy của `@tripory/web` gồm cả thay đổi chưa commit của người dùng ở `day-overview-row.tsx` và `overview-panel.tsx` (kiểu dáng dòng ngày); test vẫn xanh.
+- Không có TODO/FIXME mới được rà trong phạm vi này ngoài các file đã liệt kê; không chạy lại quét 99 file của lượt đầu.
+
+### Deviations so với plan (đã ghi ở `04-53-SUMMARY.md`)
+
+1. Mười commit sửa lỗi UAT ngoài plan (`b2b4228`, `d229e8b`, `0b94d9c`, `cb8812e`, `55a168e`, `252d047`, `814ef46`, `afe3de2`, `ccf6291`, `bfc5bcd`).
+2. Nút "Sửa thông tin" ở Tổng quan thành nút bánh răng trên bản đồ (`MapEditInfoButton`, cột điều khiển phải trên), theo yêu cầu người dùng; trái với truth 6 của 04-47 ("nút Sửa thông tin" trong khối), dòng E5 và UI-SPEC đã cập nhật.
+3. Cử chỉ sheet đổi: vuốt nội dung chỉ cuộn, kéo bằng tay cầm hoặc hàng tab; sheet có một vùng cuộn.
+4. Thêm token `caption` 12px, UI-SPEC có 5 cỡ chữ thay vì 4. Nút zoom 48px → 32px (lệch truth 5 của 04-45, UI-SPEC đã cập nhật).
+5. Lớp `park` của OSM gần Hoàng Sa: người dùng duyệt giữ nguyên.
+
+### Review
+
+Không chạy `gsd-code-review` mới cho 04-42..04-53. `04-REVIEW.md` và `04-REVIEW-GATE.json` vẫn là của lượt 2026-10-29 (HEAD `6523ba2`); các commit sửa lỗi UAT chưa qua review độc lập. Khuyến nghị chạy `/gsd-code-review 4` trước khi merge.
+
+### Chưa kiểm / tồn đọng
+
+1. **Thiết bị thật:** iOS Safari và Android Chrome (vùng an toàn, thanh địa chỉ co giãn, home indicator, kéo sheet bằng cảm ứng thật) chưa được agent kiểm; các sửa cử chỉ sheet (`afe3de2`) chỉ chạy Chrome headless với cảm ứng giả lập (CDP). E4 và E13 do người dùng xác nhận, không ghi model máy hay ảnh chụp.
+2. **E12, E13, E14:** chỉ có xác nhận của người dùng, agent không chạy lại (bàn phím + NVDA/VoiceOver, smoke 4 kích thước, console WebGL/worker).
+3. **Ảnh chụp:** truth 1 của 04-53 yêu cầu ảnh chụp E2; repo không có ảnh nào. Bằng chứng E2 là xác nhận của người dùng.
+4. **BE thật trong editor:** các lần chạy Chrome của agent dùng BFF giả lập; dữ liệu BE thật chỉ được người dùng thấy khi UAT.
+5. **Review độc lập** cho phần mở lại lần 2: chưa có (xem trên).
+6. **Chưa tự động hóa:** dòng ngày nổi khi bấm pin ở Tổng quan và cuộn thẻ điểm vào khung chỉ có unit test, chưa có kiểm trình duyệt tự động.
+7. **Cảnh báo cũ** MD-01, LW-01..LW-06 còn mở.
+8. **Thay đổi chưa commit của người dùng:** `day-overview-row.tsx`, `overview-panel.tsx` nằm ngoài các commit của phase này.
+
+
+## Đóng phase 2026-11-07 (mở lại lần 3: tìm địa điểm, MAP-01)
+
+**Người dùng xác nhận hoàn thành Phase 4 ngày 2026-11-07.** Đây là xác nhận của người dùng, không phải kết quả kiểm lại của agent.
+
+- Phạm vi thêm sau lần verify đầu: MAP-01 (plan 04-55..04-58, D-141..D-153) và sửa chân form thêm/sửa điểm trên Sheet mobile (738c9a2).
+- Bằng chứng do agent chạy: lint, typecheck, test, build ở các commit 04-55..04-57 (xem thông điệp commit; lần cuối ở c63424f: lint 8/8, typecheck 8/8, test 8/8 gồm itinerary 617, ui-web 378, web 2153). Agent không chạy lại các kiểm này khi đóng phase (chỉ sửa tài liệu).
+- **Chấp nhận theo xác nhận của người dùng, agent chưa kiểm độc lập:** mục F UAT (F1..F11), sửa chân form Sheet mobile 738c9a2. Agent chưa chạy Photon/Nominatim thật, thiết bị thật, NVDA/VoiceOver cho phần này.
+- Mục E (bản đồ) 14/14 PASS do người dùng xác nhận (xem phần trên).
+- Review: gsd-code-review mục E đã chạy ( 4-REVIEW.md,  4-REVIEW-FIX.md); chưa có review độc lập riêng cho 04-55..04-58.
+- Tồn đọng không chặn: xem "Chưa kiểm / tồn đọng" ở trên (MD-01, LW-01..LW-06, UF-01..UF-04 vẫn mở), thêm: server Photon/Nominatim công khai (giới hạn băng thông, điều khoản), cache trong bộ nhớ từng instance, place_id chưa lưu ở BE.

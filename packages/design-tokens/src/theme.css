@@ -40,6 +40,14 @@
   --color-warning: var(--semantic-color-warning);
   --color-warning-subtle: var(--semantic-color-warning-subtle);
   --color-overlay: var(--semantic-color-overlay);
+  --color-map-day-1: var(--map-day-1);
+  --color-map-day-2: var(--map-day-2);
+  --color-map-day-3: var(--map-day-3);
+  --color-map-day-4: var(--map-day-4);
+  --color-map-day-5: var(--map-day-5);
+  --color-map-day-6: var(--map-day-6);
+  --color-map-day-7: var(--map-day-7);
+  --color-map-day-8: var(--map-day-8);
 
   --spacing-inline-xs: var(--semantic-space-inline-xs);
   --spacing-inline-sm: var(--semantic-space-inline-sm);
@@ -79,6 +87,9 @@
   --text-body: var(--semantic-font-size-body);
   --text-body--line-height: var(--semantic-line-height-body);
   --text-body--letter-spacing: var(--semantic-letter-spacing-normal);
+  --text-caption: var(--semantic-font-size-caption);
+  --text-caption--line-height: var(--semantic-line-height-body);
+  --text-caption--letter-spacing: var(--semantic-letter-spacing-normal);
   --text-label: var(--semantic-font-size-label);
   --text-label--line-height: var(--semantic-line-height-body);
   --text-label--letter-spacing: var(--semantic-letter-spacing-normal);

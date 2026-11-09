@@ -16,6 +16,7 @@ const d = (
   popularityRank,
   aliases,
   defaultCoverImageUrl: null,
+  view: { center: [105.85, 21.03], bounds: [[105.28, 20.56], [106.03, 21.39]] },
 });
 
 const LIST: readonly Destination[] = [

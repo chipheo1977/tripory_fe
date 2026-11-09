@@ -8,12 +8,12 @@
 // giả: bàn phím dùng các nút "Sửa thông tin" / "Thêm ảnh bìa". Tiêu đề và mô tả là text node của React
 // (`whitespace-pre-line`, không HTML), nên không có đường XSS (T-04-44).
 import type { Itinerary } from "@tripory/itinerary";
-import { Badge, Button, cn, Icon } from "@tripory/ui-web";
-import { ImagePlus, Pencil } from "lucide-react";
+import { Badge, Button, cn } from "@tripory/ui-web";
+import { Pencil } from "lucide-react";
 import { useId, type MouseEvent } from "react";
-import { CoverImage } from "./cover-image";
 import { defaultCoverFor } from "./destination-cover";
 import { formatKm, formatStartDate } from "./format";
+import { TripCover } from "./trip-cover";
 
 export type TripSummaryProps = Readonly<{
   itinerary: Itinerary;
@@ -21,37 +21,6 @@ export type TripSummaryProps = Readonly<{
   variant: "canvas" | "compact";
   onEdit(): void;
 }>;
-
-// Cùng điều kiện với `CoverImage`: chỉ `https://` mới coi là có ảnh (D-25).
-const hasCover = (url: string | null): boolean => url !== null && url.startsWith("https://");
-
-function AddCoverPlaceholder({ className, onAdd }: Readonly<{ className: string; onAdd(): void }>) {
-  return (
-    <div
-      className={cn(
-        "flex aspect-(--itinerary-cover-ratio) flex-col items-center justify-center gap-stack-sm bg-surface-muted",
-        className,
-      )}
-    >
-      <Icon className="text-subtle" icon={ImagePlus} size="md" />
-      <Button onClick={onAdd} size="sm" variant="secondary">
-        Thêm ảnh bìa
-      </Button>
-    </div>
-  );
-}
-
-// Ảnh đang hiển thị → ảnh mặc định của điểm đến → nút "Thêm ảnh bìa" (chỉ khi không có cả hai).
-function TripCover({
-  src,
-  fallbackSrc,
-  className,
-  onAdd,
-}: Readonly<{ src: string | null; fallbackSrc: string | null; className: string; onAdd(): void }>) {
-  const hasAnyCover = hasCover(src) || hasCover(fallbackSrc);
-  if (hasAnyCover) return <CoverImage className={className} fallbackSrc={fallbackSrc} src={src} />;
-  return <AddCoverPlaceholder className={className} onAdd={onAdd} />;
-}
 
 export function TripSummary({ itinerary, variant, onEdit }: TripSummaryProps) {
   const headingId = useId();

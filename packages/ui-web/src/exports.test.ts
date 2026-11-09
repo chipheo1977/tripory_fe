@@ -39,6 +39,9 @@ const molecules = [
   'ToggleChipGroup',
   'NumberStepper',
   'RadioGroup',
+  'MapPin',
+  'MapToneDot',
+  'MapZoomControls',
 ] as const;
 
 const compoundParts = [
@@ -125,7 +128,7 @@ describe('ui-web public entry', () => {
   });
 
   it('export Sheet snap adapter và feedback helpers', () => {
-    expect(hasEveryExport(['resolveSnapPoints', 'notify', 'toastDurations'])).toEqual([]);
+    expect(hasEveryExport(['resolveSnapPoints', 'snapHeightPx', 'mapToneClass', 'notify', 'toastDurations'])).toEqual([]);
   });
 
   it('Button public nhận loadingLabel và PasswordInput nhận ref', () => {

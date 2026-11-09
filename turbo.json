@@ -4,7 +4,7 @@
     "build": {
       "dependsOn": ["^build", "transit"],
       "outputs": [".next/**", "!.next/cache/**"],
-      "env": ["API_ORIGIN", "APP_ORIGIN", "BFF_SHARED_SECRET"]
+      "env": ["API_ORIGIN", "APP_ORIGIN", "BFF_SHARED_SECRET", "PHOTON_BASE_URL", "NOMINATIM_BASE_URL"]
     },
     "transit": {
       "dependsOn": ["^transit"]
@@ -21,7 +21,7 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "env": ["API_ORIGIN", "APP_ORIGIN", "BFF_SHARED_SECRET"]
+      "env": ["API_ORIGIN", "APP_ORIGIN", "BFF_SHARED_SECRET", "PHOTON_BASE_URL", "NOMINATIM_BASE_URL"]
     }
   }
 }

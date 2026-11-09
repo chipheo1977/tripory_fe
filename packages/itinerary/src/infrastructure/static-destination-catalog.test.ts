@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeSearchText, popularDestinations, searchDestinations } from '../domain';
+import { boundsContain, normalizeSearchText, popularDestinations, searchDestinations } from '../domain';
+import type { GeoBounds } from '../domain';
 import { createStaticDestinationCatalog } from './static-destination-catalog';
 
 const BASE = 'https://example.test/destinations';
@@ -103,6 +104,53 @@ describe('static destination catalog', () => {
     expect(daLat?.destination.slug).toBe('vn-lam-dong');
     expect(daLat?.matchedAlias).toBe('Đà Lạt');
     expect(searchDestinations(list, 'phu quoc')[0]?.destination.slug).toBe('vn-an-giang');
+  });
+
+  describe('khung nhìn 34 tỉnh (D-121)', () => {
+    const LAND_FRAME: GeoBounds = [
+      [102.1, 8.3],
+      [109.6, 23.4],
+    ];
+
+    it('34 slug đều có view', () => {
+      expect(list.filter((item) => item.view !== undefined)).toHaveLength(34);
+    });
+
+    it.each(list.map((item) => [item.slug, item] as const))('%s: bbox trong khung đất liền và chứa tâm', (_slug, item) => {
+      const [[west, south], [east, north]] = item.view.bounds;
+
+      expect(west).toBeGreaterThanOrEqual(LAND_FRAME[0][0]);
+      expect(south).toBeGreaterThanOrEqual(LAND_FRAME[0][1]);
+      expect(east).toBeLessThanOrEqual(LAND_FRAME[1][0]);
+      expect(north).toBeLessThanOrEqual(LAND_FRAME[1][1]);
+      expect(boundsContain(item.view.bounds, item.view.center)).toBe(true);
+    });
+
+    it.each([
+      ['Phú Quốc', [103.96, 10.23], 'vn-an-giang'],
+      ['Đà Lạt', [108.44, 11.94], 'vn-lam-dong'],
+      ['Phan Thiết', [108.1, 10.93], 'vn-lam-dong'],
+      ['Hội An', [108.33, 15.88], 'vn-da-nang'],
+      ['Vũng Tàu', [107.08, 10.35], 'vn-ho-chi-minh'],
+      ['Sa Pa', [103.84, 22.34], 'vn-lao-cai'],
+      ['Hà Giang', [104.98, 22.82], 'vn-tuyen-quang'],
+      ['Nha Trang', [109.19, 12.24], 'vn-khanh-hoa'],
+      ['Phan Rang', [108.99, 11.56], 'vn-khanh-hoa'],
+      ['Quy Nhơn', [109.22, 13.78], 'vn-gia-lai'],
+      ['Hạ Long', [107.08, 20.95], 'vn-quang-ninh'],
+    ] as const)('địa danh %s nằm trong bbox của %s', (_place, point, slug) => {
+      const view = catalog.findBySlug(slug)?.view;
+
+      expect(view).toBeDefined();
+      expect(boundsContain(view?.bounds ?? LAND_FRAME, [point[0], point[1]])).toBe(true);
+    });
+
+    it('Khánh Hòa dùng khung tay, không gồm Trường Sa', () => {
+      expect(catalog.findBySlug('vn-khanh-hoa')?.view.bounds).toEqual([
+        [108.55, 11.25],
+        [109.47, 12.87],
+      ]);
+    });
   });
 
   it('imageBaseUrl không hợp lệ thì ném lỗi', () => {

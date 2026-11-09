@@ -2,7 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { makeApiError } from "@tripory/api-client";
-import type { Waypoint } from "@tripory/itinerary";
+import type { Place, Waypoint } from "@tripory/itinerary";
 import { createWgs84Coordinate, parseItineraryId, parseUserId } from "@tripory/shared-kernel";
 import { notify } from "@tripory/ui-web";
 import { useState } from "react";
@@ -14,7 +14,26 @@ import { LOCATION_NO_COORDINATE } from "./location-field";
 import { createSaveStatusStore, SaveStatusProvider, type SaveStatusStore } from "./save-status";
 import { WaypointFormDialog, type WaypointFormMode } from "./waypoint-form-dialog";
 
-const h = vi.hoisted(() => ({ add: vi.fn(), update: vi.fn(), resolve: vi.fn() }));
+const h = vi.hoisted(() => ({
+  add: vi.fn(),
+  update: vi.fn(),
+  resolve: vi.fn(),
+  search: vi.fn(),
+  suggest: vi.fn(),
+  reverse: vi.fn(),
+}));
+
+// Lookup giả thay BFF `/api/places/*`: test không bao giờ gọi Photon/Nominatim thật.
+vi.mock("@/composition/places.client", async () => {
+  const { createPlaceHooks } = await import("@tripory/itinerary/react");
+  return {
+    places: createPlaceHooks({
+      search: (query) => h.search(query),
+      suggest: (code) => h.suggest(code),
+      reverse: (coordinate) => h.reverse(coordinate),
+    }),
+  };
+});
 
 vi.mock("@/composition/itinerary.client", async () => {
   const { createItineraryHooks: factory } = await import("@tripory/itinerary/react");
@@ -77,6 +96,28 @@ const addressInput = () => screen.getByLabelText("Địa chỉ") as HTMLInputEle
 const notesInput = () => screen.getByLabelText("Ghi chú") as HTMLTextAreaElement;
 const submitButton = () => screen.getByRole("button", { name: /^Thêm điểm đến$|^Lưu$|^Đang (thêm|lưu)/ });
 const set = (element: HTMLElement, value: string) => fireEvent.change(element, { target: { value } });
+const searchInput = () => screen.getByRole("combobox", { name: "Tìm địa điểm" }) as HTMLInputElement;
+/** Form thêm mở ở chế độ tìm (D-150): chuyển sang ô tọa độ/link cũ trước khi dán. */
+const switchToManual = () => fireEvent.click(screen.getByRole("button", { name: "Nhập tọa độ thủ công" }));
+
+const place = (
+  id: string,
+  name: string | null,
+  address: string | null,
+  latitude: number,
+  longitude: number,
+): Place => ({
+  id,
+  name,
+  address,
+  coordinate: { latitude, longitude },
+  category: "attraction",
+  countryCode: "VN",
+});
+
+const CRAZY_HOUSE = place("W1", "Crazy House", "3 Huỳnh Thúc Kháng, Xuân Hương, Đà Lạt, Lâm Đồng", 11.93508912, 108.43071634);
+const HO_XUAN_HUONG = place("W2", "Hồ Xuân Hương", "Xuân Hương, Đà Lạt, Lâm Đồng", 11.9418, 108.4413);
+const STREET = place("W9", null, "Hùng Vương, Xuân Hương, Đà Lạt, Lâm Đồng", 11.9404, 108.4583);
 
 const originalMatchMedia = window.matchMedia;
 const setWide = (wide: boolean) => {
@@ -95,6 +136,7 @@ function setup(
     restored: WaypointValues | null;
     onDirtyChange: (dirty: boolean) => void;
     store: SaveStatusStore;
+    destinationCode: string | null;
   }> = {},
 ) {
   const user = userEvent.setup();
@@ -107,6 +149,7 @@ function setup(
     const [mode, setMode] = useState<WaypointFormMode | null>(props.mode ?? { kind: "add", dayNumber: 2 });
     return (
       <WaypointFormDialog
+        destinationCode={props.destinationCode}
         itineraryId={ITINERARY_ID}
         mode={mode}
         onAdded={onAdded}
@@ -141,6 +184,9 @@ beforeEach(() => {
     Promise.resolve({ ...SAVED, id: "wp-new", dayNumber: input.dayNumber, name: input.name }),
   );
   h.update.mockResolvedValue(undefined);
+  h.suggest.mockResolvedValue([CRAZY_HOUSE, HO_XUAN_HUONG]);
+  h.search.mockResolvedValue([HO_XUAN_HUONG]);
+  h.reverse.mockResolvedValue(null);
 });
 
 afterEach(() => {
@@ -158,7 +204,10 @@ it("opens an add form for the day with fields in order and the name focused", as
   const form = screen.getByRole("dialog").querySelector("form") as HTMLFormElement;
   const labels = [...form.querySelectorAll("label")].map((label) => label.textContent ?? "");
   expect(labels).toEqual(["Tên*(bắt buộc)", "Vị trí*(bắt buộc)", "Địa chỉ", "Ghi chú"]);
-  expect(screen.getByText("Dán tọa độ (ví dụ 10.7769, 106.7009) hoặc link Google Maps.")).toBeTruthy();
+  // D-150: thêm mới mở ở chế độ tìm địa điểm, ô tọa độ cũ là đường phụ.
+  expect(searchInput()).toBeTruthy();
+  expect(screen.queryByText("Dán tọa độ (ví dụ 10.7769, 106.7009) hoặc link Google Maps.")).toBeNull();
+  expect(screen.getByRole("button", { name: "Nhập tọa độ thủ công" })).toBeTruthy();
   expect(screen.getByRole("button", { name: "Thêm điểm đến" })).toBeTruthy();
   expect(screen.queryByRole("button", { name: "Xóa điểm đến" })).toBeNull();
   expect(screen.getByRole("dialog").querySelector("input[type=date]")).toBeNull();
@@ -191,6 +240,7 @@ it("closes the edit form and requests deletion without sending anything", async 
 it("fills an empty name and address from a place link and explains where the name came from", async () => {
   setup();
   await screen.findByRole("dialog");
+  switchToManual();
   set(locationInput(), POI);
   await waitFor(() => expect(nameInput().value).toBe("Brandenburg Gate"));
   expect(addressInput().value).toBe("Pariser Platz, 10117 Berlin, Germany");
@@ -205,6 +255,7 @@ it("does not overwrite a name or address the user already typed", async () => {
   await screen.findByRole("dialog");
   set(nameInput(), "Cổng Brandenburg");
   set(addressInput(), "Berlin");
+  switchToManual();
   set(locationInput(), POI);
   await screen.findByText(/Link này chỉ có tên địa điểm/, undefined, { timeout: 2000 }).catch(() => null);
   expect(nameInput().value).toBe("Cổng Brandenburg");
@@ -216,6 +267,7 @@ it("shows the location error under the field, focuses it and sends nothing when 
   const { user } = setup();
   await screen.findByRole("dialog");
   set(nameInput(), "Chợ Bến Thành");
+  switchToManual();
   set(locationInput(), "abc");
   await user.click(submitButton());
   expect(await screen.findByText(/Không đọc được vị trí/)).toBeTruthy();
@@ -228,7 +280,8 @@ it("shows the required messages for empty name and location on submit", async ()
   await screen.findByRole("dialog");
   await user.click(submitButton());
   expect(await screen.findByText("Vui lòng nhập tên điểm đến.")).toBeTruthy();
-  expect(screen.getByText("Vui lòng dán tọa độ hoặc link Google Maps.")).toBeTruthy();
+  expect(screen.getByText("Vui lòng chọn địa điểm hoặc nhập tọa độ.")).toBeTruthy();
+  await waitFor(() => expect(document.activeElement).toBe(nameInput()));
   expect(h.add).not.toHaveBeenCalled();
 });
 
@@ -237,6 +290,7 @@ it("adds a waypoint with trimmed values, closes without a toast and reports it",
   const { user, onAdded, onClose, store } = setup();
   await screen.findByRole("dialog");
   set(nameInput(), "  Chợ Bến Thành  ");
+  switchToManual();
   set(locationInput(), COORDS_INPUT);
   set(notesInput(), "   ");
   await user.click(submitButton());
@@ -260,6 +314,7 @@ it("resolves a pasted short link at submit time and sends its coordinate", async
   const { user, onAdded } = setup();
   await screen.findByRole("dialog");
   set(nameInput(), "Điểm lạ");
+  switchToManual();
   set(locationInput(), SHORT);
   await user.click(submitButton());
   await waitFor(() => expect(onAdded).toHaveBeenCalledTimes(1));
@@ -273,6 +328,7 @@ it("keeps the form open with the resolve error when a short link cannot be opene
   const { user, onClose } = setup();
   await screen.findByRole("dialog");
   set(nameInput(), "Điểm lạ");
+  switchToManual();
   set(locationInput(), SHORT);
   await user.click(submitButton());
   expect(await screen.findByText("Không mở được link rút gọn này. Thử dán link đầy đủ hoặc tọa độ.")).toBeTruthy();
@@ -285,7 +341,7 @@ it("saves an edit and keeps the full stored coordinate when the location was not
   await screen.findByRole("dialog");
   set(nameInput(), "Chợ Bến Thành mới");
   await user.click(submitButton());
-  await waitFor(() => expect(onUpdated).toHaveBeenCalledWith("wp-1"));
+  await waitFor(() => expect(onUpdated).toHaveBeenCalledWith("wp-1", COORDINATE));
   expect(h.update).toHaveBeenCalledTimes(1);
   expect(h.update).toHaveBeenCalledWith("wp-1", {
     name: "Chợ Bến Thành mới",
@@ -313,6 +369,7 @@ it("puts a backend coordinate error under the location field and keeps the form 
   const { user, onClose } = setup();
   await screen.findByRole("dialog");
   set(nameInput(), "Chợ");
+  switchToManual();
   set(locationInput(), COORDS_INPUT);
   await user.click(submitButton());
   expect(await screen.findByText(/Vĩ độ/)).toBeTruthy();
@@ -326,6 +383,7 @@ it("shows an inline alert for an unexpected server error and keeps the form open
   const { user, onClose } = setup();
   await screen.findByRole("dialog");
   set(nameInput(), "Chợ");
+  switchToManual();
   set(locationInput(), COORDS_INPUT);
   await user.click(submitButton());
   expect(await screen.findByRole("alert")).toBeTruthy();
@@ -338,6 +396,7 @@ it("rejects a name over 200, an address over 500 and notes over 2000 characters"
   const { user } = setup();
   await screen.findByRole("dialog");
   set(nameInput(), "a".repeat(201));
+  switchToManual();
   set(locationInput(), COORDS_INPUT);
   set(addressInput(), "b".repeat(501));
   set(notesInput(), "c".repeat(2001));
@@ -400,6 +459,7 @@ it("cannot be closed while sending", async () => {
   const { user, onClose } = setup();
   await screen.findByRole("dialog");
   set(nameInput(), "Chợ");
+  switchToManual();
   set(locationInput(), COORDS_INPUT);
   await user.click(submitButton());
   await waitFor(() => expect(h.add).toHaveBeenCalledTimes(1));
@@ -420,6 +480,8 @@ it("uses a bottom sheet below the md breakpoint with the same fields", async () 
   setup();
   expect(await screen.findByRole("dialog", { name: "Thêm điểm đến vào Ngày 2" })).toBeTruthy();
   expect(nameInput()).toBeTruthy();
+  expect(searchInput()).toBeTruthy();
+  switchToManual();
   expect(locationInput()).toBeTruthy();
 });
 
@@ -438,6 +500,7 @@ it("disables the sheet X button while sending", async () => {
   const { user, onClose } = setup();
   await screen.findByRole("dialog");
   set(nameInput(), "Chợ");
+  switchToManual();
   set(locationInput(), COORDS_INPUT);
   await user.click(submitButton());
   await waitFor(() => expect(h.add).toHaveBeenCalledTimes(1));
@@ -452,4 +515,304 @@ it("has no sheet X button in the desktop dialog", async () => {
   setup();
   await screen.findByRole("dialog");
   expect(screen.queryByRole("button", { name: "Đóng" })).toBeNull();
+});
+
+const OVERVIEW_MODE: WaypointFormMode = {
+  kind: "add",
+  dayNumber: 3,
+  dayChoices: [
+    { dayNumber: 1, subtitle: null },
+    { dayNumber: 2, subtitle: "Phố cổ" },
+    { dayNumber: 3, subtitle: null },
+  ],
+};
+const dayTrigger = () => screen.getByRole("combobox", { name: "Ngày" });
+
+it("opened from Overview shows a Day field above the name, defaulting to the last day, with the name focused", async () => {
+  setup({ mode: OVERVIEW_MODE });
+  expect(await screen.findByRole("dialog", { name: "Thêm điểm đến" })).toBeTruthy();
+  await waitFor(() => expect(document.activeElement).toBe(nameInput()));
+  expect(dayTrigger().textContent).toContain("Ngày 3");
+  const form = screen.getByRole("dialog").querySelector("form") as HTMLFormElement;
+  const labels = [...form.querySelectorAll("label")].map((label) => label.textContent ?? "");
+  expect(labels[0]).toBe("Ngày");
+  expect(labels.indexOf("Ngày")).toBeLessThan(labels.findIndex((label) => label.startsWith("Tên")));
+  expect(dayTrigger().compareDocumentPosition(nameInput()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+});
+
+it("lists every day with its subtitle and sends the chosen day", async () => {
+  const { user, onAdded } = setup({ mode: OVERVIEW_MODE });
+  await screen.findByRole("dialog");
+  await user.click(dayTrigger());
+  const options = (await screen.findAllByRole("option")).map((option) => option.textContent);
+  expect(options).toEqual(["Ngày 1", "Ngày 2 · Phố cổ", "Ngày 3"]);
+  await user.click(screen.getByRole("option", { name: "Ngày 1" }));
+  expect(dayTrigger().textContent).toContain("Ngày 1");
+  set(nameInput(), "Chợ");
+  switchToManual();
+  set(locationInput(), COORDS_INPUT);
+  await user.click(submitButton());
+  await waitFor(() => expect(h.add).toHaveBeenCalledTimes(1));
+  expect(h.add.mock.calls[0]?.[0]).toMatchObject({ dayNumber: 1, name: "Chợ" });
+  await waitFor(() => expect(onAdded).toHaveBeenCalledTimes(1));
+});
+
+it("keeps the default (last) day when the user does not touch the field", async () => {
+  const { user } = setup({ mode: OVERVIEW_MODE });
+  await screen.findByRole("dialog");
+  set(nameInput(), "Chợ");
+  switchToManual();
+  set(locationInput(), COORDS_INPUT);
+  await user.click(submitButton());
+  await waitFor(() => expect(h.add).toHaveBeenCalledTimes(1));
+  expect(h.add.mock.calls[0]?.[0]).toMatchObject({ dayNumber: 3 });
+});
+
+it("saves the expired-session draft under the chosen day, not the default one", async () => {
+  const { user } = setup({ mode: OVERVIEW_MODE });
+  await screen.findByRole("dialog");
+  await user.click(dayTrigger());
+  await user.click(await screen.findByRole("option", { name: "Ngày 2 · Phố cổ" }));
+  set(nameInput(), "Chợ");
+  act(() => sessionEvents.emitExpired());
+  const chosen = draftKey({ viewerId: VIEWER, itineraryId: ITINERARY_ID, kind: "add:2" });
+  const fallback = draftKey({ viewerId: VIEWER, itineraryId: ITINERARY_ID, kind: "add:3" });
+  expect(window.sessionStorage.getItem(chosen)).not.toBeNull();
+  expect(window.sessionStorage.getItem(fallback)).toBeNull();
+});
+
+it("has no Day field when opened from a day tab", async () => {
+  setup({ mode: { kind: "add", dayNumber: 2 } });
+  expect(await screen.findByRole("dialog", { name: "Thêm điểm đến vào Ngày 2" })).toBeTruthy();
+  expect(screen.queryByRole("combobox", { name: "Ngày" })).toBeNull();
+});
+
+it("has no Day field in the edit form", async () => {
+  setup({ mode: { kind: "edit", waypoint: SAVED } });
+  expect(await screen.findByRole("dialog", { name: "Sửa điểm đến" })).toBeTruthy();
+  expect(screen.queryByRole("combobox", { name: "Ngày" })).toBeNull();
+});
+
+it("disables the Day field while sending", async () => {
+  h.add.mockImplementation(() => new Promise(() => undefined));
+  const { user } = setup({ mode: OVERVIEW_MODE });
+  await screen.findByRole("dialog");
+  set(nameInput(), "Chợ");
+  switchToManual();
+  set(locationInput(), COORDS_INPUT);
+  await user.click(submitButton());
+  await waitFor(() => expect(h.add).toHaveBeenCalledTimes(1));
+  expect((dayTrigger() as HTMLButtonElement).hasAttribute("disabled") || dayTrigger().getAttribute("aria-disabled") === "true").toBe(true);
+});
+
+// --- Tìm địa điểm (MAP-01, D-146..D-150) ---
+
+const LAM_DONG = "vn-lam-dong";
+const pickOption = async (user: ReturnType<typeof userEvent.setup>, name: RegExp) =>
+  user.click(await screen.findByRole("option", { name }));
+const changePlace = () => fireEvent.click(screen.getByRole("button", { name: "Đổi địa điểm" }));
+
+it("add form opens in search mode with suggestions for the itinerary destination", async () => {
+  setup({ destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  expect(await screen.findByRole("listbox", { name: "Gợi ý ở Lâm Đồng" })).toBeTruthy();
+  expect(h.suggest).toHaveBeenCalledWith(LAM_DONG);
+  expect(searchInput()).toBeTruthy();
+  expect(screen.queryByText("Dán tọa độ (ví dụ 10.7769, 106.7009) hoặc link Google Maps.")).toBeNull();
+});
+
+it("picking a place fills location, address and name, keeps notes and sends the 6-decimal coordinate", async () => {
+  const { user, onAdded } = setup({ destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  set(notesInput(), "Đi buổi sáng");
+  await pickOption(user, /Crazy House/);
+
+  expect(nameInput().value).toBe("Crazy House");
+  expect(addressInput().value).toBe("3 Huỳnh Thúc Kháng, Xuân Hương, Đà Lạt, Lâm Đồng");
+  expect(notesInput().value).toBe("Đi buổi sáng");
+  expect(screen.getByText("Đã lấy tên từ địa điểm đã chọn, bạn có thể sửa.")).toBeTruthy();
+  expect(screen.getByText(/Crazy House · 3 Huỳnh Thúc Kháng, Xuân Hương, Đà Lạt, Lâm Đồng · 11\.9351, 108\.4307/)).toBeTruthy();
+  expect(document.activeElement).toBe(screen.getByRole("button", { name: "Đổi địa điểm" }));
+  expect(screen.queryByRole("combobox", { name: "Tìm địa điểm" })).toBeNull();
+
+  await user.click(submitButton());
+  await waitFor(() => expect(onAdded).toHaveBeenCalledTimes(1));
+  expect(h.add.mock.calls[0]?.[0]).toMatchObject({
+    name: "Crazy House",
+    address: "3 Huỳnh Thúc Kháng, Xuân Hương, Đà Lạt, Lâm Đồng",
+    notes: "Đi buổi sáng",
+    coordinate: { latitude: 11.935089, longitude: 108.430716 },
+  });
+  expect(h.reverse).not.toHaveBeenCalled();
+});
+
+it("a second pick replaces an auto-filled name but never a name the user typed", async () => {
+  const { user } = setup({ destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  await pickOption(user, /Crazy House/);
+  changePlace();
+  await waitFor(() => expect(document.activeElement).toBe(searchInput()));
+  await pickOption(user, /Hồ Xuân Hương/);
+  expect(nameInput().value).toBe("Hồ Xuân Hương");
+  expect(addressInput().value).toBe("Xuân Hương, Đà Lạt, Lâm Đồng");
+
+  set(nameInput(), "Hồ của tôi");
+  expect(screen.queryByText("Đã lấy tên từ địa điểm đã chọn, bạn có thể sửa.")).toBeNull();
+  changePlace();
+  await pickOption(user, /Crazy House/);
+  expect(nameInput().value).toBe("Hồ của tôi");
+  expect(addressInput().value).toBe("3 Huỳnh Thúc Kháng, Xuân Hương, Đà Lạt, Lâm Đồng");
+});
+
+it("searches by name after typing and picks with the keyboard without submitting", async () => {
+  const { user } = setup({ destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  await user.type(searchInput(), "ho xuan");
+  await screen.findByRole("listbox", { name: "Kết quả tìm kiếm" });
+  expect(h.search).toHaveBeenCalledTimes(1);
+  expect(h.search).toHaveBeenCalledWith({ text: "ho xuan", destinationCode: LAM_DONG });
+  await user.keyboard("{ArrowDown}{Enter}");
+  expect(nameInput().value).toBe("Hồ Xuân Hương");
+  expect(h.add).not.toHaveBeenCalled();
+  expect(screen.queryByText("Vui lòng nhập tên điểm đến.")).toBeNull();
+});
+
+it("Esc in the search box clears the text without closing the form, then closes it when empty", async () => {
+  const { user, onClose } = setup({ destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  await user.type(searchInput(), "ho");
+  await user.keyboard("{Escape}");
+  expect(searchInput().value).toBe("");
+  expect(onClose).not.toHaveBeenCalled();
+  expect(screen.getByRole("dialog")).toBeTruthy();
+  await user.keyboard("{Escape}");
+  await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+});
+
+it("'Nhập tọa độ thủ công' shows the old field and 'Tìm địa điểm' goes back", async () => {
+  setup({ destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  switchToManual();
+  expect(screen.getByText("Dán tọa độ (ví dụ 10.7769, 106.7009) hoặc link Google Maps.")).toBeTruthy();
+  expect(screen.queryByRole("combobox", { name: "Tìm địa điểm" })).toBeNull();
+  await waitFor(() => expect(document.activeElement).toBe(locationInput()));
+  fireEvent.click(screen.getByRole("button", { name: "Tìm địa điểm" }));
+  expect(searchInput()).toBeTruthy();
+  await waitFor(() => expect(document.activeElement).toBe(searchInput()));
+});
+
+it("a typed coordinate triggers one reverse call and fills the address but not the name for a street", async () => {
+  h.reverse.mockResolvedValue(STREET);
+  setup({ destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  switchToManual();
+  set(locationInput(), "11.9404, 108.4583");
+  expect(await screen.findByText("Đã điền địa chỉ từ OpenStreetMap, bạn có thể sửa.")).toBeTruthy();
+  expect(addressInput().value).toBe("Hùng Vương, Xuân Hương, Đà Lạt, Lâm Đồng");
+  expect(nameInput().value).toBe("");
+  expect(h.reverse).toHaveBeenCalledTimes(1);
+  expect(h.reverse).toHaveBeenCalledWith({ latitude: 11.9404, longitude: 108.4583 });
+});
+
+it("typing a coordinate key by key makes one reverse call, only for the finished coordinate", async () => {
+  h.reverse.mockResolvedValue(STREET);
+  const { user } = setup({ destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  switchToManual();
+  await user.type(locationInput(), "11.9404, 108.4583");
+  expect(await screen.findByText("Đã điền địa chỉ từ OpenStreetMap, bạn có thể sửa.")).toBeTruthy();
+  expect(addressInput().value).toBe("Hùng Vương, Xuân Hương, Đà Lạt, Lâm Đồng");
+  expect(h.reverse).toHaveBeenCalledTimes(1);
+  expect(h.reverse).toHaveBeenCalledWith({ latitude: 11.9404, longitude: 108.4583 });
+});
+
+it("a reverse hit on a named place fills an empty name", async () => {
+  h.reverse.mockResolvedValue(CRAZY_HOUSE);
+  setup();
+  await screen.findByRole("dialog");
+  switchToManual();
+  set(locationInput(), "11.935089, 108.430716");
+  await waitFor(() => expect(nameInput().value).toBe("Crazy House"));
+  expect(addressInput().value).toBe("3 Huỳnh Thúc Kháng, Xuân Hương, Đà Lạt, Lâm Đồng");
+});
+
+it("says so when the coordinate has no address, and when the lookup fails", async () => {
+  setup();
+  await screen.findByRole("dialog");
+  switchToManual();
+  set(locationInput(), "16.83, 112.34");
+  expect(await screen.findByText("Không tìm thấy địa chỉ cho tọa độ này. Bạn có thể tự nhập.")).toBeTruthy();
+  h.reverse.mockRejectedValue(makeApiError({ kind: "http", status: 502, code: "Places.Unavailable", message: null }));
+  set(locationInput(), "11.1, 108.1");
+  expect(await screen.findByText("Chưa lấy được địa chỉ lúc này. Bạn có thể tự nhập.")).toBeTruthy();
+  expect(addressInput().value).toBe("");
+});
+
+it("edit form opens in manual mode and makes no reverse call for the saved coordinate", async () => {
+  setup({ mode: { kind: "edit", waypoint: SAVED }, destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  expect(locationInput().value).toBe("10.7769, 106.7009");
+  expect(screen.queryByRole("combobox", { name: "Tìm địa điểm" })).toBeNull();
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  expect(h.reverse).not.toHaveBeenCalled();
+  expect(addressInput().value).toBe("Quận 1");
+});
+
+it("edit form: back to manual after 'Đổi địa điểm' with nothing picked restores the saved coordinate", async () => {
+  setup({ mode: { kind: "edit", waypoint: SAVED }, destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  fireEvent.click(screen.getByRole("button", { name: "Tìm địa điểm" }));
+  changePlace();
+  await waitFor(() => expect(document.activeElement).toBe(searchInput()));
+  switchToManual();
+  expect(locationInput().value).toBe("10.7769, 106.7009");
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  expect(h.reverse).not.toHaveBeenCalled();
+  expect(addressInput().value).toBe("Quận 1");
+});
+
+it("edit form from a restored draft: back to manual restores the draft coordinate and does not reverse it", async () => {
+  const draftLocation = "21.0285, 105.8542";
+  setup({
+    mode: { kind: "edit", waypoint: SAVED },
+    destinationCode: LAM_DONG,
+    restored: { name: "Bản nháp", location: draftLocation, address: "Địa chỉ nháp", notes: "" },
+  });
+  await screen.findByRole("dialog");
+  fireEvent.click(screen.getByRole("button", { name: "Tìm địa điểm" }));
+  changePlace();
+  await waitFor(() => expect(document.activeElement).toBe(searchInput()));
+  switchToManual();
+  expect(locationInput().value).toBe(draftLocation);
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  expect(h.reverse).not.toHaveBeenCalled();
+  expect(addressInput().value).toBe("Địa chỉ nháp");
+});
+
+it("edit form: switching modes never overwrites a coordinate the user typed", async () => {
+  setup({ mode: { kind: "edit", waypoint: SAVED }, destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  set(locationInput(), "21.0285, 105.8542");
+  fireEvent.click(screen.getByRole("button", { name: "Tìm địa điểm" }));
+  switchToManual();
+  expect(locationInput().value).toBe("21.0285, 105.8542");
+});
+
+it("add form: back to manual with an empty location keeps it empty", async () => {
+  setup({ destinationCode: LAM_DONG });
+  await screen.findByRole("dialog");
+  switchToManual();
+  fireEvent.click(screen.getByRole("button", { name: "Tìm địa điểm" }));
+  switchToManual();
+  expect(locationInput().value).toBe("");
+});
+
+it("a restored draft with a location opens in manual mode without a reverse call", async () => {
+  setup({ restored: { name: "Bản nháp", location: COORDS_INPUT, address: "Đường 1", notes: "" } });
+  await screen.findByRole("dialog");
+  expect(locationInput().value).toBe(COORDS_INPUT);
+  expect(screen.queryByRole("combobox", { name: "Tìm địa điểm" })).toBeNull();
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  expect(h.reverse).not.toHaveBeenCalled();
+  expect(addressInput().value).toBe("Đường 1");
 });

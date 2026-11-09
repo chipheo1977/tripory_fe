@@ -6,4 +6,19 @@
   --user-menu-name-max-width: 160px;
   --editor-timeline-width: 400px;
   --itinerary-cover-ratio: 16 / 9;
+  /* Bản đồ trong editor (PUB-06, D-122, D-123). Màu ngày là màu dữ liệu phân loại, không dùng cho nút/focus/tab. */
+  --map-pin-size: 28px;
+  --map-pin-size-selected: 36px;
+  --map-day-dot-size: 12px;
+  --map-label-max-width: 240px;
+  --overview-cover-thumb-width: 112px;
+  --map-dimmed-opacity: 0.35;
+  --map-day-1: var(--primitive-blue-700);
+  --map-day-2: var(--primitive-amber-700);
+  --map-day-3: var(--primitive-emerald-700);
+  --map-day-4: var(--primitive-pink-700);
+  --map-day-5: var(--primitive-purple-700);
+  --map-day-6: var(--primitive-cyan-700);
+  --map-day-7: var(--primitive-lime-700);
+  --map-day-8: var(--primitive-slate-700);
 }

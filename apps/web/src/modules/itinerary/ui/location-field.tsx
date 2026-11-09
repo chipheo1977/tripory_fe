@@ -153,6 +153,8 @@ export type LocationFieldProps = Readonly<{
   /** Lỗi từ ngoài (Zod, BE, kiểm lúc gửi); ưu tiên hơn lỗi suy ra từ `state`. */
   error?: string | undefined;
   inputRef?: Ref<HTMLInputElement>;
+  /** Ẩn khi khối Vị trí đang ở chế độ tìm địa điểm (D-150). */
+  visible?: boolean;
 }>;
 
 export function LocationField({
@@ -165,7 +167,9 @@ export function LocationField({
   describedById,
   error,
   inputRef,
+  visible = true,
 }: LocationFieldProps) {
+  if (!visible) return null;
   const stateError = showError && state.status === "error" ? state.message : undefined;
   const shownError = error ?? stateError;
   const hintId = `${describedById}-hint`;

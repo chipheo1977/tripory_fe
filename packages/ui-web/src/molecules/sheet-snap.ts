@@ -30,3 +30,12 @@ export const snapPointsFor = (
   if (fixedSnap) return resolveFixedSnapPoints(viewportHeight, insetTop);
   return resolveSnapPoints(viewportHeight, insetTop);
 };
+
+const SNAP_POSITIONS = { peek: 0, medium: 1, expanded: 2 } as const;
+
+/** Chiều cao px của một mức, để app tính phần bản đồ bị sheet che (cùng công thức với `resolveSnapPoints`). */
+export const snapHeightPx = (viewportHeight: number, insetTop: number, snap: 'peek' | 'medium' | 'expanded'): number => {
+  const value = resolveSnapPoints(viewportHeight, insetTop)[SNAP_POSITIONS[snap]];
+  if (typeof value === 'number') return value * viewportHeight;
+  return Number.parseFloat(value);
+};

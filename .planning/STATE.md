@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 5 context gathered
-last_updated: "2026-11-09T15:01:04.208Z"
-last_activity: 2026-11-09 (chèn Phase 5.1 like/comment sau Phase 5)
+stopped_at: Phase 5 UI-SPEC approved
+last_updated: "2026-11-11T14:32:10.092Z"
+last_activity: 2026-11-09 (chèn Phase 5.1 like/comment sau Phase 5; Phase 5 vẫn là phase hiện tại)
 progress:
   total_phases: 9
   completed_phases: 3
@@ -226,6 +226,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-11-09T15:01:04.204Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-map-public-view/05-CONTEXT.md
+Last session: 2026-11-11T14:32:10.087Z
+Stopped at: Phase 5 UI-SPEC approved
+Resume file: .planning/phases/05-map-public-view/05-UI-SPEC.md

@@ -202,7 +202,29 @@ Mở lại lần 3 (2026-11-06, tìm địa điểm trong form thêm điểm, MA
   2. Khách mở lịch trình nháp thấy trang 403, id sai thấy 404; chủ mở nháp thấy banner "Bản nháp – chỉ bạn thấy" và nút Sửa
   3. Người xem chia sẻ được bằng copy link, Web Share trên mobile và mã QR; chủ xuất bản xong trong editor thì hộp chia sẻ mở sẵn và editor có nút "Chia sẻ" (phần ITIN-11 chuyển từ Phase 4); dán link vào Zalo/Messenger hiện preview với tiêu đề, mô tả, ảnh bìa; trang nháp có `noindex`
   4. Trang công khai có nút chuyển Bài viết/Bản đồ, dùng lại component bản đồ đã làm cho editor ở Phase 4 (PUB-02; PUB-06)
-**Plans**: TBD
+**Plans**: 19 plans in 7 waves (lập 2026-11-11; 6 plan wave 1 độc lập; chỉ phụ thuộc BE-05-01 `author`, không chặn; không có plan cho Phase 5.1 like/comment)
+
+Plans:
+- [ ] 05-01-PLAN.md — Nền tảng: `uqr` 0.1.3 (pin cứng trong `catalog:`), token `--share-qr-size`, `htmlLimitedBots` thêm Zalo/Facebot/meta-externalagent + test (wave 1)
+- [ ] 05-02-PLAN.md — `ui-web`: `SegmentedControl` chọn một (bàn phím, `aria-pressed`, không rỗng) cho viên thuốc Bài viết/Bản đồ (wave 1)
+- [ ] 05-03-PLAN.md — ACL `author` tùy chọn (DTO, mapper, avatar dicebear → null), fixture domain cho test UI, tài liệu `05-BE-DEPENDENCIES.md` (BE-05-01 và tồn đọng Phase 4) (wave 1)
+- [ ] 05-04-PLAN.md — Tách route group `(public)` thành `(site)` (giữ AppShell) để chừa chỗ `(viewer)` toàn màn hình; sửa `route-layouts.test.tsx` (wave 1)
+- [ ] 05-05-PLAN.md — Mở rộng tương thích ngược `EditorMapArea`, `EditorLayout` (xuất `WideBody`/`NarrowBody`/đo header, slot cạnh chip "Lịch trình", `z-sticky`), `CoverImage` `loading` (wave 1)
+- [ ] 05-06-PLAN.md — Loader SSR `loadPublicItinerary` (ok/forbidden/not-found/recover/error, Bearer chỉ khi phiên tươi), `itinerary.server.ts` (`React.cache`), `PUBLIC_SITE_URL` (wave 2)
+- [ ] 05-07-PLAN.md — Metadata OG + `noindex` thuần (trung tính khi không phải ok), ảnh OG mặc định `/og-default.png` (`ImageResponse`, dự phòng PNG tĩnh) (wave 3)
+- [ ] 05-08-PLAN.md — Chế độ Bài viết: hàm định dạng, `AuthorLine`, `ArticleHero`, `ArticleWaypoint`, `ArticleDaySection` (wave 2)
+- [ ] 05-09-PLAN.md — Chia sẻ phần động cơ: ma trận QR (`uqr`), `QrCode` JSX, tải PNG, hook sao chép/Web Share/URL gốc (wave 2)
+- [ ] 05-10-PLAN.md — Dải chip ngày (IntersectionObserver, nhảy ngày không đổi hash), `PublicArticle` (wave 3)
+- [ ] 05-11-PLAN.md — `ShareDialog` + `ShareButton` (sao chép, Web Share điều kiện, QR, "Mở trang công khai"), thu hẹp invariant "Chia sẻ" (wave 3)
+- [ ] 05-12-PLAN.md — `usePublicView` (`?view` + `pushState`), `ViewModeToggle` (giữ focus khi đổi chỗ), `PublicHeader`, `DraftStrip`, `EditLink` (wave 2)
+- [ ] 05-13-PLAN.md — Trạng thái: `PublicForbidden` (403), `PublicItinerarySkeleton` (cold start), `PublicLoadError`, khung `PublicStatusFrame` (wave 3)
+- [ ] 05-14-PLAN.md — Thân chỉ đọc của chế độ Bản đồ: `PublicDayTabs`, Tổng quan, tab Ngày, `PublicWaypointItem`, `MapsLink` dùng chung (wave 4)
+- [ ] 05-15-PLAN.md — `usePublicMapState` + `PublicMapMode` (bản đồ chỉ đọc, sheet 3 mức, viên thuốc trong sheet/dải đáy, lỗi + "Xem dạng bài viết") (wave 5)
+- [ ] 05-16-PLAN.md — Điều hướng đổi từ Phase 4: menu thẻ "Xem trang công khai" (D-24), không phải chủ + đã xuất bản → chuyển sang trang công khai (D-25) (wave 1)
+- [ ] 05-17-PLAN.md — Editor: nút "Chia sẻ" thế nút Xuất bản, xuất bản → hộp chia sẻ tự mở → toast sau khi đóng (D-15, U-04) (wave 4)
+- [ ] 05-18-PLAN.md — Ghép trang công khai: route `(viewer)/itineraries/[id]` (`generateMetadata`, loading, error), RSC phân loại kết quả, container client hai chế độ (wave 6)
+- [ ] 05-19-PLAN.md — Bất biến tĩnh Phase 5, cổng kiểm toàn repo + `next build` + kiểm chứng SSR/OG/bot/bundle bằng BE giả, `05-UAT-CHECKLIST.md` (wave 7)
+
 **UI hint**: yes
 
 ### Phase 5.1: Itinerary Likes & Comments (INSERTED)

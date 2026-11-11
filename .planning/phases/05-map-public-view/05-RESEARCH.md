@@ -267,12 +267,14 @@ Mẫu giả lập sẵn ở `apps/web/src/test/fake-intersection-observer.ts`; `
 | A5 | Hồi phục phiên bằng `SessionRecovery` hiển thị đủ mượt trên trang công khai (skeleton rồi reload) | Pitfall 1 | Có thể nháy; UI-SPEC chọn skeleton |
 | A6 | Nhà cung cấp Zalo/Messenger lấy ảnh OG từ URL không có đuôi ảnh nếu `content-type` đúng | Pattern 6 | Dùng đuôi `.png` để tránh rủi ro |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Toast "Đã xuất bản lịch trình" khi hộp chia sẻ tự mở (D-15, để UI-SPEC chốt).** Khuyến nghị: bỏ toast (hộp mở là phản hồi), giữ `aria-live` trong hộp. Planner đặt công tắc ở một chỗ (`PublishDialog` meta feedback) để đổi dễ.
-2. **Bố cục header công khai.** D-12 nói "thanh trên cùng của vùng nội dung" (desktop) và "header" (mobile); khuyến nghị một `PublicHeader` dùng chung (thương hiệu, tiêu đề rút gọn, nhóm chuyển chế độ từ `lg`, Chia sẻ, Sửa, tài khoản) thay cho `AppHeader`. UI-SPEC chốt.
-3. **Hành vi khi `SessionRecovery` kết luận hết phiên thật** trên trang công khai: hiện tại chuyển /login (D-20 Phase 3). Chấp nhận cho chủ có cookie hết hạn; khách không bị ảnh hưởng.
-4. **BE chưa deploy mục 6-11 của 04-BE-CONTRACT:** ảnh bìa nhiều ảnh và `destinationCode` có thể thiếu; FE đã chịu `nullish`. Ghi vào `05-BE-DEPENDENCIES.md`, không chặn.
+Đánh dấu đã giải quyết khi lập kế hoạch Phase 5 (2026-11-11); nội dung gốc giữ nguyên, chỉ thêm kết luận.
+
+1. **Toast "Đã xuất bản lịch trình" khi hộp chia sẻ tự mở (D-15, để UI-SPEC chốt).** Khuyến nghị: bỏ toast (hộp mở là phản hồi), giữ `aria-live` trong hộp. Planner đặt công tắc ở một chỗ (`PublishDialog` meta feedback) để đổi dễ. **RESOLVED:** người dùng chốt U-04 trong `05-UI-SPEC.md`: GIỮ toast nhưng chỉ phát SAU khi hộp chia sẻ tự mở đóng xong; công tắc là prop `successToast` của `PublishDialog` (plan 05-17).
+2. **Bố cục header công khai.** D-12 nói "thanh trên cùng của vùng nội dung" (desktop) và "header" (mobile); khuyến nghị một `PublicHeader` dùng chung (thương hiệu, tiêu đề rút gọn, nhóm chuyển chế độ từ `lg`, Chia sẻ, Sửa, tài khoản) thay cho `AppHeader`. UI-SPEC chốt. **RESOLVED:** U-02 trong `05-UI-SPEC.md`: một hàng 64px `PublicHeader` (logo, viên thuốc từ `lg`, Sửa, Chia sẻ, tài khoản), không `AppHeader` (plan 05-12).
+3. **Hành vi khi `SessionRecovery` kết luận hết phiên thật** trên trang công khai: hiện tại chuyển /login (D-20 Phase 3). Chấp nhận cho chủ có cookie hết hạn; khách không bị ảnh hưởng. **RESOLVED:** chấp nhận hành vi hiện tại của `SessionRecovery` (plan 05-18 dùng nguyên component; kịch bản D4 trong `05-UAT-CHECKLIST.md`).
+4. **BE chưa deploy mục 6-11 của 04-BE-CONTRACT:** ảnh bìa nhiều ảnh và `destinationCode` có thể thiếu; FE đã chịu `nullish`. Ghi vào `05-BE-DEPENDENCIES.md`, không chặn. **RESOLVED:** ghi ở `05-BE-DEPENDENCIES.md` (plan 05-03) và mục J của `05-UAT-CHECKLIST.md` (plan 05-19).
 
 ## Environment Availability
 

@@ -12,6 +12,8 @@
   --map-day-dot-size: 12px;
   --map-label-max-width: 240px;
   --overview-cover-thumb-width: 112px;
+  /* Cạnh mã QR trong hộp chia sẻ (Phase 5, UI-SPEC §Sizing). 192 là bội số 4, vừa khung 272px của Sheet ở 320px. */
+  --share-qr-size: 192px;
   --map-dimmed-opacity: 0.35;
   --map-day-1: var(--primitive-blue-700);
   --map-day-2: var(--primitive-amber-700);

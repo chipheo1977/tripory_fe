@@ -47,4 +47,6 @@ catalog:
   # Bản đồ editor (PUB-06, D-111): react-map-gl 8.1.x hỗ trợ maplibre v6 (PR #2598); đã đọc tarball 2026-11-05
   maplibre-gl: 6.16.0
   react-map-gl: 8.1.3
+  # Mã QR trang công khai (PUB-04, D-14): chỉ dùng `encode()` ra ma trận, vẽ bằng JSX; không dùng `renderSVG` (cần HTML thô). Pin cứng.
+  uqr: 0.1.3
 

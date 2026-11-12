@@ -198,6 +198,7 @@ describe('design token inventory', () => {
       '--map-day-dot-size': '12px',
       '--map-label-max-width': '240px',
       '--overview-cover-thumb-width': '112px',
+      '--share-qr-size': '192px',
       '--map-dimmed-opacity': '0.35',
       '--map-day-1': 'var(--primitive-blue-700)',
       '--map-day-2': 'var(--primitive-amber-700)',
@@ -404,6 +405,7 @@ describe('token bản đồ (PUB-06)', () => {
       'size-(--map-day-dot-size)',
       'max-w-(--map-label-max-width)',
       'w-(--overview-cover-thumb-width)',
+      'size-(--share-qr-size)',
       'opacity-(--map-dimmed-opacity)',
     ]);
 
@@ -414,6 +416,7 @@ describe('token bản đồ (PUB-06)', () => {
     expect(css).toContain('var(--map-day-dot-size)');
     expect(css).toContain('var(--map-label-max-width)');
     expect(css).toContain('var(--overview-cover-thumb-width)');
+    expect(css).toContain('var(--share-qr-size)');
     expect(css).toContain('var(--map-dimmed-opacity)');
   });
 });

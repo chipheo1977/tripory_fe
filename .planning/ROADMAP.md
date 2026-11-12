@@ -218,10 +218,10 @@ Plans:
 - [x] 05-11-PLAN.md — `ShareDialog` + `ShareButton` (sao chép, Web Share điều kiện, QR, "Mở trang công khai"), thu hẹp invariant "Chia sẻ" (wave 3)
 - [x] 05-12-PLAN.md — `usePublicView` (`?view` + `pushState`), `ViewModeToggle` (giữ focus khi đổi chỗ), `PublicHeader`, `DraftStrip`, `EditLink` (wave 2)
 - [x] 05-13-PLAN.md — Trạng thái: `PublicForbidden` (403), `PublicItinerarySkeleton` (cold start), `PublicLoadError`, khung `PublicStatusFrame` (wave 3)
-- [ ] 05-14-PLAN.md — Thân chỉ đọc của chế độ Bản đồ: `PublicDayTabs`, Tổng quan, tab Ngày, `PublicWaypointItem`, `MapsLink` dùng chung (wave 4)
+- [x] 05-14-PLAN.md — Thân chỉ đọc của chế độ Bản đồ: `PublicDayTabs`, Tổng quan, tab Ngày, `PublicWaypointItem`, `MapsLink` dùng chung (wave 4)
 - [ ] 05-15-PLAN.md — `usePublicMapState` + `PublicMapMode` (bản đồ chỉ đọc, sheet 3 mức, viên thuốc trong sheet/dải đáy, lỗi + "Xem dạng bài viết") (wave 5)
 - [x] 05-16-PLAN.md — Điều hướng đổi từ Phase 4: menu thẻ "Xem trang công khai" (D-24), không phải chủ + đã xuất bản → chuyển sang trang công khai (D-25) (wave 1)
-- [ ] 05-17-PLAN.md — Editor: nút "Chia sẻ" thế nút Xuất bản, xuất bản → hộp chia sẻ tự mở → toast sau khi đóng (D-15, U-04) (wave 4)
+- [x] 05-17-PLAN.md — Editor: nút "Chia sẻ" thế nút Xuất bản, xuất bản → hộp chia sẻ tự mở → toast sau khi đóng (D-15, U-04) (wave 4)
 - [ ] 05-18-PLAN.md — Ghép trang công khai: route `(viewer)/itineraries/[id]` (`generateMetadata`, loading, error), RSC phân loại kết quả, container client hai chế độ (wave 6)
 - [ ] 05-19-PLAN.md — Bất biến tĩnh Phase 5, cổng kiểm toàn repo + `next build` + kiểm chứng SSR/OG/bot/bundle bằng BE giả, `05-UAT-CHECKLIST.md` (wave 7)
 

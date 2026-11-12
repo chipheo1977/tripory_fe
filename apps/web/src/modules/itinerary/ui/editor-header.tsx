@@ -8,6 +8,7 @@ import { useEffect, useId, useRef, useState, type ReactNode, type Ref } from "re
 import { UserMenu } from "@/components/user-menu";
 import { PublishButton, PublishHintStrip } from "./publish-button";
 import { SaveIndicator } from "./save-indicator";
+import { ShareButton } from "./share-button";
 
 /** Dải giải thích của nút Xuất bản bị chặn hiện bao lâu sau khi chạm (UI-SPEC §PublishButton). */
 const HINT_DURATION_MS = 4000;
@@ -53,6 +54,8 @@ export type EditorHeaderProps = Readonly<{
   onOpenTripInfo(): void;
   onDeleteItinerary(): void;
   onRequestPublish(): void;
+  /** Nút "Chia sẻ" thế chỗ nút Xuất bản khi đã xuất bản (D-15); nháp thì không hiện (D-17). */
+  share: Readonly<{ onRequest(): void; buttonRef?: Ref<HTMLButtonElement> }>;
   tripInfoButtonRef?: Ref<HTMLButtonElement>;
 }>;
 
@@ -63,6 +66,7 @@ export function EditorHeader({
   onOpenTripInfo,
   onDeleteItinerary,
   onRequestPublish,
+  share,
   tripInfoButtonRef,
 }: EditorHeaderProps) {
   const hintId = useId();
@@ -108,6 +112,7 @@ export function EditorHeader({
             onRequestPublish={onRequestPublish}
             pendingIds={pendingIds}
           />
+          <ShareButton buttonRef={share.buttonRef} onClick={share.onRequest} visible={itinerary.isPublic} />
           <DeleteButton onDelete={onDeleteItinerary} />
         </div>
       </div>

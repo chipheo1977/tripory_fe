@@ -3,7 +3,8 @@
 // Hộp xác nhận xuất bản (ITIN-11; D-39, D-40). Xuất bản không hủy được nên focus đầu ở "Hủy" (T-04-42).
 // Lỗi (gồm `Itinerary.CannotPublishEmpty`) hiện InlineAlert trong hộp (`errorToast: false`) và hộp vẫn mở.
 // Thành công: toast qua `meta.feedback.successMessage` của MutationCache, đóng hộp, báo `onPublished`.
-// Không có hộp hay nút chia sẻ (D-40: chuyển sang Phase 5).
+// Hộp chia sẻ tự mở sau khi đóng xong do editor điều khiển (Phase 5, D-15); editor truyền `successToast={false}` để toast
+// không chồng lên hộp đó (U-04) và nghe `onClosed` (hộp đã đóng xong) để mở hộp chia sẻ.
 import {
   Button,
   Dialog,
@@ -25,15 +26,28 @@ export type PublishDialogProps = Readonly<{
   open: boolean;
   onOpenChange(open: boolean): void;
   onPublished(): void;
+  /** `false` để không phát toast thành công (editor tự phát sau khi hộp chia sẻ đóng). Mặc định `true` như Phase 4. */
+  successToast?: boolean;
+  /** Hộp đã đóng xong (sau hoạt ảnh). Editor mở hộp chia sẻ ở đây để hai hộp không tranh focus trap. */
+  onClosed?(): void;
 }>;
+
+const SUCCESS_MESSAGE = "Đã xuất bản lịch trình";
 
 const DESCRIPTION =
   "Ai có link đều xem được lịch trình này. Bạn vẫn sửa được nội dung sau khi xuất bản, nhưng không thể chuyển lại về nháp.";
 
-export function PublishDialog({ itineraryId, open, onOpenChange, onPublished }: PublishDialogProps) {
+export function PublishDialog({
+  itineraryId,
+  open,
+  onOpenChange,
+  onPublished,
+  successToast = true,
+  onClosed,
+}: PublishDialogProps) {
   const store = useSaveStatusStore();
   const publish = itinerary.usePublish(itineraryId, {
-    meta: { feedback: { errorToast: false, successMessage: "Đã xuất bản lịch trình" } },
+    meta: { feedback: successToast ? { errorToast: false, successMessage: SUCCESS_MESSAGE } : { errorToast: false } },
     onSuccess: () => store.markSaved(),
   });
   const [alert, setAlert] = useState<string | null>(null);
@@ -67,7 +81,9 @@ export function PublishDialog({ itineraryId, open, onOpenChange, onPublished }: 
   };
 
   const handleOpenChangeComplete = (isOpen: boolean) => {
-    if (!isOpen) setAlert(null);
+    if (isOpen) return;
+    setAlert(null);
+    onClosed?.();
   };
 
   return (

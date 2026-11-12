@@ -76,16 +76,19 @@ function setup(itinerary: Itinerary = draft) {
     onDeleteItinerary: vi.fn(),
     onRequestPublish: vi.fn(),
   };
+  const onRequestShare = vi.fn();
+  const shareButtonRef = createRef<HTMLButtonElement>();
   const tripInfoButtonRef = createRef<HTMLButtonElement>();
   const view = render(
     <EditorHeader
       itinerary={itinerary}
       pendingIds={new Set()}
+      share={{ onRequest: onRequestShare, buttonRef: shareButtonRef }}
       tripInfoButtonRef={tripInfoButtonRef}
       {...handlers}
     />,
   );
-  return { ...handlers, tripInfoButtonRef, ...view };
+  return { ...handlers, onRequestShare, shareButtonRef, tripInfoButtonRef, ...view };
 }
 
 it("shows the title as a truncated h1 and goes back through onBack", async () => {
@@ -113,11 +116,29 @@ it("a draft offers Xuất bản and no share action", async () => {
   expect(onRequestPublish).toHaveBeenCalledTimes(1);
 });
 
-it("a published itinerary hides Xuất bản and shows only the title in the title block", () => {
+// Sửa có chủ đích theo D-15: trước đây ca này kỳ vọng không có chữ "Chia sẻ"; nay nút Chia sẻ thế chỗ nút Xuất bản.
+it("a published itinerary hides Xuất bản, shows Chia sẻ lịch trình, and keeps only the title in the title block", () => {
   setup({ ...draft, isPublic: true });
   expect(screen.queryByRole("button", { name: "Xuất bản" })).toBeNull();
+  expect(screen.getByRole("button", { name: "Chia sẻ lịch trình" })).toBeTruthy();
   expect(screen.getByRole("heading", { level: 1 }).parentElement?.children.length).toBe(1);
-  expect(screen.queryByText(/Chia s\u1EBB/)).toBeNull();
+});
+
+it("a draft has no Chia sẻ lịch trình button (D-17)", () => {
+  setup();
+  expect(screen.queryByRole("button", { name: "Chia sẻ lịch trình" })).toBeNull();
+});
+
+it("puts the share button in the right side next to the save indicator, requests sharing once and exposes its ref", async () => {
+  const user = userEvent.setup();
+  const { onRequestShare, shareButtonRef } = setup({ ...draft, isPublic: true });
+  const share = screen.getByRole("button", { name: "Chia sẻ lịch trình" });
+  const actions = screen.getByTestId("save-indicator").parentElement as HTMLElement;
+
+  expect(actions.contains(share)).toBe(true);
+  expect(shareButtonRef.current).toBe(share);
+  await user.click(share);
+  expect(onRequestShare).toHaveBeenCalledTimes(1);
 });
 
 it("puts the info icon right after the title block and opens trip info", async () => {

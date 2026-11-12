@@ -4,6 +4,7 @@ import { notify } from "@tripory/ui-web";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { makeQueryClient } from "@/composition/query-client";
 import { PublishDialog } from "./publish-dialog";
@@ -42,19 +43,29 @@ const http = (status: number, code: string | null, message: string | null) =>
 
 const confirmButton = () => screen.getByRole("button", { name: /^Xuất bản$|Đang xuất bản/ });
 
-function setup(open = true) {
+type ExtraProps = Partial<Pick<ComponentProps<typeof PublishDialog>, "successToast" | "onClosed">>;
+
+function setup(open = true, extra: ExtraProps = {}) {
   const user = userEvent.setup();
   const store = createSaveStatusStore();
   const onOpenChange = vi.fn();
   const onPublished = vi.fn();
-  render(
-    <QueryClientProvider client={makeQueryClient()}>
+  const element = (isOpen: boolean) => (
+    <QueryClientProvider client={client}>
       <SaveStatusProvider store={store}>
-        <PublishDialog itineraryId={ID as NonNullable<typeof ID>} onOpenChange={onOpenChange} onPublished={onPublished} open={open} />
+        <PublishDialog
+          itineraryId={ID as NonNullable<typeof ID>}
+          onOpenChange={onOpenChange}
+          onPublished={onPublished}
+          open={isOpen}
+          {...extra}
+        />
       </SaveStatusProvider>
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
-  return { user, store, onOpenChange, onPublished };
+  const client = makeQueryClient();
+  const view = render(element(open));
+  return { user, store, onOpenChange, onPublished, rerenderOpen: (isOpen: boolean) => view.rerender(element(isOpen)) };
 }
 
 beforeEach(() => {
@@ -167,4 +178,35 @@ it("maps Itinerary.CannotPublishEmpty to its curated sentence inside the dialog"
   expect(alert.textContent).toBe("Thêm ít nhất 1 điểm đến để xuất bản.");
   expect(screen.getByRole("dialog").contains(alert)).toBe(true);
   expect(onPublished).not.toHaveBeenCalled();
+});
+
+it("successToast={false}: publishes without any success toast (the share dialog takes over, U-04)", async () => {
+  const success = vi.spyOn(notify, "success");
+  const { user, onPublished, onOpenChange } = setup(true, { successToast: false });
+  await user.click(await screen.findByRole("button", { name: "Xuất bản" }));
+  await waitFor(() => expect(onPublished).toHaveBeenCalledTimes(1));
+  expect(onOpenChange).toHaveBeenCalledWith(false);
+  expect(success).not.toHaveBeenCalled();
+});
+
+it("onClosed fires once when the dialog has finished closing, not when it opens", async () => {
+  const onClosed = vi.fn();
+  const { rerenderOpen } = setup(true, { onClosed });
+  await screen.findByRole("dialog");
+  expect(onClosed).not.toHaveBeenCalled();
+
+  rerenderOpen(false);
+
+  await waitFor(() => expect(onClosed).toHaveBeenCalledTimes(1));
+});
+
+it("onClosed does not fire when publishing fails and the dialog stays open", async () => {
+  const onClosed = vi.fn();
+  h.publish.mockRejectedValue(http(500, null, null));
+  const { user } = setup(true, { onClosed, successToast: false });
+  await user.click(await screen.findByRole("button", { name: "Xuất bản" }));
+  await screen.findByRole("alert");
+
+  expect(onClosed).not.toHaveBeenCalled();
+  expect(screen.getByRole("dialog")).toBeTruthy();
 });

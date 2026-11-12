@@ -358,16 +358,62 @@ it("deletes the itinerary from the header delete button and replaces the route w
   expect(notify.success).toHaveBeenCalledWith("Đã xóa lịch trình");
 });
 
-it("publishes after confirmation, then hides the button, shows the live note and focuses the 'i' button", async () => {
+// Sửa có chủ đích theo D-15/U-04 (ca Phase 4 kỳ vọng focus về nút "i" và toast ngay): nay xuất bản xong thì hộp chia sẻ tự mở,
+// toast chỉ phát sau khi hộp đó đóng, và focus về nút "Chia sẻ lịch trình".
+it("publishes after confirmation, opens the share dialog, toasts once after it closes and focuses the Chia sẻ button", async () => {
   const { user } = setup();
   await loaded();
   await user.click(screen.getByRole("button", { name: "Xuất bản" }));
   const dialog = await screen.findByRole("dialog", { name: "Xuất bản lịch trình?" });
   await user.click(within(dialog).getByRole("button", { name: "Xuất bản" }));
 
+  const share = await screen.findByRole("dialog", { name: "Chia sẻ lịch trình" });
   await waitFor(() => expect(screen.queryByRole("button", { name: "Xuất bản" })).toBeNull());
   expect(screen.queryByText("Thay đổi hiển thị ngay với người xem")).toBeNull();
-  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "Thông tin chuyến đi" })));
+  expect(notify.success).not.toHaveBeenCalled();
+  expect(within(share).getByRole("link", { name: "Mở trang công khai (mở tab mới)" })).toBeTruthy();
+  await waitFor(() => expect(document.activeElement).toBe(within(share).getByRole("button", { name: "Sao chép link" })));
+
+  await user.click(within(share).getByRole("button", { name: "Đóng" }));
+
+  await waitFor(() => expect(notify.success).toHaveBeenCalledTimes(1));
+  expect(notify.success).toHaveBeenCalledWith("Đã xuất bản lịch trình");
+  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "Chia sẻ lịch trình" })));
+});
+
+it("opening the share dialog by hand and closing it does not toast", async () => {
+  server = makeItinerary({ isPublic: true });
+  const { user } = setup();
+  await loaded();
+
+  await user.click(screen.getByRole("button", { name: "Chia sẻ lịch trình" }));
+  const share = await screen.findByRole("dialog", { name: "Chia sẻ lịch trình" });
+  await user.click(within(share).getByRole("button", { name: "Đóng" }));
+  await waitFor(() => expect(screen.queryByRole("dialog", { name: "Chia sẻ lịch trình" })).toBeNull());
+
+  expect(notify.success).not.toHaveBeenCalled();
+});
+
+it("a published itinerary opens with Chia sẻ lịch trình instead of Xuất bản", async () => {
+  server = makeItinerary({ isPublic: true });
+  setup();
+  await loaded();
+
+  expect(screen.getByRole("button", { name: "Chia sẻ lịch trình" })).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Xuất bản" })).toBeNull();
+});
+
+it("a failed publish keeps the publish dialog open and does not open the share dialog or toast", async () => {
+  h.publish.mockReset().mockRejectedValue(makeApiError({ kind: "http", status: 500, code: null, message: null }));
+  const { user } = setup();
+  await loaded();
+  await user.click(screen.getByRole("button", { name: "Xuất bản" }));
+  const dialog = await screen.findByRole("dialog", { name: "Xuất bản lịch trình?" });
+  await user.click(within(dialog).getByRole("button", { name: "Xuất bản" }));
+
+  await screen.findByRole("alert");
+  expect(screen.queryByRole("dialog", { name: "Chia sẻ lịch trình" })).toBeNull();
+  expect(notify.success).not.toHaveBeenCalled();
 });
 
 it("goes back one step when the editor was entered from the list", async () => {

@@ -53,6 +53,8 @@ import { MapEditInfoButton } from "./map-edit-info-button";
 import { OverviewPanel } from "./overview-panel";
 import { overviewSummaryData } from "./overview-format";
 import { PublishDialog } from "./publish-dialog";
+import { ShareDialog } from "./share-dialog";
+import { useShareAfterPublish } from "./use-share-after-publish";
 import { createSaveStatusStore, SaveStatusProvider } from "./save-status";
 import { TimelinePanel } from "./timeline-panel";
 import { TripInfoDialog } from "./trip-info-dialog";
@@ -284,7 +286,6 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [focusRequest, setFocusRequest] = useState<WaypointFocusRequest | null>(null);
   const [liveMessage, setLiveMessage] = useState("");
-  const [focusMenuAfterPublish, setFocusMenuAfterPublish] = useState(false);
 
   const addButtonRef = useRef<HTMLButtonElement | null>(null);
   const appliedFocusRequest = useRef<WaypointFocusRequest | null>(null);
@@ -309,13 +310,9 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
     [],
   );
 
-  // Xuất bản xong thì nút "Xuất bản" biến mất khi dữ liệu tải lại (isPublic true): trả focus về nút "i" của header.
-  const { isPublic } = itinerary;
-  useEffect(() => {
-    if (!isPublic) return;
-    if (!focusMenuAfterPublish) return;
-    tripInfoButtonRef.current?.focus();
-  }, [isPublic, focusMenuAfterPublish]);
+  // Xuất bản xong: hộp chia sẻ tự mở sau khi hộp xuất bản đóng, toast phát sau khi hộp chia sẻ đóng và focus về nút
+  // "Chia sẻ" (chưa có thì nút "i" của header) (D-15, U-04).
+  const share = useShareAfterPublish({ fallbackFocusRef: tripInfoButtonRef });
 
   const days = useMemo(() => buildDayRange(itinerary), [itinerary]);
   // Tab ngày có thể biến mất (thêm ngày lỗi bị hoàn lại): kẹp về ngày cuối của dải.
@@ -482,6 +479,7 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
             onOpenTripInfo={openTripInfo}
             onRequestPublish={() => setPublishOpen(true)}
             pendingIds={pendingIds}
+            share={{ onRequest: share.openShare, buttonRef: share.shareButtonRef }}
             tripInfoButtonRef={tripInfoButtonRef}
           />
         }
@@ -567,9 +565,19 @@ function LoadedEditor({ itinerary, viewer, onDeleted }: LoadedEditorProps) {
       />
       <PublishDialog
         itineraryId={itineraryId}
+        onClosed={share.onPublishClosed}
         onOpenChange={setPublishOpen}
-        onPublished={() => setFocusMenuAfterPublish(true)}
+        onPublished={share.onPublished}
         open={publishOpen}
+        successToast={false}
+      />
+      <ShareDialog
+        itineraryId={itineraryId}
+        onOpenChange={share.setShareOpen}
+        onOpenChangeComplete={share.onShareClosed}
+        open={share.shareOpen}
+        showPublicLink
+        title={itinerary.title}
       />
       <DeleteItineraryDialog
         onDeleted={() => {

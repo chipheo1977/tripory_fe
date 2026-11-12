@@ -47,6 +47,9 @@ describe("proxy coverage of the (dashboard) route group", () => {
 
   it("does not gate any public page by mistake", () => {
     expect(publicUrls.length).toBeGreaterThan(0);
+    expect(publicUrls).toContain("/");
+    expect(publicUrls).toContain("/login");
+    expect(publicUrls).toContain("/register");
     expect(publicUrls.filter(isProtectedPath)).toEqual([]);
   });
 

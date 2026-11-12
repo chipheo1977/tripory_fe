@@ -1,7 +1,8 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, renderHook, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { resetPillFocusTracking } from "./use-pill-focus-handoff";
+import type { PublicView } from "./public-view";
+import { resetPillFocusTracking, usePillFocusRequest } from "./use-pill-focus-handoff";
 import { ViewModeToggle } from "./view-mode-toggle";
 
 const pill = (id: string) => (
@@ -108,5 +109,33 @@ describe("usePillFocusHandoff", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+});
+
+describe("usePillFocusRequest", () => {
+  it("focuses the selected segment of the pill once the mode is the article, and only once", () => {
+    const { result, rerender } = renderHook(({ view }) => usePillFocusRequest(view), {
+      initialProps: { view: "map" as PublicView },
+    });
+    render(<ViewModeToggle onViewChange={vi.fn()} variant="inline" view="article" />);
+
+    act(() => result.current.request());
+    expect(document.activeElement).toBe(document.body);
+    rerender({ view: "article" });
+    expect(document.activeElement?.textContent).toBe("Bài viết");
+
+    (document.activeElement as HTMLElement).blur();
+    rerender({ view: "map" });
+    rerender({ view: "article" });
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it("does nothing without a request", () => {
+    const { rerender } = renderHook(({ view }) => usePillFocusRequest(view), { initialProps: { view: "map" as PublicView } });
+    render(<ViewModeToggle onViewChange={vi.fn()} variant="inline" view="article" />);
+
+    rerender({ view: "article" });
+
+    expect(document.activeElement).toBe(document.body);
   });
 });

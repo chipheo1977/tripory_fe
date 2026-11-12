@@ -8,7 +8,8 @@
 //     thì chuyển focus sang đoạn đang chọn của viên đó ngay;
 //   - chưa có thì đặt cờ chờ trong HANDOFF_WINDOW_MS; viên thuốc mount tiếp theo mà focus đã rơi về `body` sẽ nhận focus.
 // Không có cờ nào được giữ lâu: focus ở ngoài viên thuốc hoặc trang mới mount thì không bị cướp.
-import { useEffect, useLayoutEffect, type RefObject } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, type RefObject } from "react";
+import type { PublicView } from "./public-view";
 
 const PILL_SELECTOR = "[data-view-mode-toggle]";
 const SELECTED_SELECTOR = '[aria-pressed="true"]';
@@ -79,4 +80,25 @@ export function usePillFocusHandoff(ref: RefObject<HTMLElement | null>): void {
     const timer = setTimeout(() => claimPendingFocus(root), 0);
     return () => clearTimeout(timer);
   }, [ref]);
+}
+
+/**
+ * "Xem dạng bài viết" (lỗi bản đồ) đưa người dùng về Bài viết; nút vừa bấm biến mất cùng bản đồ nên focus phải sang đoạn
+ * "Bài viết" của viên thuốc ở vị trí hiện hành. `request()` đánh dấu cần focus; khi chế độ là Bài viết (viên thuốc mới đã
+ * mount) thì focus đúng một lần rồi xóa cờ. Gọi `request()` khi chưa ở Bài viết thì chờ tới khi `view` thành `article`.
+ */
+export function usePillFocusRequest(view: PublicView): Readonly<{ request(): void }> {
+  const wanted = useRef(false);
+
+  useEffect(() => {
+    if (!wanted.current || view !== "article") return;
+    wanted.current = false;
+    document.querySelector<HTMLElement>(`${PILL_SELECTOR} ${SELECTED_SELECTOR}`)?.focus();
+  }, [view]);
+
+  const request = useCallback(() => {
+    wanted.current = true;
+  }, []);
+
+  return { request };
 }

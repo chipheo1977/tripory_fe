@@ -30,6 +30,9 @@ export type ItineraryDay = Readonly<{
   distanceKm: number | null;
 }>;
 
+/** Người tạo lịch trình, chỉ để hiển thị (D-02). Không email, không vai trò. `avatarUrl` null = dùng chữ cái đầu. */
+export type ItineraryAuthor = Readonly<{ id: UserId; displayName: string; avatarUrl: string | null }>;
+
 export type Itinerary = Readonly<{
   id: ItineraryId;
   ownerId: UserId;
@@ -47,6 +50,8 @@ export type Itinerary = Readonly<{
   totalDistanceKm: number;
   days: readonly ItineraryDay[];
   waypoints: readonly Waypoint[];
+  /** Có khi BE đã nhúng `author` vào `ItineraryDetailDto` (BE-05-01); thiếu thì UI ẩn khối tác giả. */
+  author?: ItineraryAuthor;
 }>;
 
 export type ItinerarySummary = Readonly<{

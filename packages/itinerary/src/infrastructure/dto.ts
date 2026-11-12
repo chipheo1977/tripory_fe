@@ -30,6 +30,13 @@ export const itineraryDayDto = z.object({
   dayDistanceKm: z.number().nullish(),
 });
 
+/** `author` do BE-05-01 nhúng vào `ItineraryDetailDto` (chưa chắc đã deploy): `.nullish()` ở nơi dùng. Không có email (D-02). */
+export const itineraryAuthorDto = z.object({
+  id: z.string(),
+  displayName: z.string(),
+  avatarUrl: z.string().nullish(),
+});
+
 /** `ItineraryDetailDto` (`…/Responses/ItineraryDetailDto.cs`): `data` của `GET /itineraries/{id}` và `POST /itineraries`. */
 export const itineraryDetailDto = z.object({
   id: z.string(),
@@ -49,6 +56,7 @@ export const itineraryDetailDto = z.object({
   updatedAt: z.iso.datetime({ offset: true }),
   days: z.array(itineraryDayDto),
   waypoints: z.array(waypointDto),
+  author: itineraryAuthorDto.nullish(),
 });
 
 /**
@@ -87,6 +95,7 @@ export const summaryPageDto = pagedDto(itinerarySummaryDto);
 export const resolvedLinkDto = z.object({ url: z.string() });
 
 export type WaypointDto = z.infer<typeof waypointDto>;
+export type ItineraryAuthorDto = z.infer<typeof itineraryAuthorDto>;
 export type ItineraryDetailDto = z.infer<typeof itineraryDetailDto>;
 export type ItinerarySummaryDto = z.infer<typeof itinerarySummaryDto>;
 export type SummaryPageDto = z.infer<typeof summaryPageDto>;

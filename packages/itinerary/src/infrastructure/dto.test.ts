@@ -196,3 +196,33 @@ describe('resolvedLinkDto', () => {
     expect(resolvedLinkDto.safeParse(body).success).toBe(false);
   });
 });
+
+describe('itineraryDetailDto author (BE-05-01)', () => {
+  const author = { id: '3f2504e0-4f89-11d3-9a0c-0305e82c3301', displayName: 'Lan', avatarUrl: null };
+
+  it('parse được khi thiếu author', () => {
+    expect(itineraryDetailDto.safeParse(itineraryDetailJsonFixture).success).toBe(true);
+  });
+
+  it('parse được khi author là null', () => {
+    expect(itineraryDetailDto.safeParse({ ...itineraryDetailJsonFixture, author: null }).success).toBe(true);
+  });
+
+  it('parse được khi có author đầy đủ', () => {
+    const parsed = itineraryDetailDto.parse({ ...itineraryDetailJsonFixture, author });
+
+    expect(parsed.author?.displayName).toBe('Lan');
+  });
+
+  it('từ chối author thiếu displayName', () => {
+    const broken = { id: author.id, avatarUrl: null };
+
+    expect(itineraryDetailDto.safeParse({ ...itineraryDetailJsonFixture, author: broken }).success).toBe(false);
+  });
+
+  it('bỏ khóa lạ email khỏi author', () => {
+    const parsed = itineraryDetailDto.parse({ ...itineraryDetailJsonFixture, author: { ...author, email: 'a@b.c' } });
+
+    expect(Object.keys(parsed.author ?? {})).not.toContain('email');
+  });
+});

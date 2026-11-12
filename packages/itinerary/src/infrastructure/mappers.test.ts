@@ -311,3 +311,76 @@ describe('toSummary và toSummaryPage', () => {
     expect(() => toSummaryPage(broken)).toThrow();
   });
 });
+
+describe('toItinerary author (D-02)', () => {
+  const withAuthor = (author: Record<string, unknown> | null) => detail({ author });
+
+  it('DTO không có author thì Itinerary không có author', () => {
+    const itinerary = toItinerary(detail());
+
+    expect(itinerary.author).toBeUndefined();
+  });
+
+  it('author null thì không có author', () => {
+    expect(toItinerary(withAuthor(null)).author).toBeUndefined();
+  });
+
+  it('chép author, cắt khoảng trắng tên và freeze', () => {
+    const itinerary = toItinerary(
+      withAuthor({ id: ownerIdFixture, displayName: '  Lan  ', avatarUrl: 'https://cdn.tripory.vn/a.png' }),
+    );
+
+    expect(itinerary.author).toEqual({
+      id: ownerIdFixture,
+      displayName: 'Lan',
+      avatarUrl: 'https://cdn.tripory.vn/a.png',
+    });
+    expect(Object.isFrozen(itinerary.author)).toBe(true);
+  });
+
+  it.each([
+    'https://api.dicebear.com/7.x/identicon/svg?seed=tripory',
+    '  https://api.dicebear.com/7.x/identicon/svg?seed=tripory  ',
+    '',
+    '   ',
+    null,
+  ])('avatar mặc định hoặc rỗng (%j) thành null', (avatarUrl) => {
+    const itinerary = toItinerary(withAuthor({ id: ownerIdFixture, displayName: 'Lan', avatarUrl }));
+
+    expect(itinerary.author?.avatarUrl).toBeNull();
+  });
+
+  it('thiếu avatarUrl thành null', () => {
+    const itinerary = toItinerary(withAuthor({ id: ownerIdFixture, displayName: 'Lan' }));
+
+    expect(itinerary.author?.avatarUrl).toBeNull();
+  });
+
+  it('giữ URL dicebear có seed khác', () => {
+    const url = 'https://api.dicebear.com/7.x/identicon/svg?seed=lan';
+    const itinerary = toItinerary(withAuthor({ id: ownerIdFixture, displayName: 'Lan', avatarUrl: `  ${url} ` }));
+
+    expect(itinerary.author?.avatarUrl).toBe(url);
+  });
+
+  it.each(['', '   '])('displayName rỗng (%j) thì bỏ author, không ném lỗi', (displayName) => {
+    expect(toItinerary(withAuthor({ id: ownerIdFixture, displayName, avatarUrl: null })).author).toBeUndefined();
+  });
+
+  it('id author không phải GUID thì bỏ author, không ném lỗi', () => {
+    const itinerary = toItinerary(withAuthor({ id: 'khong-phai-guid', displayName: 'Lan', avatarUrl: null }));
+
+    expect(itinerary.author).toBeUndefined();
+    expect(itinerary.title).toBe('Sài Gòn 3 ngày');
+  });
+
+  it('không rò email, roles, status của DTO thô', () => {
+    const dto = {
+      ...itineraryDetailJsonFixture,
+      author: { id: ownerIdFixture, displayName: 'Lan', avatarUrl: null, email: 'a@b.c', roles: ['Admin'], status: 'Active' },
+    };
+    const itinerary = toItinerary(itineraryDetailDto.parse(dto));
+
+    expect(Object.keys(itinerary.author ?? {})).toEqual(['id', 'displayName', 'avatarUrl']);
+  });
+});

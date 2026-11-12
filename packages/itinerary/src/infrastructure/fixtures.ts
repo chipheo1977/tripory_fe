@@ -69,6 +69,12 @@ export const itineraryDetailJsonFixture = {
   ],
 };
 
+/** `author` mà BE-05-01 sẽ nhúng vào `ItineraryDetailDto`. Dữ liệu mẫu, không email. */
+export const authorJsonFixture = { id: ownerIdFixture, displayName: 'Trần Thị Lan', avatarUrl: null as string | null };
+
+/** `ItineraryDetailDto` đã có `author` (BE-05-01 đã deploy). */
+export const itineraryDetailWithAuthorFixture = { ...itineraryDetailJsonFixture, author: authorJsonFixture };
+
 /** BE mới (04-BE-CONTRACT.md §8): có điểm đến, 2 ảnh bìa, ảnh thứ hai đang chọn, 2 sở thích. */
 export const itineraryDetailWithDestinationFixture = {
   ...itineraryDetailJsonFixture,

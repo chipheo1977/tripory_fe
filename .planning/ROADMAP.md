@@ -223,7 +223,7 @@ Plans:
 - [x] 05-16-PLAN.md — Điều hướng đổi từ Phase 4: menu thẻ "Xem trang công khai" (D-24), không phải chủ + đã xuất bản → chuyển sang trang công khai (D-25) (wave 1)
 - [x] 05-17-PLAN.md — Editor: nút "Chia sẻ" thế nút Xuất bản, xuất bản → hộp chia sẻ tự mở → toast sau khi đóng (D-15, U-04) (wave 4)
 - [x] 05-18-PLAN.md — Ghép trang công khai: route `(viewer)/itineraries/[id]` (`generateMetadata`, loading, error), RSC phân loại kết quả, container client hai chế độ (wave 6)
-- [ ] 05-19-PLAN.md — Bất biến tĩnh Phase 5, cổng kiểm toàn repo + `next build` + kiểm chứng SSR/OG/bot/bundle bằng BE giả, `05-UAT-CHECKLIST.md` (wave 7)
+- [x] 05-19-PLAN.md — Bất biến tĩnh Phase 5, cổng kiểm toàn repo + `next build` + kiểm chứng SSR/OG/bot/bundle bằng BE giả, `05-UAT-CHECKLIST.md` (wave 7)
 
 **UI hint**: yes
 

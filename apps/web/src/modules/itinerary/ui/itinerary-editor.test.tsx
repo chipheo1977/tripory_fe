@@ -240,14 +240,35 @@ it("shows the forbidden body when the BE answers 403", async () => {
   await waitFor(() => expect(document.title).toBe("Không có quyền truy cập · Tripory"));
 });
 
-it("shows the forbidden body without edit actions when the owner is somebody else", async () => {
-  server = makeItinerary({ ownerId: OTHER, isPublic: true, title: "Chuyến của người khác" });
+// Sửa có chủ đích theo D-25 (đổi 04 D-45): ca này trước đây dùng `isPublic: true`; lịch trình đã xuất bản của người
+// khác nay được chuyển sang trang công khai, nên 403 chỉ còn cho bản nháp.
+it("shows the forbidden body without edit actions when a draft belongs to somebody else", async () => {
+  server = makeItinerary({ ownerId: OTHER, isPublic: false, title: "Chuyến của người khác" });
   setup();
   expect(await screen.findByText("Bạn không có quyền sửa lịch trình này")).toBeTruthy();
   expect(screen.queryByText("Chuyến của người khác")).toBeNull();
   expect(screen.queryByRole("button", { name: "Xuất bản" })).toBeNull();
   expect(screen.queryByRole("button", { name: "Thông tin chuyến đi" })).toBeNull();
   expect(screen.queryByRole("button", { name: "Xóa lịch trình" })).toBeNull();
+  expect(h.router.replace).not.toHaveBeenCalledWith(`/itineraries/${ID}`);
+});
+
+it("redirects a non-owner to the public page when the itinerary is published", async () => {
+  server = makeItinerary({ ownerId: OTHER, isPublic: true, title: "Chuyến của người khác" });
+  setup();
+  await waitFor(() => expect(h.router.replace).toHaveBeenCalledWith(`/itineraries/${ID}`));
+  expect(h.router.replace).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole("status").textContent).toContain("Đang tải lịch trình");
+  expect(screen.queryByText("Bạn không có quyền sửa lịch trình này")).toBeNull();
+  expect(screen.queryByText("Chuyến của người khác")).toBeNull();
+  expect(notify.success).not.toHaveBeenCalled();
+});
+
+it("does not redirect the owner of a published itinerary", async () => {
+  server = makeItinerary({ isPublic: true });
+  setup();
+  await loaded();
+  expect(h.router.replace).not.toHaveBeenCalledWith(`/itineraries/${ID}`);
 });
 
 const openDayTab = (user: ReturnType<typeof userEvent.setup>, day: number) =>

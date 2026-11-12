@@ -3,7 +3,8 @@
 // Container của trình chỉnh sửa lịch trình `/itineraries/{id}/edit` (RESEARCH Pattern 1; D-11, D-22, D-35, D-36, D-42,
 // D-45..D-47). Dữ liệu tải ở client qua BFF (không có fetch phía RSC) để Bearer hết hạn được refresh rồi phát lại trước
 // khi kết luận 403 (Pitfall 11). Nhánh theo trạng thái:
-//   đang tải → EditorSkeleton · BE 404 → NotFoundView · BE 403 hoặc `canEdit` false → EditorForbidden ·
+//   đang tải → EditorSkeleton · BE 404 → NotFoundView · BE 403, hoặc `canEdit` false và nháp → EditorForbidden ·
+//   `canEdit` false và đã xuất bản → chuyển sang trang công khai (D-25) ·
 //   lỗi khác → ErrorState "Thử lại" · còn lại → editor đầy đủ.
 // `canEdit` chỉ để ẩn thao tác trên UI; BE vẫn chặn mọi lệnh ghi của người không phải chủ (T-04-58).
 //
@@ -186,6 +187,20 @@ export function ItineraryEditor(props: ItineraryEditorProps) {
   );
 }
 
+/** D-25: không phải chủ mà lịch trình đã xuất bản thì xem ở trang công khai thay vì trang 403. */
+function shouldRedirectToPublic(itinerary: Itinerary, viewerId: Viewer["id"]): boolean {
+  return !canEdit(itinerary, viewerId) && itinerary.isPublic;
+}
+
+/** Chuyển bằng `replace` (không có trang trung gian, không toast); hiện skeleton trong lúc chờ. */
+function RedirectToPublic({ itineraryId }: Readonly<{ itineraryId: ItineraryId }>) {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace(`/itineraries/${itineraryId}`);
+  }, [itineraryId, router]);
+  return <LoadingView />;
+}
+
 function EditorScreen({ itineraryId, viewer }: ItineraryEditorProps) {
   const router = useRouter();
   const query = itineraryHooks.useItinerary(itineraryId);
@@ -220,6 +235,8 @@ function EditorScreen({ itineraryId, viewer }: ItineraryEditorProps) {
       </StatusShell>
     );
   }
+
+  if (shouldRedirectToPublic(data, viewer.id)) return <RedirectToPublic itineraryId={itineraryId} />;
 
   if (!canEdit(data, viewer.id)) {
     return (

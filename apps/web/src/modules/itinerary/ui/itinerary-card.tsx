@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
   Icon,
 } from "@tripory/ui-web";
-import { MoreHorizontal, SquarePen, Trash2 } from "lucide-react";
+import { Eye, MoreHorizontal, SquarePen, Trash2 } from "lucide-react";
 import Link from "next/link";
 import type { Ref } from "react";
 import { CoverImage } from "./cover-image";
@@ -25,6 +25,17 @@ export type ItineraryCardProps = Readonly<{
   /** View dùng để chuyển focus tới link tiêu đề sau khi xóa thẻ lân cận (D-42). */
   titleLinkRef?: Ref<HTMLAnchorElement>;
 }>;
+
+/** Chỉ thẻ đã xuất bản (D-24, đổi 04 D-07); mở trong tab hiện tại, không đặt cờ "vào từ danh sách". */
+function PublicPageMenuItem({ visible, href }: Readonly<{ visible: boolean; href: string }>) {
+  if (!visible) return null;
+  return (
+    <DropdownMenuLinkItem render={<Link href={href} />}>
+      <Icon icon={Eye} size="sm" />
+      Xem trang công khai
+    </DropdownMenuLinkItem>
+  );
+}
 
 export function ItineraryCard({ summary, onDelete, titleLinkRef }: ItineraryCardProps) {
   const href = `/itineraries/${summary.id}/edit`;
@@ -55,6 +66,7 @@ export function ItineraryCard({ summary, onDelete, titleLinkRef }: ItineraryCard
                 <Icon icon={SquarePen} size="sm" />
                 Mở
               </DropdownMenuLinkItem>
+              <PublicPageMenuItem href={`/itineraries/${summary.id}`} visible={summary.isPublic} />
               <DropdownMenuSeparator />
               <DropdownMenuItem aria-label="Xóa" onClick={() => onDelete(summary)} variant="danger">
                 <Icon icon={Trash2} size="sm" />

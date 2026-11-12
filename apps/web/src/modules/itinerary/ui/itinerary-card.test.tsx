@@ -173,3 +173,35 @@ it("does not throw for an unknown destination code", () => {
   const { container } = render(<ItineraryCard onDelete={vi.fn()} summary={summary({ destinationCode: "vn-khong-co" })} />);
   expect(container.querySelector("img")).toBeNull();
 });
+
+it("published card menu lists Mở, Xem trang công khai, then Xóa (D-24)", async () => {
+  const user = userEvent.setup();
+  render(<ItineraryCard onDelete={vi.fn()} summary={summary({ isPublic: true })} />);
+  await user.click(screen.getByRole("button", { name: 'Thao tác cho "Sài Gòn 3 ngày"' }));
+  const items = await screen.findAllByRole("menuitem");
+  expect(items.map((item) => item.getAttribute("aria-label") ?? item.textContent)).toEqual([
+    "Mở",
+    "Xem trang công khai",
+    "Xóa",
+  ]);
+  const publicLink = screen.getByRole("menuitem", { name: "Xem trang công khai" });
+  expect(publicLink.getAttribute("href")).toBe(`/itineraries/${ID}`);
+  expect(publicLink.hasAttribute("target")).toBe(false);
+});
+
+it("draft card menu has no public page item", async () => {
+  const user = userEvent.setup();
+  render(<ItineraryCard onDelete={vi.fn()} summary={summary({ isPublic: false })} />);
+  await user.click(screen.getByRole("button", { name: 'Thao tác cho "Sài Gòn 3 ngày"' }));
+  await screen.findByRole("menuitem", { name: "Mở" });
+  expect(screen.queryByRole("menuitem", { name: "Xem trang công khai" })).toBeNull();
+});
+
+it("keeps the title link on the editor for a published card and does not mark entry from the public item", async () => {
+  const user = userEvent.setup();
+  render(<ItineraryCard onDelete={vi.fn()} summary={summary({ isPublic: true })} />);
+  expect(screen.getByRole("link", { name: "Sài Gòn 3 ngày" }).getAttribute("href")).toBe(`/itineraries/${ID}/edit`);
+  await user.click(screen.getByRole("button", { name: 'Thao tác cho "Sài Gòn 3 ngày"' }));
+  await user.click(await screen.findByRole("menuitem", { name: "Xem trang công khai" }));
+  expect(enteredFromList()).toBe(false);
+});

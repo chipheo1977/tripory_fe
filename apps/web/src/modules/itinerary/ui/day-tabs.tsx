@@ -11,6 +11,7 @@ import { MapToneDot, Tabs, TabsList, TabsTrigger } from "@tripory/ui-web";
 import { useEffect, useMemo, useRef } from "react";
 import { itinerary as itineraryHooks } from "@/composition/itinerary.client";
 import { AddButton } from "./add-button";
+import { EdgeFade } from "./edge-fade";
 import { formatKm } from "./format";
 import { overviewTabAccessibleName, parseTabValue, tabValue } from "./overview-format";
 import { useSaveStatusStore } from "./save-status";
@@ -23,14 +24,6 @@ export type DayTabsProps = Readonly<{
   /** Đưa focus vào một tab (ví dụ sau khi bấm dòng ngày ở Tổng quan: D-135). Mỗi `seq` chỉ áp một lần. */
   focusRequest?: Readonly<{ tab: EditorTab; seq: number }> | null;
 }>;
-
-// Mờ dần ở mép còn tab bị cắt (gợi ý có thể vuốt/kéo); không nhận chuột.
-const FADE_CLASS = { start: "left-0 bg-linear-to-r", end: "right-0 bg-linear-to-l" } as const;
-
-function EdgeFade({ visible, side }: Readonly<{ visible: boolean; side: keyof typeof FADE_CLASS }>) {
-  if (!visible) return null;
-  return <span aria-hidden="true" className={`pointer-events-none absolute inset-y-0 w-stack-lg from-surface to-transparent ${FADE_CLASS[side]}`} />;
-}
 
 function trackTab(tabs: Map<EditorTab, HTMLElement>, tab: EditorTab, element: HTMLElement | null): void {
   if (element === null) tabs.delete(tab);

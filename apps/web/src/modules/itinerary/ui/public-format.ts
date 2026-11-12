@@ -1,6 +1,7 @@
 // Chuỗi và URL của chế độ Bài viết trên trang công khai (D-01, D-03, D-04). Hàm thuần: copy nằm ở tầng UI, domain chỉ
 // trả số. Không `new Date()`: ngày dựng từ chuỗi `YYYY-MM-DD` (D-26).
-import type { CalendarDate } from "@tripory/itinerary";
+import { buildDayRange, type CalendarDate, type Itinerary } from "@tripory/itinerary";
+import { defaultCoverFor } from "./destination-cover";
 import { formatKm, formatStartDate } from "./format";
 import { overviewMetaLine } from "./overview-format";
 
@@ -42,3 +43,24 @@ export const mapsLinkLabel = (name: string): string => `Mở ${name} trong Googl
 
 /** `id` của mục ngày, đích cuộn của dải chip (D-06). */
 export const dayAnchorId = (dayNumber: number): string => `ngay-${dayNumber}`;
+
+/** Chỉ các trường Tổng quan chỉ đọc cần; cố ý không có điểm đến, sở thích (D-76), ngày kết thúc hay trạng thái xuất bản. */
+export type PublicOverviewData = Readonly<{
+  title: string;
+  description: string | null;
+  startDateLabel: string | null;
+  coverImageUrl: string | null;
+  fallbackCoverUrl: string | null;
+  metaLine: string;
+}>;
+
+export function publicOverviewData(itinerary: Itinerary): PublicOverviewData {
+  return {
+    title: itinerary.title,
+    description: itinerary.description,
+    startDateLabel: formatStartDate(itinerary.startDate),
+    coverImageUrl: itinerary.coverImageUrl,
+    fallbackCoverUrl: defaultCoverFor(itinerary.destinationCode),
+    metaLine: overviewMetaLine(buildDayRange(itinerary).length, itinerary.waypoints.length, itinerary.totalDistanceKm),
+  };
+}

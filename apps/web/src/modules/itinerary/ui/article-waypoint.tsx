@@ -1,8 +1,7 @@
 // Một điểm trong mục ngày của chế độ Bài viết (D-03, UI-SPEC §ArticleWaypoint). Tên, địa chỉ, ghi chú là text node của React
-// (ghi chú giữ xuống dòng bằng CSS `white-space: pre-line`); không HTML thô (T-05-24). Link ngoài có `rel="noopener noreferrer"`.
-import { cn, Icon, mapToneClass } from "@tripory/ui-web";
-import { ExternalLink } from "lucide-react";
-import { googleMapsUrl, mapsLinkLabel } from "./public-format";
+// (ghi chú giữ xuống dòng bằng CSS `white-space: pre-line`); không HTML thô (T-05-24). Link ngoài là `MapsLink` dùng chung.
+import { cn, mapToneClass } from "@tripory/ui-web";
+import { MapsLink } from "./maps-link";
 
 export type ArticleWaypointProps = Readonly<{
   /** Số thứ tự trong ngày, tính từ 1. */
@@ -41,16 +40,7 @@ export function ArticleWaypoint({ position, dayNumber, name, address, notes, lat
         <h3 className="break-words text-body font-semibold text-text">{name}</h3>
         <WaypointAddress text={address} />
         <WaypointNotes text={notes} />
-        <a
-          aria-label={mapsLinkLabel(name)}
-          className="inline-flex min-h-touch items-center gap-inline-xs self-start text-label font-semibold text-text underline underline-offset-2 hover:decoration-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-          href={googleMapsUrl(latitude, longitude)}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          Mở trong Google Maps
-          <Icon icon={ExternalLink} size="sm" />
-        </a>
+        <MapsLink latitude={latitude} longitude={longitude} name={name} />
       </div>
     </li>
   );

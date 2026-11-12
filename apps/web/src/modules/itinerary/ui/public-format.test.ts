@@ -1,5 +1,6 @@
 import { parseCalendarDate } from "@tripory/itinerary";
 import { describe, expect, it } from "vitest";
+import { makeFxItinerary } from "@/test/domain-itinerary-fixtures";
 import {
   articleMetaLine,
   dayAnchorId,
@@ -7,6 +8,7 @@ import {
   daySectionTitle,
   googleMapsUrl,
   mapsLinkLabel,
+  publicOverviewData,
 } from "./public-format";
 
 const DATE = parseCalendarDate("2026-10-12");
@@ -87,5 +89,31 @@ describe("googleMapsUrl, mapsLinkLabel, dayAnchorId", () => {
 
   it("derives the anchor id from the day number", () => {
     expect(dayAnchorId(3)).toBe("ngay-3");
+  });
+});
+
+describe("publicOverviewData", () => {
+  it("keeps only the six read-only overview fields", () => {
+    const data = publicOverviewData(
+      makeFxItinerary({ description: "Mô tả", destinationCode: "vn-da-nang", interests: ["nature"] }),
+    );
+
+    expect(Object.keys(data).sort()).toEqual(
+      ["coverImageUrl", "description", "fallbackCoverUrl", "metaLine", "startDateLabel", "title"].sort(),
+    );
+    expect(data.title).toBe("Sài Gòn 3 ngày");
+    expect(data.startDateLabel).toBe("Khởi hành 12/10/2026");
+    expect(data.metaLine).toBe("3 ngày · 3 điểm · 12,4 km");
+    expect(data.metaLine).not.toContain("Khởi hành");
+  });
+
+  it("has no start date label when the itinerary has none", () => {
+    expect(publicOverviewData(makeFxItinerary({ startDate: null })).startDateLabel).toBeNull();
+  });
+
+  it("falls back to the destination default cover", () => {
+    expect(publicOverviewData(makeFxItinerary({ destinationCode: "vn-da-nang" })).fallbackCoverUrl).toBe(
+      "https://triporyv1.vercel.app/destinations/vn-da-nang.jpg",
+    );
   });
 });

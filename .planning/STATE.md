@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 5.1 planned (19 plans, 10 waves)
-last_updated: "2026-11-12T08:14:16.878Z"
-last_activity: 2026-11-12 -- Phase 05.1 planning complete
+stopped_at: Completed 05.1-01-PLAN.md; wave 2 (05.1-02) chờ người dùng sửa và deploy tripory_be
+last_updated: "2026-11-12T08:28:06.369Z"
+last_activity: 2026-11-12
 progress:
   total_phases: 9
   completed_phases: 4
   total_plans: 122
-  completed_plans: 102
+  completed_plans: 103
   percent: 84
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình du lịch thật trên bản triển khai công khai, rồi trao đổi về chuyến đi với người khác.
-**Current focus:** Phase 05.1 — itinerary-likes-comments (đã lập plan; Phase 05 code xong, UAT thủ công còn mở)
+**Current focus:** Phase 05.1 — itinerary-likes-comments
 
 ## Current Position
 
-Phase: 05.1
-Plan: Not started
-Status: Ready to execute (19 plan, 10 wave). Chạy 05.1-01 (hợp đồng BE) rồi 05.1-02 (checkpoint người dùng sửa và deploy `tripory_be`); plan FE 05.1-03..05.1-19 chặn tới khi 05.1-02 xong
-Last activity: 2026-11-12 -- Phase 05.1 planning complete
+Phase: 05.1 (itinerary-likes-comments) — EXECUTING
+Plan: 2 of 19
+Status: Chờ người dùng ở checkpoint 05.1-02 (sửa và deploy `tripory_be` theo `05.1-BE-CONTRACT.md`); plan FE 05.1-03..05.1-19 chặn tới khi 05.1-02 xong
+Last activity: 2026-11-12 -- 05.1-01 xong (hợp đồng BE)
 
 Phase 1 progress: [██████████] 100% — verified complete
 
@@ -229,6 +229,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-11-12T07:19:56.069Z
-Stopped at: Phase 5.1 planned (19 plans, 10 waves; checker không độc lập, xem 05.1-PLAN-CHECK.md)
-Resume file: .planning/phases/05.1-itinerary-likes-comments/05.1-01-PLAN.md
+Last session: 2026-11-12T08:28:06.364Z
+Stopped at: Completed 05.1-01-PLAN.md; wave 2 (05.1-02) chờ người dùng sửa và deploy tripory_be
+Resume file: .planning/phases/05.1-itinerary-likes-comments/05.1-02-PLAN.md

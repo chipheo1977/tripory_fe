@@ -239,7 +239,7 @@ Plans:
 **Plans**: 19 plans in 10 waves (lập 2026-11-12). Thứ tự bắt buộc: 05.1-01 là tài liệu hợp đồng BE (không code, không ca kiểm thử, theo mẫu 04-24), 05.1-02 là checkpoint người dùng tự sửa và deploy `tripory_be`, xác nhận bằng lời gọi thật (theo mẫu 04-25); MỌI plan FE (05.1-03..05.1-19) phụ thuộc 05.1-02, test dùng fixture DTO đúng hợp đồng và repository giả, không mock ở runtime
 
 Plans:
-- [ ] 05.1-01-PLAN.md — Hợp đồng BE (tài liệu, không code, không ca kiểm thử, 5W1H): 6 endpoint dưới `/api/v1/itineraries` (PUT/DELETE/GET like, GET/POST comments, DELETE comment), DTO, mã lỗi, phân trang, giới hạn tần suất theo người dùng, ba trường đếm của chi tiết, tác giả comment dùng chung kiểu với `author` (wave 1)
+- [x] 05.1-01-PLAN.md — Hợp đồng BE (tài liệu, không code, không ca kiểm thử, 5W1H): 6 endpoint dưới `/api/v1/itineraries` (PUT/DELETE/GET like, GET/POST comments, DELETE comment), DTO, mã lỗi, phân trang, giới hạn tần suất theo người dùng, ba trường đếm của chi tiết, tác giả comment dùng chung kiểu với `author` (wave 1)
 - [ ] 05.1-02-PLAN.md — Checkpoint: người dùng tự sửa và deploy `tripory_be`, xác nhận bằng 15 điều kiện nghiệm thu thủ công (wave 2, `autonomous: false`)
 - [ ] 05.1-03-PLAN.md — Package `@tripory/social`: domain (luật nội dung, quyền xóa, trạng thái like, trộn trang), application (port + use case gửi comment), fixture dùng chung (wave 3)
 - [ ] 05.1-04-PLAN.md — `ERROR_MESSAGES` thêm 6 mã like/comment, `selectErrorMessage`/`MutationFeedback` có câu dự phòng theo ngữ cảnh (wave 3)

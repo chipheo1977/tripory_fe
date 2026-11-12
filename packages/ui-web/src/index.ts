@@ -29,6 +29,7 @@ export * from './molecules/sheet';
 export * from './molecules/sheet-snap';
 export * from './molecules/accordion';
 export * from './molecules/toggle-chip';
+export * from './molecules/segmented-control';
 export * from './molecules/number-stepper';
 export * from './molecules/radio-group';
 export * from './molecules/map-pin';

@@ -210,11 +210,11 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | ITIN-12 | Phase 4 | Complete |
 | ITIN-13 | Phase 4 | Complete |
 | ITIN-14 | Phase 4 | Complete |
-| PUB-01 | Phase 5 | Pending |
-| PUB-02 | Phase 5 | Pending (về lại Phase 5 ngày 2026-11-05: chỉ còn nút chuyển Bài viết/Bản đồ) |
-| PUB-03 | Phase 5 | Pending |
-| PUB-04 | Phase 5 | Pending |
-| PUB-05 | Phase 5 | Pending |
+| PUB-01 | Phase 5 | Code xong 2026-11-12 (19/19 plan), chờ UAT thủ công: 05-HUMAN-UAT.md |
+| PUB-02 | Phase 5 | Code xong 2026-11-12, chờ UAT thủ công (về lại Phase 5 ngày 2026-11-05: chỉ còn nút chuyển Bài viết/Bản đồ) |
+| PUB-03 | Phase 5 | Code xong 2026-11-12 (19/19 plan), chờ UAT thủ công: 05-HUMAN-UAT.md |
+| PUB-04 | Phase 5 | Code xong 2026-11-12 (19/19 plan), chờ UAT thủ công: 05-HUMAN-UAT.md |
+| PUB-05 | Phase 5 | Code xong 2026-11-12 (19/19 plan), chờ UAT thủ công: 05-HUMAN-UAT.md |
 | PUB-06 | Phase 4 | Complete (chuyển vào Phase 4, mở lại lần 2 ngày 2026-11-05; UAT mục E 14/14 PASS do người dùng xác nhận 2026-11-06; trang công khai dùng lại ở Phase 5) |
 | MAP-01 | Phase 4 | Complete (mở lại lần 3, 2026-11-06; hoàn thành phase được người dùng xác nhận 2026-11-07; UAT mục F chấp nhận theo xác nhận, agent không kiểm độc lập Photon/Nominatim thật) |
 | SOC-01 | Phase 5.1 | Pending (chuyển từ v2 BE-02 ngày 2026-11-09; chờ API like của `tripory_be`) |

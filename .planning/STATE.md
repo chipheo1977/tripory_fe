@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 5.1 UI-SPEC approved
-last_updated: "2026-11-12T07:19:56.073Z"
-last_activity: 2026-11-12
+status: executing
+stopped_at: Phase 5.1 planned (19 plans, 10 waves)
+last_updated: "2026-11-12T08:14:16.878Z"
+last_activity: 2026-11-12 -- Phase 05.1 planning complete
 progress:
   total_phases: 9
   completed_phases: 4
-  total_plans: 103
+  total_plans: 122
   completed_plans: 102
-  percent: 99
+  percent: 84
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình du lịch thật trên bản triển khai công khai, rồi trao đổi về chuyến đi với người khác.
-**Current focus:** Phase 05 — map-public-view
+**Current focus:** Phase 05.1 — itinerary-likes-comments (đã lập plan; Phase 05 code xong, UAT thủ công còn mở)
 
 ## Current Position
 
 Phase: 05.1
 Plan: Not started
-Status: Phase 05 code complete (19/19), chờ UAT thủ công (05-HUMAN-UAT.md)
-Last activity: 2026-11-12
+Status: Ready to execute (19 plan, 10 wave). Chạy 05.1-01 (hợp đồng BE) rồi 05.1-02 (checkpoint người dùng sửa và deploy `tripory_be`); plan FE 05.1-03..05.1-19 chặn tới khi 05.1-02 xong
+Last activity: 2026-11-12 -- Phase 05.1 planning complete
 
 Phase 1 progress: [██████████] 100% — verified complete
 
@@ -208,6 +208,8 @@ Recent decisions affecting current work:
 
 - Phase 5.1 inserted after Phase 5: Itinerary Likes & Comments (URGENT). Chèn ngày 2026-11-09 theo yêu cầu người dùng "thêm like/comment ở milestone này"; thư mục `.planning/phases/05.1-itinerary-likes-comments/`. Requirements SOC-01 (like), SOC-02 (comment) chuyển từ v2 BE-02. Phụ thuộc Phase 5 (trang công khai `/itineraries/[id]`) và API like/comment của `tripory_be` (chưa có): plan đầu là hợp đồng BE (mẫu 04-24), rồi checkpoint người dùng làm và deploy BE (mẫu 04-25) trước mọi plan FE; không dựng mock. Phạm vi chi tiết chờ `/gsd-discuss-phase 5.1`. Phase 5 và `05-CONTEXT.md` không đổi; Phase 6-8 giữ số, không vượt giới hạn 8 phase nguyên của granularity `standard`.
 
+- Phase 5.1 planned 2026-11-12: 19 plan, 10 wave (`.planning/phases/05.1-itinerary-likes-comments/05.1-*-PLAN.md`). Quyết định kỹ thuật thêm ngoài CONTEXT: hợp đồng BE thêm `GET /itineraries/{id}/like` để đồng bộ `likedByMe` (D-27) và yêu cầu `UseAuthentication` đứng trước `UseRateLimiter`; ACL `itinerary` mang ba trường đếm thành `Itinerary.engagement` tùy chọn; slot + factory ghép ở `components/public-social.tsx` (module web không import nhau); trang comment kế tính theo số phần tử đã tải. Checker không độc lập: `05.1-PLAN-CHECK.md`.
+
 ### Pending Todos
 
 None yet.
@@ -228,5 +230,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-11-12T07:19:56.069Z
-Stopped at: Phase 5.1 UI-SPEC approved
-Resume file: .planning/phases/05.1-itinerary-likes-comments/05.1-UI-SPEC.md
+Stopped at: Phase 5.1 planned (19 plans, 10 waves; checker không độc lập, xem 05.1-PLAN-CHECK.md)
+Resume file: .planning/phases/05.1-itinerary-likes-comments/05.1-01-PLAN.md

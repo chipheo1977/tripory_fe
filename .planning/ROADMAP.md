@@ -231,12 +231,33 @@ Plans:
 **Goal**: Người xem trang công khai `/itineraries/[id]` like và comment được lịch trình đã xuất bản bằng API thật của BE; khách chưa đăng nhập vẫn xem được
 **Depends on**: Phase 5 (like/comment hiện trên trang công khai `/itineraries/[id]` do Phase 5 dựng); API like/comment của `tripory_be` (phụ thuộc ngoài, chưa có, xem External dependency)
 **Requirements**: SOC-01, SOC-02 (chuyển từ v2 BE-02 "Like, comment" vào v1 ngày 2026-11-09, chèn phase 5.1)
-**Success Criteria** (what must be TRUE; mức tối thiểu, chi tiết phạm vi chờ `/gsd-discuss-phase 5.1`):
+**Success Criteria** (what must be TRUE; phạm vi chi tiết đã chốt ở `05.1-CONTEXT.md` D-01..D-29, giao diện ở `05.1-UI-SPEC.md`):
   1. Người đã đăng nhập like và bỏ like được một lịch trình đã xuất bản trên trang công khai và thấy số like
   2. Người đã đăng nhập đọc và gửi được comment trên trang công khai
   3. Khách chưa đăng nhập xem được trang công khai cùng số like và comment
-  4. Chờ discuss, chưa chốt: ai được bấm like (chủ lịch trình có tự like không), cách đếm số like, comment có sửa/xóa/trả lời không, phân trang comment, hiện tác giả comment ra sao (liên quan BE-06 ở v2), khách bấm like/comment thì xử lý thế nào
-**Plans**: TBD. Thứ tự bắt buộc: plan đầu tiên là tài liệu hợp đồng BE (không code, không ca kiểm thử, theo mẫu 04-24); plan thứ hai là checkpoint người dùng tự sửa và deploy `tripory_be`, xác nhận bằng một lần gọi thật (theo mẫu 04-25); mọi plan FE phụ thuộc checkpoint này
+  4. Mọi người đã đăng nhập (kể cả chủ) like được một lần mỗi lịch trình; comment phẳng 1..500 ký tự hiển thị như chữ thường, tác giả hoặc chủ lịch trình xóa được, phân trang 10, mới nhất trước; khách bấm tim hoặc muốn bình luận được dẫn sang đăng nhập rồi quay lại đúng trang; bản nháp không có like/comment
+**Plans**: 19 plans in 10 waves (lập 2026-11-12). Thứ tự bắt buộc: 05.1-01 là tài liệu hợp đồng BE (không code, không ca kiểm thử, theo mẫu 04-24), 05.1-02 là checkpoint người dùng tự sửa và deploy `tripory_be`, xác nhận bằng lời gọi thật (theo mẫu 04-25); MỌI plan FE (05.1-03..05.1-19) phụ thuộc 05.1-02, test dùng fixture DTO đúng hợp đồng và repository giả, không mock ở runtime
+
+Plans:
+- [ ] 05.1-01-PLAN.md — Hợp đồng BE (tài liệu, không code, không ca kiểm thử, 5W1H): 6 endpoint dưới `/api/v1/itineraries` (PUT/DELETE/GET like, GET/POST comments, DELETE comment), DTO, mã lỗi, phân trang, giới hạn tần suất theo người dùng, ba trường đếm của chi tiết, tác giả comment dùng chung kiểu với `author` (wave 1)
+- [ ] 05.1-02-PLAN.md — Checkpoint: người dùng tự sửa và deploy `tripory_be`, xác nhận bằng 15 điều kiện nghiệm thu thủ công (wave 2, `autonomous: false`)
+- [ ] 05.1-03-PLAN.md — Package `@tripory/social`: domain (luật nội dung, quyền xóa, trạng thái like, trộn trang), application (port + use case gửi comment), fixture dùng chung (wave 3)
+- [ ] 05.1-04-PLAN.md — `ERROR_MESSAGES` thêm 6 mã like/comment, `selectErrorMessage`/`MutationFeedback` có câu dự phòng theo ngữ cảnh (wave 3)
+- [ ] 05.1-05-PLAN.md — ACL `itinerary`: ba trường đếm thành `Itinerary.engagement` tùy chọn, fixture, loader SSR (wave 3)
+- [ ] 05.1-06-PLAN.md — Nền UI social: định dạng số/thời gian, chuỗi UI khóa, phím tắt Ctrl/Cmd+Enter, nhận biết macOS, đường dẫn đăng nhập của khách (wave 3)
+- [ ] 05.1-07-PLAN.md — Infrastructure `social`: DTO Zod, mapper ACL, repository HTTP qua BFF (wave 4)
+- [ ] 05.1-08-PLAN.md — Hook React Query: like tuần tự ý định cuối thắng + đồng bộ D-27, danh sách comment phân trang bỏ trùng, gửi, xóa (wave 4)
+- [ ] 05.1-09-PLAN.md — Điểm chèn slot tùy chọn trong hero, bài viết, tab Tổng quan và `PublicItineraryPage` nhận factory social (wave 4)
+- [ ] 05.1-10-PLAN.md — Mảnh trình bày danh sách comment: `CommentItem`, `CommentList`, skeleton/rỗng/lỗi, "Xem thêm" (wave 4)
+- [ ] 05.1-11-PLAN.md — Composition `social.client` và `SocialProvider` (một nguồn trạng thái cho hai chế độ) (wave 5)
+- [ ] 05.1-12-PLAN.md — Nút tim `LikeControl` và `ConnectedLikeControl` (khách là link, nhánh Suspense riêng) (wave 6)
+- [ ] 05.1-13-PLAN.md — `CommentComposer` (đếm sau trim, phím tắt an toàn với bộ gõ) và `CommentGuestPrompt` (wave 4)
+- [ ] 05.1-14-PLAN.md — `DeleteCommentDialog` (xác nhận xóa, focus an toàn) (wave 4)
+- [ ] 05.1-15-PLAN.md — `CommentSection`: controller, khung section, mọi trạng thái, gửi/xóa/tải thêm, focus và cuộn từ "Xem bình luận" (wave 6)
+- [ ] 05.1-16-PLAN.md — `OverviewSocialRow` cho tab Tổng quan và lớp keo `PublicSocialOverview` (wave 7)
+- [ ] 05.1-17-PLAN.md — Tích hợp trang công khai: `makePublicSocial`, route truyền factory, test hai chế độ (wave 8)
+- [ ] 05.1-18-PLAN.md — Bất biến tĩnh Phase 5.1, cổng kiểm toàn repo + `next build`, kiểm chứng SSR/BFF bằng BE giả (wave 9)
+- [ ] 05.1-19-PLAN.md — `05.1-UAT-CHECKLIST.md` kịch bản UAT thủ công (wave 10)
 **UI hint**: yes
 **External dependency**: `tripory_be` chưa có API like/comment. FE không dựng mock (quyết định "Không dựng mock cho tính năng backend chưa hỗ trợ" ở PROJECT.md), nên không plan FE nào chạy trước khi BE có API thật.
 **Note**: Chèn ngày 2026-11-09 theo yêu cầu người dùng "thêm like/comment ở milestone này". Phase 5 giữ nguyên phạm vi, `05-CONTEXT.md` không đổi. Roadmap từng ghi giới hạn 8 phase của granularity `standard` (xem Note của Phase 7); phase thập phân không thêm phase nguyên, Phase 6-8 giữ nguyên số nên giới hạn đó không bị vượt.
@@ -295,7 +316,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 6 → 7 �
 | 3. Identity & Session (BFF) | 15/15 | Executed (UAT 19/19 PASS, chờ verify-work) | 2026-10-23 |
 | 4. Itinerary CRUD & Editor | 57/57 (04-01..04-58, không có file plan 04-54) | Complete (UAT 23/23, mục D 8/8 và mục E 14/14 PASS do người dùng xác nhận; mục F tìm địa điểm F1..F12 và sửa chân form Sheet mobile 738c9a2 được người dùng chấp nhận khi xác nhận hoàn thành, agent không kiểm độc lập; chưa kiểm trên thiết bị cảm ứng thật, xem 04-VERIFICATION.md) | 2026-11-07 |
 | 5. Map & Public View | 19/19 | Code complete, chờ UAT thủ công | 2026-11-12 |
-| 5.1. Itinerary Likes & Comments (INSERTED) | 0/TBD | Not started (chờ hợp đồng BE và checkpoint deploy `tripory_be`) | - |
+| 5.1. Itinerary Likes & Comments (INSERTED) | 0/19 | Planned (19 plan, 10 wave; plan FE chờ checkpoint 05.1-02: người dùng sửa và deploy `tripory_be`) | - |
 | 6. Profile & Users | 0/TBD | Not started | - |
 | 7. Chat, Voice & Calls | 0/TBD | Not started | - |
 | 8. Deploy & Acceptance Gate | 0/TBD | Not started | - |

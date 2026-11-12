@@ -191,3 +191,98 @@ describe("itinerary security/scope invariants (static)", () => {
     expect(offenders).toEqual([]);
   });
 });
+
+describe("public itinerary invariants (Phase 5, static)", () => {
+  const VIEWER_ROUTE = "app/(public)/(viewer)/";
+  const read = (rel: string): string => readFileSync(path.join(srcDir, rel), "utf8");
+  // Dòng chú thích không phải vi phạm (comment có thể nhắc tên API bị cấm để giải thích vì sao cấm).
+  const code = (text: string): string => text.split("\n").filter((line) => !/^\s*(\/\/|\/\*|\*)/.test(line)).join("\n");
+  const tagAround = (text: string, index: number): string => text.slice(Math.max(0, index - 400), index + 400);
+
+  // T-05-25, T-05-49 (tabnabbing): mọi link mở tab mới phải kèm rel="noopener noreferrer".
+  it('pairs every target="_blank" in modules/itinerary/ui with rel="noopener noreferrer"', () => {
+    const offenders: string[] = [];
+    let found = 0;
+    for (const file of itineraryUiTsx) {
+      for (const match of file.text.matchAll(/target="_blank"/g)) {
+        found += 1;
+        if (!tagAround(file.text, match.index).includes('rel="noopener noreferrer"')) offenders.push(file.rel);
+      }
+    }
+    expect(found).toBeGreaterThanOrEqual(2);
+    expect(offenders).toEqual([]);
+  });
+
+  // T-05-62, T-05-63: route công khai gọi BE chỉ qua `itinerary.server` (server-only), không fetch, không cache dùng chung, không đọc cookie.
+  it("keeps the public route page free of http/fetch/shared cache/cookies and with generateMetadata", () => {
+    const page = readFileSync(path.join(srcDir, VIEWER_ROUTE, "itineraries", "[id]", "page.tsx"), "utf8");
+    expect(page).toContain("generateMetadata");
+    for (const forbidden of ["@tripory/itinerary/http", "fetch(", "use cache", "cookies("]) {
+      expect(page).not.toContain(forbidden);
+    }
+  });
+
+  // RESEARCH Pattern 6: file-based metadata (`opengraph-image`, `twitter-image`) có ưu tiên cao hơn `generateMetadata`
+  // và sẽ ghi đè ảnh bìa/noindex của trang công khai.
+  it("has no file-based opengraph/twitter image in the public route", () => {
+    const base = path.join(srcDir, VIEWER_ROUTE);
+    expect(existsSync(base)).toBe(true);
+    const names: string[] = [];
+    const collect = (dir: string): void => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (entry.isDirectory()) collect(path.join(dir, entry.name));
+        else names.push(entry.name);
+      }
+    };
+    collect(base);
+    expect(names.length).toBeGreaterThan(2);
+    expect(names.filter((name) => /^(opengraph|twitter)-image/.test(name))).toEqual([]);
+  });
+
+  // T-05-01, T-05-29: `uqr` chỉ ở apps/web, chỉ `encode()` (không `renderSVG` cần HTML thô).
+  it("keeps uqr in apps/web only and never uses renderSVG", () => {
+    const appPackage = readFileSync(path.join(srcDir, "..", "package.json"), "utf8");
+    expect(appPackage).toContain('"uqr": "catalog:"');
+    const packageDirs = readdirSync(path.join(repoRoot, "packages"), { withFileTypes: true }).filter((entry) => entry.isDirectory());
+    expect(packageDirs.length).toBeGreaterThan(3);
+    for (const entry of packageDirs) {
+      const manifest = path.join(repoRoot, "packages", entry.name, "package.json");
+      if (existsSync(manifest)) expect(readFileSync(manifest, "utf8")).not.toContain('"uqr"');
+    }
+    expect(packagesSrc.filter((file) => /from\s+["']uqr["']/.test(file.text)).map((file) => file.rel)).toEqual([]);
+    expect(code(read("modules/itinerary/ui/qr-matrix.ts"))).not.toContain("renderSVG");
+  });
+
+  // T-05-54: bản chỉ đọc không kéo hook ghi hay dnd-kit vào bundle công khai.
+  it("keeps the read-only public files free of the editor data client and dnd-kit", () => {
+    const readOnly = itineraryUiTsx
+      .concat(inWeb("modules/itinerary/ui/").filter((file) => file.rel.endsWith(".ts")))
+      .filter((file) => /^modules\/itinerary\/ui\/(public-|article-|share-|qr-|maps-link|draft-strip|view-mode-toggle|use-public-|use-share-|use-qr-|use-day-navigation|use-pill-)/.test(file.rel));
+    expect(readOnly.length).toBeGreaterThan(20);
+    const offenders = readOnly
+      .filter((file) => file.text.includes("itinerary.client") || file.text.includes("@dnd-kit"))
+      .map((file) => file.rel);
+    expect(offenders).toEqual([]);
+  });
+
+  // D-20, T-05-20: mọi nhánh metadata công khai đều noindex; `PUBLIC_SITE_URL` chỉ phía server.
+  it("always noindexes public metadata and keeps PUBLIC_SITE_URL server-only", () => {
+    const metadata = read("composition/server/public-metadata.ts");
+    expect(metadata).toContain("index: false");
+    expect(metadata).toContain("follow: false");
+    expect(metadata).not.toContain("index: true");
+    const siteUrl = code(read("composition/server/site-url.ts"));
+    expect(siteUrl).toContain("PUBLIC_SITE_URL");
+    expect(siteUrl).not.toContain("NEXT_PUBLIC");
+  });
+
+  // D-21: trang 403 giữ đúng câu khóa và không mời đăng nhập (tránh dò bản nháp).
+  it("keeps the locked 403 copy without a sign-in prompt", () => {
+    const forbidden = code(read("modules/itinerary/ui/public-forbidden.tsx"));
+    // `buttonVariants` là hàm của file client trong ui-web: gọi từ RSC làm vỡ stream 403 (bắt được lúc chạy `next start`).
+    expect(forbidden.trimStart().startsWith('"use client"')).toBe(true);
+    expect(forbidden).toContain("Lịch trình này chưa được xuất bản");
+    expect(forbidden).toContain("Chỉ người tạo xem được bản nháp.");
+    expect(forbidden).not.toContain("Đăng nhập");
+  });
+});

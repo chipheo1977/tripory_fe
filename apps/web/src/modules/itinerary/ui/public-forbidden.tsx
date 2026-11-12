@@ -1,3 +1,7 @@
+"use client";
+
+// `buttonVariants` nằm trong file `'use client'` của ui-web nên không gọi được từ RSC: khối này phải là client component
+// (render SSR như thường). Phát hiện khi chạy `next start` với BE giả; test jsdom không bắt được lỗi ranh giới RSC.
 import { buttonVariants, EmptyState, Icon } from "@tripory/ui-web";
 import { Lock } from "lucide-react";
 import Link from "next/link";

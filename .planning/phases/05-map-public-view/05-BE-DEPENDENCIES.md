@@ -26,6 +26,19 @@ Gọi `GET {API_ORIGIN}/api/v1/itineraries/{id}` của một lịch trình đã 
 | UAT mục F của Phase 4 (F1..F12) mới chỉ được chấp nhận theo xác nhận người dùng; bản đồ Phase 5 dùng lại code 04-42..04-53 | Còn mở. Xem `04-REVIEW.md`, `04-UI-REVIEW.md`, `deferred-items.md`. | Phase 4 |
 | Chưa kiểm trên thiết bị cảm ứng thật | Còn mở, thuộc UAT thủ công của Phase 5. | Phase 4 |
 
+## BE-05.1 (CHẶN FE của Phase 5.1): API like và comment
+
+Chi tiết ở [`05.1-BE-CONTRACT.md`](../05.1-itinerary-likes-comments/05.1-BE-CONTRACT.md); user tự sửa `tripory_be`; FE của Phase 5.1 chỉ chạy sau checkpoint 05.1-02 (D-28).
+
+| # | Vấn đề | Ảnh hưởng FE | Đề xuất BE | Trạng thái |
+|---|--------|--------------|------------|------------|
+| 5.1-1 | `tripory_be` chưa có entity, bảng hay endpoint like/comment (đọc nhánh `dev`, `feb288e`) | FE không thể like/comment, không dựng mock | làm C1..C9, C11, C12 của hợp đồng | Chờ user sửa BE (05.1-02) |
+| 5.1-2 | `ItineraryDetailDto` thiếu `likeCount`, `commentCount`, `likedByMe` | số liệu trong HTML SSR của trang công khai | C8 | Chờ user sửa BE (05.1-02) |
+| 5.1-3 | `UseRateLimiter` đứng trước `UseAuthentication` và chính sách hiện có chỉ phân vùng theo IP | giới hạn theo người dùng không hoạt động, BFF chung gom mọi người về một IP | C10 | Chờ user sửa BE (05.1-02) |
+| 5.1-4 | BE-05-01 (`author`) chưa deploy trên nhánh `dev` | `CommentDto.author` nên dùng chung kiểu với `author` của chi tiết | deploy BE-05-01 cùng đợt | Không chặn, nên làm cùng đợt |
+
+Xóa lịch trình hiện là xóa mềm nên like và comment ở lại trong DB (xem C2 của hợp đồng).
+
 ## Không ảnh hưởng
 
 `/mine` đếm sai `DaysCount`/`WaypointsCount` (`04-BE-DEPENDENCIES.md`) không ảnh hưởng trang công khai vì trang này dùng DTO chi tiết.

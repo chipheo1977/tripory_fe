@@ -9,7 +9,16 @@
 // - `data-escape-scope`: Esc của Dialog/Drawer Base UI không xét `defaultPrevented`, nên phần tử tự xử lý Esc (ô tìm
 //   điểm đến có chữ, khung nhập link ảnh) đặt thuộc tính này và gọi `stopPropagation()` ở keydown của chính nó; surface
 //   chỉ chặn đóng khi Esc xảy ra khi focus nằm trong phạm vi đó.
-import { Dialog, DialogContent, DialogTitle, Sheet, SheetContent, SheetTitle } from "@tripory/ui-web";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+} from "@tripory/ui-web";
 import type { ComponentProps, ReactNode } from "react";
 import { useMediaQuery } from "./use-media-query";
 
@@ -40,7 +49,19 @@ export type ResponsiveFormSurfaceProps = Readonly<{
   flushFooter?: boolean;
   /** Ô nhận focus khi mở. Truyền tường minh để không phụ thuộc thứ tự tab mặc định của Dialog/Sheet. */
   initialFocus?: ComponentProps<typeof DialogContent>["initialFocus"];
+  /** Mô tả ngắn dưới tiêu đề; Base UI gắn `aria-describedby` của hộp vào nó (hộp chia sẻ dùng). */
+  description?: ReactNode;
 }>;
+
+function DialogBodyDescription({ text }: Readonly<{ text: ReactNode }>) {
+  if (text === undefined) return null;
+  return <DialogDescription className="text-body text-muted">{text}</DialogDescription>;
+}
+
+function SheetBodyDescription({ text }: Readonly<{ text: ReactNode }>) {
+  if (text === undefined) return null;
+  return <SheetDescription className="text-body text-muted">{text}</SheetDescription>;
+}
 
 const isInsideEscapeScope = (element: Element | null): boolean => element?.closest("[data-escape-scope]") != null;
 
@@ -56,6 +77,7 @@ export function ResponsiveFormSurface({
   fixedSnap = false,
   flushFooter = false,
   initialFocus,
+  description,
 }: ResponsiveFormSurfaceProps) {
   const wide = useIsWide();
   const handleOpenChange = (next: boolean, details?: SurfaceOpenChangeDetails) => {
@@ -79,6 +101,7 @@ export function ResponsiveFormSurface({
           <DialogTitle className={closeButton ? "pr-touch" : undefined} id={titleId}>
             {title}
           </DialogTitle>
+          <DialogBodyDescription text={description} />
           {children}
         </DialogContent>
       </Dialog>
@@ -96,6 +119,7 @@ export function ResponsiveFormSurface({
     >
       <SheetContent closeDisabled={locked} fillSnap={fixedSnap} flushFooter={flushFooter} initialFocus={initialFocus}>
         <SheetTitle id={titleId}>{title}</SheetTitle>
+        <SheetBodyDescription text={description} />
         {children}
       </SheetContent>
     </Sheet>

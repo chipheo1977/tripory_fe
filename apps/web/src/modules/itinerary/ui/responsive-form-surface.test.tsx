@@ -52,6 +52,7 @@ type SetupProps = {
   open?: boolean;
   onOpenChangeComplete?: (open: boolean) => void;
   scopedInput?: boolean;
+  description?: string;
 };
 
 function ScopedInput({ visible }: { visible: boolean }) {
@@ -63,6 +64,7 @@ function Surface({ props }: { props: SetupProps }) {
   return (
     <ResponsiveFormSurface
       closeButton={props.closeButton}
+      description={props.description}
       fixedSnap={props.fixedSnap}
       locked={props.locked ?? false}
       onOpenChange={props.onOpenChange ?? (() => undefined)}
@@ -249,5 +251,23 @@ describe("ResponsiveFormSurface: closeButton, fixedSnap, hoàn tất đóng, ph�
     screen.getByRole("button", { name: "Nút thường" }).focus();
     await user.keyboard("{Escape}");
     expect(typeof onOpenChange.mock.calls.find(([next]) => next === false)?.[1]?.cancel).toBe("function");
+  });
+});
+
+describe("ResponsiveFormSurface: description (Phase 5)", () => {
+  it.each([true, false])("gắn mô tả vào hộp bằng aria-describedby (wide=%s)", async (wide) => {
+    setup({ wide, description: "Mô tả hộp" });
+    const dialog = await screen.findByRole("dialog", { name: "Thông tin chuyến đi" });
+    const description = screen.getByText("Mô tả hộp");
+
+    expect(description.id).not.toBe("");
+    expect(dialog.getAttribute("aria-describedby")).toContain(description.id);
+  });
+
+  it.each([true, false])("không truyền description thì không có aria-describedby (wide=%s)", async (wide) => {
+    setup({ wide });
+    const dialog = await screen.findByRole("dialog", { name: "Thông tin chuyến đi" });
+
+    expect(dialog.getAttribute("aria-describedby")).toBeNull();
   });
 });

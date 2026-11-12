@@ -102,13 +102,17 @@ describe("itinerary security/scope invariants (static)", () => {
     expect(route?.text).not.toMatch(/export\s*\{/);
   });
 
-  // D-02 (cuộn vô hạn, không nút "Tải thêm") và D-40 (không chia sẻ, thuộc Phase 5). So khớp phân biệt hoa thường:
-  // "Đang tải thêm lịch trình…" và "Link chia sẻ sẽ không còn mở được." là hợp lệ.
-  it('has no "Tải thêm" or "Chia sẻ" text in modules/itinerary/ui', () => {
-    const offenders = itineraryUiTsx
-      .filter((file) => file.text.includes("Tải thêm") || file.text.includes("Chia sẻ"))
-      .map((file) => file.rel);
+  // D-02 (cuộn vô hạn, không nút "Tải thêm"). Khóa D-40 (chưa có chia sẻ trong Phase 4) đã hết hiệu lực: Phase 5 dựng
+  // nút/hộp "Chia sẻ" (PUB-04). So khớp phân biệt hoa thường: "Đang tải thêm lịch trình…" là hợp lệ.
+  it('has no "Tải thêm" text in modules/itinerary/ui', () => {
+    const offenders = itineraryUiTsx.filter((file) => file.text.includes("Tải thêm")).map((file) => file.rel);
     expect(offenders).toEqual([]);
+  });
+
+  it('keeps the Phase 5 share UI: share-button.tsx exists with the "Chia sẻ" label', () => {
+    const button = itineraryUiTsx.find((file) => file.rel.endsWith("modules/itinerary/ui/share-button.tsx"));
+    expect(button).toBeDefined();
+    expect(button?.text).toContain("Chia sẻ lịch trình");
   });
 
   it("has no z-(--z-…) utilities left in apps/web and ui-web", () => {

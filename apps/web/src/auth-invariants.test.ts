@@ -59,11 +59,14 @@ describe("auth security invariants (static)", () => {
     expect(offenders).toEqual([]);
   });
 
-  it('only composition/viewer.server.ts imports "server-only" in composition/**', () => {
+  // Kiến trúc mục 9: `server-only` chỉ ở `composition/*.server.ts`; logic thật ở `composition/server/**` để test được.
+  // Phase 5 thêm `itinerary.server.ts` (loader trang công khai, 05-06); danh sách này liệt kê tường minh từng file.
+  it('only composition/viewer.server.ts and composition/itinerary.server.ts import "server-only" in composition/**', () => {
     const owners = inDir("composition/")
       .filter((file) => /import\s+["']server-only["']/.test(file.text))
-      .map((file) => file.rel);
-    expect(owners).toEqual(["composition/viewer.server.ts"]);
+      .map((file) => file.rel)
+      .sort();
+    expect(owners).toEqual(["composition/itinerary.server.ts", "composition/viewer.server.ts"]);
   });
 
   // Cache Components + partialPrefetching: `cookies()` vẫn đọc được trong lượt prerender runtime, nên chỉ đọc cookie

@@ -91,3 +91,11 @@ it("renders the surface when both src and fallbackSrc are null", () => {
   expect(image(container)).toBeNull();
   expect(container.querySelector(".bg-surface-muted")).not.toBeNull();
 });
+
+it("uses eager loading when asked", () => {
+  const { container } = render(<CoverImage loading="eager" src={SRC} />);
+  const img = image(container);
+  expect(img?.getAttribute("loading")).toBe("eager");
+  expect(img?.getAttribute("referrerpolicy")).toBe("no-referrer");
+  expect(img?.getAttribute("alt")).toBe("");
+});

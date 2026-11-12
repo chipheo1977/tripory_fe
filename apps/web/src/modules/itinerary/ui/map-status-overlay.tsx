@@ -5,11 +5,12 @@
 import { Icon } from "@tripory/ui-web";
 import { MapPin } from "lucide-react";
 
-export type MapStatusOverlayProps = Readonly<{ visible: boolean }>;
+export type MapStatusOverlayProps = Readonly<{ visible: boolean; message?: string }>;
 
 const MAX_WIDTH = "calc(100% - var(--semantic-size-control-sm) - 3 * var(--semantic-space-stack-md))";
+const DEFAULT_MESSAGE = "Thêm điểm đến để thấy trên bản đồ";
 
-export function MapStatusOverlay({ visible }: MapStatusOverlayProps) {
+export function MapStatusOverlay({ visible, message = DEFAULT_MESSAGE }: MapStatusOverlayProps) {
   if (!visible) return null;
   return (
     <p
@@ -17,7 +18,7 @@ export function MapStatusOverlay({ visible }: MapStatusOverlayProps) {
       style={{ maxWidth: MAX_WIDTH }}
     >
       <Icon className="text-muted" icon={MapPin} size="sm" />
-      Thêm điểm đến để thấy trên bản đồ
+      {message}
     </p>
   );
 }

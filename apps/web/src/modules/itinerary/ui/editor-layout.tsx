@@ -2,7 +2,15 @@
 
 import { Button, Sheet, SheetContent, SheetTitle } from "@tripory/ui-web";
 import { ChevronUp } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import {
   narrowViewport,
   sheetHiddenBottomPx,
@@ -30,9 +38,9 @@ export type EditorLayoutProps = Readonly<{
   sheetSnapRequest?: SheetSnapRequest | null;
 }>;
 
-type WideBodyProps = Readonly<{ timeline: ReactNode; map: EditorLayoutProps["map"]; headerHeight: number }>;
+export type WideBodyProps = Readonly<{ timeline: ReactNode; map: EditorLayoutProps["map"]; headerHeight: number }>;
 
-function WideBody({ timeline, map, headerHeight }: WideBodyProps) {
+export function WideBody({ timeline, map, headerHeight }: WideBodyProps) {
   return (
     <div
       className="grid min-h-0 lg:grid-cols-[var(--editor-timeline-width)_1fr]"
@@ -48,16 +56,21 @@ function WideBody({ timeline, map, headerHeight }: WideBodyProps) {
   );
 }
 
-type ReopenChipProps = Readonly<{ timelineOpen: boolean; onReopen: () => void }>;
+type ReopenChipProps = Readonly<{ timelineOpen: boolean; onReopen: () => void; companion?: ReactNode }>;
 
-/** Vuốt xuống hết từ mức thấp đóng sheet; chip này là đường duy nhất để mở lại, nên luôn có mặt khi sheet đóng. */
-function ReopenChip({ timelineOpen, onReopen }: ReopenChipProps) {
+/**
+ * Vuốt xuống hết từ mức thấp đóng sheet; chip này là đường duy nhất để mở lại, nên luôn có mặt khi sheet đóng.
+ * `companion` (trang công khai: viên thuốc chuyển chế độ) đứng cạnh chip trong cùng dải đáy. Lớp `z-sticky` để dải nổi
+ * dưới scrim của Dialog/Sheet modal (UI-SPEC §Viên thuốc chuyển chế độ).
+ */
+function ReopenChip({ timelineOpen, onReopen, companion = null }: ReopenChipProps) {
   if (timelineOpen) return null;
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-modal flex justify-center pb-[calc(var(--semantic-space-stack-md)+env(safe-area-inset-bottom))]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-sticky flex items-center justify-center gap-inline-sm pb-[calc(var(--semantic-space-stack-md)+env(safe-area-inset-bottom))]">
       <Button className="pointer-events-auto shadow-overlay" icon={ChevronUp} onClick={onReopen} variant="secondary">
         {TIMELINE_REOPEN_LABEL}
       </Button>
+      {companion}
     </div>
   );
 }
@@ -73,14 +86,16 @@ function useViewportHeight(): number {
   return useSyncExternalStore(subscribeViewportHeight, readViewportHeight, readServerViewportHeight);
 }
 
-type NarrowBodyProps = Readonly<{
+export type NarrowBodyProps = Readonly<{
   timeline: ReactNode;
   map: EditorLayoutProps["map"];
   headerHeight: number;
   sheetSnapRequest: SheetSnapRequest | null;
+  /** Đứng cạnh chip "Lịch trình" khi sheet đóng (viên thuốc chuyển chế độ của trang công khai). */
+  reopenCompanion?: ReactNode;
 }>;
 
-function NarrowBody({ timeline, map, headerHeight, sheetSnapRequest }: NarrowBodyProps) {
+export function NarrowBody({ timeline, map, headerHeight, sheetSnapRequest, reopenCompanion = null }: NarrowBodyProps) {
   const [timelineOpen, setTimelineOpen] = useState(true);
   const [snap, setSnap] = useState<SheetSnapName>("medium");
   // Yêu cầu có sẵn lúc mount (đã áp trước khi đổi bố cục) không áp lại; chỉ `seq` mới mới có hiệu lực.
@@ -123,28 +138,38 @@ function NarrowBody({ timeline, map, headerHeight, sheetSnapRequest }: NarrowBod
           <TimelineHostProvider value={timelineHost}>{timeline}</TimelineHostProvider>
         </SheetContent>
       </Sheet>
-      <ReopenChip onReopen={reopen} timelineOpen={timelineOpen} />
+      <ReopenChip companion={reopenCompanion} onReopen={reopen} timelineOpen={timelineOpen} />
     </>
   );
 }
 
-export function EditorLayout({ header, timeline, map, sheetSnapRequest = null }: EditorLayoutProps) {
-  const wide = useMediaQuery(LG_QUERY);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const [headerHeight, setHeaderHeight] = useState(0);
+/**
+ * Đo chiều cao của một khối dính bằng `ResizeObserver` (làm tròn lên để Sheet không chồng lên phần lẻ pixel).
+ * Editor và trang công khai (Phase 5) cùng dùng; gắn `ref` vào khối cần đo.
+ */
+export function useHeaderHeight(): { ref: RefObject<HTMLDivElement | null>; height: number } {
+  const ref = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
 
   useEffect(() => {
-    const element = headerRef.current;
+    const element = ref.current;
     if (element === null) return undefined;
     const observer = new ResizeObserver((entries) => {
       const entry = entries.at(-1);
       if (entry === undefined) return;
-      // Làm tròn lên để Sheet không chồng lên phần lẻ pixel của header.
-      setHeaderHeight(Math.ceil(entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height));
+      setHeight(Math.ceil(entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height));
     });
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
+
+  return { ref, height };
+}
+
+// `WideBody`, `NarrowBody` và `useHeaderHeight` được trang công khai dùng lại với khối dính tự đo (Phase 5).
+export function EditorLayout({ header, timeline, map, sheetSnapRequest = null }: EditorLayoutProps) {
+  const wide = useMediaQuery(LG_QUERY);
+  const { ref: headerRef, height: headerHeight } = useHeaderHeight();
 
   function renderBody() {
     if (wide) return <WideBody headerHeight={headerHeight} map={map} timeline={timeline} />;

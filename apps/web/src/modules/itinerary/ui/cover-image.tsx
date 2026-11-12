@@ -16,11 +16,20 @@ export type CoverImageProps = Readonly<{
   alt?: string;
   className?: string;
   fallbackIcon?: LucideIcon;
+  /** Hero trang công khai dùng `"eager"` (D-01); thẻ danh sách và tóm tắt giữ `"lazy"`. */
+  loading?: "lazy" | "eager";
 }>;
 
 const isHttps = (value: string | null): value is string => value !== null && value.startsWith("https://");
 
-function CoverPicture({ url, alt, onError }: Readonly<{ url: string; alt: string; onError(): void }>) {
+type Loading = "lazy" | "eager";
+
+function CoverPicture({
+  url,
+  alt,
+  loading,
+  onError,
+}: Readonly<{ url: string; alt: string; loading: Loading; onError(): void }>) {
   return (
     // eslint-disable-next-line @next/next/no-img-element -- URL ngoài do người dùng nhập, không đi qua image optimizer.
     <img
@@ -28,7 +37,7 @@ function CoverPicture({ url, alt, onError }: Readonly<{ url: string; alt: string
       className="size-full object-cover"
       decoding="async"
       key={url}
-      loading="lazy"
+      loading={loading}
       onError={onError}
       referrerPolicy="no-referrer"
       src={url}
@@ -48,13 +57,21 @@ function CoverContent({
   current,
   alt,
   icon,
+  loading,
   onError,
-}: Readonly<{ current: string | null; alt: string; icon: LucideIcon; onError(): void }>) {
+}: Readonly<{ current: string | null; alt: string; icon: LucideIcon; loading: Loading; onError(): void }>) {
   if (current === null) return <CoverFallbackSurface icon={icon} />;
-  return <CoverPicture alt={alt} onError={onError} url={current} />;
+  return <CoverPicture alt={alt} loading={loading} onError={onError} url={current} />;
 }
 
-export function CoverImage({ src, fallbackSrc = null, alt = "", className, fallbackIcon = Map }: CoverImageProps) {
+export function CoverImage({
+  src,
+  fallbackSrc = null,
+  alt = "",
+  className,
+  fallbackIcon = Map,
+  loading = "lazy",
+}: CoverImageProps) {
   // Nhớ các URL đã lỗi trong state thay vì cờ cần reset bằng effect.
   const [failed, setFailed] = useState<readonly string[]>([]);
   const candidates = [src, fallbackSrc].filter(isHttps);
@@ -65,7 +82,7 @@ export function CoverImage({ src, fallbackSrc = null, alt = "", className, fallb
 
   return (
     <div className={`aspect-(--itinerary-cover-ratio) overflow-hidden ${className ?? ""}`.trim()}>
-      <CoverContent alt={alt} current={current} icon={fallbackIcon} onError={markFailed} />
+      <CoverContent alt={alt} current={current} icon={fallbackIcon} loading={loading} onError={markFailed} />
     </div>
   );
 }

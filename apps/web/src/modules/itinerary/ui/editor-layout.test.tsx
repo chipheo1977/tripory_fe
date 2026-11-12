@@ -2,7 +2,7 @@ import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { installFakeResizeObserver, type FakeResizeObserverHandle } from "@/test/fake-resize-observer";
-import { EditorLayout, type EditorLayoutProps } from "./editor-layout";
+import { EditorLayout, NarrowBody, WideBody, useHeaderHeight, type EditorLayoutProps } from "./editor-layout";
 import { snapHeightPx } from "@tripory/ui-web";
 import type { MapFrame } from "./editor-map-viewport";
 import { TimelinePanel } from "./timeline-panel";
@@ -359,4 +359,87 @@ it("reopening with the chip goes back to the medium snap", async () => {
   await userEvent.click(screen.getByRole("button", { name: "Lịch trình" }));
 
   expect((h.sheetProps.mock.calls.at(-1)?.[0] as { snap: string }).snap).toBe("medium");
+});
+
+it("the reopen chip strip floats at z-sticky (below modal scrims), not z-modal", async () => {
+  installMatchMedia(false);
+  setup();
+  const sheet = await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
+  await userEvent.click(within(sheet).getByRole("button", { name: "Đóng" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+
+  const strip = screen.getByRole("button", { name: "Lịch trình" }).parentElement as HTMLElement;
+  expect(strip.className.split(/\s+/)).toContain("z-sticky");
+  expect(strip.className.split(/\s+/)).not.toContain("z-modal");
+});
+
+function renderNarrow(companion?: React.ReactNode) {
+  return render(
+    <NarrowBody
+      headerHeight={64}
+      map={() => null}
+      reopenCompanion={companion}
+      sheetSnapRequest={null}
+      timeline={<TimelinePanel tabs={null}>x</TimelinePanel>}
+    />,
+  );
+}
+
+it("NarrowBody puts reopenCompanion next to the chip in the same bottom strip and drops both when the sheet is open", async () => {
+  installMatchMedia(false);
+  renderNarrow(<div data-testid="pill" />);
+  const sheet = await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
+  expect(screen.queryByTestId("pill")).toBeNull();
+  expect(screen.queryByRole("button", { name: "Lịch trình" })).toBeNull();
+
+  await userEvent.click(within(sheet).getByRole("button", { name: "Đóng" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+
+  const chip = screen.getByRole("button", { name: "Lịch trình" });
+  const pill = screen.getByTestId("pill");
+  expect(pill.parentElement).toBe(chip.parentElement);
+  expect(chip.nextElementSibling).toBe(pill);
+  expect(chip.parentElement?.className.split(/\s+/)).toContain("gap-inline-sm");
+
+  await userEvent.click(chip);
+  await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
+  expect(screen.queryByTestId("pill")).toBeNull();
+});
+
+it("NarrowBody without reopenCompanion keeps the strip to the chip only", async () => {
+  installMatchMedia(false);
+  renderNarrow();
+  const sheet = await screen.findByRole("dialog", { name: "Lịch trình theo ngày" });
+  await userEvent.click(within(sheet).getByRole("button", { name: "Đóng" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+
+  const strip = screen.getByRole("button", { name: "Lịch trình" }).parentElement as HTMLElement;
+  expect(strip.children).toHaveLength(1);
+});
+
+it("WideBody and NarrowBody are importable for the public page", () => {
+  expect(typeof WideBody).toBe("function");
+  expect(typeof NarrowBody).toBe("function");
+});
+
+function HeightProbe() {
+  const { ref, height } = useHeaderHeight();
+  return (
+    <div data-height={height} data-testid="probe" ref={ref}>
+      khối dính
+    </div>
+  );
+}
+
+it("useHeaderHeight rounds the measured block size up and disconnects on unmount", () => {
+  const { unmount } = render(<HeightProbe />);
+  const probe = screen.getByTestId("probe");
+  expect(probe.getAttribute("data-height")).toBe("0");
+
+  act(() => ro.resize(probe, 63.2));
+  expect(probe.getAttribute("data-height")).toBe("64");
+
+  expect(disconnects).toBe(0);
+  unmount();
+  expect(disconnects).toBeGreaterThanOrEqual(1);
 });

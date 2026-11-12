@@ -1,8 +1,9 @@
 "use client";
 
-// Vùng bản đồ của editor (container, D-118..D-121): điều khiển trạng thái tải/sẵn sàng/lỗi quanh `TripMap` và dự phòng
-// `TripSummary` khi bản đồ lỗi. Lỗi là khi thư viện/WebGL/style lỗi trước `load` hoặc quá 15 giây chưa `load`; editor vẫn đủ
-// chức năng (D-120). Ẩn/hiện từng phần bằng prop `visible`, không rẽ nhánh JSX.
+// Vùng bản đồ dùng chung của editor và trang công khai (container, D-118..D-121): điều khiển trạng thái tải/sẵn sàng/lỗi
+// quanh `TripMap` và dự phòng (`TripSummary` ở editor) khi bản đồ lỗi. Lỗi là khi thư viện/WebGL/style lỗi trước `load` hoặc
+// quá 15 giây chưa `load`; editor vẫn đủ chức năng (D-120). Trang công khai (Phase 5, D-11) truyền `errorHint`,
+// `errorActions` và `emptyMessage` riêng, không truyền `fallback`. Ẩn/hiện từng phần bằng prop `visible`, không rẽ nhánh JSX.
 import type { DayRouteModel } from "@tripory/itinerary";
 import { Button, InlineAlert, Skeleton } from "@tripory/ui-web";
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode, type RefObject } from "react";
@@ -18,8 +19,14 @@ export type EditorMapAreaProps = Readonly<{
   /** Lịch trình chưa có điểm hiển thị nào: hiện chip hướng dẫn (D-121). */
   empty: boolean;
   handlers: Readonly<{ onPinSelect(waypointId: string): void; onBackgroundClick(): void }>;
-  /** `TripSummary` đúng biến thể theo `frame.wide`, do nơi gọi dựng; chỉ hiện khi bản đồ lỗi. */
-  fallback: ReactNode;
+  /** `TripSummary` đúng biến thể theo `frame.wide`, do nơi gọi dựng; chỉ hiện khi bản đồ lỗi. Trang công khai không truyền. */
+  fallback?: ReactNode;
+  /** Dòng thứ hai của cảnh báo lỗi; mặc định là câu của editor. */
+  errorHint?: string;
+  /** Hành động thêm, đứng ngay sau nút "Thử lại" (ví dụ "Xem dạng bài viết"). */
+  errorActions?: ReactNode;
+  /** Chữ của chip khi chưa có điểm; mặc định "Thêm điểm đến để thấy trên bản đồ". */
+  emptyMessage?: string;
   /** Nút bổ sung trong cột điều khiển của bản đồ, đứng trên nút zoom (ví dụ "Sửa thông tin"). Chỉ hiện khi bản đồ sẵn sàng. */
   controls?: ReactNode;
   onStatusChange(status: MapStatus): void;
@@ -69,16 +76,25 @@ function MapLoadingSkeleton({ visible }: Readonly<{ visible: boolean }>) {
 type ErrorFallbackProps = Readonly<{
   visible: boolean;
   wide: boolean;
+  hint: string;
+  actions: ReactNode;
   onRetry(): void;
   retryRef: RefObject<HTMLButtonElement | null>;
   children: ReactNode;
 }>;
 
+const DEFAULT_ERROR_HINT = "Bạn vẫn sửa lịch trình như bình thường.";
+
+function FallbackSlot({ children }: Readonly<{ children: ReactNode }>) {
+  if (children === null || children === undefined) return null;
+  return <div className="mt-stack-lg">{children}</div>;
+}
+
 // Desktop: canvas cuộn như bản trước. Mobile: nền cuộn được, chừa chỗ bằng mức peek của sheet.
 const ERROR_LAYOUT = { wide: "p-section", narrow: "pb-(--sheet-snap-peek)" } as const;
 const ALERT_LAYOUT = { wide: "mx-auto max-w-content-md", narrow: "p-stack-md" } as const;
 
-function MapErrorFallback({ visible, wide, onRetry, retryRef, children }: ErrorFallbackProps) {
+function MapErrorFallback({ visible, wide, hint, actions, onRetry, retryRef, children }: ErrorFallbackProps) {
   if (!visible) return null;
   const layout = wide ? "wide" : "narrow";
   return (
@@ -86,22 +102,36 @@ function MapErrorFallback({ visible, wide, onRetry, retryRef, children }: ErrorF
       <div className={ALERT_LAYOUT[layout]}>
         <InlineAlert
           action={
-            <Button aria-label="Thử tải lại bản đồ" onClick={onRetry} ref={retryRef} size="sm" variant="secondary">
-              Thử lại
-            </Button>
+            <div className="flex flex-wrap items-center gap-inline-sm">
+              <Button aria-label="Thử tải lại bản đồ" onClick={onRetry} ref={retryRef} size="sm" variant="secondary">
+                Thử lại
+              </Button>
+              {actions}
+            </div>
           }
           variant="info"
         >
           <span className="block font-semibold">Không tải được bản đồ</span>
-          <span className="block">Bạn vẫn sửa lịch trình như bình thường.</span>
+          <span className="block">{hint}</span>
         </InlineAlert>
       </div>
-      <div className="mt-stack-lg">{children}</div>
+      <FallbackSlot>{children}</FallbackSlot>
     </div>
   );
 }
 
-export function EditorMapArea({ frame, map, empty, handlers, fallback, controls = null, onStatusChange }: EditorMapAreaProps) {
+export function EditorMapArea({
+  frame,
+  map,
+  empty,
+  handlers,
+  fallback = null,
+  errorHint = DEFAULT_ERROR_HINT,
+  errorActions = null,
+  emptyMessage,
+  controls = null,
+  onStatusChange,
+}: EditorMapAreaProps) {
   const headingId = useId();
   const sectionRef = useRef<HTMLElement>(null);
   const retryRef = useRef<HTMLButtonElement>(null);
@@ -153,8 +183,15 @@ export function EditorMapArea({ frame, map, empty, handlers, fallback, controls 
         visible={status !== "error"}
       />
       <MapLoadingSkeleton visible={status === "loading"} />
-      <MapStatusOverlay visible={status === "ready" && empty} />
-      <MapErrorFallback onRetry={retry} retryRef={retryRef} visible={status === "error"} wide={frame.wide}>
+      <MapStatusOverlay message={emptyMessage} visible={status === "ready" && empty} />
+      <MapErrorFallback
+        actions={errorActions}
+        hint={errorHint}
+        onRetry={retry}
+        retryRef={retryRef}
+        visible={status === "error"}
+        wide={frame.wide}
+      >
         {fallback}
       </MapErrorFallback>
     </section>

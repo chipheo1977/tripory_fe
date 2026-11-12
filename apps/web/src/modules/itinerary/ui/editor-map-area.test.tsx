@@ -195,3 +195,48 @@ describe("Thử lại", () => {
     expect(document.activeElement).not.toBe(screen.getByRole("button", { name: "Thử tải lại bản đồ" }));
   });
 });
+
+describe("tùy biến cho trang công khai (Phase 5, D-11)", () => {
+  it("errorHint thay dòng thứ hai của cảnh báo lỗi", () => {
+    setup({ errorHint: "Bạn vẫn xem được lịch trình dạng bài viết." });
+    report("error");
+
+    expect(screen.getByText("Bạn vẫn xem được lịch trình dạng bài viết.")).toBeTruthy();
+    expect(screen.queryByText("Bạn vẫn sửa lịch trình như bình thường.")).toBeNull();
+  });
+
+  it("errorActions hiện ngay sau nút 'Thử lại' trong cùng vùng hành động", () => {
+    setup({ errorActions: <button type="button">Xem dạng bài viết</button> });
+    report("error");
+
+    const retry = screen.getByRole("button", { name: "Thử tải lại bản đồ" });
+    const extra = screen.getByRole("button", { name: "Xem dạng bài viết" });
+    expect(extra.parentElement).toBe(retry.parentElement);
+    expect(retry.nextElementSibling).toBe(extra);
+  });
+
+  it("không truyền errorHint/errorActions thì giữ nguyên copy editor", () => {
+    setup();
+    report("error");
+
+    expect(screen.getByText("Bạn vẫn sửa lịch trình như bình thường.")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Xem dạng bài viết" })).toBeNull();
+  });
+
+  it("không truyền fallback thì không render khối dự phòng rỗng", () => {
+    setup({ fallback: undefined });
+    report("error");
+
+    expect(screen.queryByTestId("fallback")).toBeNull();
+    const block = screen.getByRole("status").parentElement?.parentElement as HTMLElement;
+    expect(block.querySelectorAll(".mt-stack-lg")).toHaveLength(0);
+  });
+
+  it("emptyMessage đổi chữ chip khi bản đồ sẵn sàng và chưa có điểm", () => {
+    setup({ empty: true, emptyMessage: "Lịch trình chưa có điểm đến nào" });
+    report("ready");
+
+    expect(screen.getByText("Lịch trình chưa có điểm đến nào")).toBeTruthy();
+    expect(screen.queryByText("Thêm điểm đến để thấy trên bản đồ")).toBeNull();
+  });
+});

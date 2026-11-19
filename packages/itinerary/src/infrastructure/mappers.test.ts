@@ -384,3 +384,38 @@ describe('toItinerary author (D-02)', () => {
     expect(Object.keys(itinerary.author ?? {})).toEqual(['id', 'displayName', 'avatarUrl']);
   });
 });
+
+describe('toItinerary engagement', () => {
+  it('đủ ba trường thì có engagement đã freeze', () => {
+    const itinerary = toItinerary(detail({ likeCount: 12, commentCount: 3, likedByMe: true }));
+
+    expect(itinerary.engagement).toEqual({ likeCount: 12, commentCount: 3, likedByMe: true });
+    expect(Object.isFrozen(itinerary.engagement)).toBe(true);
+  });
+
+  it.each([
+    ['thiếu cả ba', {}],
+    ['thiếu likeCount', { commentCount: 3, likedByMe: false }],
+    ['thiếu commentCount', { likeCount: 12, likedByMe: false }],
+    ['likedByMe null', { likeCount: 12, commentCount: 3, likedByMe: null }],
+  ])('%s thì không có khóa engagement', (_name, overrides) => {
+    const itinerary = toItinerary(detail(overrides));
+
+    expect(itinerary.engagement).toBeUndefined();
+    expect('engagement' in itinerary).toBe(false);
+  });
+
+  it('số 0 vẫn hợp lệ, bản nháp của chủ cũng có engagement', () => {
+    const itinerary = toItinerary(detail({ isPublic: false, likeCount: 0, commentCount: 0, likedByMe: false }));
+
+    expect(itinerary.engagement).toEqual({ likeCount: 0, commentCount: 0, likedByMe: false });
+  });
+
+  it('các trường khác không đổi khi có engagement', () => {
+    const base = toItinerary(detail());
+    const { engagement, ...rest } = toItinerary(detail({ likeCount: 1, commentCount: 2, likedByMe: false }));
+
+    expect(engagement).toBeDefined();
+    expect(rest).toEqual(base);
+  });
+});

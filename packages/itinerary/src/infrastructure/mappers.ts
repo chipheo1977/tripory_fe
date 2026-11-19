@@ -1,6 +1,14 @@
 import { createWgs84Coordinate, parseItineraryId, parseUserId } from '@tripory/shared-kernel';
 import { normalizeInterests, parseCalendarDate } from '../domain';
-import type { Itinerary, ItineraryAuthor, ItineraryDay, ItinerarySummary, Page, Waypoint } from '../domain';
+import type {
+  Itinerary,
+  ItineraryAuthor,
+  ItineraryDay,
+  ItineraryEngagement,
+  ItinerarySummary,
+  Page,
+  Waypoint,
+} from '../domain';
 import type {
   ItineraryAuthorDto,
   ItineraryDetailDto,
@@ -93,6 +101,17 @@ export function toAuthor(dto: ItineraryAuthorDto | null | undefined): ItineraryA
  * BE không sắp `days` và `waypoints` (`ToDetailDto` không `OrderBy`), và chỉ trả những ngày có bản ghi, nên mapper
  * sắp lại nhưng không bù ngày thiếu: `buildDayRange` của domain làm việc đó. `sort` làm trên bản sao.
  */
+// chỉ tạo `engagement` khi BE trả đủ ba trường; thiếu hoặc null một trường thì UI ẩn khối like và comment.
+export function toEngagement(
+  dto: Pick<ItineraryDetailDto, 'likeCount' | 'commentCount' | 'likedByMe'>,
+): ItineraryEngagement | undefined {
+  const { likeCount, commentCount, likedByMe } = dto;
+  if (likeCount === null || likeCount === undefined) return undefined;
+  if (commentCount === null || commentCount === undefined) return undefined;
+  if (likedByMe === null || likedByMe === undefined) return undefined;
+  return Object.freeze({ likeCount, commentCount, likedByMe });
+}
+
 export function toItinerary(dto: ItineraryDetailDto): Itinerary {
   const id = parseItineraryId(dto.id);
   const ownerId = parseUserId(dto.userId);
@@ -111,6 +130,7 @@ export function toItinerary(dto: ItineraryDetailDto): Itinerary {
     );
   const waypoints = [...dto.waypoints].sort(byDayThenOrder).map(toWaypoint);
   const author = toAuthor(dto.author);
+  const engagement = toEngagement(dto);
 
   return Object.freeze({
     id,
@@ -127,6 +147,7 @@ export function toItinerary(dto: ItineraryDetailDto): Itinerary {
     days: Object.freeze(days),
     waypoints: Object.freeze(waypoints),
     ...(author === undefined ? {} : { author }),
+    ...(engagement === undefined ? {} : { engagement }),
   });
 }
 

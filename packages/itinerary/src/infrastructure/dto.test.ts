@@ -226,3 +226,30 @@ describe('itineraryDetailDto author (BE-05-01)', () => {
     expect(Object.keys(parsed.author ?? {})).not.toContain('email');
   });
 });
+
+describe('itineraryDetailDto engagement (05.1-BE-CONTRACT.md §5)', () => {
+  it('parse được khi thiếu cả ba trường', () => {
+    expect(itineraryDetailDto.safeParse(itineraryDetailJsonFixture).success).toBe(true);
+  });
+
+  it('parse được khi cả ba là null', () => {
+    const json = { ...itineraryDetailJsonFixture, likeCount: null, commentCount: null, likedByMe: null };
+
+    expect(itineraryDetailDto.safeParse(json).success).toBe(true);
+  });
+
+  it('parse được khi đủ ba trường', () => {
+    const parsed = itineraryDetailDto.parse({ ...itineraryDetailJsonFixture, likeCount: 12, commentCount: 3, likedByMe: true });
+
+    expect([parsed.likeCount, parsed.commentCount, parsed.likedByMe]).toEqual([12, 3, true]);
+  });
+
+  it.each([
+    ['likeCount âm', { likeCount: -1 }],
+    ['likeCount lẻ', { likeCount: 1.5 }],
+    ['commentCount là chuỗi', { commentCount: '3' }],
+    ['likedByMe là chuỗi', { likedByMe: 'yes' }],
+  ])('từ chối %s', (_name, overrides) => {
+    expect(itineraryDetailDto.safeParse({ ...itineraryDetailJsonFixture, ...overrides }).success).toBe(false);
+  });
+});

@@ -33,6 +33,9 @@ export type ItineraryDay = Readonly<{
 /** Người tạo lịch trình, chỉ để hiển thị (D-02). Không email, không vai trò. `avatarUrl` null = dùng chữ cái đầu. */
 export type ItineraryAuthor = Readonly<{ id: UserId; displayName: string; avatarUrl: string | null }>;
 
+// số liệu like/comment ban đầu từ chi tiết lịch trình, chỉ để hiển thị; context social giữ trạng thái sống của chúng (D-29).
+export type ItineraryEngagement = Readonly<{ likeCount: number; commentCount: number; likedByMe: boolean }>;
+
 export type Itinerary = Readonly<{
   id: ItineraryId;
   ownerId: UserId;
@@ -52,6 +55,8 @@ export type Itinerary = Readonly<{
   waypoints: readonly Waypoint[];
   /** Có khi BE đã nhúng `author` vào `ItineraryDetailDto` (BE-05-01); thiếu thì UI ẩn khối tác giả. */
   author?: ItineraryAuthor;
+  /** có khi BE đã trả ba trường đếm; thiếu thì UI ẩn khối like và comment. */
+  engagement?: ItineraryEngagement;
 }>;
 
 export type ItinerarySummary = Readonly<{

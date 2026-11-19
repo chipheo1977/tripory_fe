@@ -57,6 +57,10 @@ export const itineraryDetailDto = z.object({
   days: z.array(itineraryDayDto),
   waypoints: z.array(waypointDto),
   author: itineraryAuthorDto.nullish(),
+  // ba trường đếm của like/comment (05.1-BE-CONTRACT.md §5); `.nullish()` để chịu BE chưa deploy.
+  likeCount: z.number().int().nonnegative().nullish(),
+  commentCount: z.number().int().nonnegative().nullish(),
+  likedByMe: z.boolean().nullish(),
 });
 
 /**

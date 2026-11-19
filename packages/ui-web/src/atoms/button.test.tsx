@@ -66,6 +66,14 @@ describe('loadingLabel (D-30)', () => {
     expect(screen.queryByText('Đang lưu…')).toBeNull();
   });
 
+  it('giữ aria-busy của nơi gọi khi không loading (không spinner)', () => {
+    render(<Button aria-busy disabled>Lưu</Button>);
+    const button = screen.getByRole('button', { name: 'Lưu' });
+
+    expect(button.getAttribute('aria-busy')).toBe('true');
+    expect(button.querySelector('.animate-spin')).toBeNull();
+  });
+
   it('giữ hành vi cũ khi loading mà không có loadingLabel: children ẩn bằng invisible', () => {
     render(<Button loading>Lưu</Button>);
     const button = screen.getByRole('button');

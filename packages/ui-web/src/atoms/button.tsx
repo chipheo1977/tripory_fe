@@ -58,7 +58,8 @@ export function Button({
   return (
     <BaseButton
       {...props}
-      aria-busy={loading || undefined}
+      // giữ `aria-busy` của nơi gọi (ví dụ nút đang đồng bộ mà không spinner); `loading` vẫn luôn bật nó.
+      aria-busy={loading || props['aria-busy'] || undefined}
       className={buttonVariants({ className, size, variant })}
       disabled={disabled || loading}
       focusableWhenDisabled={loading}

@@ -61,6 +61,14 @@ export const ERROR_MESSAGES: ReadonlyMap<string, string> = new Map<string, strin
   ["Itinerary.CoverSelectionInvalid", GENERIC_ERROR_MESSAGE],
   ["WaypointName.Empty", "Vui lòng nhập tên điểm đến."],
   ["Waypoint.NotFound", "Điểm đến không còn tồn tại."],
+  // like và comment (05.1-BE-CONTRACT.md mục 7); không dùng Itinerary.Forbidden vì câu của nó là "sửa lịch trình" (D-26)
+  ["Social.DraftForbidden", "Lịch trình này chưa được xuất bản."],
+  ["Comment.ContentRequired", "Vui lòng nhập nội dung bình luận."],
+  ["Comment.ContentTooLong", "Bình luận tối đa 500 ký tự."],
+  ["Comment.DeleteForbidden", "Bạn không có quyền xóa bình luận này."],
+  ["Comment.NotFound", "Bình luận không còn tồn tại."],
+  // mã của middleware giới hạn tần suất của BE (cũng dùng cho Auth); câu trùng message BE nên không đổi hành vi đăng nhập
+  ["RateLimit.TooManyRequests", "Bạn thao tác quá nhanh. Vui lòng thử lại sau."],
   // Do FE sinh (route resolve link rút gọn), không phải mã của BE.
   ["Maps.UnresolvableLink", "Không mở được link rút gọn này. Thử dán link đầy đủ hoặc tọa độ."],
   // Do FE sinh (BFF `/api/places/*`, D-153).

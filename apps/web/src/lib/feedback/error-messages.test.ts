@@ -24,7 +24,8 @@ describe("mã lỗi itinerary theo copy UI-SPEC Phase 4", () => {
 
   it("không có mã TooLong có giới hạn động (dùng message BE), trừ CoverImageTooLong có giới hạn cố định 500, và không dùng từ 'điểm dừng'", () => {
     for (const [code, message] of ERROR_MESSAGES) {
-      if (code !== "Itinerary.CoverImageTooLong") expect(code).not.toContain("TooLong");
+      // Comment.ContentTooLong cũng có giới hạn cố định 500 (05.1-BE-CONTRACT.md mục 6).
+      if (code !== "Itinerary.CoverImageTooLong" && code !== "Comment.ContentTooLong") expect(code).not.toContain("TooLong");
       expect(message).not.toContain("điểm dừng");
     }
   });
@@ -66,6 +67,32 @@ describe("mã lỗi tìm địa điểm do BFF sinh (D-153)", () => {
   });
 });
 
+describe("mã lỗi like và comment (05.1-BE-CONTRACT.md mục 7, D-26)", () => {
+  const SOCIAL_CODES = [
+    ["RateLimit.TooManyRequests", "Bạn thao tác quá nhanh. Vui lòng thử lại sau."],
+    ["Comment.ContentRequired", "Vui lòng nhập nội dung bình luận."],
+    ["Comment.ContentTooLong", "Bình luận tối đa 500 ký tự."],
+    ["Comment.DeleteForbidden", "Bạn không có quyền xóa bình luận này."],
+    ["Comment.NotFound", "Bình luận không còn tồn tại."],
+    ["Social.DraftForbidden", "Lịch trình này chưa được xuất bản."],
+  ] as const;
+
+  it.each(SOCIAL_CODES)("%s → đúng câu", (code, message) => {
+    expect(ERROR_MESSAGES.get(code)).toBe(message);
+  });
+
+  it("Itinerary.Forbidden vẫn là câu sửa lịch trình, không dùng cho like/comment", () => {
+    expect(ERROR_MESSAGES.get("Itinerary.Forbidden")).toBe("Bạn không có quyền sửa lịch trình này.");
+  });
+
+  it("chỉ ba mã cố ý ra 404/403 chứa chuỗi đổi HTTP status", () => {
+    const intended = new Set(["Comment.NotFound", "Comment.DeleteForbidden", "Social.DraftForbidden"]);
+    for (const [code] of SOCIAL_CODES) {
+      if (!intended.has(code)) expect(code).not.toMatch(/NotFound|Conflict|AlreadyExists|Unauthorized|Forbidden/);
+    }
+  });
+});
+
 describe("SESSION_EXPIRED_TOAST (D-20)", () => {
   it("đúng câu đã khóa, không có dấu chấm", () => {
     expect(SESSION_EXPIRED_TOAST).toBe("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
@@ -81,8 +108,8 @@ describe("SESSION_EXPIRED_TOAST (D-20)", () => {
     expect(ERROR_MESSAGES.get("Token.Expired")).toBe(SESSION_EXPIRED_MESSAGE);
   });
 
-  it("bảng map có đúng 54 khóa (40 cũ + 11 mã form tạo và ảnh bìa + 3 mã tìm địa điểm)", () => {
-    expect(ERROR_MESSAGES.size).toBe(54);
+  it("bảng map có đúng 60 khóa (40 cũ + 11 mã form tạo và ảnh bìa + 3 mã tìm địa điểm + 6 mã like và comment)", () => {
+    expect(ERROR_MESSAGES.size).toBe(60);
   });
 
   it("đi ra qua barrel lib/feedback", () => {

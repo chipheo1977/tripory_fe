@@ -43,6 +43,12 @@ const EXPECTED = [
   ["Itinerary.CoverSelectionInvalid", GENERIC_ERROR_MESSAGE],
   ["WaypointName.Empty", "Vui lòng nhập tên điểm đến."],
   ["Waypoint.NotFound", "Điểm đến không còn tồn tại."],
+  ["Social.DraftForbidden", "Lịch trình này chưa được xuất bản."],
+  ["Comment.ContentRequired", "Vui lòng nhập nội dung bình luận."],
+  ["Comment.ContentTooLong", "Bình luận tối đa 500 ký tự."],
+  ["Comment.DeleteForbidden", "Bạn không có quyền xóa bình luận này."],
+  ["Comment.NotFound", "Bình luận không còn tồn tại."],
+  ["RateLimit.TooManyRequests", "Bạn thao tác quá nhanh. Vui lòng thử lại sau."],
   ["Maps.UnresolvableLink", "Không mở được link rút gọn này. Thử dán link đầy đủ hoặc tọa độ."],
   ["Places.RateLimited", "Bạn tìm hơi nhanh. Đợi vài giây rồi thử lại."],
   ["Places.Unavailable", "Chưa tìm được địa điểm lúc này. Thử lại hoặc nhập tọa độ thủ công."],
@@ -75,7 +81,6 @@ const UNMAPPED = [
   "ChatMessage.ContentTooLong",
   "ChatMessage.InvalidVoiceDuration",
   "File.TooLarge",
-  "RateLimit.TooManyRequests",
   "Validation.Error",
   "NotEmptyValidator",
   "MaximumLengthValidator",
@@ -85,9 +90,9 @@ const UNMAPPED = [
 ] as const;
 
 describe("ERROR_MESSAGES", () => {
-  it("có đúng 54 mã (D-16 + Maps.UnresolvableLink + 11 mã form tạo và ảnh bìa + 3 mã tìm địa điểm)", () => {
-    expect(ERROR_MESSAGES.size).toBe(54);
-    expect(EXPECTED).toHaveLength(54);
+  it("có đúng 60 mã (D-16 + Maps.UnresolvableLink + 11 mã form tạo và ảnh bìa + 3 mã tìm địa điểm + 6 mã like và comment)", () => {
+    expect(ERROR_MESSAGES.size).toBe(60);
+    expect(EXPECTED).toHaveLength(60);
   });
 
   it.each(EXPECTED)("%s → %s", (code, message) => {
@@ -111,8 +116,8 @@ describe("selectErrorMessage", () => {
     expect(selectErrorMessage(httpError(code, message))).toBe(message);
   });
 
-  // D-35: BE giới hạn tốc độ login/register theo IP. Không map riêng (không chép luật của BE); hiện nguyên
-  // câu tiếng Việt của BE.
+  // D-35: BE giới hạn tốc độ login/register theo IP. Phase 5.1 ánh xạ mã này (dùng cả cho like/comment),
+  // ánh xạ trùng message BE nên hành vi đăng nhập không đổi.
   it("RateLimit.TooManyRequests 429 → message tiếng Việt của BE", () => {
     expect(
       selectErrorMessage(

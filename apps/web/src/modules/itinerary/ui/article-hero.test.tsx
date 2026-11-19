@@ -70,3 +70,21 @@ describe("ArticleHero", () => {
     expect(screen.getByTestId("author-slot")).toBeTruthy();
   });
 });
+
+describe("ArticleHero social slot (05.1 D-19)", () => {
+  it("không truyền social thì không có phần tử thêm", () => {
+    const { container } = setup({ description: "Mô tả" });
+    const block = container.querySelector("h1")?.parentElement;
+    // h1, dòng meta, mô tả (author null không render gì)
+    expect(block?.children).toHaveLength(3);
+  });
+
+  it("slot nằm sau dòng meta và trước mô tả, trong cùng khối chữ", () => {
+    const { container } = setup({ description: "Mô tả", social: <div data-testid="hero-social" /> });
+    const slot = screen.getByTestId("hero-social");
+    const block = container.querySelector("h1")?.parentElement;
+    expect(slot.parentElement).toBe(block);
+    expect(slot.previousElementSibling?.textContent).toBe(base.metaLine);
+    expect(slot.nextElementSibling?.textContent).toBe("Mô tả");
+  });
+});

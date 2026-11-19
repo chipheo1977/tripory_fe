@@ -214,3 +214,12 @@ describe("PublicMapMode narrow", () => {
     expect(await screen.findByRole("dialog", { name: "Lịch trình theo ngày" })).toBeTruthy();
   });
 });
+
+describe("PublicMapMode overviewSocial (05.1 D-22)", () => {
+  it.each([true, false])("wide=%s: slot có ở tab Tổng quan, không có ở tab Ngày", async (wide) => {
+    const { user } = setup({ overviewSocial: <div data-testid="overview-social" /> }, wide);
+    expect(screen.getByTestId("overview-social")).toBeTruthy();
+    await user.click(screen.getByRole("tab", { name: "Ngày 1" }));
+    expect(screen.queryByTestId("overview-social")).toBeNull();
+  });
+});

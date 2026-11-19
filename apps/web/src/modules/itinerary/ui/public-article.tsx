@@ -7,7 +7,7 @@
 import { buildDayRange, type DayView, type Itinerary } from "@tripory/itinerary";
 import { EmptyState, Icon } from "@tripory/ui-web";
 import { MapPin } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, type CSSProperties, type ReactNode } from "react";
 import { ArticleDaySection } from "./article-day-section";
 import { ArticleHero } from "./article-hero";
 import { AuthorLine } from "./author-line";
@@ -24,6 +24,10 @@ export type PublicArticleProps = Readonly<{
   stickyTop: number;
   /** `false` khi chế độ Bài viết đang ẩn: không theo dõi cuộn. */
   enabled: boolean;
+  /** Slot nút tim trong hero (D-19). */
+  heroSocial?: ReactNode;
+  /** Khối bình luận, con cuối của `main` (D-20). */
+  comments?: ReactNode;
 }>;
 
 /** Khoảng thở dưới các khối dính khi cuộn tới một mục ngày. */
@@ -53,7 +57,7 @@ function ArticleBody({
   );
 }
 
-export function PublicArticle({ itinerary, isOwner, stickyTop, enabled }: PublicArticleProps) {
+export function PublicArticle({ itinerary, isOwner, stickyTop, enabled, heroSocial, comments }: PublicArticleProps) {
   const days = useMemo(() => buildDayRange(itinerary), [itinerary]);
   const dayNumbers = useMemo(() => days.map((day) => day.dayNumber), [days]);
   const hasContent = itinerary.days.length > 0 || itinerary.waypoints.length > 0;
@@ -84,6 +88,8 @@ export function PublicArticle({ itinerary, isOwner, stickyTop, enabled }: Public
       <main
         className="mx-auto flex w-full max-w-content-md min-w-0 flex-col gap-page-block px-page-inline pt-stack-lg pb-[calc(4rem+env(safe-area-inset-bottom))] outline-hidden sm:px-page-inline-md lg:px-page-inline-lg lg:pb-16"
         id="article-content"
+        // khối bình luận dùng làm scroll-margin-top (D-21), cùng công thức mục ngày.
+        style={{ "--article-scroll-margin": `${scrollMargin}px` } as CSSProperties}
         tabIndex={-1}
       >
         <ArticleHero
@@ -98,9 +104,11 @@ export function PublicArticle({ itinerary, isOwner, stickyTop, enabled }: Public
           description={itinerary.description}
           fallbackCoverUrl={defaultCoverFor(itinerary.destinationCode)}
           metaLine={metaLine}
+          social={heroSocial}
           title={itinerary.title}
         />
         <ArticleBody days={days} hasContent={hasContent} scrollMargin={scrollMargin} />
+        {comments}
       </main>
     </>
   );

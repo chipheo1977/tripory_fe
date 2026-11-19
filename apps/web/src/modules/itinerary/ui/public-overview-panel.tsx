@@ -18,6 +18,8 @@ export type PublicOverviewPanelProps = Readonly<{
   rowEmphasis(dayNumber: number): DayRowEmphasis;
   onSelectDay(dayNumber: number): void;
   onEmphasizeDay(dayNumber: number | null): void;
+  /** Slot social của tab Tổng quan (D-22). */
+  social?: ReactNode;
 }>;
 
 export function PublicOverviewPanel({
@@ -28,11 +30,12 @@ export function PublicOverviewPanel({
   rowEmphasis,
   onSelectDay,
   onEmphasizeDay,
+  social,
 }: PublicOverviewPanelProps) {
   return (
     <div className="flex flex-1 flex-col">
       <div className="px-stack-md py-stack-sm">
-        <PublicOverviewSummary author={author} data={data} variant={variant} />
+        <PublicOverviewSummary author={author} data={data} social={social} variant={variant} />
       </div>
       <h3 className="border-t border-border px-stack-md pt-stack-sm text-label font-semibold text-muted">Các ngày</h3>
       <ol aria-label="Tóm tắt các ngày" className="flex flex-col gap-inline-sm px-stack-md py-stack-md">

@@ -14,6 +14,8 @@ export type PublicOverviewSummaryProps = Readonly<{
   author: ReactNode;
   /** `wide`: cột trái từ `lg`. `compact`: trong sheet dưới `lg`. */
   variant: "wide" | "compact";
+  /** Slot social (D-22): hàng like và số bình luận, sau dòng meta. */
+  social?: ReactNode;
 }>;
 
 // Chọn class theo biến thể bằng bảng, không rẽ nhánh JSX.
@@ -44,7 +46,7 @@ function StartDateText({ label }: Readonly<{ label: string | null }>) {
   return <span className="text-label tabular-nums text-muted">{label}</span>;
 }
 
-export function PublicOverviewSummary({ data, author, variant }: PublicOverviewSummaryProps) {
+export function PublicOverviewSummary({ data, author, variant, social }: PublicOverviewSummaryProps) {
   const style = VARIANT[variant];
   return (
     <section aria-label="Thông tin chuyến đi">
@@ -59,6 +61,7 @@ export function PublicOverviewSummary({ data, author, variant }: PublicOverviewS
         {author}
         <DescriptionLine className={style.description} text={data.description} />
         <p className="text-label tabular-nums text-muted">{data.metaLine}</p>
+        {social}
       </div>
     </section>
   );

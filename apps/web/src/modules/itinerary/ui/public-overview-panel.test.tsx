@@ -108,3 +108,17 @@ describe("PublicOverviewPanel", () => {
     expect((container.firstElementChild as HTMLElement).className).not.toContain("min-h-full");
   });
 });
+
+describe("PublicOverviewPanel social slot (05.1 D-22)", () => {
+  it.each(["wide", "compact"] as const)("variant %s: slot nằm sau dòng meta", (variant) => {
+    setup({ variant, social: <div data-testid="overview-social" /> });
+    const slot = screen.getByTestId("overview-social");
+    expect(slot.previousElementSibling?.textContent).toBe(DATA.metaLine);
+  });
+
+  it("không truyền social thì dòng meta là phần tử cuối của khối thông tin", () => {
+    setup();
+    const meta = screen.getByText(DATA.metaLine);
+    expect(meta.nextElementSibling).toBeNull();
+  });
+});

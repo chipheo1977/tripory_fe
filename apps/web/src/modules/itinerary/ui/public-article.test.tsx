@@ -121,3 +121,37 @@ describe("PublicArticle navigation", () => {
     expect(container.innerHTML).not.toContain("dangerouslySetInnerHTML");
   });
 });
+
+describe("PublicArticle social slots (05.1 D-19..D-21)", () => {
+  it("không truyền slot thì main kết thúc bằng khối các mục ngày", () => {
+    const { container } = setup();
+    const main = container.querySelector("main#article-content");
+    expect(main?.lastElementChild?.querySelector("#ngay-1")).not.toBeNull();
+  });
+
+  it("comments là con cuối của main, sau các mục ngày", () => {
+    const { container } = setup({ comments: <section data-testid="comments-slot" /> });
+    const main = container.querySelector("main#article-content");
+    expect(main?.lastElementChild).toBe(screen.getByTestId("comments-slot"));
+    expect(main?.lastElementChild?.previousElementSibling?.querySelector("#ngay-1")).not.toBeNull();
+  });
+
+  it("comments vẫn là con cuối khi lịch trình chưa có điểm", () => {
+    const empty = makeFxItinerary({ days: [], waypoints: [] });
+    const { container } = setup({ comments: <section data-testid="comments-slot" /> }, empty);
+    const main = container.querySelector("main#article-content");
+    expect(main?.lastElementChild).toBe(screen.getByTestId("comments-slot"));
+    expect(screen.getByText("Lịch trình chưa có điểm đến nào")).toBeTruthy();
+  });
+
+  it("heroSocial nằm trong hero", () => {
+    const { container } = setup({ heroSocial: <div data-testid="hero-social" /> });
+    expect(container.querySelector("header")?.contains(screen.getByTestId("hero-social"))).toBe(true);
+  });
+
+  it("main có biến --article-scroll-margin theo công thức mục ngày", () => {
+    const { container } = setup();
+    const main = container.querySelector<HTMLElement>("main#article-content");
+    expect(main?.style.getPropertyValue("--article-scroll-margin")).toBe("80px");
+  });
+});

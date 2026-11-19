@@ -39,9 +39,19 @@ export type PublicMapModeProps = Readonly<{
   onViewChange(view: PublicView): void;
   /** "Xem dạng bài viết" khi bản đồ lỗi; cha đổi `?view` và lo focus. */
   onViewArticle(): void;
+  /** Slot social của tab Tổng quan (D-22); không có ở tab Ngày. */
+  overviewSocial?: ReactNode;
 }>;
 
-export function PublicMapMode({ itinerary, isOwner, headerHeight, view, onViewChange, onViewArticle }: PublicMapModeProps) {
+export function PublicMapMode({
+  itinerary,
+  isOwner,
+  headerHeight,
+  view,
+  onViewChange,
+  onViewArticle,
+  overviewSocial,
+}: PublicMapModeProps) {
   const wide = useMediaQuery(LG_QUERY);
   const state = usePublicMapState({ itinerary, wide });
   const overviewData = useMemo(() => publicOverviewData(itinerary), [itinerary]);
@@ -83,6 +93,7 @@ export function PublicMapMode({ itinerary, isOwner, headerHeight, view, onViewCh
             onEmphasizeDay={state.emphasizeDay}
             onSelectDay={state.selectDayFromRow}
             rowEmphasis={state.rowEmphasis}
+            social={overviewSocial}
             variant={wide ? "wide" : "compact"}
           />
         }

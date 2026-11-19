@@ -27,7 +27,7 @@ Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình 
 - [ ] Người dùng có thể truy cập khung giao diện responsive cho các route thuộc milestone mà không gặp lỗi build hoặc điều hướng.
 - [ ] Người dùng có thể đăng ký, đăng nhập, duy trì phiên và đăng xuất qua BFF cùng origin; access token và refresh token nằm trong cookie httpOnly và không thể bị JavaScript phía client đọc.
 - [ ] Khách chưa đăng nhập có thể xem trang công khai của một lịch trình đã xuất bản; lịch trình nháp hiển thị đúng trạng thái lỗi quyền truy cập.
-- [ ] Người dùng đã đăng nhập like và comment được lịch trình đã xuất bản trên trang công khai; khách chưa đăng nhập xem được (Phase 5.1, SOC-01, SOC-02; cần API mới của backend, không dựng mock).
+- [ ] Người dùng đã đăng nhập like và comment được lịch trình đã xuất bản trên trang công khai; khách chưa đăng nhập xem được (Phase 5.1, SOC-01, SOC-02; cần API mới của backend, không dựng mock). Code xong 2026-11-19 (19/19 plan), BE chấp nhận theo xác nhận của người dùng; chờ UAT thủ công `05.1-HUMAN-UAT.md`.
 - [ ] Người dùng có thể xem và cập nhật hồ sơ thật, tìm người dùng khác và xem danh sách lịch trình của mình.
 - [ ] Người dùng có thể gửi/nhận tin nhắn text và voice theo thời gian thực, theo dõi trạng thái đã đọc và xem lịch sử hội thoại.
 - [ ] Hai người dùng ở các mạng Internet khác nhau có thể gọi thoại ổn định qua WebRTC với TURN, dùng credential ngắn hạn thay vì để secret trong bundle client.
@@ -114,4 +114,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-11-09 after inserting Phase 5.1 (like, comment)*
+*Last updated: 2026-11-19 after Phase 5.1 code complete (like, comment; chờ UAT)*

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PublicItineraryPage } from "@/modules/itinerary/ui/public-itinerary-page";
 import { SessionRecovery } from "@/modules/identity/ui/session-recovery";
 import { makeFxItinerary } from "@/test/domain-itinerary-fixtures";
+import { makePublicSocial } from "@/components/public-social";
 import PublicItineraryRoute, { generateMetadata } from "./page";
 
 const h = vi.hoisted(() => ({ getPublicItinerary: vi.fn() }));
@@ -11,6 +12,8 @@ const h = vi.hoisted(() => ({ getPublicItinerary: vi.fn() }));
 vi.mock("@/composition/itinerary.server", () => ({ getPublicItinerary: h.getPublicItinerary }));
 vi.mock("@/modules/itinerary/ui/public-itinerary-page", () => ({ PublicItineraryPage: () => null }));
 vi.mock("@/modules/identity/ui/session-recovery", () => ({ SessionRecovery: () => null }));
+// tránh nạp cây client của social; chỉ cần kiểm route truyền đúng hàm.
+vi.mock("@/components/public-social", () => ({ makePublicSocial: vi.fn() }));
 vi.mock("next/navigation", () => ({
   notFound: () => {
     throw new Error("NEXT_NOT_FOUND");
@@ -71,5 +74,20 @@ describe("the route", () => {
     expect(element.props.itineraryId).toBe(ID);
     expect(element.props.recovery.type).toBe(SessionRecovery);
     expect(element.props.recovery.props.fallback).toBeTruthy();
+  });
+
+  it("passes the social factory to the public page (05.1)", async () => {
+    const element = (await PublicItineraryRoute(params(ID))) as ReactElement<{ social: unknown }>;
+    expect(element.props.social).toBe(makePublicSocial);
+  });
+
+  it("keeps like and comment counts out of the Open Graph description (D-24)", async () => {
+    h.getPublicItinerary.mockResolvedValue({
+      kind: "ok",
+      itinerary: makeFxItinerary({ engagement: { likeCount: 4321, commentCount: 8765, likedByMe: false } }),
+    });
+    const metadata = await generateMetadata(params(ID));
+    const description = String((metadata.openGraph as { description?: string }).description ?? "");
+    expect(description).not.toMatch(/4321|4\.321|8765|8\.765|lượt thích|bình luận/);
   });
 });

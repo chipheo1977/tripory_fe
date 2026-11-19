@@ -1,6 +1,7 @@
 import { parseItineraryId } from "@tripory/shared-kernel";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { makePublicSocial } from "@/components/public-social";
 import { DESTINATION_IMAGE_BASE_URL } from "@/composition/destination-catalog";
 import { getPublicItinerary } from "@/composition/itinerary.server";
 import { buildPublicMetadata, neutralPublicMetadata } from "@/composition/server/public-metadata";
@@ -19,6 +20,7 @@ type RouteProps = { params: Promise<{ id: string }> };
 // điểm suspend vẫn 200 kèm `noindex` (RESEARCH Pitfall 2, đã chấp nhận). Nếu `next build` báo `blocking-prerender-metadata-runtime`
 // thì thêm DynamicMarker (`<Suspense><Connection /></Suspense>`) theo mẫu "With Cache Components" của generate-metadata.md; KHÔNG
 // đặt `await connection()` trực tiếp trong trang.
+// Like và bình luận (05.1) ghép ở đây: `makePublicSocial` đi từ RSC sang RSC, hàm không qua ranh giới client.
 export async function generateMetadata({ params }: RouteProps): Promise<Metadata> {
   const { id } = await params;
   const itineraryId = parseItineraryId(id);
@@ -41,5 +43,11 @@ export default async function PublicItineraryRoute({ params }: RouteProps) {
   const { id } = await params;
   const itineraryId = parseItineraryId(id);
   if (itineraryId === null) notFound();
-  return <PublicItineraryPage itineraryId={itineraryId} recovery={<SessionRecovery fallback={<RecoveryFallback />} />} />;
+  return (
+    <PublicItineraryPage
+      itineraryId={itineraryId}
+      recovery={<SessionRecovery fallback={<RecoveryFallback />} />}
+      social={makePublicSocial}
+    />
+  );
 }

@@ -1,5 +1,5 @@
 // lớp keo cấp app ghép like và bình luận vào trang công khai (kiến trúc mục 7): `modules/itinerary` chỉ biết
-// `PublicSocialFactory`, factory thật ở đây. module RSC (không "use client"), chỉ dựng element.
+// `PublicSocialFactory`, factory thật ở đây. module RSC (không có chỉ thị client), chỉ dựng element.
 // - bản nháp hoặc BE cũ không có ba trường đếm thì không dựng gì (D-01).
 // - props client chỉ gồm id, số, boolean: không token, không cookie.
 // - provider bọc ngoài `PublicItineraryView` (qua `wrap`) để bao cả `Suspense fallback` của view.

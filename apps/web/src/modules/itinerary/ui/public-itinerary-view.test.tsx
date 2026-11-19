@@ -234,3 +234,31 @@ describe("safety", () => {
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("<img src=x onerror=alert(1)>");
   });
 });
+
+describe("PublicItineraryView social slots (05.1)", () => {
+  const social = {
+    hero: <div data-testid="slot-hero" />,
+    comments: <section data-testid="slot-comments" />,
+    overview: <div data-testid="slot-overview" />,
+  };
+
+  it("không truyền social thì không có slot nào", () => {
+    setup();
+    expect(screen.queryByTestId("slot-hero")).toBeNull();
+    expect(screen.queryByTestId("slot-comments")).toBeNull();
+  });
+
+  it("bài viết: hero trong hero, comments là con cuối main, không có overview", () => {
+    const { container } = setup({ social });
+    const main = container.querySelector("main#article-content");
+    expect(main?.querySelector("header")?.contains(screen.getByTestId("slot-hero"))).toBe(true);
+    expect(main?.lastElementChild).toBe(screen.getByTestId("slot-comments"));
+    expect(screen.queryByTestId("slot-overview")).toBeNull();
+  });
+
+  it("chế độ Bản đồ: overview có ở tab Tổng quan", () => {
+    h.query = "view=map";
+    setup({ social });
+    expect(screen.getByTestId("slot-overview")).toBeTruthy();
+  });
+});

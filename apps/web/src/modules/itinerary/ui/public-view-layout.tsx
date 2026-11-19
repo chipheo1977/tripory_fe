@@ -5,6 +5,7 @@
 // cuộn); Bản đồ CHỈ mount khi ở chế độ Bản đồ (MapLibre và Sheet portal không nằm lại trên bài viết).
 // Viên thuốc luôn đúng MỘT bản trong DOM: từ `lg` ở giữa header; dưới `lg` nổi ở đáy (Bài viết), hoặc nằm trong sheet / dải
 // đáy cạnh chip "Lịch trình" (Bản đồ, do `PublicMapMode` lo). Nút Chia sẻ chỉ có khi đã xuất bản (D-17); nút Sửa chỉ cho chủ (D-23).
+// Slot social (05.1): `hero` và `comments` vào bài viết, `overview` vào tab Tổng quan của chế độ Bản đồ.
 import type { Itinerary } from "@tripory/itinerary";
 import { cn } from "@tripory/ui-web";
 import { useState, type ReactNode } from "react";
@@ -15,6 +16,7 @@ import { useHeaderHeight } from "./editor-layout";
 import { PublicArticle } from "./public-article";
 import { PublicHeader } from "./public-header";
 import { PublicMapMode } from "./public-map-mode";
+import type { PublicSocialSlots } from "./public-social";
 import type { PublicView } from "./public-view";
 import { ShareButton } from "./share-button";
 import { ShareDialog } from "./share-dialog";
@@ -35,6 +37,8 @@ export type PublicViewLayoutProps = Readonly<{
   account: ReactNode;
   view: PublicView;
   onViewChange(view: PublicView): void;
+  /** Slot like và bình luận (05.1); không truyền thì trang như Phase 5. */
+  social?: PublicSocialSlots;
 }>;
 
 function HeaderToggle({ visible, view, onViewChange }: Readonly<{ visible: boolean; view: PublicView; onViewChange(view: PublicView): void }>) {
@@ -56,7 +60,7 @@ function FloatingPill({ visible, view, onViewChange }: Readonly<{ visible: boole
   );
 }
 
-export function PublicViewLayout({ itinerary, canEdit, account, view, onViewChange }: PublicViewLayoutProps) {
+export function PublicViewLayout({ itinerary, canEdit, account, view, onViewChange, social }: PublicViewLayoutProps) {
   const wide = useMediaQuery(LG_QUERY);
   const { ref: headerRef, height: headerHeight } = useHeaderHeight();
   const [shareOpen, setShareOpen] = useState(false);
@@ -85,7 +89,14 @@ export function PublicViewLayout({ itinerary, canEdit, account, view, onViewChan
         <DraftStrip itineraryId={itinerary.id} visible={canEdit && !published} />
       </div>
       <div hidden={view !== "article"}>
-        <PublicArticle enabled={view === "article"} isOwner={canEdit} itinerary={itinerary} stickyTop={headerHeight} />
+        <PublicArticle
+          comments={social?.comments}
+          enabled={view === "article"}
+          heroSocial={social?.hero}
+          isOwner={canEdit}
+          itinerary={itinerary}
+          stickyTop={headerHeight}
+        />
       </div>
       <MapSlot visible={view === "map"}>
         <PublicMapMode
@@ -94,6 +105,7 @@ export function PublicViewLayout({ itinerary, canEdit, account, view, onViewChan
           itinerary={itinerary}
           onViewArticle={leaveMap}
           onViewChange={onViewChange}
+          overviewSocial={social?.overview}
           view={view}
         />
       </MapSlot>

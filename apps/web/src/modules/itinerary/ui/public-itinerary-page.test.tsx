@@ -10,11 +10,11 @@ import { PublicItineraryView } from "./public-itinerary-view";
 import { PublicRefreshError } from "./public-load-error";
 import { PublicStatusFrame } from "./public-status-frame";
 
-const h = vi.hoisted(() => ({ getPublicItinerary: vi.fn(), getViewer: vi.fn() }));
+const h = vi.hoisted(() => ({ getPublicItinerary: vi.fn(), getViewer: vi.fn(), getSessionKind: vi.fn() }));
 
 // `server-only` không import được dưới Vitest.
 vi.mock("@/composition/itinerary.server", () => ({ getPublicItinerary: h.getPublicItinerary }));
-vi.mock("@/composition/viewer.server", () => ({ getViewer: h.getViewer }));
+vi.mock("@/composition/viewer.server", () => ({ getViewer: h.getViewer, getSessionKind: h.getSessionKind }));
 vi.mock("@/components/account-slot", () => ({ AccountSlot: () => null }));
 vi.mock("next/navigation", () => ({
   notFound: () => {
@@ -33,6 +33,7 @@ const viewerOf = (id: string) => ({ id: parseUserId(id), email: "a@b.c", fullNam
 beforeEach(() => {
   h.getPublicItinerary.mockReset();
   h.getViewer.mockReset().mockResolvedValue(null);
+  h.getSessionKind.mockReset().mockResolvedValue("fresh");
 });
 
 /** Duyệt cây element (không render) tìm phần tử có `type`. */
@@ -133,5 +134,82 @@ describe("other results", () => {
 
     expect(h.getPublicItinerary).toHaveBeenCalledTimes(1);
     expect(h.getPublicItinerary).toHaveBeenCalledWith(ID);
+  });
+});
+
+describe("social factory (05.1)", () => {
+  const ENGAGEMENT = { likeCount: 12, commentCount: 3, likedByMe: false };
+  const slots = { hero: null, comments: null, overview: null };
+  const makeFactory = () => {
+    const wrap = vi.fn((children: ReactNode) => <div data-testid="social-wrap">{children}</div>);
+    const factory = vi.fn(() => ({ slots, wrap }));
+    return { factory, wrap };
+  };
+  const resolveWith = async (target: typeof itinerary, social: ReturnType<typeof makeFactory>["factory"] | undefined) => {
+    h.getPublicItinerary.mockResolvedValue({ kind: "ok", itinerary: target });
+    const element = (await PublicItineraryPage({ itineraryId: ID, recovery, social })) as AnyElement;
+    return (await (element.type as (props: unknown) => Promise<AnyElement>)(element.props)) as AnyElement;
+  };
+  const published = makeFxItinerary({ engagement: ENGAGEMENT });
+
+  it("không có factory thì không đọc loại phiên", async () => {
+    h.getViewer.mockResolvedValue(viewerOf(FX_OWNER_ID));
+    const view = await resolveWith(published, undefined);
+    expect(view.type).toBe(PublicItineraryView);
+    expect(h.getSessionKind).not.toHaveBeenCalled();
+  });
+
+  it("khách: gọi factory một lần, likeSyncNeeded false, không đọc loại phiên, bọc bằng wrap", async () => {
+    const { factory, wrap } = makeFactory();
+    const tree = await resolveWith(published, factory);
+    expect(factory).toHaveBeenCalledTimes(1);
+    expect(factory).toHaveBeenCalledWith({
+      itineraryId: published.id,
+      ownerId: published.ownerId,
+      viewerId: null,
+      isPublished: true,
+      engagement: ENGAGEMENT,
+      likeSyncNeeded: false,
+    });
+    expect(h.getSessionKind).not.toHaveBeenCalled();
+    expect(wrap).toHaveBeenCalledTimes(1);
+    const wrapped = wrap.mock.calls[0]?.[0] as AnyElement;
+    expect(wrapped.type).toBe(PublicItineraryView);
+    expect(wrapped.props.social).toBe(slots);
+    expect(isValidElement(tree)).toBe(true);
+  });
+
+  it.each([
+    ["stale", true],
+    ["invalid", true],
+    ["none", true],
+    ["fresh", false],
+  ] as const)("người xem có phiên %s thì likeSyncNeeded %s", async (kind, expected) => {
+    h.getViewer.mockResolvedValue(viewerOf(FX_OTHER_ID));
+    h.getSessionKind.mockResolvedValue(kind);
+    const { factory } = makeFactory();
+    await resolveWith(published, factory);
+    expect(factory).toHaveBeenCalledWith(expect.objectContaining({ likeSyncNeeded: expected, viewerId: FX_OTHER_ID }));
+    expect(h.getSessionKind).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ["bản nháp", makeFxItinerary({ isPublic: false, engagement: ENGAGEMENT }), false, ENGAGEMENT],
+    ["thiếu engagement", makeFxItinerary(), true, null],
+  ] as const)("%s: factory vẫn được gọi, không đọc loại phiên", async (_name, target, isPublished, engagement) => {
+    h.getViewer.mockResolvedValue(viewerOf(FX_OWNER_ID));
+    h.getSessionKind.mockResolvedValue("stale");
+    const { factory } = makeFactory();
+    await resolveWith(target, factory);
+    expect(factory).toHaveBeenCalledWith(expect.objectContaining({ isPublished, engagement, likeSyncNeeded: false }));
+    expect(h.getSessionKind).not.toHaveBeenCalled();
+  });
+
+  it("input của factory không có token", async () => {
+    h.getViewer.mockResolvedValue(viewerOf(FX_OWNER_ID));
+    h.getSessionKind.mockResolvedValue("stale");
+    const { factory } = makeFactory();
+    await resolveWith(published, factory);
+    expect(JSON.stringify(factory.mock.calls[0])).not.toMatch(/accessToken|refreshToken|authorization/i);
   });
 });

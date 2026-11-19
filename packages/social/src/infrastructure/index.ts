@@ -1,2 +1,4 @@
-// khung subpath `@tripory/social/http`: plan 05.1-07 thay bằng dto, mapper và repository http.
-export {};
+// chỉ apps/<app>/src/composition/** được import subpath này (rule httpOnlyInComposition).
+export { createHttpSocialRepository } from './http-social-repository';
+export { likeStateDto, commentDto, commentPageDto } from './dto';
+export { toLikeState, toComment, toCommentPage } from './mappers';

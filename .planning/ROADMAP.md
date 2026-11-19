@@ -256,7 +256,7 @@ Plans:
 - [x] 05.1-15-PLAN.md — `CommentSection`: controller, khung section, mọi trạng thái, gửi/xóa/tải thêm, focus và cuộn từ "Xem bình luận" (wave 6)
 - [x] 05.1-16-PLAN.md — `OverviewSocialRow` cho tab Tổng quan và lớp keo `PublicSocialOverview` (wave 7)
 - [x] 05.1-17-PLAN.md — Tích hợp trang công khai: `makePublicSocial`, route truyền factory, test hai chế độ (wave 8)
-- [ ] 05.1-18-PLAN.md — Bất biến tĩnh Phase 5.1, cổng kiểm toàn repo + `next build`, kiểm chứng SSR/BFF bằng BE giả (wave 9)
+- [x] 05.1-18-PLAN.md — Bất biến tĩnh Phase 5.1, cổng kiểm toàn repo + `next build`, kiểm chứng SSR/BFF bằng BE giả (wave 9)
 - [ ] 05.1-19-PLAN.md — `05.1-UAT-CHECKLIST.md` kịch bản UAT thủ công (wave 10)
 **UI hint**: yes
 **External dependency**: `tripory_be` chưa có API like/comment. FE không dựng mock (quyết định "Không dựng mock cho tính năng backend chưa hỗ trợ" ở PROJECT.md), nên không plan FE nào chạy trước khi BE có API thật.

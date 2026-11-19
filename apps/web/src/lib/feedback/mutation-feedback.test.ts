@@ -48,6 +48,27 @@ describe("decideMutationError", () => {
   });
 });
 
+describe("decideMutationError với fallbackMessage", () => {
+  const network = makeApiError({ kind: "network", status: null, code: null, message: null });
+  const fallbackMessage = "Chưa gửi được bình luận. Nội dung vẫn còn, hãy thử gửi lại.";
+
+  it("network → câu theo ngữ cảnh", () => {
+    expect(decideMutationError(network, { fallbackMessage })).toEqual({ variant: "error", message: fallbackMessage });
+  });
+
+  it("không có fallbackMessage → câu chung như cũ", () => {
+    expect(decideMutationError(network, {})).toEqual({ variant: "error", message: GENERIC_ERROR_MESSAGE });
+  });
+
+  it("errorToast: false vẫn null", () => {
+    expect(decideMutationError(network, { errorToast: false, fallbackMessage })).toBeNull();
+  });
+
+  it("session_expired vẫn null", () => {
+    expect(decideMutationError(sessionExpiredError(), { fallbackMessage })).toBeNull();
+  });
+});
+
 describe("barrel lib/feedback", () => {
   it("phơi các hàm và hằng chính", () => {
     expect(feedback.selectErrorMessage).toBeTypeOf("function");

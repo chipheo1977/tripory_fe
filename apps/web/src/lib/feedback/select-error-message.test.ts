@@ -154,6 +154,39 @@ describe("selectErrorMessage", () => {
     expect(selectErrorMessage(error)).toBe(GENERIC_ERROR_MESSAGE);
   });
 
+  describe("có fallback theo ngữ cảnh", () => {
+    it.each([
+      ["network", makeApiError({ kind: "network", status: null, code: null, message: null })],
+      ["timeout", makeApiError({ kind: "timeout", status: null, code: null, message: null })],
+      ["http 500 rỗng", httpError(null, null, 500)],
+      ["parse", makeApiError({ kind: "parse", status: 200, code: null, message: null })],
+      ["Error thường", new Error()],
+      ["null", null],
+      ["Server.Error map về câu chung", httpError("Server.Error", "Lỗi", 500)],
+    ] as const)("%s → fallback", (_name, error) => {
+      expect(selectErrorMessage(error, "X")).toBe("X");
+    });
+
+    it("mã đã map vẫn thắng fallback", () => {
+      expect(selectErrorMessage(httpError("Itinerary.NotFound", null, 404), "X")).toBe("Không tìm thấy lịch trình.");
+      expect(selectErrorMessage(httpError("Comment.DeleteForbidden", null, 403), "X")).toBe(
+        "Bạn không có quyền xóa bình luận này.",
+      );
+    });
+
+    it("mã không map có message BE → message BE", () => {
+      expect(selectErrorMessage(httpError("Auth.UserBanned", "Tài khoản bị khóa vì vi phạm."), "X")).toBe(
+        "Tài khoản bị khóa vì vi phạm.",
+      );
+    });
+
+    it("aborted vẫn null", () => {
+      expect(
+        selectErrorMessage(makeApiError({ kind: "aborted", status: null, code: null, message: null }), "X"),
+      ).toBeNull();
+    });
+  });
+
   it("aborted → null (không hiện gì)", () => {
     expect(selectErrorMessage(makeApiError({ kind: "aborted", status: null, code: null, message: null }))).toBeNull();
   });

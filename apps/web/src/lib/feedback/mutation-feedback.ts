@@ -4,6 +4,8 @@ import { selectErrorMessage } from "./select-error-message";
 export type MutationFeedback = Readonly<{
   successMessage?: string;
   errorToast?: boolean;
+  /** Câu theo ngữ cảnh khi lỗi không có mã được ánh xạ và BE không có message (mạng, timeout, 5xx). */
+  fallbackMessage?: string;
 }>;
 
 export type ToastDecision = Readonly<{ variant: "success" | "error"; message: string }> | null;
@@ -15,7 +17,7 @@ export function decideMutationError(error: unknown, feedback?: MutationFeedback)
   if (feedback?.errorToast === false) return null;
   // Hết phiên do `onSessionExpired` của Phase 3 xử lý (chuyển trang đăng nhập), không toast.
   if (isApiError(error) && error.kind === "session_expired") return null;
-  const message = selectErrorMessage(error);
+  const message = selectErrorMessage(error, feedback?.fallbackMessage);
   return message === null ? null : { variant: "error", message };
 }
 

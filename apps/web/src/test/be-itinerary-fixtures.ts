@@ -53,10 +53,17 @@ export type ItineraryDetailJson = {
   waypoints: ItineraryWaypointJson[];
   /** Có khi BE-05-01 đã deploy (05-03); thiếu thì ẩn khối tác giả. */
   author?: { id: string; displayName: string; avatarUrl: string | null } | null;
+  /** Có khi BE đã deploy 05.1-BE-CONTRACT.md; thiếu thì ẩn khối like và comment. */
+  likeCount?: number | null;
+  commentCount?: number | null;
+  likedByMe?: boolean | null;
 };
 
 /** Tác giả mẫu (BE-05-01). Không email. */
 export const AUTHOR_JSON = { id: OWNER_ID, displayName: "Trần Thị Lan", avatarUrl: null as string | null };
+
+/** Ba trường đếm mẫu của chi tiết lịch trình (05.1-BE-CONTRACT.md §5). */
+export const ENGAGEMENT_JSON = { likeCount: 12, commentCount: 3, likedByMe: false };
 /** Avatar mặc định chung của BE: ACL đổi thành null (03-04, D-02). */
 export const DEFAULT_DICEBEAR_AVATAR = "https://api.dicebear.com/7.x/identicon/svg?seed=tripory";
 

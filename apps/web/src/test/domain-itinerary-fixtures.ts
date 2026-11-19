@@ -3,7 +3,7 @@
 // bằng `toItinerary(...)`; dựng thẳng object domain như `itinerary-editor.test.tsx`. Không import `vitest`.
 import { createWgs84Coordinate, parseItineraryId, parseUserId } from "@tripory/shared-kernel";
 import { parseCalendarDate } from "@tripory/itinerary";
-import type { Itinerary, ItineraryAuthor, Waypoint } from "@tripory/itinerary";
+import type { Itinerary, ItineraryAuthor, ItineraryEngagement, Waypoint } from "@tripory/itinerary";
 
 export const FX_ITINERARY_ID = "3f2a6c1e-8b7d-4e21-9c55-0a1b2c3d4e5f";
 export const FX_OWNER_ID = "3f2504e0-4f89-11d3-9a0c-0305e82c3301";
@@ -64,6 +64,8 @@ export function makeFxItinerary(overrides: Partial<Itinerary> = {}): Itinerary {
   };
 }
 
+/** Số liệu like/comment mẫu; `makeFxItinerary()` mặc định không có, truyền `{ engagement: FX_ENGAGEMENT }` khi cần. */
+export const FX_ENGAGEMENT: ItineraryEngagement = { likeCount: 12, commentCount: 3, likedByMe: false };
 export const FX_AUTHOR: ItineraryAuthor = {
   id: fxOwnerId(),
   displayName: "Trần Thị Lan",

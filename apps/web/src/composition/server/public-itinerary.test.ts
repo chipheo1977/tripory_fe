@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { jsonResponse } from "@/test/be-auth-fixtures";
 import {
   AUTHOR_JSON,
+  ENGAGEMENT_JSON,
   ITINERARY_ID,
   itineraryDetailJson,
   itineraryEnvelope,
@@ -109,6 +110,17 @@ describe("loadPublicItinerary: 200", () => {
     expect(result.kind === "ok" && result.itinerary.author).toBeUndefined();
   });
 
+  it("carries the engagement counts when the BE returns them (05.1)", async () => {
+    const fetch = fetchReturning(jsonResponse(okBody({ ...ENGAGEMENT_JSON })));
+    const result = await loadPublicItinerary(depsWith(fetch), ID, NONE);
+    expect(result.kind).toBe("ok");
+    expect(result.kind === "ok" && result.itinerary.engagement).toEqual({ likeCount: 12, commentCount: 3, likedByMe: false });
+  });
+  it("returns ok without engagement when the BE has not shipped the counts", async () => {
+    const result = await loadPublicItinerary(depsWith(fetchReturning(jsonResponse(okBody()))), ID, NONE);
+    expect(result.kind).toBe("ok");
+    expect(result.kind === "ok" && result.itinerary.engagement).toBeUndefined();
+  });
   it("never puts the access token in the result", async () => {
     const result = await loadPublicItinerary(depsWith(fetchReturning(jsonResponse(okBody()))), ID, FRESH);
 

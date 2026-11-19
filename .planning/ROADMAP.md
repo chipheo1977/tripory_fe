@@ -252,7 +252,7 @@ Plans:
 - [ ] 05.1-11-PLAN.md — Composition `social.client` và `SocialProvider` (một nguồn trạng thái cho hai chế độ) (wave 5)
 - [ ] 05.1-12-PLAN.md — Nút tim `LikeControl` và `ConnectedLikeControl` (khách là link, nhánh Suspense riêng) (wave 6)
 - [x] 05.1-13-PLAN.md — `CommentComposer` (đếm sau trim, phím tắt an toàn với bộ gõ) và `CommentGuestPrompt` (wave 4)
-- [ ] 05.1-14-PLAN.md — `DeleteCommentDialog` (xác nhận xóa, focus an toàn) (wave 4)
+- [x] 05.1-14-PLAN.md — `DeleteCommentDialog` (xác nhận xóa, focus an toàn) (wave 4)
 - [ ] 05.1-15-PLAN.md — `CommentSection`: controller, khung section, mọi trạng thái, gửi/xóa/tải thêm, focus và cuộn từ "Xem bình luận" (wave 6)
 - [ ] 05.1-16-PLAN.md — `OverviewSocialRow` cho tab Tổng quan và lớp keo `PublicSocialOverview` (wave 7)
 - [ ] 05.1-17-PLAN.md — Tích hợp trang công khai: `makePublicSocial`, route truyền factory, test hai chế độ (wave 8)

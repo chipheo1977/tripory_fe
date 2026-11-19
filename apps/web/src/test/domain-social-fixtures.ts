@@ -1,5 +1,5 @@
-// Dữ liệu domain social dùng chung cho test UI của Phase 5.1. Test dưới `modules/**` không được import
-// `@tripory/social/http` nên dựng thẳng object domain (mẫu `domain-itinerary-fixtures.ts`). Không import `vitest`.
+// Dữ liệu domain social dùng chung cho test UI của Phase 5.1. Test dưới `modules/**` không được import subpath HTTP
+// của social (chỉ composition được) nên dựng thẳng object domain (mẫu `domain-itinerary-fixtures.ts`). Không import `vitest`.
 import { parseCommentId } from "@tripory/social";
 import type { Comment, CommentAuthor, CommentPage, LikeState } from "@tripory/social";
 import { fxOtherId } from "./domain-itinerary-fixtures";

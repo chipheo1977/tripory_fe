@@ -249,7 +249,7 @@ Plans:
 - [x] 05.1-08-PLAN.md — Hook React Query: like tuần tự ý định cuối thắng + đồng bộ D-27, danh sách comment phân trang bỏ trùng, gửi, xóa (wave 4)
 - [x] 05.1-09-PLAN.md — Điểm chèn slot tùy chọn trong hero, bài viết, tab Tổng quan và `PublicItineraryPage` nhận factory social (wave 4)
 - [x] 05.1-10-PLAN.md — Mảnh trình bày danh sách comment: `CommentItem`, `CommentList`, skeleton/rỗng/lỗi, "Xem thêm" (wave 4)
-- [ ] 05.1-11-PLAN.md — Composition `social.client` và `SocialProvider` (một nguồn trạng thái cho hai chế độ) (wave 5)
+- [x] 05.1-11-PLAN.md — Composition `social.client` và `SocialProvider` (một nguồn trạng thái cho hai chế độ) (wave 5)
 - [ ] 05.1-12-PLAN.md — Nút tim `LikeControl` và `ConnectedLikeControl` (khách là link, nhánh Suspense riêng) (wave 6)
 - [x] 05.1-13-PLAN.md — `CommentComposer` (đếm sau trim, phím tắt an toàn với bộ gõ) và `CommentGuestPrompt` (wave 4)
 - [x] 05.1-14-PLAN.md — `DeleteCommentDialog` (xác nhận xóa, focus an toàn) (wave 4)

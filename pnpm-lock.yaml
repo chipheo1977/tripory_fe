@@ -158,6 +158,9 @@ importers:
       '@tripory/shared-kernel':
         specifier: workspace:*
         version: link:../../packages/shared-kernel
+      '@tripory/social':
+        specifier: workspace:*
+        version: link:../../packages/social
       '@tripory/ui-web':
         specifier: workspace:*
         version: link:../../packages/ui-web
@@ -382,6 +385,43 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.5(jiti@2.7.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.11(@types/node@20.19.43)(jsdom@29.1.1)(vite@8.3.4(@types/node@20.19.43)(jiti@2.7.0))
+
+  packages/social:
+    dependencies:
+      '@tripory/api-client':
+        specifier: workspace:*
+        version: link:../api-client
+      '@tripory/shared-kernel':
+        specifier: workspace:*
+        version: link:../shared-kernel
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.7
+    devDependencies:
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.104.2(react@19.3.0)
+      '@tripory/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 20.19.43
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.3.0
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.5(jiti@2.7.0)
+      react:
+        specifier: 'catalog:'
+        version: 19.3.0
       typescript:
         specifier: 'catalog:'
         version: 5.9.3

@@ -25,6 +25,7 @@
     "@tripory/identity": "workspace:*",
     "@tripory/itinerary": "workspace:*",
     "@tripory/shared-kernel": "workspace:*",
+    "@tripory/social": "workspace:*",
     "@tripory/ui-web": "workspace:*",
     "lucide-react": "catalog:",
     "maplibre-gl": "catalog:",

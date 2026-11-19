@@ -166,6 +166,31 @@ describe("useLikeState: đồng bộ D-27", () => {
     expect(repo.getLike).toHaveBeenCalledTimes(1);
   });
 
+  it("W-01: like xong, unmount rồi mount lại cùng phiên thì hiện giá trị BE xác nhận, không dùng cache cũ", async () => {
+    const repo = makeRepo({ getLike: vi.fn(async () => INITIAL) });
+    const hooks = createSocialHooks({ repository: repo });
+    const first = renderHook(() => hooks.useLikeState({ itineraryId: ID, initial: INITIAL, sync: true }), { wrapper });
+    await waitFor(() => expect(first.result.current.syncing).toBe(false));
+    act(() => first.result.current.toggle());
+    await waitFor(() => expect(repo.like).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(client.getQueryData(["social", "like", ID])).toEqual({ count: 13, liked: true }));
+    first.unmount();
+
+    const second = renderHook(() => hooks.useLikeState({ itineraryId: ID, initial: INITIAL, sync: true }), { wrapper });
+    expect(second.result.current.state).toEqual({ count: 13, liked: true });
+    expect(second.result.current.syncing).toBe(false);
+    expect(repo.getLike).toHaveBeenCalledTimes(1);
+  });
+
+  it("W-01: cache like chưa có dữ liệu (sync false) thì không tạo cache mới", async () => {
+    const repo = makeRepo();
+    const hooks = createSocialHooks({ repository: repo });
+    const { result } = renderHook(() => hooks.useLikeState({ itineraryId: ID, initial: INITIAL, sync: false }), { wrapper });
+    act(() => result.current.toggle());
+    await waitFor(() => expect(result.current.state).toEqual({ count: 13, liked: true }));
+    expect(client.getQueryData(["social", "like", ID])).toBeUndefined();
+  });
+
   it("sync false thì không gọi getLike", async () => {
     const repo = makeRepo();
     const hooks = createSocialHooks({ repository: repo });

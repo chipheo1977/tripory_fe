@@ -54,6 +54,14 @@ function updateCommentPages(
   qc.setQueryData<CommentPages>(key, { ...current, pages: [...update(current.pages)] });
 }
 
+// cache like có `staleTime: Infinity` nên mount lại sẽ không đọc lại: nếu cache đã có dữ liệu (phiên `sync`) thì
+// ghi giá trị BE xác nhận vào đó, tránh hiện lại trạng thái cũ. cache chưa có (không `sync`) thì để yên.
+function syncLikeCache(qc: QueryClient, id: ItineraryId, confirmed: LikeState): void {
+  const key = socialKeys.like(id);
+  if (qc.getQueryData<LikeState>(key) === undefined) return;
+  qc.setQueryData<LikeState>(key, confirmed);
+}
+
 export function createSocialHooks(deps: Readonly<{ repository: SocialRepository }>) {
   const { repository } = deps;
   const submitComment = makeSubmitComment(repository);
@@ -66,6 +74,7 @@ export function createSocialHooks(deps: Readonly<{ repository: SocialRepository 
      */
     useLikeState: (input: LikeStateInput) => {
       const { itineraryId: id, initial, sync, meta } = input;
+      const qc = useQueryClient();
       const query = useQuery({
         queryKey: socialKeys.like(id),
         queryFn: ({ signal }) => repository.getLike(id, signal),
@@ -94,6 +103,7 @@ export function createSocialHooks(deps: Readonly<{ repository: SocialRepository 
           if (pendingRef.current > 0) return;
           displayRef.current = confirmedRef.current;
           setLocal(confirmedRef.current);
+          syncLikeCache(qc, id, confirmedRef.current);
         },
       });
       const { mutate } = mutation;

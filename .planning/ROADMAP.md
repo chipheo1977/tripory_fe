@@ -243,7 +243,7 @@ Plans:
 - [x] 05.1-02-PLAN.md — Checkpoint: người dùng tự sửa và deploy `tripory_be`, xác nhận bằng 15 điều kiện nghiệm thu thủ công (wave 2, `autonomous: false`)
 - [x] 05.1-03-PLAN.md — Package `@tripory/social`: domain (luật nội dung, quyền xóa, trạng thái like, trộn trang), application (port + use case gửi comment), fixture dùng chung (wave 3)
 - [x] 05.1-04-PLAN.md — `ERROR_MESSAGES` thêm 6 mã like/comment, `selectErrorMessage`/`MutationFeedback` có câu dự phòng theo ngữ cảnh (wave 3)
-- [ ] 05.1-05-PLAN.md — ACL `itinerary`: ba trường đếm thành `Itinerary.engagement` tùy chọn, fixture, loader SSR (wave 3)
+- [x] 05.1-05-PLAN.md — ACL `itinerary`: ba trường đếm thành `Itinerary.engagement` tùy chọn, fixture, loader SSR (wave 3)
 - [ ] 05.1-06-PLAN.md — Nền UI social: định dạng số/thời gian, chuỗi UI khóa, phím tắt Ctrl/Cmd+Enter, nhận biết macOS, đường dẫn đăng nhập của khách (wave 3)
 - [ ] 05.1-07-PLAN.md — Infrastructure `social`: DTO Zod, mapper ACL, repository HTTP qua BFF (wave 4)
 - [ ] 05.1-08-PLAN.md — Hook React Query: like tuần tự ý định cuối thắng + đồng bộ D-27, danh sách comment phân trang bỏ trùng, gửi, xóa (wave 4)

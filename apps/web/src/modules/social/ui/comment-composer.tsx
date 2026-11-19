@@ -1,6 +1,6 @@
 "use client";
 // ô viết bình luận của người đã đăng nhập (D-10, D-13, UI-SPEC §Ô nhập).
-// - đếm sau trim, luật 1..500 dùng chung với domain; không đặt `maxLength` để dán dài không bị cắt âm thầm.
+// - đếm sau trim, luật 1..500 dùng chung với domain; không giới hạn độ dài bằng thuộc tính HTML để dán dài không bị cắt âm thầm.
 // - Ctrl/Cmd+Enter gửi; đang ghép dấu (bộ gõ tiếng Việt) thì không gửi (U-05).
 // - composer tự giữ chữ: giữ khi lỗi, chỉ xóa khi gửi xong. cha quyết định gọi hook và toast.
 import { checkCommentContent, trimmedLength } from "@tripory/social";

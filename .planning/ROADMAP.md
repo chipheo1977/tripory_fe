@@ -254,7 +254,7 @@ Plans:
 - [x] 05.1-13-PLAN.md — `CommentComposer` (đếm sau trim, phím tắt an toàn với bộ gõ) và `CommentGuestPrompt` (wave 4)
 - [x] 05.1-14-PLAN.md — `DeleteCommentDialog` (xác nhận xóa, focus an toàn) (wave 4)
 - [x] 05.1-15-PLAN.md — `CommentSection`: controller, khung section, mọi trạng thái, gửi/xóa/tải thêm, focus và cuộn từ "Xem bình luận" (wave 6)
-- [ ] 05.1-16-PLAN.md — `OverviewSocialRow` cho tab Tổng quan và lớp keo `PublicSocialOverview` (wave 7)
+- [x] 05.1-16-PLAN.md — `OverviewSocialRow` cho tab Tổng quan và lớp keo `PublicSocialOverview` (wave 7)
 - [ ] 05.1-17-PLAN.md — Tích hợp trang công khai: `makePublicSocial`, route truyền factory, test hai chế độ (wave 8)
 - [ ] 05.1-18-PLAN.md — Bất biến tĩnh Phase 5.1, cổng kiểm toàn repo + `next build`, kiểm chứng SSR/BFF bằng BE giả (wave 9)
 - [ ] 05.1-19-PLAN.md — `05.1-UAT-CHECKLIST.md` kịch bản UAT thủ công (wave 10)

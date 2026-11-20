@@ -61,11 +61,11 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 
 ### Trang công khai và chia sẻ (PUB)
 
-- [ ] **PUB-01**: Khách chưa đăng nhập xem được trang công khai SSR của lịch trình đã xuất bản, bố cục bài viết theo ngày
-- [ ] **PUB-02**: Người xem chuyển được giữa chế độ Bài viết và Bản đồ trên trang công khai (dùng lại component bản đồ của PUB-06)
-- [ ] **PUB-03**: Lịch trình nháp trả trang 403 cho khách, id sai trả 404; chủ xem nháp thấy banner "Bản nháp – chỉ bạn thấy" và nút Sửa
-- [ ] **PUB-04**: Người xem có thể chia sẻ bằng copy link, Web Share (mobile) và mã QR
-- [ ] **PUB-05**: Link khi dán vào Zalo/Messenger hiển thị preview Open Graph (tiêu đề, mô tả, ảnh bìa); nháp đặt `noindex`
+- [x] **PUB-01**: Khách chưa đăng nhập xem được trang công khai SSR của lịch trình đã xuất bản, bố cục bài viết theo ngày
+- [x] **PUB-02**: Người xem chuyển được giữa chế độ Bài viết và Bản đồ trên trang công khai (dùng lại component bản đồ của PUB-06)
+- [x] **PUB-03**: Lịch trình nháp trả trang 403 cho khách, id sai trả 404; chủ xem nháp thấy banner "Bản nháp – chỉ bạn thấy" và nút Sửa
+- [x] **PUB-04**: Người xem có thể chia sẻ bằng copy link, Web Share (mobile) và mã QR
+- [x] **PUB-05**: Link khi dán vào Zalo/Messenger hiển thị preview Open Graph (tiêu đề, mô tả, ảnh bìa); nháp đặt `noindex`
 - [x] **PUB-06**: Bản đồ dùng chung (MapLibre + OpenFreeMap, thể hiện Hoàng Sa, Trường Sa thuộc Việt Nam) hiển thị trong editor: pin theo ngày, đường nối trong ngày, zoom/pan, đồng bộ chọn với danh sách, tab "Tổng quan"; trang công khai dùng lại
 
 ### Like và comment (SOC)
@@ -210,11 +210,11 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | ITIN-12 | Phase 4 | Complete |
 | ITIN-13 | Phase 4 | Complete |
 | ITIN-14 | Phase 4 | Complete |
-| PUB-01 | Phase 5 | Code xong 2026-11-12 (19/19 plan), chờ UAT thủ công: 05-HUMAN-UAT.md |
-| PUB-02 | Phase 5 | Code xong 2026-11-12, chờ UAT thủ công (về lại Phase 5 ngày 2026-11-05: chỉ còn nút chuyển Bài viết/Bản đồ) |
-| PUB-03 | Phase 5 | Code xong 2026-11-12 (19/19 plan), chờ UAT thủ công: 05-HUMAN-UAT.md |
-| PUB-04 | Phase 5 | Code xong 2026-11-12 (19/19 plan), chờ UAT thủ công: 05-HUMAN-UAT.md |
-| PUB-05 | Phase 5 | Code xong 2026-11-12 (19/19 plan), chờ UAT thủ công: 05-HUMAN-UAT.md |
+| PUB-01 | Phase 5 | Complete (code xong 2026-11-12; UAT thủ công do người dùng xác nhận 2026-11-20, agent không kiểm độc lập) |
+| PUB-02 | Phase 5 | Complete (code xong 2026-11-12; UAT thủ công do người dùng xác nhận 2026-11-20, agent không kiểm độc lập) |
+| PUB-03 | Phase 5 | Complete (code xong 2026-11-12; UAT thủ công do người dùng xác nhận 2026-11-20, agent không kiểm độc lập) |
+| PUB-04 | Phase 5 | Complete (code xong 2026-11-12; UAT thủ công do người dùng xác nhận 2026-11-20, agent không kiểm độc lập) |
+| PUB-05 | Phase 5 | Complete (code xong 2026-11-12; UAT thủ công do người dùng xác nhận 2026-11-20, agent không kiểm độc lập) |
 | PUB-06 | Phase 4 | Complete (chuyển vào Phase 4, mở lại lần 2 ngày 2026-11-05; UAT mục E 14/14 PASS do người dùng xác nhận 2026-11-06; trang công khai dùng lại ở Phase 5) |
 | MAP-01 | Phase 4 | Complete (mở lại lần 3, 2026-11-06; hoàn thành phase được người dùng xác nhận 2026-11-07; UAT mục F chấp nhận theo xác nhận, agent không kiểm độc lập Photon/Nominatim thật) |
 | SOC-01 | Phase 5.1 | Code xong 2026-11-19 (19/19 plan), chờ UAT thủ công: 05.1-HUMAN-UAT.md |

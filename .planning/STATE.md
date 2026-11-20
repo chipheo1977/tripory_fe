@@ -4,7 +4,7 @@ milestone: v1.0
 milestone_name: milestone
 status: verifying
 stopped_at: Completed 05.1-01-PLAN.md; wave 2 (05.1-02) chờ người dùng sửa và deploy tripory_be
-last_updated: "2026-11-19T14:52:00.867Z"
+last_updated: "2026-11-20T00:00:00.000Z"
 last_activity: 2026-11-19
 progress:
   total_phases: 9
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-10-09)
 
 ## Current Position
 
-Phase: 6
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-11-19
+Phase: 5.1
+Plan: 19/19 code xong
+Status: Phase 5 đã verify xong (2026-11-20, UAT do người dùng xác nhận, agent không kiểm độc lập). Phase 5.1 chờ `/gsd-verify-work 5.1`
+Last activity: 2026-11-20
 
 Phase 1 progress: [██████████] 100% — verified complete
 
@@ -204,6 +204,8 @@ Recent decisions affecting current work:
 - [Phase 4]: 04-21: ItineraryEditor nhan viewer (Viewer) thay viewerId; co data thi luon hien editor; co entry-flag xoa khi back dung no (khong o cleanup effect vi StrictMode); leaving giu khung cho sau khi xoa lich trinh
 - [Phase 04]: UAT thủ công 23/23 PASS (người chạy xác nhận, không đính kèm ảnh chụp); 04-SECURITY đóng 70/70 threat, UF-01..04 vẫn OPEN không chặn; Phase 4 nghiệm thu
 - [Phase 04]: 2026-11-07: người dùng xác nhận hoàn thành Phase 4 gồm MAP-01 (tìm địa điểm). UAT mục F F1..F12 và sửa chân form Sheet mobile 738c9a2 ghi là chấp nhận theo xác nhận của người dùng, agent chưa kiểm độc lập (không PASS). Tồn đọng chuyển tiếp: Photon/Nominatim public server, cache trong bộ nhớ từng instance, place_id chưa lưu ở BE, UF-01..04, MD-01, LW-01..LW-06\n- [Phase 04]: 04-22: invariant <img regex ends at '/>' (=> in handlers breaks '>' match); BE dependencies for Phase 4 recorded in 04-BE-DEPENDENCIES.md
+
+- [Phase 05]: 2026-11-20: Phase 5 nghiệm thu. `05-HUMAN-UAT.md` 8/8 và `05-UAT-CHECKLIST.md` 51/51 do người dùng xác nhận, agent không kiểm độc lập (tổng hợp ở `05-UAT.md`, `05-VERIFICATION.md` thành `passed`). Tồn đọng không chặn: chưa có review code độc lập (`05-REVIEW.md` skipped), chưa có `05-SECURITY.md`, BE-05-01 (`author`) là việc BE của người dùng.
 
 ### Roadmap Evolution
 

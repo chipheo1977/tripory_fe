@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Itinerary CRUD & Editor** - "Lịch trình của tôi" và editor đầy đủ tới bước xuất bản (reopened 2026-10-30: form tạo 4 khối thay tạo nhanh (ITIN-02), nhiều ảnh bìa và tự lưu "Thông tin chuyến đi" (ITIN-03) đã xong 41/41 plan; mở lại lần 2 2026-11-05: bản đồ MapLibre + OpenFreeMap trong editor và tab Tổng quan (PUB-06), 12 plan 04-42..04-53 đã xong; UAT mục E 14/14 PASS do người dùng xác nhận; verify phase 2026-11-06; mở lại lần 3 2026-11-06: tìm địa điểm Photon/Nominatim trong form thêm/sửa điểm (MAP-01), 4 plan 04-55..04-58 đã xong)
  (completed 2026-11-07)
 - [x] **Phase 5: Map & Public View** - Trang công khai SSR, chuyển Bài viết/Bản đồ (dùng lại bản đồ của editor), chia sẻ và Open Graph (code xong 2026-11-12, 19/19 plan; UAT 8/8 do người dùng xác nhận 2026-11-20, agent không kiểm độc lập; hoàn thành 2026-11-20)
-- [x] **Phase 5.1: Itinerary Likes & Comments (INSERTED)** - Like và comment lịch trình đã xuất bản trên trang công khai; cần BE thêm API trước (hợp đồng BE rồi checkpoint deploy `tripory_be`) (code xong 2026-11-19, 19/19 plan; UAT thủ công còn mở: `05.1-HUMAN-UAT.md`, `05.1-UAT-CHECKLIST.md`)
+- [x] **Phase 5.1: Itinerary Likes & Comments (INSERTED)** - Like và comment lịch trình đã xuất bản trên trang công khai; cần BE thêm API trước (hợp đồng BE rồi checkpoint deploy `tripory_be`) (code xong 2026-11-19, 19/19 plan; UAT 53/53 do người dùng xác nhận 2026-11-20, agent không kiểm độc lập; hoàn thành 2026-11-20)
 - [ ] **Phase 6: Profile & Users** - Hồ sơ thật, tab lịch trình, danh bạ và lối vào hội thoại
 - [ ] **Phase 7: Chat, Voice & Calls** - Chat realtime, tin nhắn thoại và gọi thoại 1-1 qua TURN
 - [ ] **Phase 8: Deploy & Acceptance Gate** - Production Vercel trỏ BE công khai, smoke E2E và kênh góp ý
@@ -316,7 +316,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 6 → 7 �
 | 3. Identity & Session (BFF) | 15/15 | Executed (UAT 19/19 PASS, chờ verify-work) | 2026-10-23 |
 | 4. Itinerary CRUD & Editor | 57/57 (04-01..04-58, không có file plan 04-54) | Complete (UAT 23/23, mục D 8/8 và mục E 14/14 PASS do người dùng xác nhận; mục F tìm địa điểm F1..F12 và sửa chân form Sheet mobile 738c9a2 được người dùng chấp nhận khi xác nhận hoàn thành, agent không kiểm độc lập; chưa kiểm trên thiết bị cảm ứng thật, xem 04-VERIFICATION.md) | 2026-11-07 |
 | 5. Map & Public View | 19/19 | Complete (UAT 8/8 và checklist 51/51 do người dùng xác nhận 2026-11-20, agent không kiểm độc lập; chưa có review code độc lập và 05-SECURITY.md; xem 05-UAT.md) | 2026-11-20 |
-| 5.1. Itinerary Likes & Comments (INSERTED) | 19/19 | Code complete, chờ UAT thủ công | 2026-11-19 |
+| 5.1. Itinerary Likes & Comments (INSERTED) | 19/19 | Complete (UAT 8/8 và checklist 53/53 do người dùng xác nhận 2026-11-20, agent không kiểm độc lập; chưa có review code độc lập và 05.1-SECURITY.md; Info I-01..I-03 chưa sửa; xem 05.1-UAT.md) | 2026-11-20 |
 | 6. Profile & Users | 0/TBD | Not started | - |
 | 7. Chat, Voice & Calls | 0/TBD | Not started | - |
 | 8. Deploy & Acceptance Gate | 0/TBD | Not started | - |

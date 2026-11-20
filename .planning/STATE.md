@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 05.1-01-PLAN.md; wave 2 (05.1-02) chờ người dùng sửa và deploy tripory_be
+status: planning
+stopped_at: Phase 5.1 đã verify xong (UAT do người dùng xác nhận 2026-11-20); Phase 6 chưa bắt đầu
 last_updated: "2026-11-20T00:00:00.000Z"
-last_activity: 2026-11-19
+last_activity: 2026-11-20
 progress:
   total_phases: 9
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 122
   completed_plans: 121
   percent: 99
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-09)
 
 **Core value:** Người dùng có thể tạo, chỉnh sửa và chia sẻ một lịch trình du lịch thật trên bản triển khai công khai, rồi trao đổi về chuyến đi với người khác.
-**Current focus:** Phase 05.1 — itinerary-likes-comments
+**Current focus:** Phase 06 — profile-users (chưa bắt đầu)
 
 ## Current Position
 
-Phase: 5.1
-Plan: 19/19 code xong
-Status: Phase 5 đã verify xong (2026-11-20, UAT do người dùng xác nhận, agent không kiểm độc lập). Phase 5.1 chờ `/gsd-verify-work 5.1`
+Phase: 6
+Plan: Not started
+Status: Phase 5.1 đã verify xong (2026-11-20, UAT do người dùng xác nhận, agent không kiểm độc lập). Phase 6 chưa bắt đầu
 Last activity: 2026-11-20
 
 Phase 1 progress: [██████████] 100% — verified complete
@@ -206,6 +206,8 @@ Recent decisions affecting current work:
 - [Phase 04]: 2026-11-07: người dùng xác nhận hoàn thành Phase 4 gồm MAP-01 (tìm địa điểm). UAT mục F F1..F12 và sửa chân form Sheet mobile 738c9a2 ghi là chấp nhận theo xác nhận của người dùng, agent chưa kiểm độc lập (không PASS). Tồn đọng chuyển tiếp: Photon/Nominatim public server, cache trong bộ nhớ từng instance, place_id chưa lưu ở BE, UF-01..04, MD-01, LW-01..LW-06\n- [Phase 04]: 04-22: invariant <img regex ends at '/>' (=> in handlers breaks '>' match); BE dependencies for Phase 4 recorded in 04-BE-DEPENDENCIES.md
 
 - [Phase 05]: 2026-11-20: Phase 5 nghiệm thu. `05-HUMAN-UAT.md` 8/8 và `05-UAT-CHECKLIST.md` 51/51 do người dùng xác nhận, agent không kiểm độc lập (tổng hợp ở `05-UAT.md`, `05-VERIFICATION.md` thành `passed`). Tồn đọng không chặn: chưa có review code độc lập (`05-REVIEW.md` skipped), chưa có `05-SECURITY.md`, BE-05-01 (`author`) là việc BE của người dùng.
+
+- [Phase 05.1]: 2026-11-20: Phase 5.1 nghiệm thu (SOC-01, SOC-02). `05.1-UAT-CHECKLIST.md` 53/53 do người dùng xác nhận, agent không kiểm độc lập (tổng hợp ở `05.1-UAT.md`, `05.1-VERIFICATION.md` thành `passed`). Mục 11 của `05.1-BE-CONTRACT.md`: chỉ 3 GET dòng 5 do agent kiểm độc lập, dòng 6-15 theo xác nhận người dùng. W-01 đã sửa. Tồn đọng không chặn: chưa có review code độc lập, chưa có `05.1-SECURITY.md` (nên chạy `/gsd-secure-phase 5.1`), Info I-01..I-03 chưa sửa. Vùng chạm nút 40px là lựa chọn có chủ đích (lệch FND-03, nguồn a621893).
 
 ### Roadmap Evolution
 

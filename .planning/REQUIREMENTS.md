@@ -70,8 +70,8 @@ Phạm vi milestone 1 (Phase 0a → 4 + deploy Vercel). Chi tiết contract BE v
 
 ### Like và comment (SOC)
 
-- [ ] **SOC-01**: Người đã đăng nhập like và bỏ like được một lịch trình đã xuất bản trên trang công khai và thấy số like; khách chưa đăng nhập xem được số like. Chi tiết (ai được bấm, chủ có tự like không, cách đếm, khách bấm like thì sao) chờ `/gsd-discuss-phase 5.1`. Cần API like của `tripory_be` (chưa có), không dựng mock (chuyển từ v2 BE-02 vào Phase 5.1 ngày 2026-11-09)
-- [ ] **SOC-02**: Người đã đăng nhập đọc và gửi được comment trên trang công khai của lịch trình đã xuất bản; khách chưa đăng nhập đọc được comment. Chi tiết (sửa/xóa/trả lời, phân trang, hiện tác giả comment) chờ `/gsd-discuss-phase 5.1`. Cần API comment của `tripory_be` (chưa có), không dựng mock (chuyển từ v2 BE-02 vào Phase 5.1 ngày 2026-11-09)
+- [x] **SOC-01**: Người đã đăng nhập like và bỏ like được một lịch trình đã xuất bản trên trang công khai và thấy số like; khách chưa đăng nhập xem được số like. Chi tiết (ai được bấm, chủ có tự like không, cách đếm, khách bấm like thì sao) chờ `/gsd-discuss-phase 5.1`. Cần API like của `tripory_be` (chưa có), không dựng mock (chuyển từ v2 BE-02 vào Phase 5.1 ngày 2026-11-09)
+- [x] **SOC-02**: Người đã đăng nhập đọc và gửi được comment trên trang công khai của lịch trình đã xuất bản; khách chưa đăng nhập đọc được comment. Chi tiết (sửa/xóa/trả lời, phân trang, hiện tác giả comment) chờ `/gsd-discuss-phase 5.1`. Cần API comment của `tripory_be` (chưa có), không dựng mock (chuyển từ v2 BE-02 vào Phase 5.1 ngày 2026-11-09)
 
 ### Hồ sơ và người dùng (PROF)
 
@@ -217,8 +217,8 @@ Hoãn sang milestone sau, có theo dõi nhưng không nằm trong roadmap hiện
 | PUB-05 | Phase 5 | Complete (code xong 2026-11-12; UAT thủ công do người dùng xác nhận 2026-11-20, agent không kiểm độc lập) |
 | PUB-06 | Phase 4 | Complete (chuyển vào Phase 4, mở lại lần 2 ngày 2026-11-05; UAT mục E 14/14 PASS do người dùng xác nhận 2026-11-06; trang công khai dùng lại ở Phase 5) |
 | MAP-01 | Phase 4 | Complete (mở lại lần 3, 2026-11-06; hoàn thành phase được người dùng xác nhận 2026-11-07; UAT mục F chấp nhận theo xác nhận, agent không kiểm độc lập Photon/Nominatim thật) |
-| SOC-01 | Phase 5.1 | Code xong 2026-11-19 (19/19 plan), chờ UAT thủ công: 05.1-HUMAN-UAT.md |
-| SOC-02 | Phase 5.1 | Code xong 2026-11-19 (19/19 plan), chờ UAT thủ công: 05.1-HUMAN-UAT.md |
+| SOC-01 | Phase 5.1 | Complete (code xong 2026-11-19; UAT thủ công 53/53 do người dùng xác nhận 2026-11-20, agent không kiểm độc lập; xem 05.1-UAT.md) |
+| SOC-02 | Phase 5.1 | Complete (code xong 2026-11-19; UAT thủ công 53/53 do người dùng xác nhận 2026-11-20, agent không kiểm độc lập; xem 05.1-UAT.md) |
 | PROF-01 | Phase 6 | Pending |
 | PROF-02 | Phase 6 | Pending |
 | PROF-03 | Phase 6 | Pending |

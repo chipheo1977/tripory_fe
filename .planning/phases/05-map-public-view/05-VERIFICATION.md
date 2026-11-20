@@ -1,10 +1,14 @@
 ---
 phase: 05-map-public-view
-status: human_needed
+status: passed
 verified: 2026-11-11
+uat_confirmed: 2026-11-20
 verifier: inline (cùng agent thực thi; KHÔNG độc lập vì môi trường không có công cụ spawn subagent)
-score: 4/4 tiêu chí có bằng chứng tự động; 0/4 có xác nhận của người trên thiết bị thật
+score: 4/4 tiêu chí có bằng chứng tự động; 4/4 có xác nhận của người dùng (không kiểm độc lập)
 ---
+
+> **Cập nhật 2026-11-20:** `human_needed` đổi thành `passed` dựa HOÀN TOÀN trên xác nhận của người dùng: `05-HUMAN-UAT.md` 8/8 và `05-UAT-CHECKLIST.md` 51/51, tổng hợp ở `05-UAT.md`. Agent không kiểm độc lập, không có số đo, ảnh chụp hay thông tin thiết bị. Tồn đọng không chặn: chưa có review code độc lập (`05-REVIEW.md` là `skipped`), chưa có `05-SECURITY.md`, BE-05-01 (`author`) là việc BE của người dùng.
+> Các bảng bên dưới giữ nguyên nội dung ngày 2026-11-11; cột "Cần người" nay đã được người dùng xác nhận.
 # Phase 5: Xác minh mục tiêu
 
 Mục tiêu: khách chưa đăng nhập mở link chia sẻ và đọc được lịch trình đã xuất bản dưới dạng bài viết hoặc bản đồ; link hiện preview đẹp khi dán vào ứng dụng nhắn tin.
